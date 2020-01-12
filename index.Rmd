@@ -1,0 +1,19 @@
+--- 
+site: bookdown::bookdown_site   # needed for R studio integraion (Build tab)
+
+#
+# Book Metadata
+#
+title: "Applied Regression with R"
+author: "Darrin Speegle"
+date: "`r Sys.Date()`"
+
+   # description field is metadata in the html files that will show up on
+   # facebook, twitter, and other social media.  It does not appear in the book text.
+description: >-
+   Applied Regression With R by Darrin Speegle.
+   This book is based on the notes for my Applied Regression course taught at Saint Louis University. 
+   We cover the basics of descriptive modeling, predictive modeling and causal inference.
+
+documentclass: book     # needs to be here, not in _output.yml
+---

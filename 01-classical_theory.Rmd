@@ -1,0 +1,146 @@
+# Classical Theory {#classicaltheory}
+
+## Review {#review}
+
+We will need several facts and techniques from MATH/STAT 3850 that you may or may not remember. The most important theory for this chapter is that related to *normal* random variables. 
+
+Recall, a **normal** random variable with mean $\mu$ and standard deviation $\sigma$ has pdf given by
+\[
+f(x) = \frac {1}{\sqrt{2\pi}\sigma} e^{-(x- \mu)^2/(2\sigma^2)}
+\]
+We will not work much with the pdf directly, but rather use the built in R function `dnorm`, which has usage `dnorm(x, mu, sigma)`. Let's look at a couple of plots of pdfs of normal random variables.
+
+```{r}
+curve(dnorm(x, 0, 1/sqrt(2)), from = -3, to = 3, col = 3,
+      main = "Normal rvs", 
+      ylab = "likelihood") #green
+curve(dnorm(x, 0, 2), add = T, col = 2) #red
+curve(dnorm(x, 0, 1), add = T, col = 1) #black
+```
+
+Recall that the *area* under the curve between $x = a$ and $x = b$ of the pdf of $X$ gives $P(a \le X \le b) = \int_a^b f(x)\, dx$. Probability density functions can also be used to find the *expected value* of a random variable $X$ via
+\[
+\mu_X = E[X] = \int_{-\infty}^\infty x f(x)\, dx.
+\]
+
+```{theorem, label = "normalfacts"} 
+Key facts about normal random variables.
+
+1. If $X_1$ and $X_2$ are independent normal random variables with means $\mu_1, \mu_2$ and standard deviations $\sigma_1, \sigma_2$, then $X_1 + X_2$ is normal with mean $\mu_1 + \mu_2$ and standard deviation $\sqrt{\sigma_1 + \sigma_2}$.
+
+2. If $X \sim N(\mu, \sigma)$ and $a$ is a real number, then $X + a \sim N(\mu + a, \sigma)$.
+
+3. If $X \sim N(\mu, \sigma)$ and $a$ is a real number, then $aX \sim N(a\mu, a\sigma)$.
+
+```
+
+The key things to remember are that the sum of independent normals is again normal, and that translating or scaling a normal is still normal. The means and standard deviations of the resulting random variables can be computed from general facts about sums of rvs, given below.
+
+```{theorem, label = "meanfacts"}
+The following are facts about expected values of rvs.
+
+1. $E[X + Y] = E[X] + E[Y]$, whether $X$ and $Y$ are independent or dependent!
+  
+1. $E[a] = a$.
+
+1. $E[aX] = aE[X]$.
+
+1. $E[\sum_{i = 1}^n a_i X_i] = \sum_{i = 1}^n a_i E[X_i]$.
+
+  
+```
+
+Recall that the variance of an rv is $V(X) = E[(X - \mu)^2] = E[X^2] - \mu^2$, and that the standard deviation is the square root of the variance.
+
+```{theorem, label = "variancefacts"}
+Here are some key facts about variances of rvs.
+
+1. $V(aX) = a^2 V(X)$
+
+1. $V(\sum_{i = 1}^n a_i X_i) = \sum_{i = 1}^n a_i^2 V(X_i)$, *provided* that the random variables are independent!
+  
+1. $V(a) = 0$
+  
+```
+
+The other key thing that you will need to remember is about simulations. We will be doing quite a bit of simulation work in this chapter.
+
+### Estimating Means and standard deviations
+
+Let's recall how we can estimate the *mean* of a random variable given a random sample from that rv. Recall that `r` + `root` is the way that we can get random samples from known distributions. Here, we estimate the mean of a normal rv with mean 1 and standard deviation 2. Obviously, we hope to get approximately 1.
+
+We first get a single sample from the rv, then we put it inside `replicate`. 
+
+```{r}
+one_sample <- rnorm(1, mean = 1, sd = 2)
+one_sample
+
+sim_data <- replicate(10000, {
+  one_sample <- rnorm(1, mean = 1, sd = 2)
+  one_sample
+})
+```
+
+This creates a vector of length 10000 that is a random sample from a normal rv with mean 1 and sd 2. For simple examples like this, it would be more natural to do `sim_data <- rnorm(10000, 1, 2)`, but the above will be easier to keep track of when we get to more complicated things, imho.
+
+Next, we just take the mean (average) of the random sample.
+
+```{r}
+mean(sim_data)
+```
+
+And we see that we get pretty close to 1. Let's verify that $2 *X + 3 * Y$ has mean $2\mu_X + 3 \mu_Y$ in the case that $X$ and $Y$ are normal with means 2 and 5 respectively.
+
+```{r}
+x <- rnorm(1, 2, 1) #chose sd = 1
+y <- rnorm(1, 5, 3) #chose different sd just to see if that matters
+2 * x + 3 * y
+
+```
+That is one sample from $2X + 3Y$. Let's get a lot of samples.
+
+```{r}
+sim_data <- replicate(10000, {
+  x <- rnorm(1, 2, 1) #chose sd = 1
+  y <- rnorm(1, 5, 3) #chose different sd just to see if that matters
+  2 * x + 3 * y
+})
+mean(sim_data)
+2 * 2 + 3 * 5
+```
+We compare the estimated mean to the true mean of 19, and see that we are pretty close. To be sure, we might run the simulation a couple of times and see whether it looks like it is staying close to 19; sometimes larger, sometimes smaller.
+
+To estimate the variance of an rv, we take a large sample and use the R function `sd`, which computes the sample variance. This is not as straightorward from a theoretical standpoint as taking the `mean`, but we will ignore the difficulties. We know from Theorem \@ref(variancefacts) that the variance of $2X + 3Y$ shoule be $4 * 1 + 9 * 9 = 85$.  Let's check it out. We already have built our random sample, so we just use `var` on that.
+
+```{r}
+var(sim_data)
+```
+
+Let's repeat a few times.
+
+```{r}
+sim_data <- replicate(10000, {
+  x <- rnorm(1, 2, 1) #chose sd = 1
+  y <- rnorm(1, 5, 3) #chose different sd just to see if that matters
+  2 * x + 3 * y
+})
+var(sim_data)
+```
+
+Seems to be working. To estimate the standard deviation, we would take the square root, or use the `sd` R function.
+
+```{r}
+sd(sim_data)
+sqrt(var(sim_data))
+sqrt(85)
+```
+
+The reason it is tricky from a theoretical point of view to estimate the standard deviation is that, if you repeated the above a bunch of times, you would notice that `sd` is slighlty off on average. But, the variance is correct, on average. 
+
+### Estimating the density of an rv
+
+
+
+
+
+

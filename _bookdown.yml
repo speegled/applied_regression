@@ -1,0 +1,29 @@
+---
+#
+# Chapters
+#
+rmd_files: [
+  "index.Rmd",
+  "01-classical_theory.Rmd"
+  ]
+
+# Knit-then-Merge (KM) build renders each .Rmd file in its own session
+new_session: yes
+
+#before_chapter_script: package-load.R
+#after_chapter_script: package-list.R  # Generate a list of packages used
+
+# Book styling
+language:
+  ui:
+    chapter_name: "Chapter "
+
+# Build Settings
+output_dir: "_book"
+clean:
+ - _main.md
+ - _main.tex
+ - _main.log
+ - packages.bib
+
+---
