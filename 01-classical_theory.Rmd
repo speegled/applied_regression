@@ -292,6 +292,49 @@ ggplot(dd, aes(x = log_gdp_per_capita, y = life_ladder))  +
 
 Yep. That's the line that minimizes the sum of squares error, all right!
 
+Let's look at one more set of data, the `datasauRus`. You will need to install the datasauRus package if you have not already done so via `install.packages("datasauRus")`. The datasauRus package contains several interesting simulated data sets. The one we are interested in for now is the `datasaurus_dozen`, which we store into `dd`.
+
+```{r}
+dd <- datasauRus::datasaurus_dozen
+```
+
+We see that the `datasaurus_dozen` is a list of 12 data sets (I think), and that it has $(x, y)$ coordinates, together with a dataset variable. Let's see what datasets are available to us.
+
+```{r}
+unique(dd$dataset)
+```
+
+I'll do this example with `star`, but, you should follow along with a different one.
+
+```{r}
+star <- filter(dd, dataset == "star")
+ggplot(star, aes(x = x, y = y)) +
+  geom_point()
+
+```
+
+Yep, it looks like a star! This certainly is **not** of the form $y = \beta_0 \beta_1 x + \epsilon$ (Why?), but we can still find the line that is the best fit of this data. Not saying it will be a good fit, but it is still the one that minimizes SSE.
+
+```{r}
+sse <- function(b0, b1) {
+  sum((star$y - (b0 + b1 * star$x))^2)
+}
+sse_one_argument <- function(b){
+  sse(b[1], b[2])
+}
+optim(par = c(50, 0), fn = sse_one_argument)
+```
+
+We see that the line of best fit is $y = 53.33 - .10124 x$. Now, let's take a look at the line of best fit for all of the data sets. We'll use `ggplot` and `facet_wrap`.
+
+```{r}
+ggplot(dd, aes(x, y)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  facet_wrap(~dataset)
+```
+
+It turns out that all 12 of these data sets have very similar lines of best fit!
 
 
 ## Linear Regression with no intercept
