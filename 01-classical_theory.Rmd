@@ -109,8 +109,8 @@ mean(sim_data)
 2 * 2 + 3 * 5
 ```
 We compare the estimated mean to the true mean of 19, and see that we are pretty close. To be sure, we might run the simulation a couple of times and see whether it looks like it is staying close to 19; sometimes larger, sometimes smaller.
-
-To estimate the variance of an rv, we take a large sample and use the R function `sd`, which computes the sample variance. This is not as straightorward from a theoretical standpoint as taking the `mean`, but we will ignore the difficulties. We know from Theorem \@ref(variancefacts) that the variance of $2X + 3Y$ shoule be $4 * 1 + 9 * 9 = 85$.  Let's check it out. We already have built our random sample, so we just use `var` on that.
+ 
+To estimate the variance of an rv, we take a large sample and use the R function `var`, which computes the sample variance. This is not as straightorward from a theoretical standpoint as taking the `mean`, but we will ignore the difficulties. We know from Theorem \@ref(thm:variancefacts) that the variance of $2X + 3Y$ shoule be $4 * 1 + 9 * 9 = 85$.  Let's check it out. We already have built our random sample, so we just use `var` on that.
 
 ```{r}
 var(sim_data)
@@ -139,6 +139,168 @@ The reason it is tricky from a theoretical point of view to estimate the standar
 
 ### Estimating the density of an rv
 
+In this section, we see how to estimate the pdf of an rv and compare it to the pdf of a known distribution. We continue with the normal examples. Let's verify that $2X + 3Y$ is normal, when $X \sim N(0, 1)$ and $Y \sim N(1, 2)$. ($Y$ has standard deviation 2).
+
+```{r}
+sim_data <- replicate(10000, {
+  x <- rnorm(1, 0, 1)
+  y <- rnorm(1, 1, 2)
+  2 * x + 3 * y
+})
+plot(density(sim_data))
+```
+
+The `plot(density())` command gives an estimated density plot of the rv that has data given in the argument of `density`. Let's add a pdf of a normal rv with the correct mean and standard deviation to the above plot, and see whether they match. The correct mean is $2 * 0 + 3 * 1$ and the sd is $\sqrt{4 * 1 + 9 * 4}$
+
+```{r}
+plot(density(sim_data))
+curve(dnorm(x, 3, sqrt(40)), add = T, col = 2) #shows up in red
+```
+
+Alternatively, we could have used the simulated data and estimated the mean and sd.
+
+```{r}
+plot(density(sim_data))
+curve(dnorm(x, 
+            mean(sim_data), 
+            sd(sim_data)), add = T, col = 2) #shows up in red
+```
+
+Since the estimated pdf of the simulated data matches that of the `dnorm` (more or less), we conclude that the distributions are the same. Note that if there is a discontinuity in the pdf, then the simulation will not match well at that point of discontinuity. Since we will mostly be dealing with normal rvs, we'll cross that bridge when we get to it.
+
+```{exercise}
+Let $X_1, \ldots, X_5$ be normal random variables with means $1, 2, 3, 4, 5$ and variances $1, 4, 9, 16, 25$. 
+
+1. What kind of rv is $\overline{X}$? Include the values of any parameters.
+  
+1. Use simulation to plot the pdf of $\overline{X}$ and confirm your answer to part 1.
+
+```
+
+One last concept that we will run across a lot is *independence*. 
+Two random variables are independent if knowledge of the outcome of one gives no probabilistic information about the outcome of the other one. 
+Formally, $P(a \le X \le B|c \le Y \le d) = P(a \le X \le b)$ 
+for all values of $a, b, c$ and $d$. 
+It can be tricky to check this, and it is often something that we will **assume** rather than prove. 
+However, one fact that we will use is that if $X$ and $Y$ are independent, then $X + a$ and $Y + b$ are also independent. 
+
+## Linear Regression Overview
+
+We present the basic idea of regression.
+Suppose that we have a collection of data that is naturally grouped into ordered pairs, $(x_1, y_1), \ldots, (x_n, y_n)$. 
+For example, we could be measuring the height and weight of adult women, or the heights of fathers and their adult sons. 
+In both instances, these data would naturally be grouped together into ordered pairs, and we would likely be interested in the **relationship** between the two variables.
+In particular, we would not want to assume that the variables are independent.
+
+In the R package `HistData`, there is a data set that is the heights of parents and their adult children. Let's take a look.
+
+```{r message=FALSE, warning=FALSE}
+galton <- HistData::Galton
+library(tidyverse)
+ggplot(galton, aes(parent, child)) +
+  geom_jitter(alpha = .5)
+```
+
+It appears that there is a positive correlation between the height of a parent and the height of their adult child. (The parent value is the average of the father and mother of the child., and the child value has been adjusted for sex of the child. So, this may not be the best example of rigourous data collection!)
+
+```{r}
+ggplot(galton, aes(parent, child)) + 
+  geom_jitter(alpha = .5) +
+  geom_smooth(method = "lm")
+```
+
+The model that we are using for this data is
+\[
+y_i = \beta_0 + \beta_1 x_i + \epsilon_i
+\]
+where the $\epsilon_i$ are independent normal random variables with mean 0 and unknown variance $\sigma^2$. 
+The $\beta_0$ and $\beta_1$ are unknown **constants**. 
+The only randomness in this model comes from the $\epsilon_i$, which we think of as the error of the model or the residuals of the model. 
+
+In order to estimate the values of the coefficients $\beta_0$ and $\beta_1$, we want to choose the values that minimize the total error associated with the line $y = \beta_0 + \beta_1 x$. There are *lots* of ways to do this! Let's begin by looking at the error at a single point, $y_i - (\beta_0 + \beta_1 x_i)$. This is the *observed* value $y_i$ minus the $predicted$ value $\beta_0 + \beta_1 x_i$. If we are trying to minimize the total error, we will want to take the absolute value or something of the error at each point and add them up. Here are a few ways we could do this.
+
+\begin{align}
+SSE(\beta_0, \beta_1) &= \sum_{i = 1}^n \bigl(y_i - (\beta_0 + \beta_1 x_i)\bigr)^2\\
+L_1(\beta_0, \beta_1) &= \sum_{i = 1}^n \bigl|y_i - (\beta_0 + \beta_1 x_i)\bigr|\\
+E_g(\beta_0, \beta_1) &= \sum_{i = 1}^n g(y_i - \beta_0 + beta_1 x_i)
+\end{align}
+
+where $g$ is a *loss function* such that $g(x) = g(-x)$ and $g(x) \le g(y)$ whenever $0 \le x \le y$. Here are a few more loss functions $g$ that are commonly used.
+
+```{r}
+curve(x^2, from = -4, to = 4, col = 1,
+      main = "Common Loss Functions") #black
+curve(abs(x), add  = T, col = 2) #red
+delta <- 2
+curve(delta^2 *(sqrt(1 + (x/delta)^2) - 1),
+      add = T,
+      col = 3) #green
+curve(robustbase::Mchi(x, cc = 1.6, psi = "bisquare"),
+      add = T, 
+      col = 4) #bue
+```
+
+The idea is that we want to minimize the sum of the loss function evaluated at the differences between the observed and the predicted values. We will see in later sections how to do that via math, but we also have R, which is good at doing things like this. 
+
+Let's look at a different data set. This is the world happiness data set. People were surveyed in various countries around the world and asked to imagine the best life possible for them as a 10, and the worst life possible as a 0. Then they were asked to assign a number to their current life between 0 and 10. The results of the survey are summarized [here](https://mathstat.slu.edu/~speegle/Spring2020/4870/data/world_happiness_data.xls).
+
+```{r}
+dd <- readxl::read_xls("../data/world_happiness_data.xls") #This won't work for you!
+dd <- filter(dd, Year == 2018) %>% 
+  janitor::clean_names()
+dd <- select(dd, country_name, life_ladder, log_gdp_per_capita)
+ggplot(dd, aes(x = log_gdp_per_capita, y = life_ladder))  + 
+  geom_point()
+```
+
+Let's get rid of the data with missing values.
+
+```{r}
+dd <- dd[complete.cases(dd),]
+```
+
+Now, let's find values of $\beta_0$ and $\beta_1$ that minimize the SSE. (We'll do the other loss functions below.)
+
+```{r}
+sse <- function(b0, b1) {
+  sum((dd$life_ladder - (b0 + b1 * dd$log_gdp_per_capita))^2)
+}
+```
+
+The minimization function that we are going to use requires the sse function to be in a format where it accepts a single *vector* of values.
+
+```{r}
+sse_one_argument <- function(b) {
+  sse(b[1], b[2])
+}
+```
+
+Now, we can call `optim` to *optimize* the SSE (which minimizes it).
+
+```{r}
+optim(par = c(1,1), fn = sse_one_argument)
+```
+
+We see that the intercept is about -1.03 and the slope is about 0.705. Let's plot that on the scatterplot.
+
+```{r}
+ggplot(dd, aes(x = log_gdp_per_capita, y = life_ladder))  + 
+  geom_point() +
+  geom_abline(slope = 0.705, intercept = -1.03) +
+  geom_smooth(method = "lm")
+```
+
+Yep. That's the line that minimizes the sum of squares error, all right!
+
+
+
+## Linear Regression with no intercept
+
+We will present the theory of linear regression with no intercept. 
+You will be asked as an exercise to repeat the arguments for linear regression with fixed slope of 1. 
+The theory in these cases is easier than in the general case, but the ideas are similar. 
+
+I hope that you will be able to better understand the general case after having worked through these two special cases.
 
 
 
