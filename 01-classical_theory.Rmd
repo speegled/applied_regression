@@ -26,7 +26,7 @@ Recall that the *area* under the curve between $x = a$ and $x = b$ of the pdf of
 ```{theorem, label = "normalfacts"} 
 Key facts about normal random variables.
 
-1. If $X_1$ and $X_2$ are independent normal random variables with means $\mu_1, \mu_2$ and standard deviations $\sigma_1, \sigma_2$, then $X_1 + X_2$ is normal with mean $\mu_1 + \mu_2$ and standard deviation $\sqrt{\sigma_1 + \sigma_2}$.
+1. If $X_1$ and $X_2$ are independent normal random variables with means $\mu_1, \mu_2$ and standard deviations $\sigma_1, \sigma_2$, then $X_1 + X_2$ is normal with mean $\mu_1 + \mu_2$ and standard deviation $\sqrt{\sigma_1^2 + \sigma_2^2}$.
 
 2. If $X \sim N(\mu, \sigma)$ and $a$ is a real number, then $X + a \sim N(\mu + a, \sigma)$.
 
@@ -222,7 +222,7 @@ In order to estimate the values of the coefficients $\beta_0$ and $\beta_1$, we 
 \begin{align}
 SSE(\beta_0, \beta_1) &= \sum_{i = 1}^n \bigl(y_i - (\beta_0 + \beta_1 x_i)\bigr)^2\\
 L_1(\beta_0, \beta_1) &= \sum_{i = 1}^n \bigl|y_i - (\beta_0 + \beta_1 x_i)\bigr|\\
-E_g(\beta_0, \beta_1) &= \sum_{i = 1}^n g(y_i - \beta_0 + beta_1 x_i)
+E_g(\beta_0, \beta_1) &= \sum_{i = 1}^n g(y_i - \beta_0 + \beta_1 x_i)
 \end{align}
 
 where $g$ is a *loss function* such that $g(x) = g(-x)$ and $g(x) \le g(y)$ whenever $0 \le x \le y$. Here are a few more loss functions $g$ that are commonly used.
@@ -245,7 +245,7 @@ The idea is that we want to minimize the sum of the loss function evaluated at t
 Let's look at a different data set. This is the world happiness data set. People were surveyed in various countries around the world and asked to imagine the best life possible for them as a 10, and the worst life possible as a 0. Then they were asked to assign a number to their current life between 0 and 10. The results of the survey are summarized [here](https://mathstat.slu.edu/~speegle/Spring2020/4870/data/world_happiness_data.xls).
 
 ```{r}
-dd <- readxl::read_xls("../data/world_happiness_data.xls") #This won't work for you!
+dd <- readxl::read_xls("../4870/data/world_happiness_data.xls") #This won't work for you!
 dd <- filter(dd, Year == 2018) %>% 
   janitor::clean_names()
 dd <- select(dd, country_name, life_ladder, log_gdp_per_capita)
