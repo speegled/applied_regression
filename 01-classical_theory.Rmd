@@ -300,9 +300,117 @@ We will present the theory of linear regression with no intercept.
 You will be asked as an exercise to repeat the arguments for linear regression with fixed slope of 1. 
 The theory in these cases is easier than in the general case, but the ideas are similar. 
 
-I hope that you will be able to better understand the general case after having worked through these two special cases.
+I hope that you will be able to better understand the general case after having worked through these two special cases. Our model is
+\[
+y_i = \beta_1 x_i + \epsilon_i
+\]
+where $\epsilon_i$ are assumed to be normal with mean 0 and unknown variance $\sigma^2$. We still wish to minimize the sum-sqaured error of the predicted values ($\beta_1 x_i$) relative to the observed values ($y_i$). That is, we want to minimize
+\[
+SSE(\beta_1) = \sum_{i = 1}^n \bigl(y_i - \beta_1 x_i\bigr)^2
+\]
+In this case, there is only *one* unknown constant in the equation for SSE. (But, of course, we still don't know $\sigma$.)  Let's math it.
 
+\[
+\begin{aligned}
+\frac {d}{d\beta_1} SSE(\beta_1) &= \sum_{i = 1}^n 2(\bigl(y_i - \beta_1 x_i\bigr) x_i)\\
+&=2\sum_{i = 1}^n y_i x_i - 2\beta_1 \sum_{i = 1}^n x_i^2.
+\end{aligned}
+\]
 
+Setting this equal to zero and solving for $\beta_1$ gives
+\[
+\beta_1 = \frac{\sum_{i = 1}^n x_i y_i}{\sum_{i = 1}^n x_i^2}
+\]
+This is our estimate for $\beta_1$, so we add a $\hat\ $ to it to make this indication. In general, hats on tops of constants will indicate our estimates for the constants based on data.
+\[
+\hat \beta_1 = \frac{\sum_{i = 1}^n x_i y_i}{\sum_{i = 1}^n x_i^2}
+\]
 
+Let's look at some simulated data to see how this performs.
 
+```{r}
+xs <- runif(30, 0, 10)
+ys <- 2 * xs + rnorm(30, 0, 3)
+plot(xs, ys)
+```
+
+Our estimate for the slope is
+```{r}
+beta1_hat <- sum(xs * ys)/sum(xs^2)
+plot(xs, ys)
+abline(a = 0, b = beta1_hat)
+```
+
+That looks pretty good! Let's look at the formula for $\hat \beta_1$ in some more detail. In particular, let's assume that our model is correct, and that $y_i = \beta_1 x_i + \epsilon_i$, where $\epsilon_i$ are independent normal rvs with mean 0 and variance $\sigma^2$. Under this model, the $x_i$ are **constants**; there is nothing random about them contained in the model. However, the $y_i$ are random variables! The $y_i$ are the sum of a constant ($\beta_1 x_i$) and a normal random variable. By Theorem @\ref(thm:normalfacts), that means that $y_i$ is **also normal**. The mean of $y_i$ is $\beta_1 x_i$ and the variance of $y_i$ is $\sigma^2$. 
+
+**Question** Are the $y_i$ independent or dependent? There are spoilers below, so think about this before you read further.
+
+So, up to know, we have that $\hat \beta_1 = \frac{\sum x_i y_i}{\sum x_i^2} = 
+\frac {1}{\sum x_i^2}\sum x_i y_i$. The pieces are the constants $x_i$ and the normal random variables $y_i$. Let's compute the expected value of $\hat \beta_1$.
+
+\[
+\begin{aligned}
+E[\hat \beta_1] &= E\bigl[\frac {1}{\sum x_i^2}\sum x_i y_i\bigr]\\
+&= \frac {1}{\sum x_i^2} \sum_{i = 1}^n x_i E[y_i]\\
+&= \frac {1}{\sum x_i^2} \sum_{i = 1}^n x_i \beta_1 x_i\\
+&= \beta_1 \frac{\sum x_i^2}{\sum x_i^2}\\
+&= \beta_1
+\end{aligned}
+\]
+
+That's not an easy computation, but it says something **really** important about regression with no intercept. It says that the expected value of our estimate for the slope, is the slope itself! We expect, on average, to be exactly right in our estimate of the slope. These types of estimators are called **unbiased** estimators, and we have shown that $\hat \beta_1$ is an unbiased estimator of $\beta_1$. That is definitely a desirable property of an estimator, though it is not necessarily a deal-breaker if an estimator is biased. I'm looking at you, sample standard deviation.
+
+Let's check out what this would mean via simulations. We assume that the data comes from $y = 2 x + \epsilon$, where $\epsilon \sim N(0,\sigma = 3)$. Let's imagine that we have *fixed* values of `xs`, but this is not really necessary.
+
+```{r}
+xs <- seq(0, 10, length.out = 30)
+```
+
+Then we will create a data set and estimate the slope.
+
+```{r}
+ys <- 2 * xs + rnorm(30, 0, 3)
+sum(xs * ys)/sum(xs^2)
+```
+Next, we put that inside of `replicate` to get a large sample of possible estimates of slopes.
+
+```{r}
+sim_data <- replicate(10000, {
+  ys <- 2 * xs + rnorm(30, 0, 3)
+  sum(xs * ys)/sum(xs^2)
+})
+```
+
+And we compute the mean. We should get something really close to 2, which is the true value of the slope.
+
+```{r}
+mean(sim_data)
+```
+
+To be safe, we should repeat that a few times to see if the estimated expected value of $\hat \beta_1$ is on both sides of 2, and doesn't seem to be biased. More generally, we know that $\hat \beta_1$ is a **normal random variable** with mean 2. What is its variance? Well, since the $y_i$ are independent, we can compute the variance as follows.
+
+\[
+\begin{aligned}
+V(\hat \beta_1) &= V(\frac {1}{\sum x_i^2}\sum x_i y_i)\\
+&= \frac{1}{(\sum x_i^2)^2} \sum x_i^2 V(y_i)\\
+&= \frac{1}{(\sum x_i^2)^2} \sum x_i^2 \sigma^2\\
+&= \frac{\sigma^2}{\sum x_i^2}
+\end{aligned}
+\]
+
+Again, let's check that is true via... simulations!
+
+```{r}
+var(sim_data)
+9/(sum (xs^2))
+```
+
+Looks pretty good! Again, we would need to repeat a few times to be sure. Finally, let's estimate the density function of $\hat \beta_1$ and compare it to that of a normal with the above mean and standard deviation.
+
+```{r}
+plot(density(sim_data))
+curve(dnorm(x, 2, sqrt(9/sum(xs^2))),add = T, col = 2 )
+```
+
+That is compelling to me. We have seen that $\hat \beta_1$ is normal with mean $\beta_1$ and standard deviation $\frac{\sigma}{\sqrt{\sum x_i^2}}$
 
