@@ -30,7 +30,9 @@ Key facts about normal random variables.
 
 2. If $X \sim N(\mu, \sigma)$ and $a$ is a real number, then $X + a \sim N(\mu + a, \sigma)$.
 
-3. If $X \sim N(\mu, \sigma)$ and $a$ is a real number, then $aX \sim N(a\mu, a\sigma)$.
+3. If $X \sim N(\mu, \sigma)$ and $a$ is a real number, then $aX \sim N(a\mu, a\sigma)$.  
+
+
 
 ```
 
@@ -41,13 +43,14 @@ The following are facts about expected values of rvs.
 
 1. $E[X + Y] = E[X] + E[Y]$, whether $X$ and $Y$ are independent or dependent!
   
-1. $E[a] = a$.
+2. $E[a] = a$.
 
-1. $E[aX] = aE[X]$.
+3. $E[aX] = aE[X]$.
 
-1. $E[\sum_{i = 1}^n a_i X_i] = \sum_{i = 1}^n a_i E[X_i]$.
+4. $E[\sum_{i = 1}^n a_i X_i] = \sum_{i = 1}^n a_i E[X_i]$.  
 
-  
+
+
 ```
 
 Recall that the variance of an rv is $V(X) = E[(X - \mu)^2] = E[X^2] - \mu^2$, and that the standard deviation is the square root of the variance.
@@ -57,10 +60,12 @@ Here are some key facts about variances of rvs.
 
 1. $V(aX) = a^2 V(X)$
 
-1. $V(\sum_{i = 1}^n a_i X_i) = \sum_{i = 1}^n a_i^2 V(X_i)$, *provided* that the random variables are independent!
+2. $V(\sum_{i = 1}^n a_i X_i) = \sum_{i = 1}^n a_i^2 V(X_i)$, *provided* that the random variables are independent!
   
-1. $V(a) = 0$
-  
+3. $V(a) = 0$  
+
+
+
 ```
 
 The other key thing that you will need to remember is about simulations. We will be doing quite a bit of simulation work in this chapter.
@@ -364,7 +369,7 @@ Setting this equal to zero and solving for $\beta_1$ gives
 \[
 \beta_1 = \frac{\sum_{i = 1}^n x_i y_i}{\sum_{i = 1}^n x_i^2}
 \]
-This is our estimate for $\beta_1$, so we add a $\hat\ $ to it to make this indication. In general, hats on tops of constants will indicate our estimates for the constants based on data.
+This is our estimate for $\beta_1$, so we add a ^ to it to make this indication. In general, hats on tops of constants will indicate our estimates for the constants based on data.
 \[
 \hat \beta_1 = \frac{\sum_{i = 1}^n x_i y_i}{\sum_{i = 1}^n x_i^2}
 \]
@@ -384,12 +389,11 @@ plot(xs, ys)
 abline(a = 0, b = beta1_hat)
 ```
 
-That looks pretty good! Let's look at the formula for $\hat \beta_1$ in some more detail. In particular, let's assume that our model is correct, and that $y_i = \beta_1 x_i + \epsilon_i$, where $\epsilon_i$ are independent normal rvs with mean 0 and variance $\sigma^2$. Under this model, the $x_i$ are **constants**; there is nothing random about them contained in the model. However, the $y_i$ are random variables! The $y_i$ are the sum of a constant ($\beta_1 x_i$) and a normal random variable. By Theorem @\ref(thm:normalfacts), that means that $y_i$ is **also normal**. The mean of $y_i$ is $\beta_1 x_i$ and the variance of $y_i$ is $\sigma^2$. 
+That looks pretty good! Let's look at the formula for $\hat \beta_1$ in some more detail. In particular, let's assume that our model is correct, and that $y_i = \beta_1 x_i + \epsilon_i$, where $\epsilon_i$ are independent normal rvs with mean 0 and variance $\sigma^2$. Under this model, the $x_i$ are **constants**; there is nothing random about them contained in the model. However, the $y_i$ are random variables! The $y_i$ are the sum of a constant ($\beta_1 x_i$) and a normal random variable. By Theorem \@ref(thm:normalfacts), that means that $y_i$ is **also normal**. The mean of $y_i$ is $\beta_1 x_i$ and the variance of $y_i$ is $\sigma^2$. 
 
 **Question** Are the $y_i$ independent or dependent? There are spoilers below, so think about this before you read further.
 
-So, up to know, we have that $\hat \beta_1 = \frac{\sum x_i y_i}{\sum x_i^2} = 
-\frac {1}{\sum x_i^2}\sum x_i y_i$. The pieces are the constants $x_i$ and the normal random variables $y_i$. Let's compute the expected value of $\hat \beta_1$.
+So, up to know, we have that $\hat \beta_1 = \frac{\sum x_i y_i}{\sum x_i^2} = \frac{1}{\sum x_i^2}\sum x_i y_i$. The pieces are the constants $x_i$ and the normal random variables $y_i$. Let's compute the expected value of $\hat \beta_1$.
 
 \[
 \begin{aligned}

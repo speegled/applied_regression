@@ -17,3 +17,7 @@ description: >-
 
 documentclass: book     # needs to be here, not in _output.yml
 ---
+
+# Preface
+
+These notes are for the class Applied Regression, taught at SLU in the spring of 2020.

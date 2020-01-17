@@ -3,7 +3,6 @@
 # Chapters
 #
 rmd_files: [
-  "preface.Rmd",
   "index.Rmd",
   "01-classical_theory.Rmd"
   ]
