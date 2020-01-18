@@ -1,3 +1,0 @@
-# Preface
-
-These notes are for the class Applied Regression, taught at SLU in the spring of 2020.

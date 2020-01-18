@@ -2,4 +2,4 @@
 _book/*
 .Rproj.user
 _bookdown_files/*
-_main.rds
+.Rhis*
