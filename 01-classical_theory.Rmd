@@ -110,7 +110,8 @@ mean(sim_data)
 ```
 We compare the estimated mean to the true mean of 19, and see that we are pretty close. To be sure, we might run the simulation a couple of times and see whether it looks like it is staying close to 19; sometimes larger, sometimes smaller.
  
-To estimate the variance of an rv, we take a large sample and use the R function `var`, which computes the sample variance. This is not as straightorward from a theoretical standpoint as taking the `mean`, but we will ignore the difficulties. We know from Theorem \@ref(thm:variancefacts) that the variance of $2X + 3Y$ shoule be $4 * 1 + 9 * 9 = 85$.  Let's check it out. We already have built our random sample, so we just use `var` on that.
+To estimate the variance of an rv, we take a large sample and use the R function `var`, which computes the sample variance. This is not as straightorward from a theoretical standpoint as taking the `mean`, but we will ignore the difficulties. We know from Theorem \@
+(thm:variancefacts) that the variance of $2X + 3Y$ shoule be $4 * 1 + 9 * 9 = 85$.  Let's check it out. We already have built our random sample, so we just use `var` on that.
 
 ```{r}
 var(sim_data)
@@ -313,7 +314,7 @@ ggplot(star, aes(x = x, y = y)) +
 
 ```
 
-Yep, it looks like a star! This certainly is **not** of the form $y = \beta_0 \beta_1 x + \epsilon$ (Why?), but we can still find the line that is the best fit of this data. Not saying it will be a good fit, but it is still the one that minimizes SSE.
+Yep, it looks like a star! This certainly is **not** of the form $y = \beta_0 + \beta_1 x + \epsilon$ (Why?), but we can still find the line that is the best fit of this data. Not saying it will be a good fit, but it is still the one that minimizes SSE.
 
 ```{r}
 sse <- function(b0, b1) {
@@ -335,6 +336,15 @@ ggplot(dd, aes(x, y)) +
 ```
 
 It turns out that all 12 of these data sets have very similar lines of best fit!
+
+```{exercise}
+Consider the data set `ISwR::bp.obese`. If you have never installed the `ISwR` package, you will need to run `install.packages("ISwR")` before accessing this data set.
+
+1. Find the line of best fit for modeling blood pressure versus obesity by minimizing the SSE.
+
+1. Does it appear that the model $y = \beta_0 + \beta_1 x + epsilon$, where $y$ is bp, $x$ is obese, and $\epsilon$ is normal with mean 0 and standard deviation $\sigma$ is correct for this data?
+  
+```
 
 
 ## Linear Regression with no intercept
@@ -384,7 +394,8 @@ plot(xs, ys)
 abline(a = 0, b = beta1_hat)
 ```
 
-That looks pretty good! Let's look at the formula for $\hat \beta_1$ in some more detail. In particular, let's assume that our model is correct, and that $y_i = \beta_1 x_i + \epsilon_i$, where $\epsilon_i$ are independent normal rvs with mean 0 and variance $\sigma^2$. Under this model, the $x_i$ are **constants**; there is nothing random about them contained in the model. However, the $y_i$ are random variables! The $y_i$ are the sum of a constant ($\beta_1 x_i$) and a normal random variable. By Theorem @\ref(thm:normalfacts), that means that $y_i$ is **also normal**. The mean of $y_i$ is $\beta_1 x_i$ and the variance of $y_i$ is $\sigma^2$. 
+That looks pretty good! Let's look at the formula for $\hat \beta_1$ in some more detail. In particular, let's assume that our model is correct, and that $y_i = \beta_1 x_i + \epsilon_i$, where $\epsilon_i$ are independent normal rvs with mean 0 and variance $\sigma^2$. Under this model, the $x_i$ are **constants**; there is nothing random about them contained in the model. However, the $y_i$ are random variables! The $y_i$ are the sum of a constant ($\beta_1 x_i$) and a normal random variable. By Theorem \@
+(thm:normalfacts), that means that $y_i$ is **also normal**. The mean of $y_i$ is $\beta_1 x_i$ and the variance of $y_i$ is $\sigma^2$. 
 
 **Question** Are the $y_i$ independent or dependent? There are spoilers below, so think about this before you read further.
 
@@ -456,4 +467,218 @@ curve(dnorm(x, 2, sqrt(9/sum(xs^2))),add = T, col = 2 )
 ```
 
 That is compelling to me. We have seen that $\hat \beta_1$ is normal with mean $\beta_1$ and standard deviation $\frac{\sigma}{\sqrt{\sum x_i^2}}$
+
+```{exercise}
+Suppose you wish to model data $(x_1, y_1), \ldots, (x_n, y_n)$ by 
+\[
+y_i = \beta_0 + x_i + \epsilon_i  
+\]
+$\epsilon_i$ are iid normal with mean 0 and standard deviation $\sigma$.
+
+1. Find the $\beta_0$ that minimizes the SSE, $\sum(y_i - (\beta_0 + x_i))^2$ in terms of $x_i$ and $y_i$. Call this estimator $\hat \beta_0$.
+
+1. What kind of random variable is $\hat \beta_0$? Be sure to include both its mean and standard deviation or variance (in terms of the $x_i$).
+
+1. Verify your answer via simulation when the true relationship is $y = 2 + x + \epsilon$, where $\epsilon$ is normal with mean 0 and standard deviation 1.
+  
+
+```
+
+## Using different loss functions
+
+In this section, we return to the model
+\[
+y = \beta_0 + \beta_1 x + \epsilon
+\]
+where $\epsilon$ is normal with mean 0 and variance $\sigma^2$.
+
+We show how to get values for $\beta_0$ and $\beta_1$ that minimize
+\[
+\sum_{i = 1}^n g(y_i - (\beta_0 + \beta_1 x_i))^2
+\]
+where $g$ is *even*, $g$ is decreasing for $x \le 0$, and increasing for $x \ge 0$. Examples of $g$ were given above, such as $g(x) = x^2$, $g(x) = |x|$, or any of the 4 plots in the graph here. 
+
+```{r}
+curve(x^2, from = -4, to = 4, col = 1,
+      main = "Common Loss Functions") #black
+curve(abs(x), add  = T, col = 2) #red
+delta <- 2
+curve(delta^2 *(sqrt(1 + (x/delta)^2) - 1),
+      add = T,
+      col = 3) #green
+curve(robustbase::Mchi(x, cc = 1.6, psi = "bisquare"),
+      add = T, 
+      col = 4) #bue
+```
+
+Let's find the values of $\beta_0$ and $\beta_1$ that minimize the $L^1$ error, which is
+\[
+\sum \bigl|y_i - (\beta_0 + \beta_1 x_i)|
+\]
+in the happiness data set. We will also compare that to the values we got using SSE. We load the data again, clean it up, and remove the missing values and plot.
+
+```{r}
+dd <- readxl::read_xls("../4870/data/world_happiness_data.xls")
+
+dd_2018 <- filter(dd, Year ==2018) 
+dd_2018 <- janitor::clean_names(dd_2018)
+dd_2018 <- select(dd_2018, life_ladder, log_gdp_per_capita, country_name)
+dd_2018 <- dd_2018[complete.cases(dd_2018),]
+plot(dd_2018$life_ladder, dd_2018$log_gdp_per_capita)
+```
+
+As a reminder, we can get the SSE estimator for $\beta_0$ and $\beta_1$ via `lm` as follows.
+
+```{r}
+lm(life_ladder ~ log_gdp_per_capita, data = dd_2018)
+```
+
+The usage `y ~ x` is read as "y as described by x" and the *response* variable always comes first. The predictor(s) come after the `~`.
+
+Now let's minimize the $L^1$ error. We start by defining our loss function, $g$.
+
+```{r}
+g <- function(x) {
+  abs(x)
+}
+```
+
+Then, we define our total $L^1$ error as
+
+```{r}
+loss_two <- function(b0, b1) {
+  sum(g(dd_2018$life_ladder - (b0 + b1 * dd_2018$log_gdp_per_capita)))
+}
+```
+
+As before, we have to re-write this function to only accept a single argument because that is how `optim` works.
+
+```{r}
+loss_one <- function(b) {
+  loss_two(b[1], b[2])
+}
+```
+
+Now we are ready! We need to provide a guess to `optim` and the function we are minimizing. Let's try a slope of 1 and an intercept of 0.
+
+```{r}
+optim(par = c(0, 1), fn = loss_one)
+```
+We see that "the" line of best fit in this case is $y = -0.837  0.691 x$ rather than $y =  -1.03 + 0.705 x$. I will leave it to you to decide whether the difference between those coefficients is meaningful. Let's plot both lines.
+
+```{r}
+ggplot(dd_2018, aes(x = log_gdp_per_capita, y = life_ladder)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) + #SSE minimizer
+  geom_abline(slope = 0.691, intercept = -0.837)
+
+```
+
+What is happening? Well, when we look at the scatterplot, we see that there are some countries with abnormally low happiness for their gdp. The SSE worries about fitting those points more than the $L^1$ error does, and the corresponding line that minimizes SSE is closer to those points that are kind of far away from the lines. This behavior can either be a feature or a bug for the method chosen. Or both. 
+
+Next up, we look at the *psuedo-Huber loss function* $g(x) = \delta^2 \sqrt{1 + (x/\delta)^2} - \delta^2$. In this loss function, there is a parameter $\delta$ that we can use to adjust the function. Let's plot it for a few different values of $\delta$. 
+
+```{r}
+curve(sqrt(1 + x^2) - 1, from = -5, to = 5, ylim = c(0, 5))
+delta = .5
+curve(delta^2 *sqrt(1 + x^2/delta^2) - delta^2, add = T, col = 2)
+delta = 2
+curve(delta^2 *sqrt(1 + x^2/delta^2) - delta^2, add = T, col = 3)
+```
+
+This loss function combines elements of both SSE and $L^1$. When the error $y_i - (\beta_0 + \beta_1 x_i)$ is small, we get behavior that looks like a quadratic $g(x) = x^2$. When the error is large, $g$ flattens out and looks like a straight line. When $\delta$ is small, the loss function behaves like $L^1$, and when $\delta$ is big, it behaves like SSE.
+
+This loss function is an attempt to strike a balance between the two methods that we have seen so far. With the set-up from above, we only need to change the function $g$ to find the lines of best fit.
+
+```{r}
+g <- function(x) {
+  delta^2 *sqrt(1 + x^2/delta^2) - delta^2
+}
+```
+
+Now we can try this with a few different values of $\delta$. Remember, when $\delta$ is small, we expect to get results similar to what we got with $L^1$, and when $\delta$ is big, we expect to get similar to SSE, which as a reminder, were $y = -0.837  0.691 x$ rather than $y =  -1.03 + 0.705 x$
+
+```{r}
+delta = .1
+optim(par = c(1, 0), fn = loss_one)
+```
+
+```{r}
+delta = 1.345
+optim(par = c(1, 0), fn = loss_one)
+```
+
+Indeed, we do get similar results, though not identical. If we are thinking of using this loss function, then we probably want to choose a value of $\delta$ that gives results that are in-between the two extremes, in some sense. The package `rlm` automates this, not from the point of view of trying to always get something in between, but from the point of view of controling outlier effects.
+
+```{r}
+MASS::rlm(life_ladder ~ log_gdp_per_capita, 
+    data = dd_2018, 
+    psi = MASS::psi.huber)
+```
+
+We see that we don't get coefficients that are in between the two sets of coefficients that we computed previously. 
+
+The `rlm` function also implements `psi.bisquare`, which is Tukey's bi-square function. This loss function also has a parameter, which is denoted by `cc` in the `robustbase` package. Here are some plots.
+
+```{r}
+curve(robustbase::Mchi(x, cc = 1, psi = "bisquare"), from = -2, to = 2)
+curve(robustbase::Mchi(x, cc = 0.5, psi = "bisquare"), add = T, col = 2)
+curve(robustbase::Mchi(x, cc = 2, psi = "bisquare"), add = T, col = 3)
+```
+
+The thing to know about this loss function is that for "small" errors, the loss function behaves like SSE. But, there is a maximum error allowed of 1, and the `cc` parameter gives the value of the raw error that corresponds to when the loss function starts equaling 1. In other words, if `cc = 1`, then all errors between observed and predicted that are bigger than 1 are penalized the same amount! This has the benefit of limiting the impact that a single (or multiple) outliers can have on the estimation of the line of best fit. Let's first look at what happens with the happiness data, then we'll switch over to simulated data.
+
+```{r}
+library(MASS)
+rlm(life_ladder ~ log_gdp_per_capita, data = dd_2018, psi = psi.bisquare)
+```
+
+We don't get a big change by doing it like this.
+
+Now let's set up a funky simulated data set.
+
+```{r}
+xs <- runif(20, -5, 5)
+ys <- xs + rnorm(20, 0, .5)
+plot(xs, ys)
+```
+This data looks a lot like $y = x$. Indeed,
+```{r}
+lm(ys ~ xs)
+```
+
+Let's see what happens when we add an outlier that changes it to look like possible $y = -x$.
+
+
+```{r}
+xs <- c(xs, -10)
+ys <- c(ys, 10)
+plot(xs, ys)
+```
+
+If we just use `lm`, which uses SSE.
+
+```{r}
+lm(ys ~ xs)
+```
+
+```{r}
+plot(xs, ys)
+abline(lm(ys ~ xs))
+```
+
+Repeat the above, replacing the outlier with successively bigger outliers, and see what happens to the line of best fit. Convince yourself that when the outlier is big enough, the line of best fit is perpendicular to the original line.
+
+```{r}
+xs[21] <- -20
+ys[21] <- 20
+lm(ys ~ xs)
+```
+
+
+When you are done using `MASS`, I always recommend detaching it. The reason is that `MASS` has a function called `select` that masks `dplyr::select` if we load `MASS` after loading `dplyr`.
+
+```{r}
+detach("package:MASS", unload = TRUE)
+```
 
