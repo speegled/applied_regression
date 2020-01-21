@@ -3,4 +3,4 @@ _book/*
 .Rproj.user
 _bookdown_files/*
 .Rhis*
-_main.rds
+_main.*
