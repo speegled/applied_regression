@@ -14,7 +14,7 @@ We will not work much with the pdf directly, but rather use the built in R funct
 curve(dnorm(x, 0, 1/sqrt(2)), from = -3, to = 3, col = 3,
       main = "Normal rvs", 
       ylab = "likelihood") #green
-curve(dnorm(x, 0, 2), add = T, col = 2) #red
+curve(dnorm(x, 0, 2), add= T, col = 2) #red
 curve(dnorm(x, 0, 1), add = T, col = 1) #black
 ```
 
@@ -155,11 +155,13 @@ sim_data <- replicate(10000, {
 plot(density(sim_data))
 ```
 
-The `plot(density())` command gives an estimated density plot of the rv that has data given in the argument of `density`. Let's add a pdf of a normal rv with the correct mean and standard deviation to the above plot, and see whether they match. The correct mean is $2 * 0 + 3 * 1$ and the sd is $\sqrt{4 * 1 + 9 * 4}$
+The `plot(density())` command gives an estimated density plot of the rv that has data given in the argument of `density`. Let's a
+a pdf of a normal rv with the correct mean and standard deviation to the above plot, and see whether they match. The correct mean is $2 * 0 + 3 * 1$ and the sd is $\sqrt{4 * 1 + 9 * 4}$
 
 ```{r}
 plot(density(sim_data))
-curve(dnorm(x, 3, sqrt(40)), add = T, col = 2) #shows up in red
+curve(dnorm(x, 3, sqrt(40)), a
+      = T, col = 2) #shows up in red
 ```
 
 Alternatively, we could have used the simulated data and estimated the mean and sd.
@@ -168,7 +170,8 @@ Alternatively, we could have used the simulated data and estimated the mean and 
 plot(density(sim_data))
 curve(dnorm(x, 
             mean(sim_data), 
-            sd(sim_data)), add = T, col = 2) #shows up in red
+            sd(sim_data)), a
+      = T, col = 2) #shows up in red
 ```
 
 Since the estimated pdf of the simulated data matches that of the `dnorm` (more or less), we conclude that the distributions are the same. Note that if there is a discontinuity in the pdf, then the simulation will not match well at that point of discontinuity. Since we will mostly be dealing with normal rvs, we'll cross that bridge when we get to it.
@@ -222,7 +225,8 @@ where the $\epsilon_i$ are independent normal random variables with mean 0 and u
 The $\beta_0$ and $\beta_1$ are unknown **constants**. 
 The only randomness in this model comes from the $\epsilon_i$, which we think of as the error of the model or the residuals of the model. 
 
-In order to estimate the values of the coefficients $\beta_0$ and $\beta_1$, we want to choose the values that minimize the total error associated with the line $y = \beta_0 + \beta_1 x$. There are *lots* of ways to do this! Let's begin by looking at the error at a single point, $y_i - (\beta_0 + \beta_1 x_i)$. This is the *observed* value $y_i$ minus the $predicted$ value $\beta_0 + \beta_1 x_i$. If we are trying to minimize the total error, we will want to take the absolute value or something of the error at each point and add them up. Here are a few ways we could do this.
+In order to estimate the values of the coefficients $\beta_0$ and $\beta_1$, we want to choose the values that minimize the total error associated with the line $y = \beta_0 + \beta_1 x$. There are *lots* of ways to do this! Let's begin by looking at the error at a single point, $y_i - (\beta_0 + \beta_1 x_i)$. This is the *observed* value $y_i$ minus the $predicted$ value $\beta_0 + \beta_1 x_i$. If we are trying to minimize the total error, we will want to take the absolute value or something of the error at each point and a
+them up. Here are a few ways we could do this.
 
 \begin{align}
 SSE(\beta_0, \beta_1) &= \sum_{i = 1}^n \bigl(y_i - (\beta_0 + \beta_1 x_i)\bigr)^2\\
@@ -235,13 +239,13 @@ where $g$ is a *loss function* such that $g(x) = g(-x)$ and $g(x) \le g(y)$ when
 ```{r}
 curve(x^2, from = -4, to = 4, col = 1,
       main = "Common Loss Functions") #black
-curve(abs(x), add  = T, col = 2) #red
+curve(abs(x), add = T, col = 2) #red
 delta <- 2
 curve(delta^2 *(sqrt(1 + (x/delta)^2) - 1),
-      add = T,
+      add= T,
       col = 3) #green
 curve(robustbase::Mchi(x, cc = 1.6, psi = "bisquare"),
-      add = T, 
+      add= T, 
       col = 4) #bue
 ```
 
@@ -251,18 +255,24 @@ Let's look at a different data set. This is the world happiness data set. People
 
 ```{r}
 dd <- readxl::read_xls("../4870/data/world_happiness_data.xls") #This won't work for you!
+
 dd <- filter(dd, Year == 2018) %>% 
   janitor::clean_names()
+
 dd <- select(dd, country_name, life_ladder, log_gdp_per_capita)
 ggplot(dd, aes(x = log_gdp_per_capita, y = life_ladder))  + 
   geom_point()
 ```
 
-Let's get rid of the data with missing values.
+Let's get rid of the data with missing values, and store the resulting variable in `happy` for future use, since `dd` will get overwritten later.
+
 
 ```{r}
-dd <- dd[complete.cases(dd),]
+dd<- dd[complete.cases(dd),]
+happy <- dd
 ```
+
+
 
 Now, let's find values of $\beta_0$ and $\beta_1$ that minimize the SSE. (We'll do the other loss functions below.)
 
@@ -466,7 +476,8 @@ Looks pretty good! Again, we would need to repeat a few times to be sure. Finall
 
 ```{r}
 plot(density(sim_data))
-curve(dnorm(x, 2, sqrt(9/sum(xs^2))),add = T, col = 2 )
+curve(dnorm(x, 2, sqrt(9/sum(xs^2))),a
+      = T, col = 2 )
 ```
 
 That is compelling to me. We have seen that $\hat \beta_1$ is normal with mean $\beta_1$ and standard deviation $\frac{\sigma}{\sqrt{\sum x_i^2}}$
@@ -487,6 +498,242 @@ $\epsilon_i$ are iid normal with mean 0 and standard deviation $\sigma$.
 
 ```
 
+## The full model
+
+In this section, we discuss the model
+
+\[
+y_i = \beta_0 + \beta_1 x_i + \epsilon_i
+\]
+
+We minimize 
+
+\[
+SSE(\beta_0, \beta_1) = \sum \bigl(y_i - (\beta_0 + \beta_1 x_i)\bigr)^2
+\]
+over all choices of $\beta_0$ and $\beta_1$ by taking the partials with respect to $\beta_0$ and $\beta_1$, setting equal to zero, and solving for $\beta_0$ and $\beta_1$. We omit the details. But, here are the solutions that you obtain. 
+
+$$\hat \beta_0 = \overline{y} - \hat \beta_1 \overline{x}$$
+
+$$\hat \beta_1 = \frac{\sum x_i y_i - \frac 1n \sum x_i \sum y_i}{\sum x_i^2 - \frac 1n \sum x_i \sum x_i}$$
+
+As before, we can see that $\hat \beta_0$ and $\hat \beta_1$ are linear combinations of the $y_i$, so they are **normal** random variables. We won't go through the algebraic details, but it is true that $\hat \beta_0$ is normal with mean $\beta_0$ and variance $\sigma^2 \frac{\sum x_i^2}{n\sum x_i^2 - \sum x_i \sum x_i}$, while $\hat \beta_1$ is normal with mean $\beta_1$ and variance $\frac{n\sigma^2}{n \sum x_i^2 - \sum x_i \sum x_i}$. Let's check this with some simulations!
+
+```{r cache = TRUE}
+xs <- runif(30, 0, 10)
+sx <- sum(xs)
+sx2 <- sum(xs^2)
+ys <- 1 + 2 * xs + rnorm(30, 0, 3)
+lm(ys ~ xs)$coefficients[1] #pulls out the intercept
+
+sim_data <- replicate(10000, {
+  ys <- 1 + 2 * xs + rnorm(30, 0, 3)
+  lm(ys ~ xs)$coefficients[1]
+})
+mean(sim_data) #should be close to 1
+var(sim_data) #should be close to:
+
+(9 * sum(xs^2))/(30 * sum(xs^2) - sum(xs) * sum(xs))
+
+```
+
+Let's also plot it to double check normality.
+
+```{r}
+plot(density(sim_data))
+curve(dnorm(x, 1, sqrt(1.138901)), add = T, col = 2)
+```
+
+We do a similar simulation for $\beta_1$ below.
+
+```{r cache = TRUE}
+xs <- runif(30, 0, 10)
+sx <- sum(xs)
+sx2 <- sum(xs^2)
+ys <- 1 + 2 * xs + rnorm(30, 0, 3)
+lm(ys ~ xs)$coefficients[2] #pulls out the intercept
+
+sim_data <- replicate(10000, {
+  ys <- 1 + 2 * xs + rnorm(30, 0, 3)
+  lm(ys ~ xs)$coefficients[2]
+})
+mean(sim_data) #should be close to 2
+var(sim_data) #should be close to:
+
+(9 * 30)/(30 * sum(xs^2) - sum(xs) * sum(xs))
+
+```
+
+And again, we plot the density and compare to normal curve.
+
+```{r}
+plot(density(sim_data))
+curve(dnorm(x, 2, sqrt(0.03179106)), add = T, col = 2)
+```
+
+We can use this information to perform hypothesis tests and create confidence intervals! 
+
+### Hypothesis Test Interlude
+
+Recall how hypothesis tests work. We have a probability distribution that depends on a parameter $\alpha$, say. There is some default, or conventional wisdom, idea about the value of $\alpha$. We call this value $\alpha_0$. We are testing whether $\alpha = \alpha_0$ or whether $\alpha \not= \alpha_0$.  Formally, we vall $H_0: \alpha = \alpha_0$ the *null hypothesis* and $H_a: \alpha \not= \alpha_0$ the alternative 
+hypothesis. 
+
+The format of the hypothesis test works as follows. We create a *test statistic* $T$ that depends on the random sample we take and the parameter $\alpha$. We need to be able to derive or simulate the probability density function of $T$. When we do that, we then compute a $p$-value, which is the probability of obtaining a test statistic $T$, which is as likely or more unlikely than the one that we did compute, assuming that $H_0$ is true. If this $p$-value is small, say less than $.05$, then we *reject $H_0$* in favor of $H_a$. Otherwise, we fail to reject $H_0$.
+
+In regression, it is common to do hypothesis tests on $\beta_1$, the slope. It is less common to do them on the intercept, because often the intercept is harder to interpret in the context of a problem. Let's return to the happiness data, which is stored in `happy`. We computed a line of best fit of $y = -1.03 + 0.705 x$. A natural question to ask is whether the slope is actually zero, or whether it is not zero. Formally, we have the hypothesis test $H_0: \beta_1 = 0$ versus $H_a: \beta_1 \not= 0$. 
+We need to assume, at this point, that the variance of $\epsilon_i$ is **known**. We will see below what to do when it is not known. We assume that the variance is 1/2, so that the standard deviation is $1/\sqrt{2} \approx 0.71$. Recall that $\hat \beta_1$ is **normal** with mean $\beta_1$ and standard deviation $\sqrt{\frac{n\sigma^2}{n \sum x_i^2 - \sum x_i \sum x_i}}$. In this case, $n = 127$ and $\sigma^2 = 1/2.$ Therefore, the standard deviation of $\hat \beta_1$ is 
+
+```{r}
+sigma_b1 <- sqrt((127 * 1/2)/(127 * sum(happy$log_gdp_per_capita^2) - sum(happy$log_gdp_per_capita)^2))
+```
+
+Under the null hypothesis, we have that the **mean** of $\hat \beta_1$ is 0. So, if the null hypothesis is true, then $\hat \beta_1$ is normal with mean 0 and standard deviation about 0.053. Let's plot the pdf.
+
+```{r}
+curve(dnorm(x, 0, 0.053), 
+      from = -.8, 
+      to = 0.8,
+      ylab = "likelihood", 
+      main = "pdf of beta1 hat")
+```
+
+It is **very** unlikely that the computed slope would be 0.705 or larger! The $p$-value is obtained by computing the probability of getting 0.705 or larger given that $H_0$ is true. 
+
+```{r}
+pnorm(0.705, 0, .053, lower.tail = FALSE)
+```
+
+Wow! To be fair, we would also want to see the probability of getting less than -0.705, and add it to the above.
+
+```{r}
+pnorm(0.705, 0, .053, lower.tail = FALSE) + 
+  pnorm(-.705, 0, .053)
+```
+Our $p$-value is $2.257 \times 10^{-40}$. We reject $H_0$ and conclude that the slope is not zero. 
+
+That's all well and good, **but**... We *don't* know what $\sigma$ is at all in this setting. We need to figure out how to estimate $\sigma$, and we need to figure out how that affects our $p$-value computation!!
+
+We start with figuring out how to estimate $\sigma^2$. Let's suppose that our data comes from $y_i = 1 + 2 * x_i + \epsilon_i$, where $\epsilon_i$ is normal with mean 0 and standard deviation 3. We don't assume that we know any of that information. But, if we **did** know $\beta_0 = 1$ and $\beta_1 = 2$, then we could compute $y_i - (1 + 2 * x_i)$, and that would be a random sample from $\epsilon$! We could use `sd` to estimate the standard deviation or `var` to estimate the variance! Our idea, then, is to *estimate* $\hat \beta_0$ and $\hat \beta_1$, and then $y_i - (\hat \beta_0 + \hat \beta_1 x_i)$ is an *estimate* of a sample from $\epsilon_i$! Maybe a good estimate for $\sigma^2$ would be to use `var` on that!
+
+Notationally, we call $y_i - (\hat \beta_0 + \hat \beta_1 x_i)$ the *residuals* of the model. 
+
+```{r}
+xs <- runif(30, 0, 10)
+ys <- 1 + 2 * xs + rnorm(30, 0, 3)
+beta_0 <- lm(ys ~ xs)$coefficients[1]
+beta_1 <- lm(ys ~ xs)$coefficients[2]
+ys - (beta_0 + beta_1 * xs)
+```
+Now, to estimate $\sigma^2$, we could use the `var` function.
+
+```{r}
+var(ys - (beta_0 + beta_1 * xs)) #true value is 9
+```
+
+Let's put this inside of `replicate` to see whether this is an unbiased estimator of $\sigma^2$.
+
+```{r, cache = TRUE}
+sim_data <- replicate(10000, {
+  ys <- 1 + 2 * xs + rnorm(30, 0, 3)
+  mod <- lm(ys ~ xs)
+  beta_0 <- mod$coefficients[1]
+  beta_1 <- mod$coefficients[2]
+  var(ys - (beta_0 + beta_1 * xs))
+})
+mean(sim_data)
+```
+Hmmm, it looks like it is **too small**. It can be provent hat estimating $\sigma^2$ in this way is a **biased** way to do it. The formula for `var` is $\frac {1}{n-1} \sum_{i = 1}^n (x_i - \overline{x})^2$. There is a rule of thumb that, for each parameter that you estimate, you need to subtract one from the $n$ in the denominator in front of the sum. Since we are estimating $\beta_0$ and $\beta_1$, we would need to subtract 2 from $n$. In other words, we need to multiple `var` by $\frac {n-1}{n-2}$.
+
+```{r, cache = TRUE}
+sim_data <- replicate(10000, {
+  ys <- 1 + 2 * xs + rnorm(30, 0, 3)
+  mod <- lm(ys ~ xs)
+  beta_0 <- mod$coefficients[1]
+  beta_1 <- mod$coefficients[2]
+  var(ys - (beta_0 + beta_1 * xs)) * 29/28
+})
+mean(sim_data)
+```
+
+That looks better! That is our unbiased estimator of $\sigma^2$! What kind of rv is $\hat \sigma^2$, which is more commonly denoted $S^2$. Well. $S^2$ itself is not one that we are familiar with, but $(n - 2) S^2/\sigma^2$ is a $\chi^2$ random variable with $n - 2$ degrees of freedom.
+
+```{r}
+plot(density(28 * sim_data/9))
+curve(dchisq(x, 28), add = T, col = 2)
+```
+
+Now, we are ready to do actual hypothesis testing on the slope without assuming that we know the underlying variance. 
+
+```{theorem, label = "betazerodist"}
+Let $(x_1, y_1), \ldots, (x_n, y_n)$ be a random sample from the model
+\[
+y_i = \beta_0 + \beta_1 x_i + \epsilon_i  
+\]
+where $\epsilon_i$ are iid normal random variables with mean 0 and variance $\sigma^2$.  Then,
+\[
+\frac{\hat \beta_1 - \beta_1}{\sqrt{\frac{n S^2}{n \sum x_i^2 - \sum x_i \sum x_i}}}
+\]
+follows a $t$ distribution with $n - 2$ degrees of freedom.
+
+```
+
+To prove this, we will once again use simulations. We assume $\beta_0 = 1$, $\beta_1 = 2$ and $\sigma = 3$.
+
+```{r, cache=TRUE}
+n <- 30
+sim_data <- replicate(10000, {
+  ys <- 1 + 2 * xs + rnorm(30, 0, 3)
+  mod <- lm(ys ~ xs)
+  beta_1 <- mod$coefficients[2]
+  a <- summary(mod)
+  (beta_1 - 2)/(sqrt(n * a$sigma^2/(n * sum(xs^2) - sum(xs)^2)))
+})
+ curve(dt(x, 28), add = T, col = 2)
+```
+
+```{example}
+Using the $t$ distribution to do a hypothesis test.
+```
+
+We consider the happiness data set again. Our model is $y_i = \beta_0 + beta_1 x_i + \epsilon_i$, where $\epsilon_i$ are iid normal with mean 0 and variance $\sigma^2$.  The null hypothesis is $H_0: \beta_1 = 0$ and the alternative is $H_0: \beta_1 \not= 0$. Theorem \@ref(thm:betazerodist) tells us that the **test statistic**
+\[
+\frac{\hat \beta_1 - \beta_1}{\sqrt{\frac{n S^2}{n \sum x_i^2 - \sum x_i \sum x_i}}}
+\]
+is $t$ with 125 degrees of freedom, since there are 127 observations in `happy`. 
+
+We compute the value of the test statistic by putting in our estimate for $\hat \beta_1$, which we can pull out of `lm` as 0.7046, and our estimate for $S^2$.
+
+```{r}
+mod <- lm(life_ladder ~ log_gdp_per_capita, data = happy)
+beta_1_hat <- mod$coefficients[2]
+S <- sqrt(var(mod$residuals) * 126/125)
+```
+
+Therefore, the value of the test statistic is
+
+```{r}
+(beta_1_hat - 0)/(sqrt((127 * S^2)/(127 * sum(happy$log_gdp_per_capita^2) - sum(happy$log_gdp_per_capita)^2)))
+```
+
+That is, again, a very unlikely value for the test statistic that is $t$ with any degrees of freedom!!
+
+```{r}
+curve(dt(x, 125), from = -21, to = 21)
+```
+
+To compute the $p$-value, we use `pt` as follows:
+
+```{r}
+pt(13.08232, 125, lower.tail = FALSE) * 2
+```
+And, we would reject the null hypothesis at any reasonable $\alpha$ level. However, note that the $p$-value is 15 orders of magnitude greater than the $p$-value that we computed when we assumed that we knew $\sigma$. That is quite substantial! 
+
+```{exercise}
+Consider the data set `HistData::Galton` that we looked at briefly. Assume the model $y_i = \beta_0 + \beta_1 x_i + \epsilon_i$, and do a hypothesis test of $H_0: \beta_1 = 1$ versus $H_a: \beta_1 \not= 1$. Explain what this means in the context of the data.
+```
+
+
+
 ## Using different loss functions
 
 In this section, we return to the model
@@ -504,13 +751,13 @@ where $g$ is *even*, $g$ is decreasing for $x \le 0$, and increasing for $x \ge 
 ```{r}
 curve(x^2, from = -4, to = 4, col = 1,
       main = "Common Loss Functions") #black
-curve(abs(x), add  = T, col = 2) #red
+curve(abs(x), add = T, col = 2) #red
 delta <- 2
 curve(delta^2 *(sqrt(1 + (x/delta)^2) - 1),
-      add = T,
+      add= T,
       col = 3) #green
 curve(robustbase::Mchi(x, cc = 1.6, psi = "bisquare"),
-      add = T, 
+      add= T, 
       col = 4) #bue
 ```
 
@@ -518,22 +765,13 @@ Let's find the values of $\beta_0$ and $\beta_1$ that minimize the $L^1$ error, 
 \[
 \sum \bigl|y_i - (\beta_0 + \beta_1 x_i)|
 \]
-in the happiness data set. We will also compare that to the values we got using SSE. We load the data again, clean it up, and remove the missing values and plot.
+in the happiness data set. We will also compare that to the values we got using SSE. Recall that the data is stored in `happy.
 
-```{r}
-dd <- readxl::read_xls("../4870/data/world_happiness_data.xls")
-
-dd_2018 <- filter(dd, Year ==2018) 
-dd_2018 <- janitor::clean_names(dd_2018)
-dd_2018 <- select(dd_2018, life_ladder, log_gdp_per_capita, country_name)
-dd_2018 <- dd_2018[complete.cases(dd_2018),]
-plot(dd_2018$life_ladder, dd_2018$log_gdp_per_capita)
-```
 
 As a reminder, we can get the SSE estimator for $\beta_0$ and $\beta_1$ via `lm` as follows.
 
 ```{r}
-lm(life_ladder ~ log_gdp_per_capita, data = dd_2018)
+lm(life_ladder ~ log_gdp_per_capita, data = happy)
 ```
 
 The usage `y ~ x` is read as "y as described by x" and the *response* variable always comes first. The predictor(s) come after the `~`.
@@ -550,7 +788,7 @@ Then, we define our total $L^1$ error as
 
 ```{r}
 loss_two <- function(b0, b1) {
-  sum(g(dd_2018$life_ladder - (b0 + b1 * dd_2018$log_gdp_per_capita)))
+  sum(g(happy$life_ladder - (b0 + b1 * happy$log_gdp_per_capita)))
 }
 ```
 
@@ -570,7 +808,7 @@ optim(par = c(0, 1), fn = loss_one)
 We see that "the" line of best fit in this case is $y = -0.837  0.691 x$ rather than $y =  -1.03 + 0.705 x$. I will leave it to you to decide whether the difference between those coefficients is meaningful. Let's plot both lines.
 
 ```{r}
-ggplot(dd_2018, aes(x = log_gdp_per_capita, y = life_ladder)) +
+ggplot(happy, aes(x = log_gdp_per_capita, y = life_ladder)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) + #SSE minimizer
   geom_abline(slope = 0.691, intercept = -0.837)
@@ -584,7 +822,7 @@ Next up, we look at the *psuedo-Huber loss function* $g(x) = \delta^2 \sqrt{1 + 
 ```{r}
 curve(sqrt(1 + x^2) - 1, from = -5, to = 5, ylim = c(0, 5))
 delta = .5
-curve(delta^2 *sqrt(1 + x^2/delta^2) - delta^2, add = T, col = 2)
+curve(delta^2 *sqrt(1 + x^2/delta^2) - delta^2, add= T, col = 2)
 delta = 2
 curve(delta^2 *sqrt(1 + x^2/delta^2) - delta^2, add = T, col = 3)
 ```
@@ -615,7 +853,7 @@ Indeed, we do get similar results, though not identical. If we are thinking of u
 
 ```{r}
 MASS::rlm(life_ladder ~ log_gdp_per_capita, 
-    data = dd_2018, 
+    data = happy, 
     psi = MASS::psi.huber)
 ```
 
@@ -633,7 +871,7 @@ The thing to know about this loss function is that for "small" errors, the loss 
 
 ```{r}
 library(MASS)
-rlm(life_ladder ~ log_gdp_per_capita, data = dd_2018, psi = psi.bisquare)
+rlm(life_ladder ~ log_gdp_per_capita, data = happy, psi = psi.bisquare)
 ```
 
 We don't get a big change by doing it like this.
@@ -685,3 +923,34 @@ When you are done using `MASS`, I always recommend detaching it. The reason is t
 detach("package:MASS", unload = TRUE)
 ```
 
+## Exercises
+
+1. Let $X_1, \ldots, X_5$ be normal random variables with means $1, 2, 3, 4, 5$ and variances $1, 4, 9, 16, 25$. 
+
+    1. What kind of rv is $\overline{X}$? Include the values of any parameters.
+  
+    1. Use simulation to plot the pdf of $\overline{X}$ and confirm your answer to part 1.
+
+    &nbsp;
+1. Consider the data set `ISwR::bp.obese`. If you have never installed the `ISwR` package, you will need to run `install.packages("ISwR")` before accessing this data set.
+
+    1. Find the line of best fit for modeling blood pressure versus obesity by minimizing the SSE.
+
+    1. Does it appear that the model $y = \beta_0 + \beta_1 x + epsilon$, where $y$ is bp, $x$ is obese, and $\epsilon$ is normal with mean 0 and standard deviation $\sigma$ is correct for this data?
+
+    &nbsp;
+1. Suppose you wish to model data $(x_1, y_1), \ldots, (x_n, y_n)$ by 
+\[
+y_i = \beta_0 + x_i + \epsilon_i  
+\]
+$\epsilon_i$ are iid normal with mean 0 and standard deviation $\sigma$.
+
+    1. Find the $\beta_0$ that minimizes the SSE, $\sum(y_i - (\beta_0 + x_i))^2$ in terms of $x_i$ and $y_i$. Call this estimator $\hat \beta_0$.
+
+    1. What kind of random variable is $\hat \beta_0$? Be sure to include both its mean and standard deviation or variance (in terms of the $x_i$).
+
+    1. Verify your answer via simulation when the true relationship is $y = 2 + x + \epsilon$, where $\epsilon$ is normal with mean 0 and standard deviation 1.
+    
+    &nbsp;
+1. Consider the data set `HistData::Galton` that we looked at briefly. Assume the model $y_i = \beta_0 + \beta_1 x_i + \epsilon_i$, and do a hypothesis test of $H_0: \beta_1 = 1$ versus $H_a: \beta_1 \not= 1$. Explain what this means in the context of the data.
+  
