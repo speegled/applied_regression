@@ -19,14 +19,16 @@ curve(dnorm(x, 0, 1), add = T, col = 1) #black
 ```
 
 Recall that the *area* under the curve between $x = a$ and $x = b$ of the pdf of $X$ gives $P(a \le X \le b) = \int_a^b f(x)\, dx$. Probability density functions can also be used to find the *expected value* of a random variable $X$ via
-\[
+$$
 \mu_X = E[X] = \int_{-\infty}^\infty x f(x)\, dx.
-\]
+$$
+
+
 
 ```{theorem, label = "normalfacts"} 
 Key facts about normal random variables.
 
-1. If $X_1$ and $X_2$ are independent normal random variables with means $\mu_1, \mu_2$ and standard deviations $\sigma_1, \sigma_2$, then $X_1 + X_2$ is normal with mean $\mu_1 + \mu_2$ and standard deviation $\sqrt{\sigma_1^2 + \sigma_2^2}$.
+1. If $X_1$ and $X_2$ are independent normal random variables with means $\mu_1, \mu_2$ and standard deviations $\sigma_1, \sigma_2$, then $X_1 + X_2$ is normal with mean $\mu_1 + \mu_2$ and standard deviation $\sqrt{\sigma_1^2 + \sigma_2^2}$. if 
 
 2. If $X \sim N(\mu, \sigma)$ and $a$ is a real number, then $X + a \sim N(\mu + a, \sigma)$.
 
@@ -966,7 +968,7 @@ $\epsilon_i$ are iid normal with mean 0 and standard deviation $\sigma$.
     
     c. What kind of random variable is $\frac{\hat \beta_0 - \beta_0}{S/\sqrt{n}}$? 
     
-    d. Download the data `problem_2_5.csv` [here](https://stat.slu.edu/~speegle/data). Model $ys \tilde \beta_0 + xs + \epsilon$ and perform a hypothesis test of $H_0: \beta_0 = 2$ versus $H_a: \beta_0 \not= 2$ at the $\alpha = .05$ level.
+    d. Download the data `problem_2_5.csv` [here](https://stat.slu.edu/~speegle/Spring2020/4870/data). Model $ys \sim \beta_0 + xs + \epsilon$ and perform a hypothesis test of $H_0: \beta_0 = 2$ versus $H_a: \beta_0 \not= 2$ at the $\alpha = .05$ level.
     
     &nbsp;
 1. Consider the data set `carData::Davis`. This data set gives the recorded weight and the self-reported weight for about 200 patients. We are interested in modeling `weight` as a function of `repwt`. 
