@@ -534,14 +534,14 @@ mean(sim_data) #should be close to 1
 var(sim_data) #should be close to:
 
 (9 * sum(xs^2))/(30 * sum(xs^2) - sum(xs) * sum(xs))
-
+sigma_b0 <- sqrt((9 * sum(xs^2))/(30 * sum(xs^2) - sum(xs) * sum(xs)))
 ```
 
 Let's also plot it to double check normality.
 
 ```{r}
 plot(density(sim_data))
-curve(dnorm(x, 1, sqrt(1.138901)), add = T, col = 2)
+curve(dnorm(x, 1, sigma_b0), add = T, col = 2)
 ```
 
 We do a similar simulation for $\beta_1$ below.
@@ -560,15 +560,15 @@ sim_data <- replicate(10000, {
 mean(sim_data) #should be close to 2
 var(sim_data) #should be close to:
 
-(9 * 30)/(30 * sum(xs^2) - sum(xs) * sum(xs))
-
+sigma_b1 <- sqrt((9 * 30)/(30 * sum(xs^2) - sum(xs) * sum(xs)))
+sigma_b1^2
 ```
 
 And again, we plot the density and compare to normal curve.
 
 ```{r}
 plot(density(sim_data))
-curve(dnorm(x, 2, sqrt(0.03179106)), add = T, col = 2)
+curve(dnorm(x, 2, sigma_b1), add = T, col = 2)
 ```
 
 We can use this information to perform hypothesis tests and create confidence intervals! 
@@ -688,7 +688,8 @@ sim_data <- replicate(10000, {
   a <- summary(mod)
   (beta_1 - 2)/(sqrt(n * a$sigma^2/(n * sum(xs^2) - sum(xs)^2)))
 })
- curve(dt(x, 28), add = T, col = 2)
+plot(density(sim_data))
+curve(dt(x, 28), add = T, col = 2)
 ```
 
 ```{example}
@@ -857,7 +858,8 @@ MASS::rlm(life_ladder ~ log_gdp_per_capita,
     psi = MASS::psi.huber)
 ```
 
-We see that we don't get coefficients that are in between the two sets of coefficients that we computed previously. 
+We see that we don'
+coefficients that are in between the two sets of coefficients that we computed previously. However, I believe that `MASS` implements the true Huber loss function, rather than the psuedo-Huber loss function that we implemented above so we aren't really comparing apples to apples.
 
 The `rlm` function also implements `psi.bisquare`, which is Tukey's bi-square function. This loss function also has a parameter, which is denoted by `cc` in the `robustbase` package. Here are some plots.
 
@@ -874,7 +876,8 @@ library(MASS)
 rlm(life_ladder ~ log_gdp_per_capita, data = happy, psi = psi.bisquare)
 ```
 
-We don't get a big change by doing it like this.
+We don'
+a big change by doing it like this.
 
 Now let's set up a funky simulated data set.
 
@@ -954,3 +957,20 @@ $\epsilon_i$ are iid normal with mean 0 and standard deviation $\sigma$.
     &nbsp;
 1. Consider the data set `HistData::Galton` that we looked at briefly. Assume the model $y_i = \beta_0 + \beta_1 x_i + \epsilon_i$, and do a hypothesis test of $H_0: \beta_1 = 1$ versus $H_a: \beta_1 \not= 1$. Explain what this means in the context of the data.
   
+  
+1. Consider your model $y_i = \beta_0 + x_i + \epsilon_i$, where $\epsilon_i$ are independent normal random variables with mean 0 and standard deviation $\sigma$. You showed above that $\hat \beta_0 = \overline{y} - \overline{x}$ is normal with mean $\beta_0$ and standard deviation $\sigma/\sqrt{n}$. 
+
+    a. Fix a value of $\beta_0$ and $\sigma$. The residuals are $y_i - \hat \beta_0 - x_i$. Find an unbiased estimator for $\sigma^2$ in terms of the residuals. Call this estimator $S^2$.
+    
+    b. What kind of random variable is $\frac{\hat \beta_0 - \beta_0}{\sigma/\sqrt{n}}$?
+    
+    c. What kind of random variable is $\frac{\hat \beta_0 - \beta_0}{S/\sqrt{n}}$? 
+    
+    d. Download the data `problem_2_5.csv` [here](https://stat.slu.edu/~speegle/data). Model $ys \tilde \beta_0 + xs + \epsilon$ and perform a hypothesis test of $H_0: \beta_0 = 2$ versus $H_a: \beta_0 \not= 2$ at the $\alpha = .05$ level.
+    
+    &nbsp;
+1. Consider the data set `carData::Davis`. This data set gives the recorded weight and the self-reported weight for about 200 patients. We are interested in modeling `weight` as a function of `repwt`. 
+
+    a. Confirm that there is an outlier in this data set. Do not fix the outlier.
+    
+    b. Find the line of best fit using SSE, using the Huber or psuedo-Huber loss function, and using the Tukey bisquare loss function. Comment.
