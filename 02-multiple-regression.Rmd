@@ -1,0 +1,394 @@
+# Multiple Linear Regression
+
+In this chapter we consider the case where we have one response variable $y$ and multiple predictor variables $x_1, \ldots, x_K$. Our model is
+\[
+y = \beta_0 + \sum_{k = 1}^K \beta_k x_k + \epsilon
+\]
+where $\epsilon$ is normal with mean 0 and standard deviation $\sigma^2$. Note that this notation is equivalent to 
+\[
+y = \beta_0 + \beta_1 x + \epsilon
+\]
+in the single predictor case. Let's restrict down to the case where we have *three* predictors, which is easier notationally. 
+
+Suppose we have data that consists of one response variable and three predictor variables, $v, w$ and $x$. We are interested in the model
+
+\[
+y = \beta_0 + \beta_1 v + \beta_2 w + \beta_2 x + \epsilon
+\]
+
+where $\epsilon$ is a normal random variable with mean 0 and variance $\sigma^2$. Given data $(v_1, w_1, x_1, y_1), \ldots, (v_K, w_K, x_K, y_K)$, we compute the $\hat \beta_i$ by minimizing the SSE,
+
+\[
+SSE = \sum_{i = 1}^K \bigl(y_i - (\beta_0 + \beta_1 v_i + \beta_2 w_i + \beta_3 x_i)\bigr)^2
+\]
+
+The R function `lm` will do this for you. Let's look at some simulated data.
+
+```{r}
+set.seed(1262020)
+vs <- runif(30, 0, 10)
+ws <- runif(30, 0, 10)
+xs <- runif(30, 0, 10)
+dd <- data.frame(vs,
+                 ws,
+                 xs,
+                 ys = 1 + 2* vs + 3 * ws + rnorm(30, 0, 5))
+mod1 <- lm(ys ~., data = dd)
+mod1
+```
+
+We can also do hypothesis tests of $\beta_i = 0$ versus $\beta_i \not= 0$ by looking at the summary.
+
+```{r}
+summary(mod1)
+```
+
+We see that we reject that $\beta_1$ and $\beta_2$ are 0, but fail to reject that $\beta_0$ and $\beta_3$ are zero, at the $\alpha = .05$ level. 
+
+Our primary goal is going to do **variable selection**. Many times, we have more predictors than we really need, and several of them do not contribute to the model. We will remove those predictors in order to form a simpler and more understandable model. We will also see that removing predictors leads to better prediction for future values!
+
+Based on the above, we might consider removing `xs` from the  model, and re-computing.
+
+```{r}
+mod2 <- lm(ys ~ vs + ws, data = dd)
+summary(mod2)
+```
+Our model would then be $y = -2.9041 + 2.4214 v + 2.8949 w + \epsilon$, at which point we would probably be done removing variables. 
+
+Let's look at another example. Consider the data in `cystfibr` in the `ISwR` package. Our treatment of this data set follows the treatment given in Dalgaard's book. Let's start by seeing what kind of data we are dealing with. According to the description, "It contains lung function data for cystic fibrosis patients (7–23 years old)." I recommend running `?ISwR::cystfibr` and reading about the variables involved in this data. 
+
+We begin by plotting and summarizing the data.
+
+```{r}
+cystfibr <- ISwR::cystfibr
+summary(cystfibr)
+```
+
+There's not a whole lot to see here. `frc`, `weight` and `pemax` appear to be right skew, and `sex` has been miscoded as numeric rather than as a factor. Let's recode.
+
+```{r}
+cystfibr$sex <- factor(cystfibr$sex, levels = c(0, 1), labels = c("Male", "Female"))
+summary(cystfibr$sex)
+```
+
+Now, let's do a scatterplot.
+
+```{r}
+plot(cystfibr)
+```
+
+That's pretty spectacular, but not very informative. It looks like `height` and `weight` are related, as well as `age`. The variable `pemax`, which is the variable of interest, appears to be correlated with some of the other variables, but is is hard to tell. Here is a tidy plot. We use the original `ISwR::cystfibr` because in this case, we don't want `sex` coded as a factor.
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+ISwR::cystfibr %>% tidyr::pivot_longer(cols = -pemax,
+                                 names_to = "variable",
+                                 values_to = "value") %>%
+  ggplot(aes(x = value, y = pemax)) + geom_point() +
+    facet_wrap(facets = ~variable, scales = "free_x") 
+```
+
+
+
+Wait, what do I mean by correlated???
+
+We define the **covariance** of $X$ and $Y$ to be 
+\[
+E[(X - \mu_X) (Y - \mu_Y)] = E[XY] - E[X]E[Y],
+\]
+where $\mu_X$ is the mean of $X$ and $\mu_Y$ is the mean of $Y$.
+Looking at the first expression, we see that $(X - \mu_X) (Y - \mu_Y)$ is positive exactly when *either* both $X$ and $Y$ are bigger than their means, *or* when both $X$ and $Y$ are less than their means. Therefore, we expect to see a positive covariance if increased values of $X$ are probabilistically associated with increased values of $Y$, and we expect to see a negatice covariance when increased values of $X$ are associated with decreased values of $Y$.
+
+The **correlation** of $X$ and $Y$ is given by
+\[
+\rho(X, Y) = \frac{E[(X - \mu_X) (Y - \mu_Y)]}{\sigma_X \sigma_Y}
+\]
+The correlation is easier to interpret in most cases than the covariance, because the values are between $-1$ and $1$. A value of $\pm 1$ corresponds to a perfect linear relationship between $X$ and $Y$, and the larger tha absolute value of the correlation is, the stronger we expect the linear relationship of $X$ and $Y$ to be.
+
+We can estimate the covariance and correlation using the built in R functions `cov` and `cor`. If we apply `cor` to a data frame, then it computes the correlation of each pair of variables separately.
+
+```{r}
+cor(select(cystfibr, -sex))
+```
+
+Indeed, we see that `age`, `height` and `weight` are pretty strongly correlated, as are some of the lung function variables. `pemax` is not highly correlated with any one other variable.
+
+
+
+Let's run multiple regression on all of the variables at once, and see what we get:
+
+```{r}
+my.mod <- lm(pemax~., data = cystfibr)
+summary(my.mod)
+```
+
+A couple of things to notice: first, the p-value is 0.03195, which indicates that the variables *together* do have a statistically significant predictive value for `pemax`. However, looking at the list, no one variable seems necessary. The reason for this is that the $p$-values for each variable is testing what happens when we remove *only* that variable. So, for example, we can remove weight and not upset the model too much. Of course, since height is strongly correlated with weight, it may just be that height will serve as a proxy for weight in the event that weight is removed!
+
+### Aside on multiple R squared and ANOVA
+
+The Multiple R Squared value is 0.6373. This means that the model explains 63% of the variance of pemax. To better understand what that means, let's see how we could calculate it. First, we compute the total variance of `pemax`.
+
+```{r}
+pemax_var <- var(cystfibr$pemax)
+```
+
+Now, we compute the variance of the **residuals** of our model. We can think of the variance of the residuals as the variance in `pemax` that remains unexplained after taking into account the variables in our model.
+
+```{r}
+residuals_var <- var(my.mod$residuals)
+```
+
+So, the percentage of variance explained is:
+
+```{r}
+(pemax_var - residuals_var)/pemax_var
+```
+
+```{exercise}
+In this exercise, you will see evidence that adding variables always increases the multiple R squared. Define `cystifbr$random <- rnorm(25)` and re-compute the Multiple R-squared. How does it compare to 0.6373354? You may need to compute it out to many digits to see a difference!
+```
+
+We said above that the variables **taken together** have a $p$-value of 0.03195. What does that mean, exactly?
+
+Let's consider the case where we have three predictors and one response, to make things a bit simpler. Our null hypothesis would be that there is no linear association between the three predictors and the response. In other words, if our model is $y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \epsilon$, then the null hypothesis is that $\beta_1 = \beta_2 = \beta_3 = 0$, and the alternative hypothesis is that not all of them are zero. 
+
+As we saw above, the multiple R squared will never be zero, but we ask the question: how big is big enough that we can be pretty sure that it isn't due to chance? We could do it directly via simulations, but we are supposed to be doing classical theory now! So, let's see what kind of distribuytions the component pieces have.
+
+We start with the estimate of $\sigma^2$ based on the residuals.
+
+```{r}
+set.seed(1262020)
+x1s <- runif(30, 0, 10)
+x2s <- runif(30, 0, 10)
+x3s <- runif(30, 0, 10)
+dd <- data.frame(x1s = x1s,
+                 x2s = x2s,
+                 x3s = x3s,
+                 ys = 1 + 2 * x1s + 3 * x2s + rnorm(30, 0, 10) 
+                 )
+summary(lm(ys ~ ., data = dd))
+```
+
+Based on our previous work, we would expect an **unbiased** estimator for $\sigma^2$ to be the sum-squared residuals over (30 - 4), where 4 is the number of parameters that we estimated. Let's see if that is right. First we check that the esimate of the variance $\sigma^2$ in the summary really is computed by dividing by 26.
+
+```{r}
+random.mod <- lm(ys ~ ., data = dd)
+summary(random.mod)$sigma^2
+1/26*sum(random.mod$residuals^2)
+```
+Yep. Now, let's see that it appears to be an unbiased estimate for $\sigma^2$.
+
+```{r}
+sim_data <- replicate(10000, {
+  dd <- data.frame(x1s = x1s,
+                 x2s = x2s,
+                 x3s = x3s,
+                 ys = 1 + 2 * x1s + 3 * x2s + rnorm(30, 0, 10) 
+                 )
+  summary(lm(ys ~ ., data = dd))$sigma^2
+})
+mean(sim_data)
+```
+Yep. (Repeat the above code a few times to see that it appears to be centered at 100.) What kind of rv is our estimate for $\sigma^2$? We can adjust it to be $\chi^2$!
+
+```{r}
+plot(density(sim_data * 26/100))
+curve(dchisq(x, 26), add = T, col = 2)
+```
+
+Next, we assume that the null is true. We can estimate the variance as follows.
+
+```{r}
+sim_data_2 <- replicate(10000, {
+  ys = rnorm(30, 0, 10) 
+  sum((ys - mean(ys))^2)/29
+})
+plot(density(sim_data_2 * 29 / 100))
+curve(dchisq(x, 29), add = T, col = 2)
+```
+
+We see that the variance estimate in this case is a $\chi^2$ random variable with 29 degrees of freedom. Now the cool part. What about the difference between the variance we computed both ways?? Again, let's assume that the null hypothesis is `TRUE`
+
+```{r}
+sim_data_3 <- replicate(10000, {
+    dd <- data.frame(x1s = x1s,
+                 x2s = x2s,
+                 x3s = x3s,
+                 ys = rnorm(30, 0, 10) 
+                 )
+    sum((dd$ys - mean(dd$ys))^2)/29 * 29/100 -summary(lm(ys ~ ., data = dd))$sigma^2 * 26/100 
+      
+})
+plot(density(-sim_data_3))
+curve(dchisq(x, 3), add = T, col = 2)
+```
+
+Finally, we take the ratio, similar to the multiple R squared.
+
+```{r}
+sim_data_3 <- replicate(10000, {
+    dd <- data.frame(x1s = x1s,
+                 x2s = x2s,
+                 x3s = x3s,
+                 ys = rnorm(30, 0, 10) 
+                 )
+    ((sum((dd$ys - mean(dd$ys))^2)/100 -summary(lm(ys ~ ., data = dd))$sigma^2 * 26/100)/3)/ (summary(lm(ys ~ ., data = dd))$sigma^2 * 26/100/26)
+})
+plot(density(sim_data_3))
+curve(df(x, 3, 26), add = T, col = 2)
+```
+
+
+If 
+Let's look at an anova table:
+
+```{r}
+anova(my.mod)
+```
+
+We get a different result, because in this case, the table is telling us the significance of adding/removing variables one at a time. For example, age is significant all by itself. Once age is added, sex, height, etc. are not significant. Note that bmp is close to the mystical, magical .05 level^[that's a joke. it **is** close to .05, but there is nothing magical about .05.]. However, we are testing 9 things, so we should expect that relatively often we will get a false small p-value. 
+
+One way to test this further is to see whether it is permissible to remove *all* of the variables once age is included. We do that using anova again.
+
+```{r}
+my.mod2 <- lm(pemax~age, data = cystfibr)
+anova(my.mod2, my.mod) #Only use when models are nested! R doesn't check
+```
+
+As you can see, the p-value is 0.2936, which is not significant. Therefore, we can reasonably conclude that once age is included in the model, that is about as good as we can do. *Note:* This does NOT mean that age is necessarily the best predictor of pemax. The reason that it was included in the final model is largely due to the fact that it was listed first in the data set! 
+
+Let's see what happens if we change the order:
+
+```{r}
+my.mod <- lm(pemax~height+age+weight+sex+bmp+fev1+rv+frc+tlc, data = cystfibr)
+summary(my.mod)
+```
+
+Note that the overall p-value is the same.
+
+```{r}
+anova(my.mod)
+```
+
+Here, we see that height is significant, and nothing else. If we test the model pemax ~ height versus pemax ~ ., we get
+
+```{r}
+anova(my.mod2, my.mod) #Only use when models are nested!
+```
+
+And again, we can conclude that once we have added height, there is not much to be gained by adding other variables. We leave it to the reader to test whether weight follows the same pattern as height and age.
+
+Let's first examine a couple of other ways we could have proceeded.
+
+```{r}
+my.mod <- lm(pemax~., data = cystfibr)
+summary(my.mod)
+```
+
+We start to eliminate variables that are not statistically significant in the model. We will begin with the other lung function data, for as long as we are allowed to continue to remove. The order chosen for removal is: tlc, frc,  rv, fev1.
+
+```{r}
+summary(lm(pemax~height+age+weight+sex+bmp+fev1+rv+frc, data = cystfibr))
+summary(lm(pemax~height+age+weight+sex+bmp+fev1+rv, data = cystfibr))
+summary(lm(pemax~height+age+weight+sex+bmp+fev1, data = cystfibr))
+summary(lm(pemax~height+age+weight+sex+bmp, data = cystfibr))
+```
+
+When removing variables in a stepwise manner such as above, it is important to consider adding variables back into the model. Since we have removed all of the lung function data one variable at a time, let's see whether the **group** of lung function data is significant as a whole. This serves as a sort of test as to whether we need to consider adding variables back in to the model.
+
+```{r}
+mod1 <- lm(pemax~., data = cystfibr)
+mod2 <- lm(pemax~height+age+weight+sex+bmp, data = cystfibr)
+anova(mod2, mod1)
+```
+Since the $p$-value is 0.4758, this is an indication that the group of variables is not significant as a whole, and we are at least somewhat justified in removing the group.
+
+
+Returning to variable selection, we see that age, height and sex don't seem important, so let's start removing.
+```{r}
+summary(lm(pemax~height+weight+sex+bmp, data = cystfibr))
+summary(lm(pemax~weight+sex+bmp, data = cystfibr))
+summary(lm(pemax~weight+bmp, data = cystfibr))
+```
+
+Again, we have removed a group of variables that are related, so let's see if the group as a whole is significant. If it were, then we would need to consider adding variables back in to our model.
+```{r}
+mod3 <- lm(pemax~weight+bmp, data = cystfibr)
+anova(mod3, mod2)
+```
+This indicates that we are justified in removing the age, weight and sex variables. And now, bmp also doesn't seem important. We are left with modeling pemax on weight, similar to what we had before. 
+
+
+Returning to the model of pemax on height, let's take a look at the residuals.
+
+
+```{r}
+my.mod <- lm(pemax~height, data = cystfibr)
+plot(pemax~height, data = cystfibr)
+abline(my.mod)
+plot(my.mod)
+```
+
+It is hard to say, but there definitely could be a U-shape in the Residuals vs Fitted plot, which means there might be some lurking variables that we have not yet taken into account. One possibility is that pemax actually depends on height and height-sqaured, rather than height itself. Let's see what happens when we run the model:
+
+```{r}
+my.mod2 <- lm(pemax~height + I(height^2), data = cystfibr)
+summary(my.mod2)
+```
+
+Notice that in this case, both height and height^2 are significant. 
+
+**Aside**
+Let's pause and think a moment about what we are doing. If we assume that we are just exploring the data, then the process that has led us to considering modeling pemax as a function of height and height^2 is marginal. Considering that pemax seems to have larger variance for taller children, it is not hard to imagine that a linear relationship could look quadratic. We also have no a prioiri reason to think that pemax might depend on height^2. So, think of this as an illustration of what can be done and not necessarily an ideal analysis of the data. A couple of things that might be reasonable would be to either (1) contact the experts to see whether there is any reason that height^2 might be relevant, and (2) collect more data and see whether the relationship was an artifact of this data or whether it is recreated the second time around.
+**End of Aside**
+
+Let's check the residuals:
+
+```{r}
+plot(my.mod2)
+```
+
+Looks pretty good, except we seem to be violating constant variance. In particular, the variance seems to be higher for children with higher height/pemax values than for shorter children. Let's re-examine the plot of pemax vs height:
+
+```{r}
+ggplot(cystfibr, aes(x = height, y = pemax)) + geom_point()
+```
+
+This plot also seems to show that the variance of pemax depends on the height of the child.
+
+
+Let's look at an example. We use the `fuel2001` data from the `alr3` package. This is the package associated with the book *Applied Linear Regression*, by Sanford Weisberg. In some ways, I wish I could teach this class by following that book, but it requires more mathematical sophistication than a typical student from MATH/STAT 3850 could be expected to have. Let's first examine it and see what it contains. According to the help page, it is "Data on motor fuel consumption and related variables, for the year 2001. The unit is a state in the United States or the District of Columbia. Data are for 2001, unless noted." We are interested in understanding how the **per capita** fuel consumption is associated with the other variables, which are number of drivers, per capita income, miles of highway in state, miles driven per capita (est), population, and tax rate. It seems clear that the total number of drivers licenses isn't what we would want to use to predict per capita fuel consumption^[source needed]. It also seems unfair, perhaps, to use MPC, which is the estimated miles driven based, in part, on fuel consumption! So, let's make some changes.
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+dd <- alr3::fuel2001
+dd <- mutate(dd, Drivers = Drivers/Pop, FuelC = FuelC/Pop)
+dd <- select(dd, -MPC)
+summary(dd)
+```
+
+Let's start by examining the correlation between the variables. 
+
+
+
+```{r}
+cor(dd)
+```
+
+Let's look at the summary data now.
+
+```{r}
+summary(dd)
+```
+
+
+```{r}
+ggplot(dd, aes(Pop, Drivers)) + geom_point()
+```
+
+Not exactly a straight line, but pretty close. This is telling us that there is a very closer to linear relationship between drivers and population, and they are going to provide *very* similar predictive ability for fuel consumption. So, we are going to remove one of them; let's get rid of population.
+
+```{r}
+plot(dd[,-6])
+```
+
