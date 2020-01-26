@@ -1,4 +1,4 @@
-# Classical Theory {#classicaltheory}
+# Classical Theory of Simple Linear Regression {#classicaltheory}
 
 ## Review {#review}
 
