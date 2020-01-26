@@ -178,6 +178,13 @@ summary(random.mod)$sigma^2
 ```
 Yep. Now, let's see that it appears to be an unbiased estimate for $\sigma^2$.
 
+```{theorem}
+Let $\hat \epsilon_i$ be the residuals when $y = \beta_0 + \sum_{k = 1}^K \beta_k x_k + \epsilon$, with $\epsilon \sim N(0, \sigma^2)$. Then
+$\frac{1}{n - (K + 1)}\sum_{i = 1}^n \hat \epsilon^2$ is an unbiased estimator for $\sigma^2$. 
+```
+
+We denote the estimator $\hat \sigma^2 = \frac{1}{n - (K + 1)}\sum_{i = 1}^n \hat \epsilon^2$.
+
 ```{r}
 sim_data <- replicate(10000, {
   dd <- data.frame(x1s = x1s,
@@ -196,7 +203,14 @@ plot(density(sim_data * 26/100))
 curve(dchisq(x, 26), add = T, col = 2)
 ```
 
-Next, we assume that the null is true. We can estimate the variance as follows.
+To summarize, we have the following theorem.
+
+```{theorem}
+Let $\hat \epsilon_i$ be the residuals when $y = \beta_0 + \sum_{k = 1}^K \beta_k x_k + \epsilon$, with $\epsilon \sim N(0, \sigma^2)$, and let $\hat \sigma^2$ denote the estimator for $\sigma$ discussed above. Then, $\frac{n - (K + 1) \hat \sigma^2}{\sigma^2} \sim \chi^2_{n - (K + 1)}$. That is,  $\frac{n - (K + 1) \hat \sigma^2}{\sigma^2}$ is a $\chi^2$ random variable with $n - (K + 1)$ degrees of freedom.
+```
+
+
+Next, we assume that the null is true. We can estimate the variance as follows, which we denote as $V(y)$. 
 
 ```{r}
 sim_data_2 <- replicate(10000, {
@@ -238,17 +252,68 @@ plot(density(sim_data_3))
 curve(df(x, 3, 26), add = T, col = 2)
 ```
 
+We again summarize the above in the following theorem.
 
-If 
-Let's look at an anova table:
+```{theorem}
+With the notation from this section,
+
+    a. $\frac{(n - 1)V(y)}{\sigma^2} - \frac{n - (K + 1)\hat \sigma^2}{\sigma^2} \sim \chi^2_K$.
+
+    b. $F = \frac{\bigl((n - 1)V(y) - (n - (K + 1)) \hat \sigma^2\bigr)/K}{\bigl((n - (K + 1))\hat \sigma^2\bigr)/(n - (K + 1))} \sim F_{K, n - (K + 1)}$
+```
+
+Note that **large** values of $F$ correspond to evidence **against** the null hypothesis and in favor of the alternative hypothesis. Therefore, we will compute $F$ and reject the null hypothesis in favor of the alternative if it is larger than `qf(.95, K, (n - (K + 1)))`. We can compute the $p$ value of `pf(F, K, n - (K + 1), lower.tail = FALSE)`. Let's see it in action.
+
+```{r}
+set.seed(1262020)
+x1s <- runif(30, 0, 10)
+x2s <- runif(30, 0, 10)
+x3s <- runif(30, 0, 10)
+dd <- data.frame(x1s = x1s,
+                 x2s = x2s,
+                 x3s = x3s,
+                 ys = 1 + 2 * x1s + 3 * x2s + rnorm(30, 0, 10) 
+                 )
+mod <- lm(ys ~ ., data = dd)
+vy <- var(dd$ys)
+sigmahat <- sum(mod$residuals^2)/(30 - (3 + 1))
+Fstat <- ((29 * vy - 26 * sigmahat)/3)/(26 * sigmahat/26)
+pf(Fstat, 3, 26, lower.tail = FALSE)
+mod <- lm(ys ~ ., data = dd)
+summary(mod)
+```
+
+We note that the $F$ statistic and the $p$-value match what `lm` gives us. 
+
+```{exercise}
+For this exercise, use the data frame `dd` that we created in the previous code chunk. Suppose that we know that $\beta_1 \not= 0$, and we wish to test $H_0: \beta_2 = \beta_3 = 0$ versus $H_a$: at least one of $\beta_2$ and $\beta_3$ is not zero. Repeat the analysis above to do this hypothesis test. The outline of what you need to do is given below.
+```
+
+#### Hint to Exercise
+
+    a. Build a model $y = \beta_0 + \beta_1 x_1 + \epsilon$, and estimate $\sigma^2$ based on this model. This estimate will play the role of $V(y)$ in the previous section. Think about how many parameters you are estimating to get an unbiased estimator. Call this estimator $\hat \sigma_1^2$.
+    
+    b. Show that $(n - 2) \hat \sigma_1^2/\sigma^2$ is $\chi^2$ with $n -2$ degrees of freedom.
+    
+    c. Use the same estimate for $\hat \sigma^2$ as we did above.
+    
+    d. Show that $\frac{\bigl(n - 2)\hat \sigma_1^2) - (n - (K + 1) \hat \sigma^2)\bigr)/2}{(n - (K + 1) \hat \sigma^2)/26} \sim F_{2, 26}$. 
+    
+    e. Use your result in d. to do the hypothesis test. If you do everything correctly, your $p$-value will be about 0.001258.
+
+
+## More Variable Selection: ANOVA
+
+
+Let's look at an ANOVA table:
 
 ```{r}
 anova(my.mod)
 ```
 
-We get a different result, because in this case, the table is telling us the significance of adding/removing variables one at a time. For example, age is significant all by itself. Once age is added, sex, height, etc. are not significant. Note that bmp is close to the mystical, magical .05 level^[that's a joke. it **is** close to .05, but there is nothing magical about .05.]. However, we are testing 9 things, so we should expect that relatively often we will get a false small p-value. 
+We get a different result, because in this case, the table is telling us the significance of adding/removing variables one at a time. For example, age is significant all by itself. Then R compares the model with `age` and `sex` to the model with just `age`, just like you did in the exercise in the previous section. Then it compares the model with `age`, `sex` and `height` to the model with just `age` and `sex`. Once age is added, sex, height, etc. are not significant. Note that bmp is close to the mystical, magical .05 level^[that's a joke. it **is** close to .05, but there is nothing magical about .05.]. However, we are testing 9 things, so we should expect that relatively often we will get a false small p-value. 
 
-One way to test this further is to see whether it is permissible to remove *all* of the variables once age is included. We do that using anova again.
+One way to test this further is to see whether it is permissible to remove *all* of the variables once age is included. We do that using anova again, and this is a short-cut to what you did in the exercise in the previous section!
 
 ```{r}
 my.mod2 <- lm(pemax~age, data = cystfibr)
@@ -357,7 +422,7 @@ ggplot(cystfibr, aes(x = height, y = pemax)) + geom_point()
 This plot also seems to show that the variance of pemax depends on the height of the child.
 
 
-Let's look at an example. We use the `fuel2001` data from the `alr3` package. This is the package associated with the book *Applied Linear Regression*, by Sanford Weisberg. In some ways, I wish I could teach this class by following that book, but it requires more mathematical sophistication than a typical student from MATH/STAT 3850 could be expected to have. Let's first examine it and see what it contains. According to the help page, it is "Data on motor fuel consumption and related variables, for the year 2001. The unit is a state in the United States or the District of Columbia. Data are for 2001, unless noted." We are interested in understanding how the **per capita** fuel consumption is associated with the other variables, which are number of drivers, per capita income, miles of highway in state, miles driven per capita (est), population, and tax rate. It seems clear that the total number of drivers licenses isn't what we would want to use to predict per capita fuel consumption^[source needed]. It also seems unfair, perhaps, to use MPC, which is the estimated miles driven based, in part, on fuel consumption! So, let's make some changes.
+Let's look at another example. We use the `fuel2001` data from the `alr3` package. This is the package associated with the book *Applied Linear Regression*, by Sanford Weisberg. In some ways, I wish I could teach this class by following that book, but it requires more mathematical sophistication than a typical student from MATH/STAT 3850 could be expected to have. Let's first examine it and see what it contains. According to the help page, it is "Data on motor fuel consumption and related variables, for the year 2001. The unit is a state in the United States or the District of Columbia. Data are for 2001, unless noted." We are interested in understanding how the **per capita** fuel consumption is associated with the other variables, which are number of drivers, per capita income, miles of highway in state, miles driven per capita (est), population, and tax rate. It seems clear that the total number of drivers licenses isn't what we would want to use to predict per capita fuel consumption^[source needed]. It also seems unfair, perhaps, to use MPC, which is the estimated miles driven based, in part, on fuel consumption! So, let's make some changes.
 
 ```{r warning=FALSE, message=FALSE}
 library(tidyverse)
