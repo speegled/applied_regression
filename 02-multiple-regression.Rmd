@@ -16,10 +16,10 @@ Suppose we have data that consists of one response variable and three predictor 
 y = \beta_0 + \beta_1 v + \beta_2 w + \beta_2 x + \epsilon
 \]
 
-where $\epsilon$ is a normal random variable with mean 0 and variance $\sigma^2$. Given data $(v_1, w_1, x_1, y_1), \ldots, (v_K, w_K, x_K, y_K)$, we compute the $\hat \beta_i$ by minimizing the SSE,
+where $\epsilon$ is a normal random variable with mean 0 and variance $\sigma^2$. Given data $(v_1, w_1, x_1, y_1), \ldots, (v_n, w_n, x_n, y_n)$, we compute the $\hat \beta_i$ by minimizing the SSE,
 
 \[
-SSE = \sum_{i = 1}^K \bigl(y_i - (\beta_0 + \beta_1 v_i + \beta_2 w_i + \beta_3 x_i)\bigr)^2
+SSE = \sum_{i = 1}^n \bigl(y_i - (\beta_0 + \beta_1 v_i + \beta_2 w_i + \beta_3 x_i)\bigr)^2
 \]
 
 The R function `lm` will do this for you. Let's look at some simulated data.
@@ -185,7 +185,7 @@ $\frac{1}{n - (K + 1)}\sum_{i = 1}^n \hat \epsilon^2$ is an unbiased estimator f
 
 We denote the estimator $\hat \sigma^2 = \frac{1}{n - (K + 1)}\sum_{i = 1}^n \hat \epsilon^2$.
 
-```{r}
+```{r, cache=TRUE}
 sim_data <- replicate(10000, {
   dd <- data.frame(x1s = x1s,
                  x2s = x2s,
@@ -223,7 +223,7 @@ curve(dchisq(x, 29), add = T, col = 2)
 
 We see that the variance estimate in this case is a $\chi^2$ random variable with 29 degrees of freedom. Now the cool part. What about the difference between the variance we computed both ways?? Again, let's assume that the null hypothesis is `TRUE`
 
-```{r}
+```{r, cache=TRUE}
 sim_data_3 <- replicate(10000, {
     dd <- data.frame(x1s = x1s,
                  x2s = x2s,
@@ -233,13 +233,13 @@ sim_data_3 <- replicate(10000, {
     sum((dd$ys - mean(dd$ys))^2)/29 * 29/100 -summary(lm(ys ~ ., data = dd))$sigma^2 * 26/100 
       
 })
-plot(density(-sim_data_3))
+plot(density(sim_data_3))
 curve(dchisq(x, 3), add = T, col = 2)
 ```
 
 Finally, we take the ratio, similar to the multiple R squared.
 
-```{r}
+```{r, cache=TRUE}
 sim_data_3 <- replicate(10000, {
     dd <- data.frame(x1s = x1s,
                  x2s = x2s,
@@ -257,9 +257,10 @@ We again summarize the above in the following theorem.
 ```{theorem}
 With the notation from this section,
 
-    a. $\frac{(n - 1)V(y)}{\sigma^2} - \frac{n - (K + 1)\hat \sigma^2}{\sigma^2} \sim \chi^2_K$.
+a. $\frac{(n - 1)V(y)}{\sigma^2} - \frac{n - (K + 1)\hat \sigma^2}{\sigma^2} \sim \chi^2_K$.
 
-    b. $F = \frac{\bigl((n - 1)V(y) - (n - (K + 1)) \hat \sigma^2\bigr)/K}{\bigl((n - (K + 1))\hat \sigma^2\bigr)/(n - (K + 1))} \sim F_{K, n - (K + 1)}$
+b. $F = \frac{\bigl((n - 1)V(y) - (n - (K + 1)) \hat \sigma^2\bigr)/K}{\bigl((n - (K + 1))\hat \sigma^2\bigr)/(n - (K + 1))} \sim F_{K, n - (K + 1)}$
+
 ```
 
 Note that **large** values of $F$ correspond to evidence **against** the null hypothesis and in favor of the alternative hypothesis. Therefore, we will compute $F$ and reject the null hypothesis in favor of the alternative if it is larger than `qf(.95, K, (n - (K + 1)))`. We can compute the $p$ value of `pf(F, K, n - (K + 1), lower.tail = FALSE)`. Let's see it in action.
@@ -291,15 +292,15 @@ For this exercise, use the data frame `dd` that we created in the previous code 
 
 #### Hint to Exercise
 
-    a. Build a model $y = \beta_0 + \beta_1 x_1 + \epsilon$, and estimate $\sigma^2$ based on this model. This estimate will play the role of $V(y)$ in the previous section. Think about how many parameters you are estimating to get an unbiased estimator. Call this estimator $\hat \sigma_1^2$.
+a. Build a model $y = \beta_0 + \beta_1 x_1 + \epsilon$, and estimate $\sigma^2$ based on this model. This estimate will play the role of $V(y)$ in the previous section. Think about how many parameters you are estimating to get an unbiased estimator. Call this estimator $\hat \sigma_1^2$.
     
-    b. Show that $(n - 2) \hat \sigma_1^2/\sigma^2$ is $\chi^2$ with $n -2$ degrees of freedom.
+b. Show that $(n - 2) \hat \sigma_1^2/\sigma^2$ is $\chi^2$ with $n -2$ degrees of freedom.
     
-    c. Use the same estimate for $\hat \sigma^2$ as we did above.
+c. Use the same estimate for $\hat \sigma^2$ as we did above.
     
-    d. Show that $\frac{\bigl(n - 2)\hat \sigma_1^2) - (n - (K + 1) \hat \sigma^2)\bigr)/2}{(n - (K + 1) \hat \sigma^2)/26} \sim F_{2, 26}$. 
+d. Show that $\frac{\bigl(n - 2)\hat \sigma_1^2) - (n - (K + 1) \hat \sigma^2)\bigr)/2}{(n - (K + 1) \hat \sigma^2)/26} \sim F_{2, 26}$. 
     
-    e. Use your result in d. to do the hypothesis test. If you do everything correctly, your $p$-value will be about 0.001258.
+e. Use your result in d. to do the hypothesis test. If you do everything correctly, your $p$-value will be about 0.001258.
 
 
 ## More Variable Selection: ANOVA
