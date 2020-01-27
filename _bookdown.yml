@@ -4,7 +4,9 @@
 #
 rmd_files: [
   "index.Rmd",
-  "01-classical_theory.Rmd"
+  "01-classical_theory.Rmd",
+  "02-multiple-regression.Rmd",
+  "solutions.Rmd"
   ]
 
 # Knit-then-Merge (KM) build renders each .Rmd file in its own session

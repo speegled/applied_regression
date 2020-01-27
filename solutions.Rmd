@@ -1,0 +1,88 @@
+# Solutions
+
+## Chapter 2 Solutions
+
+**Exercise 2.1**
+
+a. We have that $\overline{X}$ is normal with mean $\overline{\mu}$ and variance $\frac 1{25}\sum \sigma_i^2$, i.e. $\overline{X} \sim N(3, \sigma^2 = 2.2)$. 
+
+b. To confirm this via simulations:
+
+```{r}
+sim_data <- replicate(10000, {
+  x <- rnorm(5, 1:5, sqrt((1:5)^2))
+  mean(x)
+})
+mean(sim_data) #cf 3
+var(sim_data) #cf 2.2
+```
+
+```{r}
+plot(density(sim_data))
+curve(dnorm(x, 3, sqrt(2.2)), add = T, col = 2)
+```
+
+**Exercise 2.2**
+```{r}
+bp.obese <- ISwR::bp.obese
+sse <- function(beta) {
+  sum((bp.obese$bp - (beta[1] + beta[2] * bp.obese$obese))^2)
+}
+
+optim(par = c(0,0), fn = sse)
+```
+
+Our line of best fit is $y = 96.8 + 23 x$.  Confirm with `lm`:
+
+```{r}
+lm(bp ~ obese, data = bp.obese)
+```
+
+For part (b), either answer is OK. The data seems pretty good to me, but I can see where some people didn't think so. As long as you say why.
+
+**Exercise 2.3**
+
+a. Note that $\sum_{i = 1}^n \beta_0 = n\beta_0$. The solution is $\hat \beta_0 = \overline{y} - \overline{x}$.
+
+b. $\hat \beta_0$ is normal with mean $\beta_0$ and variance $\sigma^2/n$.
+
+c. Let's simulate.
+
+```{r}
+xs <- runif(20, 0, 10)
+sim_data <- replicate(10000, {
+  ys <- 2 + xs + rnorm(20, 0, 1)  
+  mean(ys) - mean(xs)
+})
+plot(density(sim_data))
+curve(dnorm(x, 2, 1/sqrt(20)), add = T, col = 2)
+```
+
+**Exercise 2.4**
+
+We have that 
+\[
+\frac{\hat \beta_1 - \beta_1}{\sqrt{nS^2/(n\sum x_i^2 - (\sum x_i)^2)}} \sim t_{n -2}
+\]
+So we compute.
+
+```{r}
+dd <- HistData::Galton
+mod <- lm(child ~ parent, data = dd)
+summary(mod)
+```
+
+The estimate for $S$ is given as 2.239, which we use. We compute the test statistic:
+
+```{r}
+(0.64629 - 1)/sqrt(2.239^2/(sum(dd$parent^2) - 1/928 * sum(dd$parent)^2))
+```
+The test statistic is -8.596837. We need to compute the likelihood of obtaining something that unlikely given that $H_0$ is true.
+
+
+```{r}
+pt(-8.596837, 926) * 2
+```
+
+With this $p$-value, we reject the null hypothesis. We conlcude that the slope is not 1. With more work, we can see that this means (roughly) that parents who are short or tall will tend to have children that are again short or tall, but less so than the parents.  Does not mean that eventually there will be little variation among heights of humans. Why or why not?
+
