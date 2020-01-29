@@ -124,7 +124,52 @@ summary(my.mod)
 
 A couple of things to notice: first, the p-value is 0.03195, which indicates that the variables *together* do have a statistically significant predictive value for `pemax`. However, looking at the list, no one variable seems necessary. The reason for this is that the $p$-values for each variable is testing what happens when we remove *only* that variable. So, for example, we can remove weight and not upset the model too much. Of course, since height is strongly correlated with weight, it may just be that height will serve as a proxy for weight in the event that weight is removed!
 
-### Aside on multiple R squared and ANOVA
+We start to eliminate variables that are not statistically significant in the model. We will begin with the other lung function data, for as long as we are allowed to continue to remove. The order chosen for removal is: tlc, frc,  rv, fev1.
+
+```{r}
+summary(lm(pemax~height+age+weight+sex+bmp+fev1+rv+frc, data = cystfibr))
+summary(lm(pemax~height+age+weight+sex+bmp+fev1+rv, data = cystfibr))
+summary(lm(pemax~height+age+weight+sex+bmp+fev1, data = cystfibr))
+summary(lm(pemax~height+age+weight+sex+bmp, data = cystfibr))
+```
+
+When removing variables in a stepwise manner such as above, it is important to consider adding variables back into the model. Since we have removed all of the lung function data one variable at a time, let's see whether the **group** of lung function data is significant as a whole. This serves as a sort of test as to whether we need to consider adding variables back in to the model.
+
+```{r}
+mod1 <- lm(pemax~., data = cystfibr)
+mod2 <- lm(pemax~height+age+weight+sex+bmp, data = cystfibr)
+anova(mod2, mod1)
+```
+Since the $p$-value is 0.4758, this is an indication that the group of variables is not significant as a whole, and we are at least somewhat justified in removing the group.
+
+
+Returning to variable selection, we see that age, height and sex don't seem important, so let's start removing.
+```{r}
+summary(lm(pemax~height+weight+sex+bmp, data = cystfibr))
+summary(lm(pemax~weight+sex+bmp, data = cystfibr))
+summary(lm(pemax~weight+bmp, data = cystfibr))
+```
+
+Again, we have removed a group of variables that are related, so let's see if the group as a whole is significant. If it were, then we would need to consider adding variables back in to our model.
+```{r}
+mod3 <- lm(pemax~weight+bmp, data = cystfibr)
+anova(mod3, mod2)
+```
+
+This indicates that we are justified in removing the age, weight and sex variables. And now, bmp also doesn't seem important. We are left with modeling pemax on weight, similar to what we had before. 
+
+
+```{exercise}
+Consider the data set `ISwR::secher`. Read about the data set by typing `?ISwR::secher`. We are interested in predicting birth weight on the other variables. 
+
+  a. Should any of the variables be removed immediately without doing any testing?
+  
+  b. Find a minimal meaningful model that explains birthweight in terms of other variable(s).   
+  
+  c. Check the residuals.
+```
+
+### Aside on multiple R squared and ANOVA {#anova}
 
 The Multiple R Squared value is 0.6373. This means that the model explains 63% of the variance of pemax. To better understand what that means, let's see how we could calculate it. First, we compute the total variance of `pemax`.
 
@@ -132,7 +177,7 @@ The Multiple R Squared value is 0.6373. This means that the model explains 63% o
 pemax_var <- var(cystfibr$pemax)
 ```
 
-Now, we compute the variance of the **residuals** of our model. We can think of the variance of the residuals as the variance in `pemax` that remains unexplained after taking into account the variables in our model.
+Now, we compute the variance of the **residuals** of our model. We can think of the variance of the residuals as the variance in `pemax` that remains unexplained after taking into account the variables in our model. Notice that we don't correct for the number of parameters we are estimating.
 
 ```{r}
 residuals_var <- var(my.mod$residuals)
@@ -144,11 +189,27 @@ So, the percentage of variance explained is:
 (pemax_var - residuals_var)/pemax_var
 ```
 
-```{exercise}
-In this exercise, you will see evidence that adding variables always increases the multiple R squared. Define `cystifbr$random <- rnorm(25)` and re-compute the Multiple R-squared. How does it compare to 0.6373354? You may need to compute it out to many digits to see a difference!
+
+
+What would have happened if we had used the variance adjusted for the number of parameters that we are estimating? 
+
+```{r}
+residuals_var_corrected <- 1/(25 - (9 + 1)) * sum(my.mod$residuals^2)
+(pemax_var - residuals_var_corrected)/pemax_var
 ```
 
-We said above that the variables **taken together** have a $p$-value of 0.03195. What does that mean, exactly?
+In this case, we get the **adjusted** $R^2$! Whoa! 
+
+```{exercise}
+In this exercise, you will see evidence that adding variables always increases the multiple R squared, but that adding noise to a model generally decreases the adjusted R squared. Define `cystifbr$random <- rnorm(25)`. 
+
+    a. Compute the Multiple R-squared when `pemax` is modeled on all of the predictors. How does it compare to 0.6373354? You may need to compute it out to many digits to see a difference! 
+      
+    b. Repeat for the adjusted R-squared. How does it compare to 0.4197366?
+
+```
+
+Moving on, we said above that the variables **taken together** have a $p$-value of 0.03195. What does that mean, exactly?
 
 Let's consider the case where we have three predictors and one response, to make things a bit simpler. Our null hypothesis would be that there is no linear association between the three predictors and the response. In other words, if our model is $y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \epsilon$, then the null hypothesis is that $\beta_1 = \beta_2 = \beta_3 = 0$, and the alternative hypothesis is that not all of them are zero. 
 
@@ -351,41 +412,7 @@ my.mod <- lm(pemax~., data = cystfibr)
 summary(my.mod)
 ```
 
-We start to eliminate variables that are not statistically significant in the model. We will begin with the other lung function data, for as long as we are allowed to continue to remove. The order chosen for removal is: tlc, frc,  rv, fev1.
-
-```{r}
-summary(lm(pemax~height+age+weight+sex+bmp+fev1+rv+frc, data = cystfibr))
-summary(lm(pemax~height+age+weight+sex+bmp+fev1+rv, data = cystfibr))
-summary(lm(pemax~height+age+weight+sex+bmp+fev1, data = cystfibr))
-summary(lm(pemax~height+age+weight+sex+bmp, data = cystfibr))
-```
-
-When removing variables in a stepwise manner such as above, it is important to consider adding variables back into the model. Since we have removed all of the lung function data one variable at a time, let's see whether the **group** of lung function data is significant as a whole. This serves as a sort of test as to whether we need to consider adding variables back in to the model.
-
-```{r}
-mod1 <- lm(pemax~., data = cystfibr)
-mod2 <- lm(pemax~height+age+weight+sex+bmp, data = cystfibr)
-anova(mod2, mod1)
-```
-Since the $p$-value is 0.4758, this is an indication that the group of variables is not significant as a whole, and we are at least somewhat justified in removing the group.
-
-
-Returning to variable selection, we see that age, height and sex don't seem important, so let's start removing.
-```{r}
-summary(lm(pemax~height+weight+sex+bmp, data = cystfibr))
-summary(lm(pemax~weight+sex+bmp, data = cystfibr))
-summary(lm(pemax~weight+bmp, data = cystfibr))
-```
-
-Again, we have removed a group of variables that are related, so let's see if the group as a whole is significant. If it were, then we would need to consider adding variables back in to our model.
-```{r}
-mod3 <- lm(pemax~weight+bmp, data = cystfibr)
-anova(mod3, mod2)
-```
-This indicates that we are justified in removing the age, weight and sex variables. And now, bmp also doesn't seem important. We are left with modeling pemax on weight, similar to what we had before. 
-
-
-Returning to the model of pemax on height, let's take a look at the residuals.
+Let's take a look at the residuals.
 
 
 ```{r}
@@ -395,32 +422,7 @@ abline(my.mod)
 plot(my.mod)
 ```
 
-It is hard to say, but there definitely could be a U-shape in the Residuals vs Fitted plot, which means there might be some lurking variables that we have not yet taken into account. One possibility is that pemax actually depends on height and height-sqaured, rather than height itself. Let's see what happens when we run the model:
 
-```{r}
-my.mod2 <- lm(pemax~height + I(height^2), data = cystfibr)
-summary(my.mod2)
-```
-
-Notice that in this case, both height and height^2 are significant. 
-
-**Aside**
-Let's pause and think a moment about what we are doing. If we assume that we are just exploring the data, then the process that has led us to considering modeling pemax as a function of height and height^2 is marginal. Considering that pemax seems to have larger variance for taller children, it is not hard to imagine that a linear relationship could look quadratic. We also have no a prioiri reason to think that pemax might depend on height^2. So, think of this as an illustration of what can be done and not necessarily an ideal analysis of the data. A couple of things that might be reasonable would be to either (1) contact the experts to see whether there is any reason that height^2 might be relevant, and (2) collect more data and see whether the relationship was an artifact of this data or whether it is recreated the second time around.
-**End of Aside**
-
-Let's check the residuals:
-
-```{r}
-plot(my.mod2)
-```
-
-Looks pretty good, except we seem to be violating constant variance. In particular, the variance seems to be higher for children with higher height/pemax values than for shorter children. Let's re-examine the plot of pemax vs height:
-
-```{r}
-ggplot(cystfibr, aes(x = height, y = pemax)) + geom_point()
-```
-
-This plot also seems to show that the variance of pemax depends on the height of the child.
 
 
 Let's look at another example. We use the `fuel2001` data from the `alr3` package. This is the package associated with the book *Applied Linear Regression*, by Sanford Weisberg. In some ways, I wish I could teach this class by following that book, but it requires more mathematical sophistication than a typical student from MATH/STAT 3850 could be expected to have. Let's first examine it and see what it contains. According to the help page, it is "Data on motor fuel consumption and related variables, for the year 2001. The unit is a state in the United States or the District of Columbia. Data are for 2001, unless noted." We are interested in understanding how the **per capita** fuel consumption is associated with the other variables, which are number of drivers, per capita income, miles of highway in state, miles driven per capita (est), population, and tax rate. It seems clear that the total number of drivers licenses isn't what we would want to use to predict per capita fuel consumption^[source needed]. It also seems unfair, perhaps, to use MPC, which is the estimated miles driven based, in part, on fuel consumption! So, let's make some changes.
@@ -457,4 +459,31 @@ Not exactly a straight line, but pretty close. This is telling us that there is 
 ```{r}
 plot(dd[,-6])
 ```
+
+## Exercises
+
+1. Consider the data set `ISwR::secher`. Read about the data set by typing `?ISwR::secher`. We are interested in predicting birth weight on the other variables. 
+
+    a. Should any of the variables be removed immediately without doing any testing?
+  
+    b. Find a minimal meaningful model that explains birthweight in terms of other variable(s).   
+  
+    c. Check the residuals.
+  
+    &nbsp;
+1. In this exercise, you will see evidence that adding variables always increases the multiple R squared. Define `cystifbr$random <- rnorm(25)` and re-compute the Multiple R-squared. How does it compare to 0.6373354? You may need to compute it out to many digits to see a difference!
+
+2. For this exercise, use the data frame `dd` that we created with the following code:
+```{r}
+set.seed(1262020)
+x1s <- runif(30, 0, 10)
+x2s <- runif(30, 0, 10)
+x3s <- runif(30, 0, 10)
+dd <- data.frame(x1s = x1s,
+                 x2s = x2s,
+                 x3s = x3s,
+                 ys = 1 + 2 * x1s + 3 * x2s + rnorm(30, 0, 10) 
+                 )
+```
+Suppose that we know that $\beta_1 \not= 0$, and we wish to test $H_0: \beta_2 = \beta_3 = 0$ versus $H_a$: at least one of $\beta_2$ and $\beta_3$ is not zero. Repeat the analysis in Section \@ref(anova), *mutatis mutandis*. The outline of what you need to do is given in the section.
 
