@@ -84,5 +84,5 @@ The test statistic is -8.596837. We need to compute the likelihood of obtaining 
 pt(-8.596837, 926) * 2
 ```
 
-With this $p$-value, we reject the null hypothesis. We conlcude that the slope is not 1. With more work, we can see that this means (roughly) that parents who are short or tall will tend to have children that are again short or tall, but less so than the parents.  Does not mean that eventually there will be little variation among heights of humans. Why or why not?
+With this $p$-value, we reject the null hypothesis. We conlcude that the slope is not 1. With more work, we can see that this means (roughly) that parents who are short or tall will tend to have children that are again short or tall, but less so than the parents.  Does that mean that eventually there will be little variation among heights of humans. Why or why not?
 

@@ -1,0 +1,221 @@
+# Intro to Predictive Modeling
+
+In Chapter \@ref(multiple_regression) we saw that it can be hard to decide how to predict future values from a regression model. The reason is that our model isn't constructed so as to efficiently predict future values, but rather for other goals. In this chapter, we focus on doing regression for predictions. 
+
+## Comparing Two Models
+
+Let's return to the `ISwR::cystfibr` data set. We imagine that we want to determine whether `height` or `weight` is a better predictor for `pemax`. 
+
+```{r echo=FALSE}
+library(tidyverse)
+```
+
+```{r}
+cystfibr <- ISwR::cystfibr
+```
+
+Our idea is that we want to split the data set into two parts. One of the parts is the **training** data, and the other part is the **testing** data. We are required to build our model 100% solely on the training data, and we will determine how will it can predict future values based on the testing data. As a first step, let's imagine that our training data consists of all of the data except for the 6th observation. The test data is then the data that is not in the training data, that is, the 6th observation.
+
+```{r}
+train_data <- cystfibr[-6,]
+test_data <- cystfibr[6,]
+```
+
+We build our two models (based on height or weight separately), and we compute the error when predicting the value in the test data.
+
+```{r}
+mod1 <- lm(pemax ~ height, data = train_data)
+mod2 <- lm(pemax ~ weight, data = train_data)
+predict(mod1, newdata = test_data) - test_data$pemax  #this is the error using model 1
+predict(mod2, newdata = test_data) - test_data$pemax #this is the error using model 2
+```
+
+We see that model 1 did a better job predicting the value of `pemax` in this case than model 2 did. Now, we repeat this for every observation. That is, for each observation, we remove it from the data set, train our model, and compute the error when predicting the new value. This is called **Leave one out cross validation** (LOOCV).
+
+Here are the details on how to do it in R.
+
+```{r}
+height_errors <- sapply(1:nrow(cystfibr), function(x){
+  train_data <- cystfibr[-x,]
+  test_data <- cystfibr[x,]
+  mod <- lm(pemax ~ height, data = train_data)
+  predict(mod, newdata = test_data) - test_data$pemax
+})
+height_errors
+```
+
+```{r}
+weight_errors <- sapply(1:nrow(cystfibr), function(x){
+  train_data <- cystfibr[-x,]
+  test_data <- cystfibr[x,]
+  mod <- lm(pemax ~ weight, data = train_data)
+  predict(mod, newdata = test_data) - test_data$pemax
+})
+weight_errors
+```
+
+Now we need to decide which errors are "smaller". A common measurement is the mean-sqaured error (MSE), or equivalently the root mean-squared error (RMSE). Let's use it.
+
+```{r}
+sqrt(mean(height_errors^2))
+sqrt(mean(weight_errors^2))
+```
+
+And we see that the MSE for using just weight is slighlty better than the MSE for using just height. 
+
+Next, let's get a common misconception out of the way. Many people who haven't worked with things like this before would think that it would be best to build the model on **all** of the variables. Let's do that and compute the RMSE.
+
+```{r}
+full_errors <- sapply(1:nrow(cystfibr), function(x){
+  train_data <- cystfibr[-x,]
+  test_data <- cystfibr[x,]
+  mod <- lm(pemax ~ ., data = train_data)
+  predict(mod, newdata = test_data) - test_data$pemax
+})
+sqrt(mean(full_errors^2))
+```
+
+We see that the RMSE is about 17% higher with the full model than it is with the model using just weight! One reason for this is the so-called bias-variance trade-off. The easiest version of this principle was observed in MATH 3850. Assume that $\hat \theta$ is an estimator for $\theta$ and $E[\hat \theta] = \theta_0$.
+
+\[
+E[(\hat \theta - \theta)^2] = MSE(\hat \theta) = V(\hat \theta) + Bias(\hat \theta)^2 = V(\hat \theta) + (E[\hat \theta] - \theta)^2
+\]
+
+It can be shown, for example, that $S^2 = \frac 1{n - 1} \sum_{i = 1}^n (y_i - \overline{y})^2$ is an unbiased estimator for $\sigma^2$, and that among all unbiased estimators for $\sigma^2$, $S^2$ as the **smallest variance**. However, we can **increase** the bias and the corresponding **decrease** in variance can lead to an estimator for $\sigma^2$ that has a lower MSE. 
+
+In the context of modeling, we have a different formulation of the bias-variance trade-off. Suppose that we are modeling an outcome $y$ that consists of independent noise about a curve with constant variance $\sigma^2$. (We can assume the curve is $y = 0$.) Suppose also that we use a model to estimate the outcome. We have that 
+
+\[
+E[MSE] = \sigma^2 + (\text{Model Bias})^2 + \text{Model Variance}
+\]
+
+We are never going to be able to get rid of the $\sigma^2$ part, because each time we draw new samples, the $\sigma^2$ is going to be there. However, we can trade-off between the model bias and the model variance. Often, we can reduce the bias by increasing the variance, or reduce the variance by increasing the bias in such a way that the overall expected value of the MSE decreases. Let's look at an example with simulated data to further understand what each component of the above means!
+
+Let's imagine that we take a sample of size 10 and we connect those points with line segments as our model. We imagine that the 10 $x$ values are **fixed** and do not change with subsequent data collection (which would change things up). 
+
+```{r}
+xs <- 1:10
+ys <- rnorm(10, 0, 2)
+dd <- data.frame(xs, ys)
+ggplot(dd, aes(xs, ys)) + 
+  geom_line()
+```
+This is our model. In order to compute the expected mean-squared error, we will need to sample data, build our model, create a new data point and compute the error squared, then find the expected value of that. For simplicity sake, we assume that the new data point falls on the $x$ value of 5. In that case, we don't need to compute anything else, the error is simply the difference between consecutive draws of normal random variables, which has variance $2^2 + 2^2 = 8$. However, we include the full code of the full simulation below.
+
+```{r}
+xs <- 1:10
+errs <- replicate(10000, {
+  ys <- rnorm(10, 0, 2)
+  new_x <- sample(1:10, 1)
+  new_y <- rnorm(1, 0, 2)
+  ys[new_x] - new_y
+})
+mean(errs^2) #this is our estimate of E[MSE]
+```
+
+Next, we estimate the bias.
+
+```{r}
+mean(errs) #our estimate of the bias
+```
+
+Next, we estimate the variance of the model. Here, we only look at the variance of the **estimated values**.
+
+```{r}
+est_values <- replicate(10000, {
+    ys <- rnorm(10, 0, 2)
+    new_x <- sample(1:10, 1)
+    ys[new_x]
+})
+var(est_values)
+```
+And we see that the MSE, which we estimate to be about 8, is the sum of the variance $\sigma^2 = 4$, the bias squared = 0, and the variance of the model itself, which is about 4. Hmmm, that one was maybe *too* easy in that it didn't illustrate all of the ideas. Let's try the one from the textbook, where they model $y = \sin(2\pi x) + \epsilon$ by splitting the x-values into two groups and approximating with a line. That'll be fun! 
+
+This time, we also assume that our $x$'s are chosen randomly. We also plot our estimate.
+
+```{r}
+xs <- runif(40, 0, 1)
+ys <- sin(2 * pi * xs) + rnorm(40, 0, .4)
+plot(xs, ys)
+new_f <- function(x) {
+  ifelse(x < 1/2, mean(ys[xs < 1/2]), mean(ys[xs >= 1/2]))
+}
+curve(new_f, add = T, col = 2)
+```
+OK, the variance that we can't remove from this model is $.4^2 = 0.16$. Now, we estimate the MSE at several $x$ values, as per above.
+
+```{r cache=TRUE}
+mses <- sapply(seq(0, 1, length.out = 20), function(x1) {
+  errors <- replicate(10000, {
+    xs <- runif(40, 0, 1)
+    ys <- sin(2 * pi * xs) + rnorm(40, 0, .4)
+    y1 <- mean(ys[xs < 1/2])
+    y2 <- mean(ys[xs >= 1/2])
+    new_x <-  x1
+    new_y <- sin(2 * pi * new_x) + rnorm(1, 0, .4)
+    ifelse(new_x < 1/2, y1 - new_y, y2 - new_y)
+  })
+  mean(errors^2)
+})
+mses
+```
+We definitely see that the MSE depends on the $x$ value! What we then do is integrate that out to see what we get. This looks like a Rieman sum with $\delta x = 2\pi/20$. So, the integral would be about
+
+```{r}
+sum(mses /20)
+```
+
+Cool. That is our estimate of the MSE associated with the model. Now we estimate the **variance** using the same technique.
+
+```{r, cache = TRUE}
+vars <- sapply(seq(0, 1, length.out = 20), function(x1) {
+  errors <- replicate(10000, {
+    xs <- runif(40, 0, 1)
+    ys <- sin(2 * pi * xs) + rnorm(40, 0, .4)
+    y1 <- mean(ys[xs < 1/2])
+    y2 <- mean(ys[xs >= 1/2])
+    new_x <-  x1
+    ifelse(new_x < 1/2, y1, y2)
+  })
+  var(errors)
+})
+vars
+```
+These seem not to depend nearly as much on $x$, which is what should be expected! Our integral of this is about
+
+```{r}
+sum(vars/20)
+```
+
+Let's look at the bias squared. 
+
+```{r}
+biases <- sapply(seq(0, 1, length.out = 20), function(x1) {
+  errors <- replicate(10000, {
+    xs <- runif(40, 0, 1)
+    ys <- sin(2 * pi * xs) + rnorm(40, 0, .4)
+    y1 <- mean(ys[xs < 1/2])
+    y2 <- mean(ys[xs >= 1/2])
+    new_x <-  x1
+    new_y <- sin(2 * pi * new_x) + rnorm(1, 0, .4)
+    ifelse(new_x < 1/2, y1 - new_y, y2 - new_y)
+  })
+  mean(errors)
+})
+biases
+```
+
+OK, and the integral of the biases squared is about
+```{r}
+sum(biases^2/20)
+```
+
+Here is the moment of truth! 
+
+```{r}
+sum(mses/20)
+.4^2 + sum(vars/20) + sum(biases^2/20)
+```
+Woo-hoo!
+
+

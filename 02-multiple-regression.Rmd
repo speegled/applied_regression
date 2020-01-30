@@ -1,4 +1,4 @@
-# Multiple Linear Regression
+# Multiple Linear Regression {#multiple_regression}
 
 In this chapter we consider the case where we have one response variable $y$ and multiple predictor variables $x_1, \ldots, x_K$. Our model is
 \[
@@ -422,43 +422,35 @@ abline(my.mod)
 plot(my.mod)
 ```
 
+## Predictions
 
+Let's return to the `cystfibr` data set and consider predictions. Suppose that a new patient presents, and we measure all of their data except `pemax`, and we want to predict their `pemax`. 
 
-
-Let's look at another example. We use the `fuel2001` data from the `alr3` package. This is the package associated with the book *Applied Linear Regression*, by Sanford Weisberg. In some ways, I wish I could teach this class by following that book, but it requires more mathematical sophistication than a typical student from MATH/STAT 3850 could be expected to have. Let's first examine it and see what it contains. According to the help page, it is "Data on motor fuel consumption and related variables, for the year 2001. The unit is a state in the United States or the District of Columbia. Data are for 2001, unless noted." We are interested in understanding how the **per capita** fuel consumption is associated with the other variables, which are number of drivers, per capita income, miles of highway in state, miles driven per capita (est), population, and tax rate. It seems clear that the total number of drivers licenses isn't what we would want to use to predict per capita fuel consumption^[source needed]. It also seems unfair, perhaps, to use MPC, which is the estimated miles driven based, in part, on fuel consumption! So, let's make some changes.
-
-```{r warning=FALSE, message=FALSE}
-library(tidyverse)
-dd <- alr3::fuel2001
-dd <- mutate(dd, Drivers = Drivers/Pop, FuelC = FuelC/Pop)
-dd <- select(dd, -MPC)
-summary(dd)
+```{r echo=FALSE}
+set.seed(1282020)
+new_patient <- cystfibr[sample(1:25, 1),]
+sds <- sapply(3:10, function(x) sd(cystfibr[,x]))
+new_patient[, 3:10] <- round(new_patient[,3:10] + rnorm(8, 0, sds/2), 1)
+new_patient
 ```
 
-Let's start by examining the correlation between the variables. 
-
-
+We can take our final model of `pemax` described by `weight` and use that.
 
 ```{r}
-cor(dd)
+mod <- lm(pemax ~ weight, data = cystfibr)
+predict(mod, newdata = new_patient, interval = "predict")
 ```
+We have an estimate of 146 with a range of possible values from 87 to 205.
 
-Let's look at the summary data now.
+What if we had used height?
 
 ```{r}
-summary(dd)
+mod2 <- lm(pemax ~ height, data = cystfibr)
+predict(mod2, newdata = new_patient, interval = "predict")
 ```
+What? This gives us a very different answer! This gives us 116 with a range from 59 to 174. We have kind of said above that from a modeling point of view, it is hard to pick one model over the other. But from a **predictive** point of view, they are giving us very different answers. How can we decide which one is better at predicting future values? That is the topic of the next chapter!
 
 
-```{r}
-ggplot(dd, aes(Pop, Drivers)) + geom_point()
-```
-
-Not exactly a straight line, but pretty close. This is telling us that there is a very closer to linear relationship between drivers and population, and they are going to provide *very* similar predictive ability for fuel consumption. So, we are going to remove one of them; let's get rid of population.
-
-```{r}
-plot(dd[,-6])
-```
 
 ## Exercises
 
@@ -471,8 +463,13 @@ plot(dd[,-6])
     c. Check the residuals.
   
     &nbsp;
-1. In this exercise, you will see evidence that adding variables always increases the multiple R squared. Define `cystifbr$random <- rnorm(25)` and re-compute the Multiple R-squared. How does it compare to 0.6373354? You may need to compute it out to many digits to see a difference!
+1. In this exercise, you will see evidence that adding variables always increases the multiple R squared, but that adding noise to a model generally decreases the adjusted R squared. Consider the `cystfibr` data set from the section. Define `cystifbr$random <- rnorm(25)`. 
 
+    a. Compute the Multiple R-squared when `pemax` is modeled on all of the predictors. How does it compare to 0.6373354? You may need to compute it out to many digits to see a difference! 
+      
+    b. Repeat for the adjusted R-squared. How does it compare to 0.4197366?
+
+    &nbsp;
 2. For this exercise, use the data frame `dd` that we created with the following code:
 ```{r}
 set.seed(1262020)
