@@ -142,56 +142,57 @@ new_f <- function(x) {
 }
 curve(new_f, add = T, col = 2)
 ```
-OK, the variance that we can't remove from this model is $.4^2 = 0.16$. Now, we estimate the MSE at several $x$ values, as per above.
+
+OK, the variance that we can't remove from this model is $.4^2 = 0.16$. Now, we estimate the expected value of the MSE by picking a bunch of $x$ values, estimating the expected MSE for that $x$ value, and integrating over all of the $x$ values. 
 
 ```{r cache=TRUE}
-mses <- sapply(seq(0, 1, length.out = 20), function(x1) {
-  errors <- replicate(10000, {
-    xs <- runif(40, 0, 1)
-    ys <- sin(2 * pi * xs) + rnorm(40, 0, .4)
-    y1 <- mean(ys[xs < 1/2])
-    y2 <- mean(ys[xs >= 1/2])
-    new_x <-  x1
-    new_y <- sin(2 * pi * new_x) + rnorm(1, 0, .4)
-    ifelse(new_x < 1/2, y1 - new_y, y2 - new_y)
-  })
-  mean(errors^2)
+x_vals <- seq(0, 1, length.out = 200)
+for_mse <- sapply(x_vals, function(x1) {errors <- replicate(1000, {
+  xs <- runif(40, 0, 1)
+  ys <- sin(2 * pi * xs) + rnorm(40, 0, .4)
+  y1 <- mean(ys[xs < 1/2])
+  y2 <- mean(ys[xs >= 1/2])
+  new_x <-  x1
+  new_y <- sin(2*pi*new_x) + rnorm(40, 0, .4)
+  ifelse(new_x < 1/2, new_y - y1, new_y - y2)
 })
-mses
+mean(errors^2)
+})
+head(for_mse)
 ```
-We definitely see that the MSE depends on the $x$ value! What we then do is integrate that out to see what we get. This looks like a Rieman sum with $\delta x = 2\pi/20$. So, the integral would be about
+
+We see that the expected MSE is larger when the value of $sin(2 \pi x)$ is close to 0; that is, when $x$ is close to 0. Now, we just take the average MSE, and that is our estimate for the overall expected MSE of the model.
 
 ```{r}
-sum(mses /20)
+mean(for_mse)
 ```
 
 Cool. That is our estimate of the MSE associated with the model. Now we estimate the **variance** using the same technique.
 
 ```{r, cache = TRUE}
-vars <- sapply(seq(0, 1, length.out = 20), function(x1) {
-  errors <- replicate(10000, {
+for_variance <- sapply(x_vals, function(x1) {errors <- replicate(1000, {
     xs <- runif(40, 0, 1)
     ys <- sin(2 * pi * xs) + rnorm(40, 0, .4)
     y1 <- mean(ys[xs < 1/2])
     y2 <- mean(ys[xs >= 1/2])
     new_x <-  x1
     ifelse(new_x < 1/2, y1, y2)
-  })
-  var(errors)
 })
-vars
+var(errors)
+})
+head(for_variance)
 ```
 These seem not to depend nearly as much on $x$, which is what should be expected! Our integral of this is about
 
 ```{r}
-sum(vars/20)
+mean(for_variance)
 ```
 
 Let's look at the bias squared. 
 
 ```{r}
-biases <- sapply(seq(0, 1, length.out = 20), function(x1) {
-  errors <- replicate(10000, {
+biases <- sapply(seq(0, 1, length.out = 200), function(x1) {
+  errors <- replicate(1000, {
     xs <- runif(40, 0, 1)
     ys <- sin(2 * pi * xs) + rnorm(40, 0, .4)
     y1 <- mean(ys[xs < 1/2])
@@ -202,19 +203,19 @@ biases <- sapply(seq(0, 1, length.out = 20), function(x1) {
   })
   mean(errors)
 })
-biases
+head(biases)
 ```
 
 OK, and the integral of the biases squared is about
 ```{r}
-sum(biases^2/20)
+sum(biases^2/100)
 ```
 
 Here is the moment of truth! 
 
 ```{r}
-sum(mses/20)
-.4^2 + sum(vars/20) + sum(biases^2/20)
+mean(for_mse)
+.4^2 + mean(for_variance) + mean(biases^2)
 ```
 Woo-hoo!
 
