@@ -6,7 +6,7 @@ In Chapter \@ref(multiple_regression) we saw that it can be hard to decide how t
 
 Let's return to the `ISwR::cystfibr` data set. We imagine that we want to determine whether `height` or `weight` is a better predictor for `pemax`. 
 
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE,message=FALSE}
 library(tidyverse)
 ```
 
@@ -75,13 +75,129 @@ full_errors <- sapply(1:nrow(cystfibr), function(x){
 sqrt(mean(full_errors^2))
 ```
 
-We see that the RMSE is about 17% higher with the full model than it is with the model using just weight! One reason for this is the so-called bias-variance trade-off. The easiest version of this principle was observed in MATH 3850. Assume that $\hat \theta$ is an estimator for $\theta$ and $E[\hat \theta] = \theta_0$.
+We see that the RMSE is about 17% higher with the full model than it is with the model using just weight! 
+
+```{exercise}
+The aim of this exercise is to illustrate the difference between using $p$-values for determining whether to select variables, and using estimates of MSE. 
+
+    a. Find the LOOCV estimate for the MSE when estimating `pemax` via `weight + bmp + fev1 + rv`, and compare to just using `weight`.
+    
+    b. Use `lm` to model `pemax ~ weight + bmp + fev1 + rv` and observe that `rv` is the only non-significant variable. Remove it, and estimate the MSE via LOOCV again. Did removing `rv` improve the estimate of MSE?
+```
+
+LOOCV works well for small data sets such as `cystfibr`, but can become unwieldy when the data set is large and the method of estimation is involved. For each model that we want to test, we would need to build it $n-1$ times, where $n$ is the number of observations. Let's examine a couple of alternatives for when LOOCV takes too long. 
+
+We can also use LGOCV, which stands for leave group out cross validation. As you might guess, this means that instead of leaving one observation out and building the model, we leave a group of observations out. Within this paradigm, there are several ways to proceed. 
+
+1. We could randomly select 70% to leave in, and leave 30% out, and estimate the MSE based on this split. 
+
+2. We could repeatedly select 70% to leave in, estimate the MSE based on the 30% left out each time, and take the average.
+
+3. We could split the data into $k$ groups, and estimate the MSE based on leaving out each of the groups separately, and take the average.
+
+4. We could repeatedly split the data into $k$ groups, and estimate the MSE based on leaving out each of the groups separately, and take the average. Then take the average of the averages.
+
+5. We could **bootstrap** resample from the data set. A bootstrap resample is one that resamples observations from a data set **with replacement**. So, the same observation can appear multiple times in the resampled version. In this case, generally about 38% of the observations do not appear in the resampled version (so-called out of bag), and they can be used to estimate the error of estimation. 
+
+Let's look at how to implement these in R. We will use the `insurance` data set that is available on the course web page.
+
+```{r warning=FALSE,message=FALSE}
+dd <- read.csv("data/insurance.csv")
+summary(dd)
+```
+
+The first think that I notice is that the expenses look right skew. Let's plot a histogram.
+
+```{r}
+hist(dd$expenses)
+```
+
+And we can compute the skewness of the data via
+
+```{r}
+e1071::skewness(dd$expenses)
+```
+That is moderately skew; about like an exponential rv. 
+
+```{r}
+e1071::skewness(log(dd$expenses))
+```
+Yep. It might be worth taking the log of expenses and modeling that instead, but I will leave that as an exercise. 
+
+If we want to do repeated 70/30 splits, then that is perhaps easiest to do by hand.
+
+```{r}
+N <- nrow(dd)
+train_indices <- sample(1:N,ceiling(N * .7))
+test_indices <- setdiff((1:N), train_indices)
+mod <- lm(expenses ~ ., data = dd)
+errors <- predict(mod, newdata = dd[test_indices,]) - dd$expenses[test_indices]
+sqrt(mean(errors^2))
+```
+
+We see that with the first train/test split, we have an estimated RMSE of `r round(sqrt(mean(errors^2)))`. (For comparison purposes, if we simply took the mean value, then the RMSE would be about \$12K).
+
+Now, we can repeat the train/test split a bunch of times... say 50. If our model building procedure were slower than this, we might not be able to do 50.
+
+```{r}
+rmse <- replicate(50, {
+  train_indices <- sample(1:N,ceiling(N * .7))
+  test_indices <- setdiff((1:N), train_indices)
+  mod <- lm(expenses ~ ., data = dd)
+  errors <- predict(mod, newdata = dd[test_indices,]) - dd$expenses[test_indices]
+  sqrt(mean(errors^2))
+})
+```
+
+Once we have these values, we can compute the mean and standard deviation to get a feeling for the **range** of MSE that we would expect to get with this model.
+
+```{r}
+mean(rmse)
+quantile(rmse, c(.025, .975))
+c(mean(rmse) - 2 * sd(rmse), mean(rmse) + 2 * sd(rmse))
+```
+
+We can either compute the 95% confidence interval of the RMSE from the quantiles or by taking two times the standard deviation. This is saying that we would be surprised if the true RMSE of this model on unseen, future data is less than \$5500 or more than \$6500
+
+
+```{exercise}
+Consider the `insurance` data set. Estimate the RMSE with error bounds when modeling expenses on the other variables after taking the log of expenses. Note that we will still want to get the RMSE of the estimate for **expenses**, not the log of expenses. Compare your answer to what we achieved in the previous example.
+```
+
+We could also do this for repeated $k$-fold CV, but let's instead start using the `caret` function `train`. The `train` function is a powerful tool that allows us to train many types of models with different types of cross validation. This example is about as simple of an example as we can do.
+
+```{r, messsage=FALSE,warning=FALSE}
+library(caret)
+repeated_cv <- train(x = select(dd, -expenses), 
+      y = dd$expenses,
+      method = "lm",
+      trControl = trainControl(method = "repeatedcv",
+                               repeats = 5))
+repeated_cv$results
+```
+
+From this table, we see that the repeated 10-fold CV estimated RMSE is 6073 with standard deviation 368. Recall that using repeated LGOCV, we got an estimated RMSE of `r round(mean(rmse))` and a standard deviation of `r round(sd(rmse))`. 
+
+Finally, let's see what happens with the bootstrap, which is the default in `caret` for `lm`.
+
+```{r}
+boot_rmse <- train(x = select(dd, -expenses), 
+      y = dd$expenses,
+      method = "lm")
+boot_rmse$results
+```
+
+All three methods give relatively similar results in this case. We can guess that our RMSE on future, unseen data will be about $\$6100 \pm \$600$. 
+
+## Bias Variance Trade-off
+
+One reason that the full model of `pemax ~ .` in `cystfibr` does worse than just `pemax ~ weight` or `pemax ~ height` is the so-called bias-variance trade-off. The easiest version of this principle was observed in MATH 3850. Assume that $\hat \theta$ is an estimator for $\theta$ and $E[\hat \theta] = \theta_0$.
 
 \[
 E[(\hat \theta - \theta)^2] = MSE(\hat \theta) = V(\hat \theta) + Bias(\hat \theta)^2 = V(\hat \theta) + (E[\hat \theta] - \theta)^2
 \]
 
-It can be shown, for example, that $S^2 = \frac 1{n - 1} \sum_{i = 1}^n (y_i - \overline{y})^2$ is an unbiased estimator for $\sigma^2$, and that among all unbiased estimators for $\sigma^2$, $S^2$ as the **smallest variance**. However, we can **increase** the bias and the corresponding **decrease** in variance can lead to an estimator for $\sigma^2$ that has a lower MSE. 
+It can be shown, for example, that $S^2 = \frac 1{n - 1} \sum_{i = 1}^n (y_i - \overline{y})^2$ is an unbiased estimator for $\sigma^2$, and that among all unbiased estimators for $\sigma^2$, $S^2$ as the **smallest variance**. However, we can **increase** the bias and the corresponding **decrease** in variance can lead to an estimator for $\sigma^2$ that has a lower MSE. In this case, we can show that $\frac 1n \sum_{i = 1}^n \bigl(y_i - \overline{y}\bigr)^2 = \frac {n-1}{n} S^2$ has lower MSE than $S^2$ does.
 
 In the context of modeling, we have a different formulation of the bias-variance trade-off. Suppose that we are modeling an outcome $y$ that consists of independent noise about a curve with constant variance $\sigma^2$. (We can assume the curve is $y = 0$.) Suppose also that we use a model to estimate the outcome. We have that 
 
@@ -146,7 +262,7 @@ curve(new_f, add = T, col = 2)
 OK, the variance that we can't remove from this model is $.4^2 = 0.16$. Now, we estimate the expected value of the MSE by picking a bunch of $x$ values, estimating the expected MSE for that $x$ value, and integrating over all of the $x$ values. 
 
 ```{r cache=TRUE}
-x_vals <- seq(0, 1, length.out = 200)
+x_vals <- seq(0, 1, length.out = 300)
 for_mse <- sapply(x_vals, function(x1) {errors <- replicate(1000, {
   xs <- runif(40, 0, 1)
   ys <- sin(2 * pi * xs) + rnorm(40, 0, .4)
@@ -191,7 +307,7 @@ mean(for_variance)
 Let's look at the bias squared. 
 
 ```{r}
-biases <- sapply(seq(0, 1, length.out = 200), function(x1) {
+biases <- sapply(seq(0, 1, length.out = 300), function(x1) {
   errors <- replicate(1000, {
     xs <- runif(40, 0, 1)
     ys <- sin(2 * pi * xs) + rnorm(40, 0, .4)
@@ -217,6 +333,16 @@ Here is the moment of truth!
 mean(for_mse)
 .4^2 + mean(for_variance) + mean(biases^2)
 ```
-Woo-hoo!
+Woo-hoo! Those seem to match! I wasn't sure when I was doing the simulations with smaller samples, so I kept making them bigger and now I am convinced. This also helps me understand what the *model variance* and *model bias* refer to, though in this case the model variance is constant across all of the values of $x$. 
+
+
+```{exercise}
+Verify the bias-variance trade-off formula through simulations when the signal is $y = \sin(2 \pi x) + \epsilon$, where $\epsilon \sim N(0, \sigma = .4)$, and the model is obtained by the following procedure. (Note that this is the same procedure as above, but we have replaced 1/2 by 3/4). 
+
+    a. If $x < 3/4$, then $y$ is the mean of all of the $y$ values associated with $x$ values that are less than 3/4.
+    
+    b. If $x \ge 3/4$, then $y$ is the mean of all of the $y$ values associated with $x$ values that are greater than or equal to 3/4. 
+    
+```
 
 

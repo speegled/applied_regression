@@ -6,6 +6,7 @@ rmd_files: [
   "index.Rmd",
   "01-classical_theory.Rmd",
   "02-multiple-regression.Rmd",
+  "03-predictive-modeling.Rmd",
   "solutions.Rmd"
   ]
 

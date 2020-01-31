@@ -5,3 +5,4 @@ _bookdown_files/*
 .R*
 _main.*
 *.xls
+data/*.txt
