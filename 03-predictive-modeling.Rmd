@@ -189,6 +189,163 @@ boot_rmse$results
 
 All three methods give relatively similar results in this case. We can guess that our RMSE on future, unseen data will be about $\$6100 \pm \$600$. 
 
+## Simulations of Expected MSE
+
+In the previous section, we saw several methods for estimating the MSE or RMSE for models. One question that you may have is: which method should I be using? If we want to get error bounds for our estimate of RMSE, then we will need to use one that is repeated, but that still leaves repeated LGOCV, repeated $k$-vold CV, and repeated bootstrap. The type of model we are building can have an impact on our choice: if the model doesn't handle data that is repeated well, then bootstrapping would not be a good choice, for example. If model accuracy is highly sensitive to sample size, then LGOCV might not be a good choice, as the model is built on data roughly 70-80% of the size of the original data set.
+
+In this section, though, we will thouroughly examine the estimates for MSE in the case of a simple linear model $y = 1 + 2x + \epsilon$, where $\epsilon \sim N(0, \sigma = 3)$. We suppose that we have data $\{(x_1, y_1), \ldots, (x_N, y_N)\}$, and that future $x$ values are generated through a random process with pdf $f$. It can be shown that the expected MSE of the model is given by
+\[
+\sigma^2 + \sigma^2/N + \sigma^2 \int \frac{(x - \overline{x})^2}{S_{xx}} f(x)\, dx
+\]
+where $S_{xx} = \sum_{i = 1}^N (x_i - \overline{x})^2$. In the special case that the original $x_i$ are uniformly sampled from 0 to $M$ (ie `seq(0, M, length.out = N)` and new $x$ values are chosen uniformly over the interval $[0, M]$ we get an expected MSE of 
+\[
+\sigma^2\bigl(1 + 1/N + \frac{M^2}{12 S_{xx}}\bigr)
+\]
+Let's make a computation when $N = 20$ and $M = 10$ in our model where $\sigma^2 = 9$.
+
+```{r}
+sigma <- 3
+N <- 20
+minx <- 0
+maxx <- 10
+xs <- seq(minx, maxx, length.out = N)
+sxx <- sum((xs - mean(xs))^2)
+mse_real <- sigma^2 * (1  + 1/N + maxx^2/12/sxx)
+mse_real
+```
+
+We see that the **true** expected MSE from building a model like this is `r round(mse_real, 3)`. Since we are going to be doing simulation in this section, let's convince ourselves that we can simulate this value correctly.
+
+```{r, cache=TRUE}
+mean_x <- mean(xs)
+sxx <- sum((xs - mean_x)^2)
+mse_sim <- replicate(40000, {
+  ys <- 1 + 2 * xs + rnorm(N, 0, sigma)
+  dd <- data.frame(xs, ys)
+  sxy <- sum((dd$xs - mean_x) * dd$ys)
+  coeffs_2 <- sxy/sxx
+  coeffs_1 <- mean(dd$ys) - coeffs_2 * mean_x
+  x_star <- runif(1, minx, maxx)
+  y_star <- 1 + 2 * x_star + rnorm(1, 0, 3)
+  (coeffs_1 + coeffs_2 * x_star - y_star)^2
+})
+mean(mse_sim)
+mse_real
+```
+
+If you run the above code a few times, you should see that the estimate value through simulation is close to the true value we computed above.  To be clear, we could have done the following to get `coeffs_1` and `coeffs_2`, but we want to resample a bunch and the way done above is much faster, and gets the same answer as illustrated below:
+
+```{r}
+ys <- 1 + 2 * xs + rnorm(N, 0, sigma)
+dd <- data.frame(xs, ys)
+sxy <- sum((dd$xs - mean_x) * dd$ys)
+coeffs_2 <- sxy/sxx
+coeffs_1 <- mean(dd$ys) - coeffs_2 * mean_x
+lm(ys ~ xs, data = dd)
+coeffs_1
+coeffs_2
+```
+
+
+Now let's look at estimating the MSE using bootstrapping. We are assuming that the `xs` are fixed here, and the random part is generating the `ys`. I will again compute the coefficients from the formulas rather than using `lm` because it is so much faster. 
+
+```{r}
+ys <- 1 + 2 * xs + rnorm(N, 0, sigma)
+dd <- data.frame(xs, ys)
+train_indices <- sample(1:N, replace = TRUE)
+train <- dd[train_indices,]
+test <- dd[-train_indices,]
+sxx <- sum((train$xs - mean(train$xs))^2)
+sxy <- sum((train$xs - mean(train$xs)) * train$ys)
+coeffs_2 <- sxy/sxx
+coeffs_1 <- mean(train$ys) - coeffs_2 * mean(train$xs)
+x_star <- test$xs
+mean((coeffs_1 + coeffs_2 * x_star - test$ys)^2)
+```
+
+Our estimate of the MSE based on this one bootstrap resample is `r round(mean((coeffs_1 + coeffs_2 * x_star - test$ys)^2), 3)`. 
+
+Now, we would do this about 100 times in order to estimate the MSE of any one model.
+
+```{r,cache=TRUE}
+boot_mse <- replicate(100, {
+  ys <- 1 + 2 * xs + rnorm(N, 0, sigma)
+  dd <- data.frame(xs, ys)
+  train_indices <- sample(1:N, replace = TRUE)
+  train <- dd[train_indices,]
+  test <- dd[-train_indices,]
+  sxx <- sum((train$xs - mean(train$xs))^2)
+  sxy <- sum((train$xs - mean(train$xs)) * train$ys)
+  coeffs_2 <- sxy/sxx
+  coeffs_1 <- mean(train$ys) - coeffs_2 * mean(train$xs)
+  x_star <- test$xs
+  mean((coeffs_1 + coeffs_2 * x_star - test$ys)^2)
+})
+mean(boot_mse)
+```
+
+To see how well our estimate is working, we need to repeat **this** many times!
+
+```{r, cache=TRUE}
+boot_data <- replicate(100, {
+  boot_mse <- replicate(100, {
+    ys <- 1 + 2 * xs + rnorm(N, 0, sigma)
+    dd <- data.frame(xs, ys)
+    train_indices <- sample(1:N, replace = TRUE)
+    train <- dd[train_indices,]
+    test <- dd[-train_indices,]
+    sxx <- sum((train$xs - mean(train$xs))^2)
+    sxy <- sum((train$xs - mean(train$xs)) * train$ys)
+    coeffs_2 <- sxy/sxx
+    coeffs_1 <- mean(train$ys) - coeffs_2 * mean(train$xs)
+    x_star <- test$xs
+    mean((coeffs_1 + coeffs_2 * x_star - test$ys)^2)
+  })
+  mean(boot_mse)
+})
+mean(boot_data)
+sd(boot_data)
+mse_real
+```
+
+In this case, the bootstrapping method tends to overestimate the true MSE.
+
+Now, let's look at repeated $10$-fold CV using the `caret` package. As a reminder, here is how we do it.
+
+```{r message=FALSE, warning=FALSE}
+library(caret)
+tt <- caret::train(ys ~ xs, 
+                   data = dd, 
+                   method = "lm", 
+                   trControl = trainControl(method = "repeatedcv",
+                                            repeats = 5))
+tt$results$RMSE^2
+```
+
+Let's replicate this and see what the mean is.
+
+```{r, cache=TRUE}
+cv_data <- replicate(100, {
+  ys <- 1 + 2 * xs + rnorm(N, 0, sigma)
+  dd$ys <- ys
+  tt <- caret::train(ys ~ xs, 
+                   data = dd, 
+                   method = "lm", 
+                   trControl = trainControl(method = "repeatedcv",
+                                            repeats = 5))
+  tt$results$RMSE^2
+})
+mean(cv_data)
+sd(cv_data)
+mse_real
+```
+
+Here, we see that 10-fold repeated CV tends to underestimate the true MSE, and the standard deviation of the estimator is quite high to boot. This indicates that, for this particular problem, bootstrapping seems to be the better way to go. 
+
+```{exercise}
+Use simulation to compute the expected value of the estimator for MSE when using LGOCV with 70% in group and 30% out of group in the above scenarios. How does it compare to the other two techniques?
+```
+
 ## Bias Variance Trade-off
 
 One reason that the full model of `pemax ~ .` in `cystfibr` does worse than just `pemax ~ weight` or `pemax ~ height` is the so-called bias-variance trade-off. The easiest version of this principle was observed in MATH 3850. Assume that $\hat \theta$ is an estimator for $\theta$ and $E[\hat \theta] = \theta_0$.
@@ -218,7 +375,7 @@ ggplot(dd, aes(xs, ys)) +
 ```
 This is our model. In order to compute the expected mean-squared error, we will need to sample data, build our model, create a new data point and compute the error squared, then find the expected value of that. For simplicity sake, we assume that the new data point falls on the $x$ value of 5. In that case, we don't need to compute anything else, the error is simply the difference between consecutive draws of normal random variables, which has variance $2^2 + 2^2 = 8$. However, we include the full code of the full simulation below.
 
-```{r}
+```{r, cache=TRUE}
 xs <- 1:10
 errs <- replicate(10000, {
   ys <- rnorm(10, 0, 2)
@@ -237,7 +394,7 @@ mean(errs) #our estimate of the bias
 
 Next, we estimate the variance of the model. Here, we only look at the variance of the **estimated values**.
 
-```{r}
+```{r, cache=TRUE}
 est_values <- replicate(10000, {
     ys <- rnorm(10, 0, 2)
     new_x <- sample(1:10, 1)
@@ -306,7 +463,7 @@ mean(for_variance)
 
 Let's look at the bias squared. 
 
-```{r}
+```{r, cache=TRUE}
 biases <- sapply(seq(0, 1, length.out = 300), function(x1) {
   errors <- replicate(1000, {
     xs <- runif(40, 0, 1)
