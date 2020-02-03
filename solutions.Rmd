@@ -86,3 +86,57 @@ pt(-8.596837, 926) * 2
 
 With this $p$-value, we reject the null hypothesis. We conlcude that the slope is not 1. With more work, we can see that this means (roughly) that parents who are short or tall will tend to have children that are again short or tall, but less so than the parents.  Does that mean that eventually there will be little variation among heights of humans. Why or why not?
 
+**Exercise 2.5**
+
+a. An unbiased estimator for $S^2$ is 
+\[
+\frac{1}{n-1} \sum_{ i = 1}^n \bigl(y_i - \hat\beta_0 - x_i\bigr)^2
+\]
+
+b. Standard normal.
+
+c. $t$ with $n-1$ degrees of freedom.
+
+d. 
+```{r, eval=FALSE}
+dd <- read.csv("https://stat.slu.edu/~speegle/Spring2020/4870/data/problem_2_5.csv")
+```
+
+```{r, echo=FALSE}
+dd <- read.csv("data/problem_2_5.csv")
+```
+
+
+```{r}
+beta_0 <- mean(dd$ys) - mean(dd$xs)
+s <- sqrt(1/(nrow(dd) - 1) * sum((dd$ys - beta_0 - dd$xs)^2))
+test_stat <- (beta_0 - 2)/(s/sqrt(nrow(dd)))
+test_stat
+pt(test_stat, nrow(dd) - 1, lower.tail = FALSE) * 2
+```
+
+Note that this is the same as a paired $t$-test, where we have as our null hypothesis that $y_i - x_i$ is normal with mean 2 and unknown standard deviation. 
+
+```{r}
+t.test(dd$ys, dd$xs, mu = 2, paired = T)
+```
+
+**Exercise 2.6**
+
+a. 
+```{r}
+dd <- carData::Davis
+plot(dd$repwt, dd$weight)
+```
+
+b.
+```{r}
+mod_lm <- lm(weight ~ repwt, data = dd)
+mod_huber <- MASS::rlm(weight ~ repwt, data = dd, psi = MASS::psi.huber)
+mod_tukey <- MASS::rlm(weight ~ repwt, data = dd, psi = MASS::psi.bisquare)
+plot(dd$repwt, dd$weight)
+abline(mod_lm, col = 2) #red
+abline(mod_huber, col = 3) #green
+abline(mod_tukey, col = 4) #blue
+```
+
