@@ -359,7 +359,7 @@ b. Show that $(n - 2) \hat \sigma_1^2/\sigma^2$ is $\chi^2$ with $n -2$ degrees 
     
 c. Use the same estimate for $\hat \sigma^2$ as we did above.
     
-d. Show that $\frac{\bigl(n - 2)\hat \sigma_1^2) - (n - (K + 1) \hat \sigma^2)\bigr)/2}{(n - (K + 1) \hat \sigma^2)/26} \sim F_{2, 26}$. 
+d. Show that $\frac{\bigl(n - 2)\hat \sigma_1^2 - ((n - (K + 1)) \hat \sigma^2\bigr)/2}{((n - (K + 1)) \hat \sigma^2)/26} \sim F_{2, 26}$. 
     
 e. Use your result in d. to do the hypothesis test. If you do everything correctly, your $p$-value will be about 0.001258.
 

@@ -511,6 +511,6 @@ b. If $x \ge 3/4$, then $y$ is the mean of all of the $y$ values associated with
 
 2. Exercise \@ref(exr:exercise-4-2)
 
-3. Exercise \@ref(exr:exercise3)
+3. Exercise \@ref(exr:exercise-4-3)
 
 4. Exercise \@ref(exr:exercise-4-4)
