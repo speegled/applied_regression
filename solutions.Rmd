@@ -140,3 +140,34 @@ abline(mod_huber, col = 3) #green
 abline(mod_tukey, col = 4) #blue
 ```
 
+
+## Chapter 3 Solutions
+
+1. Let's load the data.
+
+```{r}
+secher <- ISwR::secher
+plot(secher[,-4])
+mod <- lm(bwt ~ bpd + ad, data = secher)
+summary(mod)
+```
+Looks like a pretty good model already. Let's check the diagnostics.
+
+```{r}
+plot(mod)
+```
+
+Could be some skewness there. Let's see if a transformation might help the normality of the residuals.
+
+```{r}
+MASS::boxcox(mod)
+```
+
+This suggests a log transform of the response would improve the normality of the residuals. Finally, let's put `no` back in to the model. We hope that it is not strongly significant, as that might be an indicator of some sort of experimental flaw.
+
+```{r}
+mod2 <- lm(bwt ~., data = secher)
+summary(mod2)
+```
+Note that `no` is not significant, and the Adjusted R-squared decreased. Both of these are what we would like to see.
+

@@ -355,11 +355,11 @@ For this exercise, use the data frame `dd` that we created in the previous code 
 
 a. Build a model $y = \beta_0 + \beta_1 x_1 + \epsilon$, and estimate $\sigma^2$ based on this model. This estimate will play the role of $V(y)$ in the previous section. Think about how many parameters you are estimating to get an unbiased estimator. Call this estimator $\hat \sigma_1^2$.
     
-b. Show that $(n - 2) \hat \sigma_1^2/\sigma^2$ is $\chi^2$ with $n -2$ degrees of freedom.
+b. Show that $(n - 2) \hat \sigma_1^2/\sigma^2$ is $\chi^2$ with $n -2$ degrees of freedom. Be sure to generate the response variable according to the model $y = \beta_0 + \beta_1 x_1 + \epsilon$ for your simulations.
     
-c. Use the same estimate for $\hat \sigma^2$ as we did above.
+c. Use the same estimate for $\hat \sigma^2$ as we did above. That is, assume that $\beta_1\not= 0$, but $\beta_2 = \beta_3 = 0$. Build a model of $y \sim \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \epsilon$ and use that model to estimate the variance. Be sure to generate the response data according to $y = \beta_0 + \beta_1 x_1 + \epsilon$ for your simulations. Let's call this estimate of the variance $\hat \sigma_2^2$.
     
-d. Show that $\frac{\bigl(n - 2)\hat \sigma_1^2 - ((n - (K + 1)) \hat \sigma^2\bigr)/2}{((n - (K + 1)) \hat \sigma^2)/26} \sim F_{2, 26}$. 
+d. Show that $\frac{\bigl(n - 2)\hat \sigma_1^2 - ((n - (K + 1)) \hat \sigma_2^2\bigr)/2}{((n - (K + 1)) \hat \sigma_2^2)/26} \sim F_{2, 26}$. Be sure to generate the response data according to $y = \beta_0 + \beta_1 x_1 + \epsilon$ for your simulations.
     
 e. Use your result in d. to do the hypothesis test. If you do everything correctly, your $p$-value will be about 0.001258.
 
