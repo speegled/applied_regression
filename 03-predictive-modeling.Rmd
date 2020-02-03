@@ -1,6 +1,6 @@
 # Intro to Predictive Modeling
 
-In Chapter \@ref(multiple_regression) we saw that it can be hard to decide how to predict future values from a regression model. The reason is that our model isn't constructed so as to efficiently predict future values, but rather for other goals. In this chapter, we focus on doing regression for predictions. 
+In Chapter \@ref(multiple-linear-regression) we saw that it can be hard to decide how to predict future values from a regression model. The reason is that our model isn't constructed so as to efficiently predict future values, but rather for other goals. In this chapter, we focus on doing regression for predictions. 
 
 ## Comparing Two Models
 
@@ -77,12 +77,12 @@ sqrt(mean(full_errors^2))
 
 We see that the RMSE is about 17% higher with the full model than it is with the model using just weight! 
 
-```{exercise}
+```{exercise, label = "exercise-4-1"}
 The aim of this exercise is to illustrate the difference between using $p$-values for determining whether to select variables, and using estimates of MSE. 
 
-    a. Find the LOOCV estimate for the MSE when estimating `pemax` via `weight + bmp + fev1 + rv`, and compare to just using `weight`.
+a. Find the LOOCV estimate for the MSE when estimating `pemax` via `weight + bmp + fev1 + rv`, and compare to just using `weight`.
     
-    b. Use `lm` to model `pemax ~ weight + bmp + fev1 + rv` and observe that `rv` is the only non-significant variable. Remove it, and estimate the MSE via LOOCV again. Did removing `rv` improve the estimate of MSE?
+b. Use `lm` to model `pemax ~ weight + bmp + fev1 + rv` and observe that `rv` is the only non-significant variable. Remove it, and estimate the MSE via LOOCV again. Did removing `rv` improve the estimate of MSE?
 ```
 
 LOOCV works well for small data sets such as `cystfibr`, but can become unwieldy when the data set is large and the method of estimation is involved. For each model that we want to test, we would need to build it $n-1$ times, where $n$ is the number of observations. Let's examine a couple of alternatives for when LOOCV takes too long. 
@@ -160,7 +160,7 @@ c(mean(rmse) - 2 * sd(rmse), mean(rmse) + 2 * sd(rmse))
 We can either compute the 95% confidence interval of the RMSE from the quantiles or by taking two times the standard deviation. This is saying that we would be surprised if the true RMSE of this model on unseen, future data is less than \$5500 or more than \$6500
 
 
-```{exercise}
+```{exercise, label = "exercise-4-2"}
 Consider the `insurance` data set. Estimate the RMSE with error bounds when modeling expenses on the other variables after taking the log of expenses. Note that we will still want to get the RMSE of the estimate for **expenses**, not the log of expenses. Compare your answer to what we achieved in the previous example.
 ```
 
@@ -342,7 +342,7 @@ mse_real
 
 Here, we see that 10-fold repeated CV tends to underestimate the true MSE, and the standard deviation of the estimator is quite high to boot. This indicates that, for this particular problem, bootstrapping seems to be the better way to go. 
 
-```{exercise}
+```{exercise, label = "exercise-4-3"}
 Use simulation to compute the expected value of the estimator for MSE when using LGOCV with 70% in group and 30% out of group in the above scenarios. How does it compare to the other two techniques?
 ```
 
@@ -416,20 +416,21 @@ new_f <- function(x) {
 curve(new_f, add = T, col = 2)
 ```
 
-OK, the variance that we can't remove from this model is $.4^2 = 0.16$. Now, we estimate the expected value of the MSE by picking a bunch of $x$ values, estimating the expected MSE for that $x$ value, and integrating over all of the $x$ values. 
+OK, the variance that we can't remove from this model is $.4^2 = 0.16$. Now, we estimate the expected value of the MSE by picking a bunch of $x$ values, estimating the expected MSE for that $x$ value, and integrating over all of the $x$ values. This yields the same result as the method we used in the previous section. The reason we are doing this more complicated thing is that when we have to estimate the **Variance** of the model, we will need to do it this way, so we may as well get used to doing it like that now...
 
 ```{r cache=TRUE}
 x_vals <- seq(0, 1, length.out = 300)
-for_mse <- sapply(x_vals, function(x1) {errors <- replicate(1000, {
-  xs <- runif(40, 0, 1)
-  ys <- sin(2 * pi * xs) + rnorm(40, 0, .4)
-  y1 <- mean(ys[xs < 1/2])
-  y2 <- mean(ys[xs >= 1/2])
-  new_x <-  x1
-  new_y <- sin(2*pi*new_x) + rnorm(40, 0, .4)
-  ifelse(new_x < 1/2, new_y - y1, new_y - y2)
-})
-mean(errors^2)
+for_mse <- sapply(x_vals, function(x1) {
+  errors <- replicate(1000, {
+    xs <- runif(40, 0, 1)
+    ys <- sin(2 * pi * xs) + rnorm(40, 0, .4)
+    y1 <- mean(ys[xs < 1/2])
+    y2 <- mean(ys[xs >= 1/2])
+    new_x <-  x1
+    new_y <- sin(2*pi*new_x) + rnorm(40, 0, .4)
+    ifelse(new_x < 1/2, new_y - y1, new_y - y2)
+  })
+  mean(errors^2)
 })
 head(for_mse)
 ```
@@ -443,15 +444,16 @@ mean(for_mse)
 Cool. That is our estimate of the MSE associated with the model. Now we estimate the **variance** using the same technique.
 
 ```{r, cache = TRUE}
-for_variance <- sapply(x_vals, function(x1) {errors <- replicate(1000, {
+for_variance <- sapply(x_vals, function(x1) {
+  errors <- replicate(1000, {
     xs <- runif(40, 0, 1)
     ys <- sin(2 * pi * xs) + rnorm(40, 0, .4)
     y1 <- mean(ys[xs < 1/2])
     y2 <- mean(ys[xs >= 1/2])
     new_x <-  x1
     ifelse(new_x < 1/2, y1, y2)
-})
-var(errors)
+  })
+  var(errors)
 })
 head(for_variance)
 ```
@@ -493,13 +495,22 @@ mean(for_mse)
 Woo-hoo! Those seem to match! I wasn't sure when I was doing the simulations with smaller samples, so I kept making them bigger and now I am convinced. This also helps me understand what the *model variance* and *model bias* refer to, though in this case the model variance is constant across all of the values of $x$. 
 
 
-```{exercise}
+```{exercise, label = "exercise-4-4"}
 Verify the bias-variance trade-off formula through simulations when the signal is $y = \sin(2 \pi x) + \epsilon$, where $\epsilon \sim N(0, \sigma = .4)$, and the model is obtained by the following procedure. (Note that this is the same procedure as above, but we have replaced 1/2 by 3/4). 
 
-    a. If $x < 3/4$, then $y$ is the mean of all of the $y$ values associated with $x$ values that are less than 3/4.
+a. If $x < 3/4$, then $y$ is the mean of all of the $y$ values associated with $x$ values that are less than 3/4.
     
-    b. If $x \ge 3/4$, then $y$ is the mean of all of the $y$ values associated with $x$ values that are greater than or equal to 3/4. 
+b. If $x \ge 3/4$, then $y$ is the mean of all of the $y$ values associated with $x$ values that are greater than or equal to 3/4. 
     
 ```
 
 
+## Exercises
+
+1. Exercise \@ref(exr:exercise-4-1)
+
+2. Exercise \@ref(exr:exercise-4-2)
+
+3. Exercise \@ref(exr:exercise3)
+
+4. Exercise \@ref(exr:exercise-4-4)

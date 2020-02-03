@@ -1,4 +1,4 @@
-# Multiple Linear Regression {#multiple_regression}
+# Multiple Linear Regression
 
 In this chapter we consider the case where we have one response variable $y$ and multiple predictor variables $x_1, \ldots, x_K$. Our model is
 \[
