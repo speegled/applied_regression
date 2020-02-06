@@ -1,0 +1,102 @@
+# Regression Predictive Models
+
+In this chapter, we consider predictive models built from ordinary least squares models. Even in this case, that we have been thinking about since Chapter 1, there are new things to think about when focusing on predictive models. Our primary goal is variable selection for the purposes of prediction. However, sometimes, it may be more efficient to *combine* predictors into new predictors, rather than using the predictors as given. This process will also be lumped under the general term of "variable selection" for lack of a better descriptor. 
+
+## Preprocessing
+
+First, we talk about preprocessing the predictors. A common techniques is to **center** and **scale** the predictors, so that all of the predictors are on a common scale. Some techniques that we will see in the next chapter require the predictors to be on a similar scale, while there is not usually a down side in terms of predictive power for this in any regression model. However, it can be harder to interpret the coefficients of ordinary least squares regression, since the predictors are no longer in their original scales.
+
+Let's look at the `insurance` data set from the previous chapter to see how this could be done via R.
+
+```{r}
+dd <- read.csv("data/insurance.csv")
+summary(dd)
+mod_raw <- lm(expenses ~ ., data = dd)
+summary(mod_raw)
+```
+
+We see that the numeric predictors are `age` and `bmi`, which we can center and scale by subtracting the mean and dividing by the standard deviation.
+
+```{r}
+dd$bmi <- (dd$bmi - mean(dd$bmi))/sd(dd$bmi)
+dd$age <- (dd$age - mean(dd$age))/sd(dd$age)
+```
+
+Compare the model with the scaled predictors to the one with the raw predictors above to see what changes.
+
+```{r}
+mod_scaled <- lm(expenses ~ ., data = dd)
+summary(mod_scaled)
+```
+
+Another technique is to *deskew* the predictors. Data that is very skew often has points that look like outliers, and those can be high leverage points for the model, meaning that they may overly impact the prediction of other values. Since values that are at the edge of the data range may follow a different pattern than values in the center of the data, this can adversely affect RMSE. As an example, suppose the true generative process of the data is $y = \epsilon a x^b$, where $\epsilon$ is a mean 1 random variable. If we take the logs of both sides, then we get $\log y = \log a + b \log x + \log \epsilon$, which looks very much like our model for simple linear regression. 
+
+When trying to decide whether to deskew predictors, cross-validation can be useful. We can model the response both ways, and use the model with the lower RMSE. As always, we should be careful to avoid overfitting, and consider taking the **simplest** model that has a RMSE within one standard deviation of the lowest. 
+
+The process of de-skewing is done to positive variables via the Box-Cox transformation. The Box-Cox transform chooses a value for $\lambda$ such that the transformed variable
+\[
+x^* = \begin{cases}
+\frac{x^\lambda - 1}{\lambda} & \lambda\not= 0\\
+\log(x)& \lambda = 0
+\end{cases}
+\]
+We will not discuss the details of how $\lambda$ is chosen, but the value that is chosen is one that deskews the variable of interest.
+
+For example, suppose we have a random sample from an exponential random variable. 
+
+```{r}
+simdat <- rexp(100)
+e1071::skewness(simdat)
+```
+
+We see that the data is moderately positively skewed. In order to apply the Box-Cox transform we need to put the data into a data frame.
+
+```{r}
+df <- data.frame(simdat)
+```
+
+Next, we use `caret::preProcess` to say what kind of processing we want to do to the data.
+
+```{r}
+pre_process_mod <- preProcess(df, method = "BoxCox")
+```
+
+Finally, to get the new data frame, we "predict" the new values from the pre-processing model.
+
+```{r}
+unskewed <- predict(pre_process_mod, newdata = df)
+```
+
+We can check that the new data has been unskewed:
+
+```{r}
+e1071::skewness(unskewed$simdat)
+hist(unskewed$simdat)
+```
+
+If we wanted to center, scale and unskew it, we could do the following.
+
+```{r}
+pre_process_mod <- preProcess(df, 
+                              method = c("BoxCox", "center", "scale"))
+processed_data <- predict(pre_process_mod, newdata = df)
+mean(processed_data$simdat)
+sd(processed_data$simdat)
+```
+
+## Correlated Predictors
+
+One common problem that comes up is when the predictors are correlated. An extreme case of this is when two predictors are just affine combinations of one another; for example, temperature measured in celsius and temperature measured in Fahrenheit. 
+
+```{r, warning=FALSE, message=FALSE}
+library(tidyverse)
+dd <- read.csv("data/stl_weather_data.csv")
+dd$DATE <- lubridate::ymd(dd$DATE)
+dd_feb <- filter(dd, lubridate::month(DATE) == 2)
+dd_feb <- mutate(dd_feb, TMAX_celsius = (TMAX - 32)*5/9, 
+                 TMIN_celsius = (TMIN - 32)* 5/9)
+ggplot(dd_feb, aes(x = TMIN, y = TMAX)) + geom_point()
+lm(TMAX ~ TMIN, data = dd_feb)
+lm(TMAX ~ TMIN + TMIN_celsius, data = dd_feb)
+```
+

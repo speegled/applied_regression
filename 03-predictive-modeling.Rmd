@@ -161,7 +161,7 @@ We can either compute the 95% confidence interval of the RMSE from the quantiles
 
 
 ```{exercise, label = "exercise-4-2"}
-Consider the `insurance` data set. Estimate the RMSE with error bounds when modeling expenses on the other variables after taking the log of expenses. Note that we will still want to get the RMSE of the estimate for **expenses**, not the log of expenses. Compare your answer to what we achieved in the previous example.
+Consider the `insurance` data set. Estimate the RMSE with error bounds when modeling expenses on the other variables after taking the log of expenses, using repeated LGOCV. Note that we will still want to get the RMSE of the estimate for **expenses**, not the log of expenses. Compare your answer to what we achieved in the previous example.
 ```
 
 We could also do this for repeated $k$-fold CV, but let's instead start using the `caret` function `train`. The `train` function is a powerful tool that allows us to train many types of models with different types of cross validation. This example is about as simple of an example as we can do.
@@ -193,19 +193,167 @@ All three methods give relatively similar results in this case. We can guess tha
 
 In the previous section, we saw several methods for estimating the MSE or RMSE for models. One question that you may have is: which method should I be using? If we want to get error bounds for our estimate of RMSE, then we will need to use one that is repeated, but that still leaves repeated LGOCV, repeated $k$-vold CV, and repeated bootstrap. The type of model we are building can have an impact on our choice: if the model doesn't handle data that is repeated well, then bootstrapping would not be a good choice, for example. If model accuracy is highly sensitive to sample size, then LGOCV might not be a good choice, as the model is built on data roughly 70-80% of the size of the original data set.
 
-In this section, though, we will thouroughly examine the estimates for MSE in the case of a simple linear model $y = 1 + 2x + \epsilon$, where $\epsilon \sim N(0, \sigma = 3)$. We suppose that we have data $\{(x_1, y_1), \ldots, (x_N, y_N)\}$, and that future $x$ values are generated through a random process with pdf $f$. It can be shown that the expected MSE of the model is given by
+In this section, though, we will thouroughly examine the estimates for MSE in the case of a simple linear model $y = 1 + 2x + \epsilon$, where $\epsilon \sim N(0, \sigma = 3)$. We suppose that we have data $\{(x_1, y_1), \ldots, (x_N, y_N)\}$, and we do computations in two special cases.
+
+1. We assume that future $x$ values are a fixed constant $x_0$. In this case, it can be shown that the expected MSE of the model is given by 
+\[
+\sigma^2 + \sigma^2/N + \sigma^2 \frac{(x_0 - \overline{x})^2}{S_{xx}},
+\]
+where $S_{xx} = \sum_{i = 1}^N (x_i - \overline{x})^2$.
+
+2. We assume that future $x$ values are generated through a random process with pdf $f$. It can be shown that the expected MSE of the model is given by
 \[
 \sigma^2 + \sigma^2/N + \sigma^2 \int \frac{(x - \overline{x})^2}{S_{xx}} f(x)\, dx
 \]
-where $S_{xx} = \sum_{i = 1}^N (x_i - \overline{x})^2$. In the special case that the original $x_i$ are uniformly sampled from 0 to $M$ (ie `seq(0, M, length.out = N)` and new $x$ values are chosen uniformly over the interval $[0, M]$ we get an expected MSE of 
+where $S_{xx} = \sum_{i = 1}^N (x_i - \overline{x})^2$. A consequence of this is that, in order to minimize expected MSE, the mean of the predictors should equal the mean of the future values!
+
+### Estimating MSE and Bias-Variance Tradeoff
+
+Let's start with case 1. We assume the $x_i$ are uniformly sampled on $[0, 1]$ and we have 100 samples. We make predictions at $x_0 = 0.75$ and compute the MSE.
+
+```{r}
+N <- 100
+set.seed(2052020)
+xs <- seq(0, 1, length.out = N)
+ys <- 1 + 2 * xs + rnorm(N, 0, 3)
+sxx <- sum((xs - mean(xs))^2)
+true_mse <- 9 + 9/N + 9 * (.75 - mean(xs))^2/sxx 
+```
+
+We see from above that the **true** MSE is 9.156 in this case. Let's estimate it directly.
+
+```{r, cache=TRUE}
+sim_data <- replicate(10000, {
+  ys <- 1 + 2 * xs + rnorm(N, 0, 3)
+  mod <- lm(ys ~ xs)
+  predict(mod, newdata = data.frame(xs = 0.75)) - (1 + 2 * .75 + rnorm(1, 0, 3))
+})
+mean(sim_data^2)
+```
+
+Pretty close. 
+
+One reason that the full model of `pemax ~ .` in `cystfibr` does worse than just `pemax ~ weight` or `pemax ~ height` is the so-called bias-variance trade-off. The easiest version of this principle was observed in STAT 3850. Assume that $\hat \theta$ is an estimator for $\theta$ and $E[\hat \theta] = \theta_0$.
+
+\[
+E[(\hat \theta - \theta)^2] = MSE(\hat \theta) = V(\hat \theta) + Bias(\hat \theta)^2 = V(\hat \theta) + (E[\hat \theta] - \theta)^2
+\]
+
+It can be shown, for example, that $S^2 = \frac 1{n - 1} \sum_{i = 1}^n (y_i - \overline{y})^2$ is an unbiased estimator for $\sigma^2$, and that among all unbiased estimators for $\sigma^2$, $S^2$ as the **smallest variance**. However, we can **increase** the bias and the corresponding **decrease** in variance can lead to an estimator for $\sigma^2$ that has a lower MSE. In this case, we can show that $\frac 1n \sum_{i = 1}^n \bigl(y_i - \overline{y}\bigr)^2 = \frac {n-1}{n} S^2$ has lower MSE than $S^2$ does.
+
+In the context of modeling, we have a different formulation of the bias-variance trade-off. Suppose that we are modeling an outcome $y$ that consists of independent noise about a curve with constant variance $\sigma^2$. (We can assume the curve is $y = 0$.) Suppose also that we use a model to estimate the outcome. We have that 
+
+\[
+E[MSE] = \sigma^2 + (\text{Model Bias})^2 + \text{Model Variance}
+\]
+
+We are never going to be able to get rid of the $\sigma^2$ part, because each time we draw new samples, the $\sigma^2$ is going to be there. However, we can trade-off between the model bias and the model variance. Often, we can reduce the bias by increasing the variance, or reduce the variance by increasing the bias in such a way that the overall expected value of the MSE decreases. Let's look at an example with simulated data to further understand what each component of the above means!
+
+We again consider data generated from $y = 1 + 2x + \epsilon$, and we look at the MSE when predicting values at $x_0 = 0.75$, which we computed above to be `r round(true_mse, 3)`. Let's estimate the **bias** of the prediction. 
+
+```{r, cache=TRUE}
+sim_data <- replicate(10000, {
+  ys <- 1 + 2 * xs + rnorm(N, 0, 3)
+  mod <- lm(ys ~ xs)
+  predict(mod, newdata = data.frame(xs = .75))
+})
+mean(sim_data)
+1 + 2 * .75
+```
+
+We see that this is, in fact, an **unbiased** estimator for $y$ when $x_0 = 0.75$. We could have recalled that $E[\hat \beta_0] = \beta_0$ and $E[\hat \beta_1] = \beta_1$, and seen $E[\hat \beta_0 + \hat \beta_1 \times 0.75] = \beta_0 + \beta_1 \times .75 = 2.5$, as well. So, the bias squared is 0. Now, we need to estimate the **variance** of the **model** when $x_0 = 0.75$. To do so, we take the variance of the simulated data.
+
+```{r}
+var(sim_data) + 3^2
+true_mse
+```
+
+Adding this to $\sigma^2$ gives us the MSE. If we repeat this a couple of times, we see this is correct. 
+
+**Example** Suppose we have data generated by $y = sin(2 \pi x) + \epsilon$, where $\epsilon \sim N(0, \sigma = .4)$. We choose to predict new values by splitting the data into two groups and approximating with a horizontal line, see the textbook for details. Let's generate some data and plot our predictions.
+
+```{r}
+N <- 20
+xs <- seq(0, 1, length.out = N)
+ys <- sin(2 * pi * xs) + rnorm(N, 0, .4)
+plot(xs, ys)
+y1 <- mean(ys[xs < .5])
+y2 <- mean(ys[xs >= .5])
+curve(ifelse(x < .5, y1, y2), add = TRUE, col = 2)
+```
+
+The red line is our prediction at the various $x$ values. In particular, when $x_0 = 0.75$, our prediction is `y2`, `r round(y2, 3)`. In this case, we will 
+
+1. estimate the MSE.
+```{r}
+for_mse <- replicate(10000, {
+  ys <- sin(2 * pi * xs) + rnorm(N, 0, .4)
+  y2 <- mean(ys[xs >= .5])
+  new_y = sin(2 * pi * 0.75) + rnorm(1, 0, .4)
+  y2 - new_y
+})
+mse_estimate <- mean(for_mse^2)
+mse_estimate
+```
+
+    &nbsp;
+2. We know $\sigma^2$
+```{r}
+sigma_squared <- .4^2
+```
+
+    &nbsp;
+3. Estimate the Bias at $x_0 = 0.75$
+```{r}
+for_bias <- replicate(10000, {
+  ys <- sin(2 * pi * xs) + rnorm(N, 0, .4)
+  y2 <- mean(ys[xs >= .5])
+  new_y = sin(2 * pi * 0.75) + rnorm(1, 0, .4)
+  y2 - new_y
+})
+bias_estimate <- mean(for_bias)
+bias_estimate
+```
+
+    &nbsp;
+4. Estimate the model variance at $x_0 = 0.75$.
+```{r}
+for_model_variance <- replicate(10000, {
+  ys <- sin(2 * pi * xs) + rnorm(N, 0, .4)
+  y2 <- mean(ys[xs >= .5])
+  new_y = sin(2 * pi * 0.75) + rnorm(1, 0, .4)
+  y2
+})
+model_variance_estimate <- var(for_model_variance)
+model_variance_estimate
+```
+
+    &nbsp;
+5. Check the bias-variance trade-off.
+```{r}
+sigma_squared + bias_estimate^2 + model_variance_estimate
+mse_estimate
+```
+
+
+
+
+
+
+
+
+### Estimating MSE for new predictors uniformly sampled
+
+
+In this section, we imagine that our predictors that we are using for model building are uniformly sampled between 0 and 1, and future predictors will be drawn from a uniform random variable on the interval $(0, 1)$. In the special case that the original $x_i$ are uniformly sampled from 0 to $M$ (ie `seq(0, M, length.out = N)` and new $x$ values are chosen uniformly over the interval $[0, M]$ we get an expected MSE of 
 \[
 \sigma^2\bigl(1 + 1/N + \frac{M^2}{12 S_{xx}}\bigr)
 \]
-Let's make a computation when $N = 20$ and $M = 10$ in our model where $\sigma^2 = 9$.
+Let's make a computation when $N = 100$ and $M = 10$ in our model where $\sigma^2 = 9$.
 
 ```{r}
 sigma <- 3
-N <- 20
+N <- 100
 minx <- 0
 maxx <- 10
 xs <- seq(minx, maxx, length.out = N)
@@ -247,68 +395,42 @@ coeffs_2
 ```
 
 
-Now let's look at estimating the MSE using bootstrapping. We are assuming that the `xs` are fixed here, and the random part is generating the `ys`. I will again compute the coefficients from the formulas rather than using `lm` because it is so much faster. 
+Now let's look at estimating the MSE using bootstrapping. We are assuming that the `xs` are fixed here, and the random part is generating the `ys`. 
 
-```{r}
-ys <- 1 + 2 * xs + rnorm(N, 0, sigma)
-dd <- data.frame(xs, ys)
-train_indices <- sample(1:N, replace = TRUE)
-train <- dd[train_indices,]
-test <- dd[-train_indices,]
-sxx <- sum((train$xs - mean(train$xs))^2)
-sxy <- sum((train$xs - mean(train$xs)) * train$ys)
-coeffs_2 <- sxy/sxx
-coeffs_1 <- mean(train$ys) - coeffs_2 * mean(train$xs)
-x_star <- test$xs
-mean((coeffs_1 + coeffs_2 * x_star - test$ys)^2)
+```{r cache=TRUE}
+sim_data <- replicate(100, {
+  dd$ys <- 1 + 2 * dd$xs + rnorm(N, 0, sigma) 
+  boot_error <- train(ys ~ xs, data = dd, method = "lm")
+  boot_error$results$RMSE
+})
+mean(sim_data)
+min(sim_data)
+sd(sim_data)
+t.test(sim_data^2, mu = true_mse)
 ```
 
-Our estimate of the MSE based on this one bootstrap resample is `r round(mean((coeffs_1 + coeffs_2 * x_star - test$ys)^2), 3)`. 
+This runs too slow on my computer, and the following code speeds things up.
 
-Now, we would do this about 100 times in order to estimate the MSE of any one model.
-
-```{r,cache=TRUE}
-boot_mse <- replicate(100, {
-  ys <- 1 + 2 * xs + rnorm(N, 0, sigma)
-  dd <- data.frame(xs, ys)
-  train_indices <- sample(1:N, replace = TRUE)
+```{r, cache=TRUE}
+sim_data <- replicate(1000, {replicate(25, {
+  dd$ys <- 1 + 2 * dd$xs + rnorm(N, 0, sigma)
+  train_indices <- sample(1:nrow(dd), replace = T)
   train <- dd[train_indices,]
   test <- dd[-train_indices,]
   sxx <- sum((train$xs - mean(train$xs))^2)
   sxy <- sum((train$xs - mean(train$xs)) * train$ys)
   coeffs_2 <- sxy/sxx
   coeffs_1 <- mean(train$ys) - coeffs_2 * mean(train$xs)
-  x_star <- test$xs
-  mean((coeffs_1 + coeffs_2 * x_star - test$ys)^2)
+  errors <- coeffs_1 + test$xs * coeffs_2 - test$ys
+  mean(errors^2)
+}) %>% mean()
 })
-mean(boot_mse)
+mean(sim_data)
+sd(sim_data)
+t.test(sim_data, mu = true_mse)
 ```
 
-To see how well our estimate is working, we need to repeat **this** many times!
-
-```{r, cache=TRUE}
-boot_data <- replicate(100, {
-  boot_mse <- replicate(100, {
-    ys <- 1 + 2 * xs + rnorm(N, 0, sigma)
-    dd <- data.frame(xs, ys)
-    train_indices <- sample(1:N, replace = TRUE)
-    train <- dd[train_indices,]
-    test <- dd[-train_indices,]
-    sxx <- sum((train$xs - mean(train$xs))^2)
-    sxy <- sum((train$xs - mean(train$xs)) * train$ys)
-    coeffs_2 <- sxy/sxx
-    coeffs_1 <- mean(train$ys) - coeffs_2 * mean(train$xs)
-    x_star <- test$xs
-    mean((coeffs_1 + coeffs_2 * x_star - test$ys)^2)
-  })
-  mean(boot_mse)
-})
-mean(boot_data)
-sd(boot_data)
-mse_real
-```
-
-In this case, the bootstrapping method tends to overestimate the true MSE.
+We see that bootstrapping significantly **overestimates** the MSE in this scenario.
 
 Now, let's look at repeated $10$-fold CV using the `caret` package. As a reminder, here is how we do it.
 
@@ -325,7 +447,7 @@ tt$results$RMSE^2
 Let's replicate this and see what the mean is.
 
 ```{r, cache=TRUE}
-cv_data <- replicate(100, {
+cv_data <- replicate(50, {
   ys <- 1 + 2 * xs + rnorm(N, 0, sigma)
   dd$ys <- ys
   tt <- caret::train(ys ~ xs, 
@@ -338,31 +460,43 @@ cv_data <- replicate(100, {
 mean(cv_data)
 sd(cv_data)
 mse_real
+t.test(cv_data, mu = mse_real)
 ```
 
-Here, we see that 10-fold repeated CV tends to underestimate the true MSE, and the standard deviation of the estimator is quite high to boot. This indicates that, for this particular problem, bootstrapping seems to be the better way to go. 
+Here, we see that 10-fold repeated CV tends to underestimate the true MSE, and the standard deviation of the estimator is quite high to boot. This indicates that, for this particular problem, bootstrapping seems to be the better way to go. Again, the above code is **really** slow, and only does 50 different data sets. Here is a speed-up. The other advantage of doing it this way is that we can estimate MSE directly, rather than estimating RMSE and squaring, which introduces bias (as seen above).
+
+```{r, cache=TRUE}
+sim_data_2 <- replicate(200, {
+  dd$ys <- 1 + 2 * dd$xs + rnorm(N, 0, 3)
+  replicate(5, {
+    folds <- caret::createFolds(dd$ys)
+    sapply(1:10, function(x) {
+      test_indices <- folds[[x]]
+      test <- dd[test_indices,]
+      train <- dd[-test_indices,]
+      sxx <- sum((train$xs - mean(train$xs))^2)
+      sxy <- sum((train$xs - mean(train$xs)) * train$ys)
+      coeffs_2 <- sxy/sxx
+      coeffs_1 <- mean(train$ys) - coeffs_2 * mean(train$xs)
+      errors <- coeffs_1 + test$xs * coeffs_2 - test$ys
+      mean(errors^2)
+    })
+  }) %>% mean() #estimate of MSE via 5 repeated 10-fold CV
+})
+mean(sim_data_2)
+sd(sim_data_2)
+t.test(sim_data_2, mu = mse_real)
+```
+
+For this example, repeated CV seems considerably less biased than bootstrapping. Bootstrapping has a lower standard deviation.
+
 
 ```{exercise, label = "exercise-4-3"}
-Use simulation to compute the expected value of the estimator for MSE when using LGOCV with 70% in group and 30% out of group in the above scenarios. How does it compare to the other two techniques?
+Use simulation to compute the expected value and standard deviation of the estimator for MSE when using LGOCV with 70% in group and 30% out of group in the above scenarios. (That is, assume that we have a sample size of 100 from data that follows the pattern $y = 1 + 2x + \epsilon$, where $\epsilon \sim N(0, \sigma = 3)$. Assume the $x$ values in the data are uniformly spaced between 0 and 1, and the additional $x$ value is chosen randomly between 0 and 1, so we know the true MSE is 9.178218.) How does the estimate compare to bootstrapping and repeated 10-fold CV in terms of **bias** and **standard deviation**?
 ```
 
 ## Bias Variance Trade-off
 
-One reason that the full model of `pemax ~ .` in `cystfibr` does worse than just `pemax ~ weight` or `pemax ~ height` is the so-called bias-variance trade-off. The easiest version of this principle was observed in MATH 3850. Assume that $\hat \theta$ is an estimator for $\theta$ and $E[\hat \theta] = \theta_0$.
-
-\[
-E[(\hat \theta - \theta)^2] = MSE(\hat \theta) = V(\hat \theta) + Bias(\hat \theta)^2 = V(\hat \theta) + (E[\hat \theta] - \theta)^2
-\]
-
-It can be shown, for example, that $S^2 = \frac 1{n - 1} \sum_{i = 1}^n (y_i - \overline{y})^2$ is an unbiased estimator for $\sigma^2$, and that among all unbiased estimators for $\sigma^2$, $S^2$ as the **smallest variance**. However, we can **increase** the bias and the corresponding **decrease** in variance can lead to an estimator for $\sigma^2$ that has a lower MSE. In this case, we can show that $\frac 1n \sum_{i = 1}^n \bigl(y_i - \overline{y}\bigr)^2 = \frac {n-1}{n} S^2$ has lower MSE than $S^2$ does.
-
-In the context of modeling, we have a different formulation of the bias-variance trade-off. Suppose that we are modeling an outcome $y$ that consists of independent noise about a curve with constant variance $\sigma^2$. (We can assume the curve is $y = 0$.) Suppose also that we use a model to estimate the outcome. We have that 
-
-\[
-E[MSE] = \sigma^2 + (\text{Model Bias})^2 + \text{Model Variance}
-\]
-
-We are never going to be able to get rid of the $\sigma^2$ part, because each time we draw new samples, the $\sigma^2$ is going to be there. However, we can trade-off between the model bias and the model variance. Often, we can reduce the bias by increasing the variance, or reduce the variance by increasing the bias in such a way that the overall expected value of the MSE decreases. Let's look at an example with simulated data to further understand what each component of the above means!
 
 Let's imagine that we take a sample of size 10 and we connect those points with line segments as our model. We imagine that the 10 $x$ values are **fixed** and do not change with subsequent data collection (which would change things up). 
 
