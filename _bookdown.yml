@@ -7,6 +7,7 @@ rmd_files: [
   "01-classical_theory.Rmd",
   "02-multiple-regression.Rmd",
   "03-predictive-modeling.Rmd",
+  "04-practical-ols.Rmd",
   "solutions.Rmd"
   ]
 
