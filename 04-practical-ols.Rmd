@@ -247,7 +247,7 @@ Let's consider a more realistic example from the textbook, the permeability data
 
 ```{r}
 library(caret)
-data("tecator")
+data("tecator") #loads fingerprints and endpoints
 ```
 
 This data set consists of 215 observations of three responses (the percentages of water, fat and protein) and 100 predictors. The predictors are the infrared absorption of finely chopped pure meat with different moisture, fat and protein contents. The wavelength range was from 850-1050 nm, and we expect the absorption of nearby wavelengths to be highly correlated from sample to sample.

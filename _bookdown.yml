@@ -8,6 +8,7 @@ rmd_files: [
   "02-multiple-regression.Rmd",
   "03-predictive-modeling.Rmd",
   "04-practical-ols.Rmd",
+  "05-variable-selection.Rmd",
   "solutions.Rmd"
   ]
 
