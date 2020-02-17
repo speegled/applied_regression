@@ -1,0 +1,149 @@
+# Variable Selection
+
+We have already seen times when we have more predictors than optimal for predicting the response. We discussed an *ad hoc* method of variable selection using $p$-values, which can be useful for explanatory model building. We also looked at projecting the predictors onto a smaller subspace using PCA, which works about as well as projecting randomly onto subspaces in many cases. 
+
+The issue with PCA regression is that the choice of directions of maximal variance may have nothing to do with the response. It **could* be that the predictive value of the predictors is in a direction that has small variance relative to other directions, in which case it would be hidden in one of the later components. For this reason, we will want to consider the relationship of the components in the predictors with the response. That is the idea behind partial least squares.
+
+In the next section, we will consider ridge and lasso regression. These methods attempt to minimize an error function that also includes the magnitudes of the coefficients. The thought is that if a predictor doesn't have much predictive power, then the penalty associated with the coefficient will force the coefficient to be zero, which is the same as eliminating it from the model.
+
+Next, we will talk about the Akaike Information Criterion, which is a classical way of variable selection that also performs well in predictive models.
+
+Finally, we will take a **long** overdue detour and talk about interactions. Interactions really belonged in the classical theory section, but are also useful for predictive modeling. We will discuss their use both in explanatory model building and predictive model building.
+
+## Partial Least Squares
+
+As mentioned above, partial least squares first finds the direction in the predictor space that has maximum covariance with the response. Let's do that using simulations so that we can understand what is going on. Our data is also simulated data.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(caret)
+```
+
+
+```{r}
+set.seed(2162020)
+Sigma <- matrix(rnorm(9), nrow = 3)
+Sigma <- Sigma %*% t(Sigma)
+dd <- as.data.frame(MASS::mvrnorm(500, mu = c(0,0,0), Sigma = Sigma))
+names(dd) <- c("x", "y", "z")
+cor(dd)
+dd <- mutate(dd, response = 2 * (x + 4 *y) + .25 * (x + 6*y + z) + rnorm(500, 0, 7))
+summary(lm(response ~., data = dd))
+```
+
+We begin by centering and scaling the predictors.
+
+```{r}
+dd <- dd %>% mutate(x = scale(x),
+             y = scale(y),
+             z = scale(z))
+```
+
+Next, as in the case of PCA, we randomly select values in the unit sphere of $R^3$, and we compute the covariance of the projection of the data onto that direction with the response. We will keep track of the largest and that will be our rough estimate for the PLS component 1. We begin with some helper functions, which are the inner product of two vectors and the norm of a vector.
+
+```{r}
+ip <- function(x, y) {
+  sum(x * y)
+}
+mynorm <- function(x) {
+  sqrt(sum(x^2))
+}
+```
+
+Next, we see how to take a random sample from the sphere, project the data onto that direction, and compute the covariance with the response.
+
+```{r}
+rvec <- rnorm(3)
+rvec <- rvec/mynorm(rvec)
+dd_p <- apply(dd[,1:3], 1, function(x) ip(x, rvec))
+cov(dd_p, dd$response)
+```
+
+Now, we do this 1000 times, and keep track of the largest component. This time, instead of taking random points on the sphere, we jitter the current best a bit and if it improves things, then we move in that direction.
+
+```{r}
+largest_cov <- abs(cov(dd_p, dd$response))
+largest_direction <- rvec
+for(i in 1:1000) {
+  rvec <- largest_direction
+  rvec <- rvec + rnorm(3, 0, .2)
+  rvec <- rvec/mynorm(rvec)
+  dd_p <- apply(dd[,1:3], 1, function(x) ip(x, rvec))
+  curr_cov <- abs(cov(dd_p, dd$response))
+  if(curr_cov > largest_cov) {
+    largest_cov <- abs(cov(dd_p, dd$response))
+    largest_direction <- rvec
+    print(largest_direction)
+  }
+}
+```
+
+According to this, our estimate for the first PLS component is `r round(largest_direction, 3)`. This is the direction of the data that has the largest covariance with the response. Let's check it against the first component found using the `plsr` function in the `pls` package.
+
+```{r}
+library(pls)
+plsmod <- plsr(response ~ x + y + z, data = dd)
+loadings(plsmod)
+plsmod$projection
+```
+
+We see that the first component that `plsr` got in the `projection` is $(0.331, 0.668, -0.6667)$, which is pretty close to what we got. We confirm that the covariance for that vector is slightly better than the one we got via our crude technique.
+
+```{r}
+rvec <- plsmod$projection[,1]
+mynorm(rvec)
+dd_p <- apply(dd[,1:3], 1, function(x) ip(x, rvec))
+cov(dd_p, dd$response)
+largest_cov
+```
+
+Now, in PCA to get the second component, we looked at all directions perpendicular to the first component and found the one with maximum variance. In PLS, we no longer force the second component to be orthogonal to the first component. That's one difference. But, we do want it to pick up different information than the first component. How do we accomplish that?
+
+A first idea might be to find the direction that has the highest covariance with the **residuals** of the response after predicting on the directions chosen so far. That is pretty close to what happens, but doesn't work exactly. In partial least squares, we first **deflate** the predictor matrix by subtracting out $d d^T M$, where $d$ is the first direction, $d^T$ is the transpose of $d$, and $M$ is the original matrix. Then, we find the direction of maximum covariance between the residuals of the first model and this new matrix. I include the details below, but this section is **OPTIONAL**.
+
+### Optional PLS Stuff
+
+```{r}
+first_vec <- largest_direction
+dd$direction_1 <- apply(dd[,1:3], 1, function(x) ip(x, first_vec))
+m1 <- lm(response ~ direction_1, data = dd)
+
+pvec <- c(1,0,0)
+#first_vec
+#dd$direction_1 <- apply(dd[,1:3], 1, function(x) ip(x, first_vec))
+E <- as.matrix(dd[,1:3])
+new_dat <- E - dd$direction_1%*% t(dd$direction_1) %*% E /(mynorm(dd$direction_1)^2)
+projections <- apply(new_dat, 1, function(x) ip(x, pvec))
+best_cov <- abs(cov(m1$residuals, projections))
+best_dir <- pvec
+for(i in 1:1000) {
+  pvec <- best_dir + rnorm(3,0,.02)
+  pvec <- pvec/mynorm(pvec)
+  projections <- apply(new_dat, 1, function(x) ip(x, pvec))
+  covv <- abs(cov(m1$residuals, projections))
+  if(covv > best_cov) {
+    best_cov <- covv
+    best_dir <- pvec
+    print(pvec)
+  }
+}
+best_dir
+plsmod$loading.weights
+```
+
+As we can see, we have recovered the *loading weights*, which map the **deflated** predictors onto the scores. Continuing in this fashion, we could find all of the loading weights, use them to compute the scores, and then compute the loadings via
+
+```{r}
+corpcor::pseudoinverse(as.matrix(dd[,1:3])) %*% plsmod$scores
+```
+
+And this would give us our projection, which we could use to transform the original (or new) data into the basis spanned by the partial least squares representation. The trickiest part about this whole thing is understanding why we deflate the data each time we get a new component in our partial least squares. Let's leave that for another time, shall we?
+
+```{r}
+as.matrix(dd[,1:3]) %*% plsmod$projection %>% 
+  head()
+plsmod$scores[1:6,1:3]
+```
+
+
+
