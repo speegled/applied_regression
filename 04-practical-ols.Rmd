@@ -4,7 +4,7 @@ In this chapter, we consider predictive models built from ordinary least squares
 
 ## Preprocessing
 
-First, we talk about preprocessing the predictors. A common techniques is to **center** and **scale** the predictors, so that all of the predictors are on a common scale. Some techniques that we will see in the next chapter require the predictors to be on a similar scale, while there is not usually a down side in terms of predictive power for this in any regression model. However, it can be harder to interpret the coefficients of ordinary least squares regression, since the predictors are no longer in their original scales.
+First, we talk about preprocessing the predictors. A common technique is to **center** and **scale** the predictors, so that all of the predictors are on a common scale. Some techniques that we will see in the next chapter require the predictors to be on a similar scale, while there is not usually a down side in terms of predictive power for this in a regression model. However, it can be harder to interpret the coefficients of ordinary least squares regression, since the predictors are no longer in their original scales.
 
 Let's look at the `insurance` data set from the previous chapter to see how this could be done via R.
 
@@ -57,7 +57,8 @@ df <- data.frame(simdat)
 
 Next, we use `caret::preProcess` to say what kind of processing we want to do to the data.
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
+library(caret)
 pre_process_mod <- preProcess(df, method = "BoxCox")
 ```
 
@@ -84,9 +85,123 @@ mean(processed_data$simdat)
 sd(processed_data$simdat)
 ```
 
+## Missing Data
+
+Missing data is a very common problem. We may have a data set with 2000 observations of 50 variables, but each observation is missing information in at least one of the variables. Let's start by observing the **default** behaviour of `lm` when there is missing data.
+
+We use the St Louis housing data set that is required for your project. 
+
+```{r}
+dd <- read.csv("../private/4870/data/train_data.csv", 
+               stringsAsFactors = FALSE)
+```
+We see that this data set consists of 1201 observations of 29 variables. However, some of the variables consist **entirely** of missing data!
+
+```{r}
+summary(dd$SOLD.DATE)
+```
+
+Let's model price on year built and sold date, and see what happens.
+
+```{r, eval=FALSE}
+lm(PRICE ~ SOLD.DATE + YEAR.BUILT, data = dd)
+```
+
+As we can see, it throws an error. More generally, the default behavior of R is to **remove** any observation that contains a missing value for any of the variables. 
+
+```{r}
+summary(lm(PRICE ~ YEAR.BUILT, data = dd))
+```
+We see we have 935 degrees of freedom for the F-statistic, which we showed in the previous chapters should have $n - 2$ degrees of freedom. We compute
+
+```{r}
+sum(!is.na(dd$YEAR.BUILT)) - 2
+```
+
+and we see that R has kept the 937 observations that don't have any missing values.
+
+It is a bad idea to build a final model based only on observations that have no missing values.
+First, as we saw in the previous chapter, the accuracy of predictions tends to increase with the number of observations that we have. Second, it is possible (likely even) that the missing data is not just randomly missing, but the fact that the value of one variable is missing may have an impact on how the other variables are related to the response! 
+
+As an example, for the housing data set, if BEDS is missing, that may very well be because the property is not, in fact, a house, but rather a vacant lot. If we remove all observations that have missing values for BEDS, then we remove all information about vacant lots.
+That means that we are going to need to have some way of dealing with the missing data. 
+
+1. If many, many values of a variable are missing, it may be appropriate to just remove the entire variable. In the extreme case of SOLD.DATE, which is missing **all** of its observations, then we should definitely just remove the entire variable.
+
+2. We can use mean/median imputation of the missing values. This means that, for continuous data, we replace all of the missing values with either the mean or the median of the values that are not missing. For categorical data, we could replace all of the missing values with the value that occurs the most frequently in the values that are not missing. 
+
+3. For categorical data, we could create a new level which codes missing data. 
+
+4. We can predict the missing values based on the values that we do have. For example, if ZIP is missing, we could predict the value of ZIP based on the other characteristics of the house under consideration. Then we could use that ZIP to build the model.
+
+For now, we will focus on mean imputation; we leave the last technique for once we have learned a few more predictive modeling techniques.
+
+Here is how you can do mean imputation, using the `mice` package. The `mice` package does **a lot** more than just this! Let's look at the `carData::Chile` data set. A first useful function in `mice` is `md.pattern`, which gives us information about how the missing values are organized.
+
+```{r}
+library(mice)
+chile <- carData::Chile
+md.pattern(chile)
+```
+
+We see that we have 2431 complete cases, 150 that are only missing `vote`, 77 that are only missing `income` and so on. The vast majority of missing data is in the income and vote column, and there is only one observation that is missing more than 2 values. 
+
+
+Unfortunately, we have to replace the missing values in the categorical variables by hand. The snazziest way (possibly) is using `mutate_if` and `fct_explicit_na`, which is shown below, but an easier way is to go through the categorical data one at a time, replacing `NA` with "(Missing)".
+
+```{r, warning=FALSE, message=FALSE}
+library(tidyverse)
+chile <- mutate(chile, vote = fct_explicit_na(f = vote),
+                sex = fct_explicit_na(f = sex),
+                education = fct_explicit_na(f = education),
+                region = fct_explicit_na(f = region))
+```
+
+Note that `fct_explicit_na` has an argument `na_level` that can also be used to change `NA` to a value that is a current level. You simply use
+
+```{r, eval=FALSE}
+mutate(chile, education = fct_explicit_na(f = education,
+                                          na_level = "P"))
+```
+and this would change all of the `NA` values in `education` to be `P`.
+
+Of course, any time you find yourself writing the same code over and over again, there is likely a way to automate it. We can do that using `mutate_if` as below.
+
+
+```{r}
+chile <- mutate_if(chile, 
+                   is.factor, 
+                   ~fct_explicit_na(f = ., na_level = "(Missing)"))
+```
+
+OK, now we only have two more observations with missing values! Let's see how `mice` can be used to replace those with the mean.
+
+```{r}
+missing_model <- mice(chile, m = 1, maxit = 1, method = "mean")
+chile <- mice::complete(data = missing_model)
+md.pattern(chile)
+```
+
+Yay! We have successfully replaced all of the missing values! Later in the book, we will see that this is just a first step, and should **by no means** be the last thing you do with missing data. It is a really tricky problem.
+
+```{exercise, label="housing-na"}
+Consider the housing data set in the class kaggle competition, which is available [here](https://www.kaggle.com/c/house-price-prediction-4870/data). 
+
+1. Perform mean imputation for the numerical data.
+
+2. For categorical data, determine whether you can provide reasonable values for the missing data. If so, do it. If not, then replace the missing values with a new level, "(Missing)". 
+```
+
+
+### Predicting when a level is missing from the training set
+
+It can also happen that when you wish to **predict** a value, an observation is not missing, but it is also not found in the training set. For example, suppose you are trying to predict the PRICE of a house. You decide to model it on square footage and zip code.  You build your model, but when you go to predict, there is a house in a zip code that you don't have any data for. While this data isn't missing, it causes similar problems to missing data in that we can't predict a PRICE with that value of zip code. 
+
+The remedy for this is similar to the remedy for missing data. We should try to predict the value of the zip code based on other charactersitics of the house. For example, we could look at the lat/long information and pick the zip code that is the closest geographically. More sophisticated would be to predict the zip code using methods that we will cover later in the course. As a last resort, we could reassign the novel zip code in the test set to the most common value in the train set `na_level` option in `fct_explicit_na`, or to (Missing) using the if it exists in the train set.
+
 ## Correlated Predictors
 
-One common problem that comes up is when the predictors are correlated. An extreme case of this is when two predictors are just affine combinations of one another; for example, temperature measured in celsius and temperature measured in Fahrenheit. 
+One common problem that comes up is when the predictors are correlated. Of course, when predictors are strongly correlated with the **Response** then we are golden, but when they are strongly correlated with one another... not so much. An extreme case of this is when two predictors are just affine combinations of one another; for example, temperature measured in celsius and temperature measured in Fahrenheit. 
 
 ```{r, warning=FALSE, message=FALSE}
 library(tidyverse)
@@ -100,3 +215,374 @@ lm(TMAX ~ TMIN, data = dd_feb)
 lm(TMAX ~ TMIN + TMIN_celsius, data = dd_feb)
 ```
 
+The default behavior of R in this case is to remove the linearly dependent predictor from the model entirely. This is probably the best case scenario. When the predictors are only strongly correlated, things work less smoothly. Let's see this by adding a tiny bit of noise to the `TMIN_celsius` variable.
+
+```{r}
+dd_feb$TMIN_celsius_jitter <- dd_feb$TMIN_celsius + rnorm(2260,0,.01)
+mod2 <- lm(TMAX ~ TMIN + TMIN_celsius_jitter, data = dd_feb)
+summary(mod2)
+```
+
+If you re-run the code above several times, you will see that there is quite a bit of variation in the estimates for the predictors! Let's see how that plays out in terms of predictive modeling.
+
+```{r, cache=TRUE}
+train(TMAX ~ TMIN + TMIN_celsius_jitter, 
+      data = dd_feb, 
+      method = "lm",
+      trControl = trainControl(method = "repeatedcv", repeats = 5))
+```
+
+We see that our RMSE is about 8.2-ish. Now, what if we only used `TMIN`?
+
+```{r}
+train(TMAX ~ TMIN, 
+      data = dd_feb, 
+      method = "lm",
+      trControl = trainControl(method = "repeatedcv", repeats = 5))
+```
+
+However, from the point of view of prediction, it doesn't make much difference. Where it can make a big difference is when we have more variables than observations due to the large number of correlated predictors! 
+
+Let's consider a more realistic example from the textbook, the permeability data set.
+
+```{r}
+library(caret)
+data("tecator")
+```
+
+This data set consists of 215 observations of three responses (the percentages of water, fat and protein) and 100 predictors. The predictors are the infrared absorption of finely chopped pure meat with different moisture, fat and protein contents. The wavelength range was from 850-1050 nm, and we expect the absorption of nearby wavelengths to be highly correlated from sample to sample.
+
+Let's look at the correlation.
+
+```{r}
+cor(absorp)[1:5, 1:5]
+```
+Wow. That's super correlated.
+
+```{r}
+cor(absorp)[1:5,96:100]
+```
+
+Even at the tail end, that is really high correlation! One way to deal with this is by using Principal Components Analysis (PCA). PCA tries to find the orthogonal directions of maximum variance in data. The first direction will be the one with the most variance. The second direction will be the one that has the most variance among all directions that are orthogonal to the first direction. And so on. Then, we can rewrite the data in terms of this new basis. Let's see how it works.
+
+```{r}
+pca_mod <- princomp(absorp)
+```
+
+The standard deviations of the data in the various directions are stored in `pca_mod$sdev`.
+
+```{r}
+pca_mod$sdev %>% head()
+```
+We can see that the standard deviations get quite small quite quickly, so after the first 1-4 directions, there is really not much else in the data. In other words, we may be able to restrict to those 4 components and build just as good of a model as using all 100 predictors. It can be helpful to plot the standard deviations or variances in a **scree plot** to see where it looks like they are leveling off.
+
+```{r}
+barplot(pca_mod$sdev[1:30])
+screeplot(pca_mod)
+```
+
+The built in R function `screeplot` plots the *variances* and not the standard deviations. Next, if we are going to be using the PCA data to build a model, it will be useful to have the data written in the new basis! 
+
+```{r}
+pca_data <- predict(pca_mod, absorp)
+pca_data <- as.data.frame(pca_data)
+pca_data$moisture <- endpoints[,1]
+mod2 <- lm(moisture ~ Comp.1 + Comp.2 + Comp.3 + Comp.4, 
+           data = pca_data)
+summary(mod2)
+```
+
+This model has an $R^2$ of 0.893, which is pretty high. If we built the model on **all** of the variables, we would get the following.
+
+```{r}
+mod_full <- lm(moisture ~ ., 
+           data = pca_data)
+summary(mod_full)
+```
+Definitely has a better adjusted $R^2$; probably we should have included more predictors in our model. But, how do we decide how many of the principle components we want to include? Let's use cross-validation. Here are the steps:
+
+1. Split into test-train.
+2. Do PCA and keep the $N$ directions with most variance based on the training data.
+3. Build model based on $N$ variables.
+4. Transform the test data into these new directions.
+5. Predict outcomes of test data and compute error. Repeat for different values of $N$.
+
+Let's implement this for repeated LGOCV, and then I'll show you how to `caret` it for ease of use.
+
+```{r}
+N <- 4
+train_indices <- sample(1:215, 150)
+train <- absorp[train_indices,]
+test <- absorp[-train_indices,]
+pca_model <- princomp(train)
+absorp_pca <- predict(pca_model)[,1:N]
+absorp_pca <- as.data.frame(absorp_pca)
+absorp_pca$moisture <- endpoints[train_indices,1]
+mod_pca <- lm(moisture ~ ., data = absorp_pca)
+test_pca <- as.data.frame(predict(pca_model, newdata = test))
+mean((predict(mod_pca, newdata = test_pca) - endpoints[-train_indices,1])^2)
+
+```
+Now let's repeat it.
+
+```{r}
+N <- 4
+sim_data <- replicate(100, {
+  train_indices <- sample(1:215, 150)
+  train <- absorp[train_indices,]
+  test <- absorp[-train_indices,]
+  pca_model <- princomp(train)
+  absorp_pca <- predict(pca_model)[,1:N]
+  absorp_pca <- as.data.frame(absorp_pca)
+  absorp_pca$moisture <- endpoints[train_indices,1]
+  mod_pca <- lm(moisture ~ ., data = absorp_pca)
+  test_pca <- as.data.frame(predict(pca_model, newdata = test))
+  mean((predict(mod_pca, newdata = test_pca) - endpoints[-train_indices,1])^2)
+})
+mean(sim_data)
+sd(sim_data)
+```
+
+Now, let's try it for a few different values of $N$.
+
+```{r, cache=TRUE}
+rmse_est <- bind_rows(lapply(2:50, function(N) {
+  sim_data <- replicate(100, {
+    train_indices <- sample(1:215, 150)
+    train <- absorp[train_indices,]
+    test <- absorp[-train_indices,]
+    pca_model <- princomp(train)
+    absorp_pca <- predict(pca_model)[,1:N]
+    absorp_pca <- as.data.frame(absorp_pca)
+    absorp_pca$moisture <- endpoints[train_indices,1]
+    mod_pca <- lm(moisture ~ ., data = absorp_pca)
+    test_pca <- as.data.frame(predict(pca_model, newdata = test))
+    mean((predict(mod_pca, newdata = test_pca) - endpoints[-train_indices,1])^2)
+  })
+  data.frame(N = N, mean = mean(sim_data), sdev = sd(sim_data))
+}))
+ggplot(rmse_est, aes(x = N, y = mean)) +
+  geom_point()
+knitr::kable(rmse_est, digits = 3)
+
+```
+
+```{exercise, label="ex-5-5"}
+Create a data set that consists of 100 independently sampled normal random variables. Perform PCA on this data set and examine the scree plot.
+```
+
+## Aside on PCA
+
+Above, we gave an intuitive idea about what PCA does. The first direction "maximizes the variance" of the data in that direction. The second direction maximizes the variance of the data from among all directions that are orthogonal to the first direction. What does that mean? Let's check to see whether we really believe that, and see a bit more about how this important dimension reduction technique works!
+
+We start by creating a 3 dimensional data set that is not independent. We will use the `mvrnorm` from the `MASS` package, which implements sampling from a multivariate normal distribution. We need a **covariance** matrix that describes the variance and covariance of the three dimensions.
+
+```{r}
+set.seed(2122020)
+pre_cov <- matrix(rnorm(9), nrow = 3)
+cov_mat <- pre_cov %*% t(pre_cov)
+cov_mat
+```
+Multiplying a matrix by its transpose leads to a symmetric positive semidefinite matrix, which is a valid covariance matrix. (What is positive semidefinite, you ask? Well, it just means that $<Ax, x> \ge 0$ for all vectors $x$.)
+
+```{r}
+ip <- function(x, y) {
+  sum(x * y)
+}
+all(replicate(100, {
+  x <- rnorm(3)
+  ip(cov_mat %*% x,x) 
+}) > 0)
+```
+Seems to be true. Now, we build a random sample of 1000 points, then we center them.
+
+```{r}
+dat <- MASS::mvrnorm(1000, mu = c(0,0,0), Sigma = cov_mat)
+library(caret)
+dat <- as.data.frame(dat)
+names(dat) <- c("x", "y", "z")
+dat <- predict(preProcess(dat, method = c("center", "scale")), 
+               newdata = dat)
+```
+
+OK, let's visualize this data set to see if it looks like there is one direction that is of maximum variance.
+
+```{r, warning=FALSE, message=FALSE}
+library(plotly)
+plot_ly(data = dat, x = ~x, y = ~y, z = ~z, type = "scatter3d")
+```
+
+By rotating the figure around, it is pretty clear what is probably the direction of largest variance. But, let's see how we can do that by hand! We first note that the projection of a vector $x$ onto the subspace spanned by $w$ when $\|w\| = 1$ is given by
+\[
+Px = \langle w, x\rangle w
+\]
+It is also an interesting fact that we can randomly sample from the unit sphere by taking a random sample of normal random variables and normalizing. Like this.
+
+```{r}
+vec <- rnorm(3)
+vec <- vec/sqrt(sum(vec^2))
+vec
+```
+
+Let's check on the unit circle that this looks like uniform sampling on the circle.
+
+```{r}
+sim_data <- replicate(1000, {
+  vec <- rnorm(2)
+  vec <- vec/sqrt(sum(vec^2))
+  vec
+})
+plot(t(sim_data))
+```
+
+
+So, here is our plan for finding approximately the direction with biggest variance. We randomly sample from the sphere, project the point cloud onto the line spanned by the random sample, and then compute the variance. We do this a bunch of times and return the biggest value. We first do it a single time. Let's define `norm` to make things a bit more transperent and do it.
+
+```{r}
+norm <- function(x) {
+  sqrt(sum(x^2))
+}
+vec <- rnorm(3)
+vec <- vec/norm(vec)
+mags <- apply(dat, 
+              1, 
+              function(x) norm(ip(x, vec) * vec) * sign(ip(x, vec)))
+var(mags)
+```
+
+So, the current largest variance direction is given by `vec` and the largest variance is given by `var(mags)`. We just repeat this a bunch of times.
+
+```{r}
+largest_variance <- var(mags)
+largest_direction <- vec
+for(i in 1:1000) {
+  vec <- rnorm(3)
+  vec <- vec/norm(vec)
+  mags <- apply(dat, 
+                1, 
+                function(x) norm(ip(x, vec) * vec) * sign(ip(x, vec)))
+  if(var(mags) > largest_variance) {
+    largest_variance <- var(mags)
+    largest_direction <- vec
+    print(i)
+  }
+}
+```
+OK, we see that the direction of the largest variance is `r round(largest_direction, 3)`. Let's add a line in that direction to the scatterplot we already had.
+
+```{r}
+df2 <- data.frame(x = largest_direction[1],
+                  y = largest_direction[2],
+                  z = largest_direction[3])
+mm <- seq(-6, 6, length.out = 100)
+df2 <- bind_rows(lapply(mm, function(x) x * df2))
+
+plot_ly() %>% 
+   add_trace(data=dat, 
+             x = ~x,
+             y = ~y,
+             z = ~z,
+             type = "scatter3d") %>% 
+  add_trace(data=df2, 
+            x = ~x, 
+            y = ~y,
+            z = ~z,
+            mode = "line")
+```
+
+Now let's compare this to the `princomp` function in R.
+
+```{r}
+pca_mod <- princomp(dat)
+pca_mod$loadings
+```
+
+We see that the principle direction is `(0.67, 0.66, 0.34)` and the second direction is `(0.203, 0.274, -0.94)`. Let's plot those two on our scatter plot and see.
+
+```{r}
+df3 <- as.data.frame(t(pca_mod$loadings[,2]))
+df3 <- bind_rows(lapply(mm, function(x) x * df3))
+plot_ly() %>% 
+   add_trace(data=dat, 
+             x = ~x,
+             y = ~y,
+             z = ~z,
+             type = "scatter3d") %>% 
+  add_trace(data=df2, 
+            x = ~x, 
+            y = ~y,
+            z = ~z,
+            mode = "line") %>% 
+  add_trace(data = df3, x = ~x, y = ~y, z = ~z,
+            mode = "line")
+
+```
+
+If you have had linear algebra, it may make sense to you that the principle components are the **eigenvectors** of the covariance matrix of the data. But probably not, because libear algebra doesn't normally cover the interesting things.
+
+```{r}
+cov_mat_dat <- t(as.matrix(dat)) %*% as.matrix(dat)
+eigen(cov_mat_dat)
+```
+
+The largest eigenvalue corresponds to the first principle component, and so on. Note that the we can multiply a vector by negative 1 and that doesn't change the *direction* that we are talking about, and some of these (all?) have been multiplied by negative one relative to the principle components given by `princomp`.
+
+## Johnson-Lindenstrauss Dimension Reduction
+
+PCA is pretty cool. But, before we congratulate ourselves **too** much on being clever, let's look at the following. Suppose that, instead of carefully choosing the principle components and re-writing the data in that basis, we **randomly** chose a subspace of an appropriate dimension and projected down onto that. It turns out that random projections also work, at least with very high probability. This is the idea behind Johnson-Lindenstrauss dimension reduction. To illustrate, let's again use the `tecator` data set. We treat it as a matrix and then multiply by a matrix of random standard normal rvs of appropriate dimension. Then we use that new matrix as our predictors.
+
+```{r}
+data("tecator")
+N <- 10
+train_indices <- sample(1:215, 150)
+test_indices <- (1:215)[-train_indices]
+train <- absorp[train_indices,]
+test <- absorp[test_indices,]
+jl_mat <- matrix(rnorm(N * ncol(train)), ncol = N)
+new_train <- train %*% jl_mat
+new_test <- test %*% jl_mat
+new_train <- as.data.frame(new_train)
+new_test <- as.data.frame(new_test)
+new_train$moisture <- endpoints[train_indices,1]
+mod <- lm(moisture ~ ., data = new_train)
+errs <- predict(mod, newdata = new_test) - endpoints[test_indices,1]
+sqrt(mean(errs^2))
+```
+
+Now we replicate this to estimate RMSE.
+
+```{r}
+ss <- replicate(100, {
+  train_indices <- sample(1:215, 150)
+  test_indices <- (1:215)[-train_indices]
+  train <- absorp[train_indices,]
+  test <- absorp[test_indices,]
+  jl_mat <- matrix(rnorm(N * ncol(train)), ncol = N)
+  new_train <- train %*% jl_mat
+  new_test <- test %*% jl_mat
+  new_train <- as.data.frame(new_train)
+  new_test <- as.data.frame(new_test)
+  new_train$moisture <- endpoints[train_indices,1]
+  mod <- lm(moisture ~ ., data = new_train)
+  errs <- predict(mod, newdata = new_test) - endpoints[test_indices,1]
+  mean(errs^2)
+})
+mean(ss)
+```
+
+We see that taking a *random* projection onto 10 dimensions yields an esimated MSE of `r round(mean(ss, 1))`, which isn't that different from what we were getting by carefully choosing the projection via PCA.
+
+```{exercise, label = "chapter-5-3"}
+a. Do Exercise 6.3, parts (a-d) in the Applied Predictive Modeling book using Principle Components Regression with the number of components kept as the tuning parameter. 
+
+b. Repeat, using JL regression with the reduced dimension size as the tuning parameter. This one will have to be coded up by hand.
+```
+
+
+## Exercises
+
+1. Exercise \@ref(exr:housing-na)
+
+1. Exercise \@ref(exr:ex-5-5)
+
+1. Exercise \@ref(exr:chapter-5-3)
