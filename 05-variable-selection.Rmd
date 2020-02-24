@@ -145,5 +145,219 @@ as.matrix(dd[,1:3]) %*% plsmod$projection %>%
 plsmod$scores[1:6,1:3]
 ```
 
+## Ridge/Lasso and Elastic Net
 
+PCR and partial least squares regression both have the goal of reducing the number of predictor variables by replacing the given predictors with a smaller set of linear combinations of the predictors. This has the advantage of finding directions in the data that are aligned with either the signal of the data or the response, but has as a disadvantage that it can be hard to interpret the new predictors. The techniques of this section work directly with the predictors, and lead to models that tend to be more easily interpretable. 
+
+### Ridge Regression
+
+We start with **ridge regression**. The basic idea is that minimizing SSE has no penalty at all on having arbitrarily large coefficients. If we add a penalty related to the size of the coefficients, then minimizing this new cost function will keep the coefficients relatively small. Ideally, it would force some of them to be either zero, or close enough to zero that we could round to zero and remove that variable from the model that we are building. 
+
+Some more details. Suppose our model is
+
+\[
+y = \beta_0 + \sum_{p = 1}^P \beta_p x_p + \epsilon
+\]
+
+Recall that the SSE based on data is
+\[
+SSE = \sum_{i = 1}^n\bigl(y_i - \hat y_i\bigr)^2
+\]
+where $\hat y_i$ is the estimate of the response $y$. In ridge regression, we add a penalty based on the size of the coefficients $\beta_p$:
+
+\[
+SSE_{L^2} = \sum_{i = 1}^n \bigl(y_i - \hat y_i\bigr)^2 + \lambda \sum_{p = 1}^P \beta_p^2
+\]
+Note that there is also a tuning parameter $\lambda$ in the SSE. Depending on the scales of the predictors and the responses, as well as the relationship between the response and predictor, different $\lambda$ will need to be chosen.
+
+Let's see how this works with a simple simulated example. It is suggested to center and scale our predictors before using ridge regression. We begin with an OLS model. 
+
+```{r}
+sigma <- matrix(rnorm(9), nrow = 3)
+sigma <- t(sigma) %*% sigma
+dd <- MASS::mvrnorm(500, mu = c(0,0,0), Sigma = sigma)
+response <- dd[,1] + 2 * dd[,2] + rnorm(500,0,3)
+dd <- scale(dd)
+lm(response ~ dd) %>% summary()
+```
+
+Now, let's choose $\lambda = 1$ and minimize the $SSE_{L^2}$ cost function.
+
+```{r}
+ssel2 <- function(dd, response, beta_0, beta, lambda = 1) {
+  sum((dd %*% beta + beta_0 - response)^2) + lambda * sum(beta^2)
+}
+ssel2(dd, response, 0, c(0,0,-1))
+```
+
+Now, if we want to minimize this, we use the `optim` function. First, we define the cost function just in terms of the variables that we are trying to minimize.
+
+```{r}
+sse_for_optim <- function(beta) {
+  ssel2(dd, response, beta[1], beta[2:4])
+}
+optim(c(0,0,0,0), fn = sse_for_optim)
+lm(response ~ dd)
+```
+
+We see that regularizing with $\lambda = 1$ had little impact on the result! Since the actual minimum SSE is about 4000, and the coefficients are about 1, that makes sense. In order to get them on the same scale, we would need to have $\lambda = 1000$ or so. Let's try again with $\lambda = 1000$ just to see. Before we do this, you should think about whether larger $\lambda$ will be associated with coefficients that are closer to what we get with OLS, or further.
+
+```{r}
+sse_for_optim <- function(beta) {
+  ssel2(dd, response, beta[1], beta[2:4], lambda = 1000)
+}
+optim(c(0,0,0,0), fn = sse_for_optim)
+lm(response ~ dd)
+```
+
+Still not a huge difference, but note that the large coefficients are now closer to the same size. If we do ridge regression with highly correlated predictors, it is often the case that the coefficients associated with the highly correlated predictors end up being about the same size. That is, ridge regression tends to spread out the weight of that direction across all of the predictors. 
+
+There are several R packages that implement ridge regression. One that gives the same answer as the algorithm described in the book is `ridge`.
+
+```{r}
+ridge::linearRidge(response ~ dd, lambda = 1000, scaling = "scale")
+```
+
+However, as we saw above, it can be tricky to find the right $\lambda$, so other packages do more scaling and trickery, which means that their answers have twists from the algorithm that we described above. Here is the technique suggested by the book.
+
+```{r}
+emod <- elasticnet::enet(x = dd, y = response, lambda = 1000)
+enetCoef<- predict(emod, newx = dd,
+                   s = 1, 
+                   mode = "fraction",
+                   type = "coefficients")
+enetCoef
+```
+
+As long as the method is internally consistent with how it penalizes, it doesn't matter so much whether it matches the exact definition we gave; it's more of a frustration than a problem. As before, in any real problem, we will use cross validation to decide which $\lambda$ to pick. We could again use `train`, as below:
+
+
+```{r}
+library(caret)
+data("tecator")
+train(x = as.data.frame(absorp),
+      y = endpoints[,1],
+      method = "ridge")
+```
+
+But we can get some better information more easily out of the dedicated package `glmnet`. Let's see how to do it. I am following [this book](https://daviddalpiaz.github.io/r4sl/regularization.html) which has tons of interesting things!
+
+```{r}
+library(glmnet)
+fit_ridge <- glmnet(x = absorp, y = endpoints[,1], alpha = 0)
+plot(fit_ridge, label = T, xvar = "lambda")
+```
+
+Here, we can see that as $\lambda$ gets bigger the coefficients of the variables are forced to be smaller and smaller, until eventually they are essentially zero.
+
+```{r}
+fit_ridge_cv <- cv.glmnet(absorp, endpoints[,1], alpha = 0)
+plot(fit_ridge_cv)
+```
+
+The first vertical dotted line is where the smallest MSE is, and the second line is where the MSE is one standard error away from the smallest. In this case, **larger** $\lambda$ corresponds to **simpler** models, or at least, models that have been more regularized. 
+
+The function `glmnet` returns the models associated with each of those two $\lambda$'s for further investigation and use. We can see the coefficients used in the model:
+
+```{r}
+plot(coef(fit_ridge_cv, s = "lambda.min"), type = "l")
+points(coef(fit_ridge_cv, s = "lambda.1se"), type = "l", col = 2)
+```
+
+We see that there isn't a big difference in the coefficients for the two models! If we wanted to predict values, we could use `predict`.
+
+```{r}
+predict(fit_ridge_cv, newx = absorp[1:2,], s = "lambda.min")
+predict(fit_ridge_cv, newx = absorp[1:2,], s = "lambda.1se")
+```
+
+```{r}
+plot(predict(fit_ridge_cv, newx = absorp, s = "lambda.min") - predict(fit_ridge_cv, newx = absorp), ylab = "Moisture", main = "Difference in Predictions of Moisture Content")
+```
+
+Ridge regression is a regularization technique. The point is that if there are highly correlated variables and we resample, we are likely to get similar results using ridge regression with a similar penalty. Let's check that out. We will need to come up with a covariance matrix that produces highly correlated predictors.
+
+```{r}
+sigma <- matrix(runif(16, .9, 1.1), nrow = 4)
+sigma <- sigma %*% t(sigma)
+df <- MASS::mvrnorm(500, mu = c(0,0,0,0), Sigma = sigma)
+cor(df)
+response <- df[,1] + 2 * df[,2] + 3 * df[,3] + 4 * df[,4] + rnorm(500, 0, 3)
+lm(response ~ df)
+```
+
+You should check that if you run the above code multiple times, you get quite different answers for the regression coefficients. Now, let's do ridge regression.
+
+```{r}
+ridge_model <- cv.glmnet(x = df, y = response, alpha = 0)
+coefficients(ridge_model)
+```
+
+The ridge-regression model typically gives a model of about $t = 2.5 x_1 + 2.5 x_2 + 2.5 x_3 + 2.5 x_4$, which is about $y = 10 x_i$ for any of the predictors $x_i$. 
+
+### LASSO
+
+Unlike ridge regression, the LASSO is more of a variable selection technique. If we are trying to force the non-important or redundant predictors' coefficients to be zero, we would want to use the so-called $L_0$ norm as a penalty:
+
+\[
+SSE_{L_0} = \sum\bigl(\hat y_i - y_i\bigr)^2 + \lambda\bigl| \{p: \beta_p \not= 0\}\bigr|
+\]
+
+However, this is a hard problem to solve when there are lots of variables! It essentially involves computing the SSE for each subset of predictors and seeing which one is the smallest. If we had 100 predictors, like in `tecator`, that would mean $2^{100} \approx 1,267,561,000,000,000,000,000,000,000,000$ subsets. That's gonna take some time, and even if we could do it, what if we found a data set that had 1000 predictors? I don't have that kind of time. Instead, we solve the **convex relaxation** of the problem, which is to minimize
+
+\[
+SSE_{L_1} = \sum\bigl(\hat y_i - y_i\bigr)^2 + \lambda \sum_{i = 1}^P |\beta_i|
+\]
+
+Again, we don't typically penalize the intercept, though we could if that made sense for the problem you were working on. Let's see how it works when we have the same four highly correlated synthetic data as we had in the last section.
+
+```{r}
+sigma <- matrix(runif(16, .9, 1.1), nrow = 4)
+sigma <- sigma %*% t(sigma)
+df <- MASS::mvrnorm(500, mu = c(0,0,0,0), Sigma = sigma)
+response <- df[,1] + 2 * df[,2] + 3 * df[,3] + 4 * df[,4] + rnorm(500, 0, 3)
+```
+
+We will again use `glmnet`.
+
+```{r}
+mod <- glmnet(x = df, y = response, alpha = 1)
+plot(mod, xvar = "lambda", label = TRUE)
+```
+
+```{r}
+cv_mod <- cv.glmnet(x = df, y = response, alpha = 1)
+plot(cv_mod)
+```
+
+```{r}
+coef(cv_mod)
+```
+
+We see that the LASSO removed two of the variables, and the other two add up to about 10. (At least, that is what it seemed to be doing when I was practicing!) If we resample, then the LASSO will likely select different variables with different coefficients. So, LASSO doesn't regularize as much as ridge regression, but it does do some variable selection. Let's run it again on `tecator`.
+
+```{r}
+mod <- glmnet(x = absorp, y = endpoints[,1], alpha = 1)
+plot(mod, xvar = "lambda", label = TRUE)
+```
+
+```{r}
+cv_mod <- cv.glmnet(x = absorp, y = endpoints[,1], alpha = 1, type.measure = "mse")
+plot(cv_mod)
+```
+
+```{r}
+plot(coef(cv_mod))
+sum(abs(coef(cv_mod)) > 0)
+```
+
+This model has `r sum(abs(coef(cv_mod)) > 0)` non-zero variables. That is quite a few more than PCR and PLS ended up with, but **these are the original variables** so we might have some hope of interpreting things. So, downside is more variables, upside is that the variables are more immediately interpretable. Now let's just see what the estimated RMSE was. The first one is for the $\lambda$ that is one standard error away from the minimum value, and the second is the minimum MSE observed.
+
+
+```{r}
+cv_mod$cvm[cv_mod$lambda == cv_mod$lambda.1se]
+cv_mod$cvm[cv_mod$lambda == cv_mod$lambda.min]
+```
+
+## Step AIC
 

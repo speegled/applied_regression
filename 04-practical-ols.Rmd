@@ -368,7 +368,7 @@ knitr::kable(rmse_est, digits = 3)
 ```
 
 ```{exercise, label="ex-5-5"}
-Create a data set that consists of 100 independently sampled normal random variables. Perform PCA on this data set and examine the scree plot.
+Create a data set that consists of at least 100 observations of 100 independent, normal random variables. Perform PCA on this data set and examine the scree plot.
 ```
 
 ## Aside on PCA
@@ -446,7 +446,8 @@ vec <- rnorm(3)
 vec <- vec/norm(vec)
 mags <- apply(dat, 
               1, 
-              function(x) norm(ip(x, vec) * vec) * sign(ip(x, vec)))
+              function(x) norm(ip(x, vec) * vec) * sign(ip(x, vec))) 
+#' This is not necessary. Since vec is norm 1, this is ip(x, vec)!
 var(mags)
 ```
 
