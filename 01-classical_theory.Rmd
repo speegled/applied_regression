@@ -211,7 +211,7 @@ ggplot(galton, aes(parent, child)) +
   geom_jitter(alpha = .5)
 ```
 
-It appears that there is a positive correlation between the height of a parent and the height of their adult child. (The parent value is the average of the father and mother of the child., and the child value has been adjusted for sex of the child. So, this may not be the best example of rigourous data collection!)
+It appears that there is a positive correlation between the height of a parent and the height of their adult child. (The parent value is the average of the father and mother of the child, and the child value has been adjusted for sex of the child. So, this may not be the best example of rigourous data collection!)
 
 ```{r}
 ggplot(galton, aes(parent, child)) + 

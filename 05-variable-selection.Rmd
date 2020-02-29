@@ -361,3 +361,281 @@ cv_mod$cvm[cv_mod$lambda == cv_mod$lambda.min]
 
 ## Step AIC
 
+We mentioned before that we would ideally like to minimize $SSE_{L_0}$, which is the sum-squared error plus a penalty based on how many of the coefficients are non-zero. While checking all subsets of coefficients would take too long, we can try a *stepwise* approach, which would approximate this. Let's see how this would work in the example from above that is running through the chapter, but let's make the correlation between variables smaller.
+
+```{r}
+set.seed(2292020)
+sigma <- matrix(runif(16, -.5, 1.5), nrow = 4)
+sigma <- sigma %*% t(sigma)
+df <- MASS::mvrnorm(500, mu = c(0,0,0,0), Sigma = sigma)
+response <- df[,1] + 2 * df[,2] + 3 * df[,3] + rnorm(500, 0, 3)
+cor(df)
+```
+We do LOOCV on the full model, then we do LOOCV estimate of MSE after removing each variable separately. So, in all, we do 5 LOOCV MSE estimates. If none of the 4 reduced models are better, then we are done. If one is better, that becomes our new "full model" and we see whether we can remove any of the other three variables. 
+
+One twist, though, is that in the real algorithm, we would also want to check whether adding variables back in would improve the MSE. We will not implement that here.
+
+The reason that we are using LOOCV is that it is easy to compute for linear models without actually doing the interation! We won't go through the details, but we will include the code here for anyone interested.
+
+First, we find the hat matrix and the leverage values.
+
+```{r}
+dd <- as.data.frame(df)
+dd$response <- response
+full_mod <- lm(response ~ ., data = dd)
+full_mod$residuals
+str(full_mod)
+hatvalues(full_mod) #This is the diagonal of the "hat matrix" aka the leverage values
+df_intercept <- cbind(df, rep(1, 500))
+hat_matrix <- df_intercept %*% 
+  solve(t(df_intercept) %*% 
+          df_intercept) %*% 
+  t(df_intercept)  #this is the hat matrix
+
+diag(hat_matrix)[1:5] 
+hatvalues(full_mod)[1:5] #see, the diagonal of the hat matrix really is this!
+predict(full_mod)[1:5]
+(hat_matrix %*% response)[1:5] 
+
+```
+
+The hat matrix is called the hat matrix because when you multiply the hat matrix times the response, you get the predicted values! Sounds like magic, I know, but you can see that it is true above.
+
+You can also get the residuals from the hat matrix:
+
+```{r}
+((diag(1, 500) - hat_matrix) %*% response)[1:5]
+full_mod$residuals[1:5]
+```
+
+So far, this doesn't seem too magical. But, check this out. We can get the LOOCV MSE score directly from the hat matrix.
+
+```{r}
+1/500 * sum(((diag(1, 500) - hat_matrix) %*% response)^2/(1 - hatvalues(full_mod))^2)
+```
+Perhaps easier to understand:
+
+```{r}
+mean((full_mod$residuals^2)/(1 - hatvalues(full_mod))^2)
+```
+
+It is the average value of the residuals squared, weighted by the reciprocal of 1 minus the leverage squared. Let's verify through actual LOOCV.
+
+```{r}
+errors <- sapply(1:500, function(x) {
+  dd_small <- dd[-x,]
+  mod_small <- lm(response ~ ., data = dd_small)
+  predict(mod_small, newdata = dd[x,]) - dd$response[x]
+})
+mean(errors^2) #behold!
+```
+
+Now, let's remove each of the four variables separately, and estimate the MSE via LOOCV.
+
+```{r}
+loocvs <- sapply(1:4, function(x) {
+  dd_skinny <- dd[,-x]
+  skinny_mod <- lm(response ~ ., data = dd_skinny)
+  mean((skinny_mod$residuals^2)/((1 - hatvalues(skinny_mod))^2))
+})
+loocvs
+```
+By inspection, we see that we should remove variable number `r which.min(loocvs)`, because doing so has the lowest LOOCV estimate of MSE, and it is lower than the full model, which was `r mean(errors^2)`. Then, we would repeat the above, seeing if we can remove any of variables 1, 2 and 3. 
+
+There is another way of doing this, using the Akaike Information Criterion. It can be shown that under some assumptions, the AIC is asymptotically equivalent to doing LOOCV. Here, by asymptotically equivalent, I mean that as the number of data points goes to infinity, LOOCV with MSE and the AIC will both yield the same suggestion as to which variable to remove, or whether to stay with the model you have.
+
+```{r}
+MASS::stepAIC(full_mod, steps = 1)
+```
+
+Note that, in this case, `stepAIC` also chooses to remove the 4th variable. It is not the case that these two techniques will always give the same suggestion, though, even though in the limit as the number of observations goes to infinity they will. 
+
+Let's try them out on the tecator data set.
+
+```{r}
+data("tecator")
+compute_loocv <- function(full_model) {
+  mean((full_model$residuals)^2/((1 - hatvalues(full_model))^2))
+}
+dd <- as.data.frame(absorp)
+dd$response <- endpoints[,1]
+full_model <- lm(response ~ ., data = dd)
+mse_full <- compute_loocv(full_model)
+mse_loocv <- sapply(1:ncol(absorp), function(x) {
+  dd_skinny <- dd[,-x]
+  skinny_model <- lm(response ~ ., data = dd_skinny)
+  compute_loocv(skinny_model)
+})
+which.min(mse_loocv)
+mse_loocv[45]
+```
+This suggests that our first move should be to remove variable 45, resulting in a decrease of almost a full unit in MSE!  Now, let's see what `stepAIC` suggests.
+
+```{r}
+MASS::stepAIC(full_model, steps = 1)
+```
+
+Hmmm, it suggests to remove variable 53. 
+
+```{r}
+mse_loocv[53]
+mse_loocv[45]
+```
+
+This really isn't doing a good job of selling itself as a proxy for LOOCV.
+
+### Doing LGOCV with preprocessing
+
+1. If there are tuning parameters, set tuning parameter.
+1. Split into test/train
+2. Preprocess train based only on train.
+3. Build model.
+4. Process test based on the preprocessing model from 2.
+5. Predict response from model built in 3.
+6. Compute error
+7. Repeat 1-6 100-ish times.
+8. Take mean and standard deviation; that is the mean error estimate for this tuning parameter value.
+9. Repeat for next tuning parameter value.
+10. Choose the tuning parameter value that gives the simplest model that is within one standard deviation of the smallest mean error. 
+
+Then, if you want to apply your model to new data that comes in, you build your model on the entire data with the best tuning parameter, including any preprocessing steps. Apply those same preprocessing steps to the new data and then predict. 
+
+Let's run through the entire thing with the Chemical Manufacturing Process data.
+
+```{r}
+library(AppliedPredictiveModeling)
+data("ChemicalManufacturingProcess")
+```
+
+Let's pretend like the very last observation is the new data that will be coming in at the end.
+
+```{r}
+newdata <- ChemicalManufacturingProcess[176,]
+ChemicalManufacturingProcess <- ChemicalManufacturingProcess[-176,]
+```
+
+We'll do Johnson-Lindenstrauss dimension reduction followed by regression. We'll choose either 2 or 3 dimensions to project onto, for simplicity. 
+
+```{r cache=TRUE}
+# 1. If there are tuning parameters, set tuning parameter.
+
+num_dim <- 2
+
+# 1. Split into test/train
+
+train_indices <- sample(1:nrow(ChemicalManufacturingProcess), 135)
+test_indices <- (1:175)[-train_indices]
+train_data <- ChemicalManufacturingProcess[train_indices,]
+test_data <- ChemicalManufacturingProcess[test_indices,]
+
+# 2. Preprocess train based only on train. We only want to do this for the predictors.
+
+train_predictors <- as.matrix(select(train_data, -Yield))
+train_response <- train_data$Yield
+pre_model <- preProcess(x = train_predictors, 
+                        method = c("center", 
+                                   "scale", 
+                                   "medianImpute", 
+                                   "nzv"))
+train_predictors <- predict(pre_model, newdata = train_predictors)
+
+# 3. Build model.
+
+jl_matrix <- matrix(rnorm(ncol(train_predictors) * num_dim), ncol = num_dim)
+projected_predictors <- train_predictors %*% jl_matrix
+mod <- lm(train_response ~ ., data = as.data.frame(projected_predictors))
+
+# 4. Process test based on the preprocessing model from 2.
+
+test_predictors <- as.matrix(select(test_data, -"Yield"))
+test_response <- test_data$Yield
+test_predictors <- predict(pre_model, newdata = test_predictors)
+
+
+# 5. Predict response from model built in 3.
+
+test_projected <- test_predictors %*% jl_matrix
+test_response_model <- predict(mod, newdata = as.data.frame(test_projected))
+
+# 6. Compute error
+
+error <- test_response_model - test_response
+mean(error^2)
+
+# 7. Repeat 1-6 100-ish times.
+
+lgocv_errors <- replicate(100, {
+  train_indices <- sample(1:nrow(ChemicalManufacturingProcess), 135)
+  test_indices <- (1:175)[-train_indices]
+  train_data <- ChemicalManufacturingProcess[train_indices,]
+  test_data <- ChemicalManufacturingProcess[test_indices,]
+  
+  train_predictors <- as.matrix(select(train_data, -Yield))
+  train_response <- train_data$Yield
+  pre_model <- preProcess(x = train_predictors, 
+                          method = c("center", 
+                                     "scale", 
+                                     "medianImpute", 
+                                     "nzv"))
+  train_predictors <- predict(pre_model, newdata = train_predictors)
+  
+  jl_matrix <- matrix(rnorm(ncol(train_predictors) * num_dim), ncol = num_dim)
+  projected_predictors <- train_predictors %*% jl_matrix
+  mod <- lm(train_response ~ ., data = as.data.frame(projected_predictors))
+  
+  test_predictors <- as.matrix(select(test_data, -"Yield"))
+  test_response <- test_data$Yield
+  test_predictors <- predict(pre_model, newdata = test_predictors)
+  
+  test_projected <- test_predictors %*% jl_matrix
+  test_response_model <- predict(mod, newdata = as.data.frame(test_projected))
+  
+  error <- test_response_model - test_response
+  mean(error^2)
+})
+
+# 8. Take mean and standard deviation; that is the mean error estimate for this tuning parameter value.
+
+c(mean = mean(lgocv_errors), sdev = sd(lgocv_errors))
+
+# 9. Repeat for next tuning parameter value.
+
+sapply(2:3, function(num_dim) {
+  lgocv_errors <- replicate(100, {
+    train_indices <- sample(1:nrow(ChemicalManufacturingProcess), 135)
+    test_indices <- (1:175)[-train_indices]
+    train_data <- ChemicalManufacturingProcess[train_indices,]
+    test_data <- ChemicalManufacturingProcess[test_indices,]
+    
+    train_predictors <- as.matrix(select(train_data, -Yield))
+    train_response <- train_data$Yield
+    pre_model <- preProcess(x = train_predictors, 
+                            method = c("center", 
+                                       "scale", 
+                                       "medianImpute", 
+                                       "nzv"))
+    train_predictors <- predict(pre_model, newdata = train_predictors)
+    
+    jl_matrix <- matrix(rnorm(ncol(train_predictors) * num_dim), ncol = num_dim)
+    projected_predictors <- train_predictors %*% jl_matrix
+    mod <- lm(train_response ~ ., data = as.data.frame(projected_predictors))
+    
+    test_predictors <- as.matrix(select(test_data, -"Yield"))
+    test_response <- test_data$Yield
+    test_predictors <- predict(pre_model, newdata = test_predictors)
+    
+    test_projected <- test_predictors %*% jl_matrix
+    test_response_model <- predict(mod, newdata = as.data.frame(test_projected))
+    
+    error <- test_response_model - test_response
+    mean(error^2)
+  })
+  
+  c(mean = mean(lgocv_errors), sdev = sd(lgocv_errors))
+})
+
+
+# 10. Choose the tuning parameter value that gives the simplest model that is within one standard deviation of the smallest mean error. 
+```
+
+By inspection, the model with `num_dim = 2` is the one that is the best.
