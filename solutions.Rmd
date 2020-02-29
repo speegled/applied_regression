@@ -171,3 +171,92 @@ summary(mod2)
 ```
 Note that `no` is not significant, and the Adjusted R-squared decreased. Both of these are what we would like to see.
 
+## Chapter 5
+
+3. Let's load the data.
+
+```{r}
+set.seed(2252020)
+library(AppliedPredictiveModeling)
+data("ChemicalManufacturingProcess")
+```
+
+The problem asks us to do an initial test/train split and work with the train data from there on out. I'll pull out the test data and leave the train data with the same variable name.
+
+```{r}
+test_indices <- sample(1:176, 46)
+test_dat <- ChemicalManufacturingProcess[test_indices,]
+ChemicalManufacturingProcess <- ChemicalManufacturingProcess[-test_indices,]
+```
+
+
+The data isn't in the format that the book said it would be in. Let's create a matrix of predictors and a vector response, in addition to the data frame with both.
+
+```{r}
+predictors <- ChemicalManufacturingProcess[,-1]
+response <- ChemicalManufacturingProcess[,1]
+```
+
+Now let's see about missing data.
+
+```{r}
+sum(is.na(predictors))
+```
+
+We do have missing data, so we will need to preprocess. The first part of the problem asks us to do Principle Component Regression. Let's do it using the `caret` package.
+
+```{r}
+library(caret)
+train(x = predictors, 
+      y = response, 
+      method = "pcr", 
+      preProcess = c("center", "scale", "medianImpute", "nzv"))
+```
+
+I think we need to expand our tune grid a bit.
+
+```{r}
+tuneGrid <- data.frame(ncomp = 1:20)
+pca_mod <- train(x = predictors, 
+      y = response, 
+      method = "pcr", 
+      tuneGrid = tuneGrid,
+      preProcess = c("center", "scale", "medianImpute", "nzv"))
+apply(pca_mod$results[,c(2, 5)], 1, sum)
+```
+
+The smallest value 1 se away from the estimated MSE is `r min(apply(pca_mod$results[,c(2, 5)], 1, sum))`. So, by our one se rule of them, we will choose
+
+```{r}
+ncomp <- which(pca_mod$results[,2] < min(apply(pca_mod$results[,c(2, 5)], 1, sum)))
+ncomp <- min(ncomp)
+ncomp
+```
+
+This says that we need one component, and our estimate for the MSE is roughly $2.1 \pm  .92$.
+
+```{r}
+pca_mod$results[1,2]
+pca_mod$results[1,5]
+```
+
+Let's check it out on our test set that we haven't touched yet. We first have to apply the same pre-processing steps to the test data as we did to the train data.
+
+```{r}
+preprocess_mod <- preProcess(predictors, 
+                             method = c("scale", "center", "medianImpute", "nzv"))
+test_predictors <- test_dat[,-1]
+test_response <- test_dat[,1]
+test_processed <- predict(preprocess_mod, newdata = test_predictors)
+```
+
+Now we can predict the outcomes on the test set.
+
+```{r}
+predict(pca_mod$finalModel, newdata = test_processed, ncomp = 1)[,,1]
+errors <- predict(pca_mod$finalModel, newdata = test_processed, ncomp = 1)[,,1] - test_response
+mean(errors^2)
+```
+
+This value is within 2 se of the predicted value based on CV. 
+
