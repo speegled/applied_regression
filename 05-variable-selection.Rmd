@@ -383,9 +383,7 @@ First, we find the hat matrix and the leverage values.
 dd <- as.data.frame(df)
 dd$response <- response
 full_mod <- lm(response ~ ., data = dd)
-full_mod$residuals
-str(full_mod)
-hatvalues(full_mod) #This is the diagonal of the "hat matrix" aka the leverage values
+
 df_intercept <- cbind(df, rep(1, 500))
 hat_matrix <- df_intercept %*% 
   solve(t(df_intercept) %*% 
@@ -393,7 +391,7 @@ hat_matrix <- df_intercept %*%
   t(df_intercept)  #this is the hat matrix
 
 diag(hat_matrix)[1:5] 
-hatvalues(full_mod)[1:5] #see, the diagonal of the hat matrix really is this!
+hatvalues(full_mod)[1:5] #see, the diagonal of the hat matrix is given by hatvalues!
 predict(full_mod)[1:5]
 (hat_matrix %*% response)[1:5] 
 
@@ -639,3 +637,89 @@ sapply(2:3, function(num_dim) {
 ```
 
 By inspection, the model with `num_dim = 2` is the one that is the best.
+
+## Interactions
+
+This section is long, long overdue. We are going to talk about interactions between variables. It can, and often does, happen that the values of one variable affect the way that another variable affects the response. For example, suppose you were measuring how fast honey emtpied out of a jar as a function of the angle that the jar is held and the ambient temperature. It is reasonable to wonder whether at higher temperatures, the angle will have a different effect on how quickly the honey drains than at lower temperatures. Another example would be estimating the drop in blood pressure per mg of drug pressure medicine administered. It is reasonable to wonder whether the rate at which drug pressure drops is different per mg for women than for men, or for children than for adults. 
+
+The interpretation of interactions is different depending on whether the predictors are categorical or numeric.
+
+1. For categorical data, interactions are an effect for each combination of the levels in the categorical data.
+
+2. For an interaction between categorical and numeric, interactions indicate a different slope for each of the levels of the categorical data.
+
+3. For interaction between numeric data, the interactions indicate that at a fixed level of the first variable, there is a linear response in the other variable, but the slope of that response changes with the value of the first variable. In practice, interaction between numeric variables creates a new variable which is the product of the two variables, and includes that in the regression model.
+
+Let's look at an example from ISwR.
+
+```{r}
+juul <- ISwR::juul
+```
+
+We model `igf` on age, sex and tanner level, with interactions.
+
+```{r}
+juul$sex <- factor(juul$sex, levels = c(1, 2), labels = c("boy", "girl"))
+juul$tanner <- factor(juul$tanner)
+mod <- lm(igf1 ~ (age + sex + tanner)^2, data = juul) #includes all interactions between pairs of variables
+summary(mod)
+```
+
+Let's go through the interpretations. Note that if we do not re-code `sex` and `tanner` as categorical, then our output would have been quite different. 
+
+Looking at the `age` coefficient, we would be tempted to say that the `igf` level is associated with an increase of 14.887 micrograms/liter for each year of age increase. However, that can (read: would) be misleading. Looking further down the list, we see coefficients associated with `age:sex` and `age:tanner`. So, the increase of 14.886 per year is **for boys** in **tanner level 1**. 
+
+If we look at `age:sexgirl`, we see that we need to add 5.666 to the estimate for boys in order to get the estimate for the `igf` level increase per year. In other words, for girls (in tanner level 1), the increase is `14.866 + 5.666 = 20.532`. R has as its default that it reports the values for the first level of the factor, and then the interactions indicate the change from that first value for the other levels. It chose `boys` because we listed `boy` before `girl` in the `levels` argument to `factor`. It is important to know which level R is considering the base level for interpreting the coefficients!
+
+Note that we didn't specify the levels in the `tanner` variable. In this case, R chooses a natural order for the levels. If the data is numeric, it will arrange them in increasing order, and if the data is character, then it will arrange them in alphabetical order. If we want to be sure, we can type `levels(juul$tanner)` and it will give us the labels of the levels in the order that it has them.
+
+```{r}
+levels(juul$tanner)
+```
+
+We see that tanner level 1 is the "base" level. So, the `igf` increases by 14.886 per year for **boys** in **tanner 1**. Girls in tanner 2 have a an estimated increase of 14.886 + 5.666 + 10.759 per year. (Note: this sounds like I am saying that for an individual girl, she would expect to see her igf1 level increase by this much per year. That is not what I mean. I mean that each extra year is associated with igf1 levels that are 31.291 micrograms/liter higher. What is the difference?) 
+
+Now, let's estimate the mean `igf` level for girls in tanner 2 who are 12 years old. It would be 
+
+\[
+79.825 -32.310 - 69.726 + (14.886124 + 5.666282 + 10.758917 ) * 12 + 19.597 =  373.1219
+\]
+
+I have used more sig digits in the slope of age because we are multiplying by 12, and otherwise it doesn't match the answer given by predict very well.
+
+```{r}
+predict(mod, newdata = data.frame(age = 12,
+                                  sex = "girl",
+                                  tanner  = "2"))
+```
+
+Now let's look at significance. Dalgaard writes "The exact definition of the interaction terms and the interpretation of their associated regression coefficients can be elusive. Some peculiar things happen if an interaction term is present but one or more of the main effects are missing." Note that if we re-do the model with the main effect `sex` missing, it simply reparametrizes the model. The $R^2$ and $F$ statistic are exactly the same.
+
+```{r}
+mod2 <- lm(igf1 ~ age + tanner + age:tanner + sex:tanner + sex:age, data = juul)
+summary(mod2)
+```
+
+Let's remind ourselves what the original model summary was.
+
+```{r}
+summary(mod)
+```
+
+We see a significant interaction between sex and tanner, between age and tanner, and but not between age and sex. It might be reasonable to remove the interaction term between age and sex. I don't normally use `update`, but now would be a good time to start. Here are two ways of specifying the model.
+
+```{r}
+mod2 <- lm(igf1 ~ age + sex + tanner + age:tanner + sex:tanner, data = juul)
+summary(mod2)
+mod2 <- update(mod, formula. = . ~. -age:sex)
+summary(mod2)
+```
+
+At this point, the interaction between sex and tanner is significant, as is the interaction between age and tanner. I would probably not proceed any further with reducing the model. I tend to only consider removing main effect terms if all of the interactions associated with those terms are not significant. Note also that this is the default behavior of `stepAIC`, which can also be applied to models with interactions.
+
+```{r}
+MASS::stepAIC(mod)
+```
+
+
+
