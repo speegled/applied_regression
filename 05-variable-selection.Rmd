@@ -715,7 +715,7 @@ mod2 <- update(mod, formula. = . ~. -age:sex)
 summary(mod2)
 ```
 
-At this point, the interaction between sex and tanner is significant, as is the interaction between age and tanner. I would probably not proceed any further with reducing the model. I tend to only consider removing main effect terms if all of the interactions associated with those terms are not significant. Note also that this is the default behavior of `stepAIC`, which can also be applied to models with interactions.
+At this point, the interaction between sex and tanner is significant, as is the interaction between age and tanner. I would not proceed any further with reducing the model. I tend to only consider removing main effect terms if all of the interactions associated with those terms are not significant. Note also that this is the default behavior of `stepAIC`, which can also be applied to models with interactions.
 
 ```{r}
 MASS::stepAIC(mod)

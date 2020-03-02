@@ -9,6 +9,7 @@ rmd_files: [
   "03-predictive-modeling.Rmd",
   "04-practical-ols.Rmd",
   "05-variable-selection.Rmd",
+  "06-nonlinear-regression.Rmd",
   "solutions.Rmd"
   ]
 

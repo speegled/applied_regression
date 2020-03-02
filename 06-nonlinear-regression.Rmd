@@ -1,0 +1,204 @@
+# Non-Linear Regression Models
+
+This short chapter will cover two techniques: Support Vector Machines and $k$ nearest neighbors. 
+
+Support vector machines are more commonly used in classification problems, but we are focusing on a numeric response for now. We will motivate SVM's via an appeal to *robust regression*, much like using Huber or another error function. 
+
+$k$ Nearest Neighbors is a useful technique in many contexts. We will only give a brief overview of this technique.
+
+## Support Vector Machines
+
+Recall once again that OLS using `lm` minimizes the SSE given by
+
+\[
+SSE = \sum_{i = 1}^n\bigl(y_i - (\beta_0 + \beta_1 x_{1i} + \cdots \beta_{Pi})\bigr)^2
+\]
+
+In other words, if $g(x) = x^2$, then the SSE is given by 
+
+\[
+SSE = \sum_{i = 1}^n g(y_i - \hat y_i)
+\]
+
+We have seen before that picking different functions $g$ can lead to better results in some instances. For example, chosing $g$ to be given in the following plot limits the influence of outliers.
+
+```{r}
+curve(robustbase::Mchi(x, cc = 1.6, psi = "bisquare"), from = -2, to = 2,
+      ylab = "g(x)")
+```
+
+Support vector machines give another choice of $g$, which is shown below:
+
+```{r}
+svm <- function(x, epsilon = 1) {
+  pmax(0, abs(x) - epsilon)
+}
+curve(svm(x, .2), from = -2, to = 2)
+curve(robustbase::Mchi(x, psi = "huber", cc = 1), add = T, col = 2)
+```
+
+The loss function for SVM is similar to the Huber loss function and to $g(x) = |x|$, because it behaves linearly outside of some interval around 0. However, a key difference is that small errors are set to exactly 0, rather than some small number. Another way to describe the loss function is that it is the absolute loss function $g(x) = |x|$, which has been *soft thresholded* at some value of $\epsilon$. Don't worry if that doesn't help you understand that last sentence; you can definitely understand the loss function straight from the graph. 
+
+Let's call the SVM loss function $g_S$ for this chapter, just to have notation. SVM regression minimizes
+
+\[
+\lambda \sum_{i = 1}^n g_S(y_i - \hat y_i) + \sum_{i = 1}^P \beta_i^2
+\]
+
+Note that there is a penalty attached to the coefficients. This will force the coefficients to be small within the range of errors for which $g_S = 0$. You can think of it as; an error less than $\epsilon$ isn't really an error, it is essentially correct. So, there is no point in fitting the curve further once we are within $\epsilon$, we should work on other priorities. The two priorities chosen are fitting points outside of the $\epsilon$ error band, and making the coefficients small. We could have chosen other priorities and put those in the thing we are trying to minimize. 
+
+Note also that there is a parameter associated with the fit error. This parameter will determine how much weight is given to data points that fall outside of the $\epsilon$ band relative to how much weight is given to the penalty term of the coefficients. The textbook recommends that you fix a value of $\epsilon$ and tune the $\lambda$ parameter via cross-validation. 
+
+Let's look at an example, using simulated data.
+
+```{r, warning=FALSE, message=FALSE}
+sigma <- matrix(rnorm(9), ncol = 3)
+sigma <- t(sigma) %*% sigma
+dd <- matrix(MASS::mvrnorm(100 * 3, mu = c(0,0,0), Sigma = sigma), ncol = 3)
+cor(dd)
+df <- data.frame(dd)
+library(tidyverse)
+df <- mutate(df, response = 1 + 2 * X1 + 3 * X2 + 4 * X3 + 8 * rt(100, 4))
+summary(lm(response ~ ., data =df))
+```
+
+
+```{r}
+svm_error <- function(beta) {
+  yhat <- beta[1] + dd %*% beta[2:4]
+  lambda * sum(svm(df$response - yhat, epsilon = 1)) + sum(beta[2:4]^2)
+}
+lambda <- 1
+optim(par = c(1,2,3,4), fn = svm_error)
+```
+
+We definitely get quite different values for the parameters than we got when we used `lm`. Let's do CV to see what the estimate RMSE is. In the past, we have been forcing our functions passed to optim to only have one parameter; namely, the one of interest. Here we see that we can have more arguments, and we just can add them to the end of `optim` and they get passed right along to the function we are optimizing. 
+
+```{r}
+svm_error <- function(beta, lambda, dd_train, df_train) {
+  yhat <- beta[1] + dd_train %*% beta[2:4]
+  lambda * sum(svm(df_train$response - yhat, epsilon = .5)) + sum(beta[2:4]^2)
+}
+svm_rmse <- replicate(100, {
+  train_indices <- sample(100, 75)
+  test_indices <- (1:100)[-train_indices]
+  dd_train <- dd[train_indices,]
+  df_train <- df[train_indices,]
+  dd_test <- dd[test_indices,]
+  beta <- optim(par = c(1,2,3,4), fn = svm_error, 
+                  lambda = lambda, 
+                  dd_train = dd_train,
+                  df_train = df_train)$par
+  yhats <- beta[1] + dd_test %*% beta[2:4]
+  errors <- df$response[test_indices] - yhats
+  sqrt(mean(errors^2))
+})
+mean(svm_rmse)
+```
+
+Now, let's tune over several different values of $\lambda$. 
+
+```{r}
+svm_error <- function(beta, lambda, dd_train, df_train) {
+  yhat <- beta[1] + dd_train %*% beta[2:4]
+  lambda * sum(svm(df_train$response - yhat, epsilon = .5)) + sum(beta[2:4]^2)
+}
+sapply((2)^((-6):14), function(lambda) {
+
+  svm_rmse <- replicate(100, {
+    train_indices <- sample(100, 75)
+    test_indices <- (1:100)[-train_indices]
+    dd_train <- dd[train_indices,]
+    df_train <- df[train_indices,]
+    dd_test <- dd[test_indices,]
+    beta <- optim(par = c(1,2,3,4), fn = svm_error, 
+                  lambda = lambda, 
+                  dd_train = dd_train,
+                  df_train = df_train)$par
+    yhats <- beta[1] + dd_test %*% beta[2:4]
+    errors <- df$response[test_indices] - yhats
+    sqrt(mean(errors^2))
+  })
+  c(lambda = lambda, mu = mean(svm_rmse), sdev = sd(svm_rmse))
+})
+```
+
+We see that once we get to a $\lambda$ of about 1/8, the RMSE is about as small as it is going to get.
+
+
+And now we compare that to `lm`. 
+
+```{r}
+lm_rmse <- replicate(100, {
+  train_indices <- sample(100, 75)
+  test_indices <- (1:100)[-train_indices]
+  dd_train <- dd[train_indices,]
+  df_train <- df[train_indices,]
+  dd_test <- dd[test_indices,]
+  mod <- lm(response ~ ., data = df_train)
+  yhats <- predict(mod, newdata = df[test_indices,])
+  errors <- df$response[test_indices] - yhats
+  sqrt(mean(errors^2))
+})
+mean(lm_rmse)
+```
+
+Seems to be working about the same as `lm` on this data set. Up to this point, you could fairly ask why this section is in the non-linear regression chapter of the book. It seems completely in line with the things we were doing earlier. However, we can do a switcheroo called the "kernel trick" that I am not going to go into details on in order to spice things up. Let's see some data and use some packages to do this.
+
+```{r, message=FALSE, warning=FALSE}
+library(kernlab)
+tuneGrid <- data.frame(C = 2^((-4):4))
+caret::train(response ~ ., 
+             data = df,
+             method = "svmLinear",
+             tuneGrid = tuneGrid,
+             preProcess = c("center", "scale")
+              )
+```
+
+We see that there isn't a lot to choose from in terms of the tuning parameter! Now, let's spice things up. Here is a new data set that is a $\sin$ curve.
+
+```{r}
+sincurve <- data.frame(x = runif(100, 0, 2 * pi))
+sincurve$y <- sin(sincurve$x) + rnorm(100, 0, .1)
+plot(sincurve) 
+```
+
+Now, let's throw in some outliers.
+
+```{r}
+sincurve <- rbind(sincurve, data.frame(x = seq(0, .1, length.out = 5), y = -1))
+plot(sincurve)
+```
+
+```{r}
+caret::train(y ~ x, 
+             data = sincurve,
+             method = "svmRadial"
+             )
+svm_mod <- ksvm(x = sincurve$x, y = sincurve$y,
+                C = 1, epsilon = .1
+                )
+new_x <- seq(0, 2*pi, length.out = 100)
+new_y <- predict(svm_mod, newdata = seq(0, 2 * pi, length.out = 100))
+plot(sincurve)
+points(new_x, new_y, type = "l")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
