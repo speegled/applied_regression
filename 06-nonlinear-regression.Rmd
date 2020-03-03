@@ -6,7 +6,7 @@ Support vector machines are more commonly used in classification problems, but w
 
 $k$ Nearest Neighbors is a useful technique in many contexts. We will only give a brief overview of this technique.
 
-## Support Vector Machines
+## Support Vector Regression
 
 Recall once again that OLS using `lm` minimizes the SSE given by
 
@@ -167,26 +167,30 @@ plot(sincurve)
 Now, let's throw in some outliers.
 
 ```{r}
-sincurve <- rbind(sincurve, data.frame(x = seq(0, .1, length.out = 5), y = -1))
+sincurve <- rbind(sincurve, data.frame(x = seq(0, 1, length.out = 5), y = -1))
 plot(sincurve)
 ```
 
 ```{r}
-caret::train(y ~ x, 
+c_mod <- caret::train(y ~ x, 
              data = sincurve,
              method = "svmRadial"
              )
+c_mod$bestTune
+
 svm_mod <- ksvm(x = sincurve$x, y = sincurve$y,
-                C = 1, epsilon = .1
+                C = c_mod$bestTune$C, 
+                epsilon = .1, 
+                sigma = c_mod$bestTune$sigma
                 )
 new_x <- seq(0, 2*pi, length.out = 100)
 new_y <- predict(svm_mod, newdata = seq(0, 2 * pi, length.out = 100))
 plot(sincurve)
 points(new_x, new_y, type = "l")
-
+curve(sin(x), add = T, col = 2)
 ```
 
-
+This technique isn't perfect, but that it looks like a pretty good match for this particular example, doesn't it! 
 
 
 
