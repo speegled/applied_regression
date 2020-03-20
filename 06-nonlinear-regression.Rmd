@@ -143,9 +143,115 @@ lm_rmse <- replicate(100, {
 mean(lm_rmse)
 ```
 
-Seems to be working about the same as `lm` on this data set. Up to this point, you could fairly ask why this section is in the non-linear regression chapter of the book. It seems completely in line with the things we were doing earlier. However, we can do a switcheroo called the "kernel trick" that I am not going to go into details on in order to spice things up. Let's see some data and use some packages to do this.
+Seems to be working about the same as `lm` on this data set. Up to this point, you could fairly ask why this section is in the non-linear regression chapter of the book. It seems completely in line with the things we were doing earlier. However, we can do a switcheroo called the "kernel trick."  Let's do this.
 
-```{r, message=FALSE, warning=FALSE}
+Let's suppose that we have new data $(u_1, \ldots, u_P)$ that we want to predict the response for. We find values $(\alpha_i)$ such that 
+
+\[
+\beta_j = \sum_{i = 1}^n \alpha_i x_{ij}
+\]
+
+Then, plugging into the regression equation, we have 
+
+\[
+\begin{aligned*}
+\hat y &= \beta_0 + \sum_{j = 1}^P \beta_j u_j \\
+&= \beta_0 + \sum_{j = 1}^P \sum_{i = 1}^n \alpha_i x_{ij} u_j\\
+&= \beta_0 + \sum_{i = 1}^n \alpha_i \bigl(\sum_{j = 1}^P x_{ij} u_j\bigr)
+\end{aligned*}
+\]
+
+Now we have more parameters in our model than we have observations! That is normally not a good idea, but we can add penalties to having $|\alpha_i| > 0$ which make many of them zero. We want to minimize the following function:
+
+\[
+\sum_{i = 1}^n\sum_{j = 1}^n \alpha_i \alpha_j \langle x[i,], x[j,]\rangle + \epsilon \sum_{i = 1}^n |\alpha_i| - \sum_{i = 1}^n \alpha_i y_i
+\]
+subject to the constraints $\sum_{i = 1}^n \alpha_i = 0$ and $|\alpha_i| \le C$. I will be the first to admit that it is not obvious how to get to these conditions from where we started, but it follows from considering the [Karush-Kuhn-Tucker Conditions](https://en.wikipedia.org/wiki/Karush%E2%80%93Kuhn%E2%80%93Tucker_conditions) for transforming one optimization problem into its dual formulation. See this [paper](https://alex.smola.org/papers/2003/SmoSch03b.pdf) for details. But, notice that there is an $\ell_1$ penalty on the $\alpha_i$ coefficients, which we have seen in the LASSO tends to force some/many of them to be zero. I am not going to try to solve that minimization problem directly, let's use packages that do SVR and see what we get.
+
+```{r}
+xs <- runif(100, -1, 1)
+ys <- 1 + 2 * xs + rnorm(100, 0, .5)
+plot(xs, ys)
+```
+
+```{r}
+library(kernlab)
+tuneGrid <- data.frame(C = 2^((-4):4))
+df <- data.frame(x = xs, y = ys)
+tuneGrid <- data.frame(C = 2^((-4):4))
+caret::train(y ~ x,
+             data = df,
+             method = "svmLinear",
+             tuneGrid = tuneGrid,
+             preProcess = c("center", "scale")
+              )
+```
+
+There doesn't seem to be much difference between the tuning parameters, so let's just do the default $C = 1$.
+
+```{r}
+mod <- kernlab::ksvm(x = xs, 
+                     y = ys, 
+                     kernel = "vanilladot", #linear regression
+                     scaled = FALSE, #for illustration purposes
+                     C = 1,
+                     epsilon = .1)
+kernlab::alpha(mod)
+kernlab::alphaindex(mod)
+```
+
+The observations for which the corresponding $\alpha_i$ are not zero are called **support vectors**. In this case, we see that we have a surprisingly (perhaps) large number of support vectors for the model, considering the model can be described by two numbers; a slope and an intercept. We had the math up above, but I don't know whether I emphasized it enough. Let's see how we could predict a new value of the response given $x = 1.5$. What we would do is compute
+
+\[
+\beta_0 + \sum_{i = 1}^n \alpha_i \langle x_[i,], x\rangle
+\]
+where here the inner product is just the multiplication of the two numbers. In order to do this with the results from `ksvm`, we would need to extract the $\alpha$ values and the corresponding $x$ values, multiply them together with the new x value, which in this case is $x = 1.5$.
+
+```{r}
+(-b(mod) + sum(alpha(mod) * xs[alphaindex(mod)] * 1.5)) 
+predict(mod, newdata = 1.5)
+```
+In the above, I set `scaled = FALSE` to simplify this process, but in general we will not make that change. Let's see what happens if we change $\epsilon$.  
+```{r}
+mod <- kernlab::ksvm(x = xs, 
+                     y = ys, 
+                     kernel = "vanilladot", #linear regression
+                     C = 1,
+                     epsilon = .5)
+alphaindex(mod)
+```
+
+We see that we get quite a bit fewer support vectors. Let's see which observations are showing up as support vectors in this model.
+
+```{r}
+df$support <- FALSE
+df$support[kernlab::alphaindex(mod)] <- TRUE
+which(abs(predict(mod, newdata = xs) - ys) > .5)
+```
+
+
+
+```{r}
+m <- (diff(predict(mod, newdata = c(1,2))))
+b <- predict(mod, newdata = 0)
+ggplot(df, aes(x = x, y = y, color = support)) + 
+  geom_point() +
+  geom_abline(slope = m, intercept = b)
+```
+Note that the support vectors for the model correspond to the observations which are further away than $\epsilon = 0.5$ from the line of best fit (as determined by SVR). Suggestion: repeat the above plot, adding in lines that are $\pm \epsilon$ of the line of best fit, and coloring the points that are associated with $\alpha = C$ (=1, in this case).
+
+Now let's look at another simulated example, but with multiple predictors.
+
+
+```{r}
+set.seed(342020)
+sigma <- matrix(rnorm(9), ncol = 3)
+sigma <- t(sigma) %*% sigma
+dd <- matrix(MASS::mvrnorm(50, mu = c(0,0,0), Sigma = sigma), ncol = 3)
+df <- data.frame(dd)
+df <- mutate(df, response = 1 + 2 * X1 + 3 * X2 + 4 * X3 + 8 * rt(10, 4))
+
+
 library(kernlab)
 tuneGrid <- data.frame(C = 2^((-4):4))
 caret::train(response ~ ., 
@@ -156,7 +262,53 @@ caret::train(response ~ .,
               )
 ```
 
-We see that there isn't a lot to choose from in terms of the tuning parameter! Now, let's spice things up. Here is a new data set that is a $\sin$ curve.
+Not much to choose from here; looks like the tuning parameter doesn't matter much, but we'll take it to be $C = 0.25$, which is the smallest RMSE.
+
+```{r}
+mod <- kernlab::ksvm(x = dd, 
+                     y = df$response, 
+                     kernel = "vanilladot", 
+                     C = 0.25,
+                     scaled = FALSE) #for illustrative purposes
+kernlab::alpha(mod)
+kernlab::alphaindex(mod)
+```
+
+Let's again see how to predict a new value. Recall that if the new predictors are $x = (V1, V2, V3)$, then we compute the estimate of $\hat y$ via:
+
+\[
+\beta_0 + \sum_{i = 1}^n \alpha_i \langle x[i,], x\rangle
+\]
+
+```{r}
+x <- c(1,2,3)
+ip <- function(x, y) {
+  sum(x * y)
+}
+ips <- apply(dd[alphaindex(mod),], 1, function(y) ip(y,x))
+-b(mod) + sum(alpha(mod) * ips)
+predict(mod, newdata = matrix(c(1,2,3), nrow = 1))
+```
+
+Again, when doing problems that are not for illustrative purposes, we will typically use `scaled = TRUE`, which is the default. 
+
+### PLOT TWIST
+
+Let's recast what we have done. We have data that is stored in a tall, skinny matrix $X$, which has $n$ row and $p$ columns. We get predictions of  responses given new predictors $u = (u_1, \ldots, u_p)$ by finding $\{\alpha\}_{i = 1}^n$ and $\beta_0$ and computing
+\[
+\hat y = \beta_0 + \sum_{i = 1}^n \alpha_i \langle X[i,], u\rangle
+\]
+So, the predictions depend **only on the data through their inner products with the new predictors**. Of course, the $\alpha_i$ and $\beta_0$ will depend on the training responses. So, we take the inner product of each row with the new vector $u$, and use that as weights in our weighted sum prediction of $\hat y$. 
+
+What if, instead, we used a different function of each row and the new vector $u$? Formally, if we write $K(x, y) = \langle x, y \rangle$, then
+\[
+\hat y = \beta_0 + \sum_{i = 1}^n \alpha_i K(X[i,], u)
+\]
+This is called a *kernel method* and the function $K$ is a *kernel*. We can define other functions $K$ that we can use as kernels in the above equation. A commonly used one is the *radial basis function* $K(x, y) = e^{-\sigma\|x - y\|^2}$, which leads to predictions of the form
+\[
+\hat y = \beta_0 + \sum_{i = 1}^n \alpha_i e^{-\sigma\|X[i,] - u\|^2}
+\]
+Of course, we would have to re-evaluate the best way of choosing the $\alpha_i$ and $\beta_0$ in this context. The paramter $\sigma$ is a tuning parameter that can be chosen by cross-validation. Let's think about what this would do. The data in the training set $X$ that is closest to the new data is given the most weight, with the weight accorded to data that is further away from $u$ decreasing exponentially with the distance from $u$. So, predictions will be a weighted average of the distances to the new data, where the weights are determined in such a way as to make the predictions close to the training data responses. Now, let's spice things up. Here is a new data set that is a $\sin$ curve.
 
 ```{r}
 sincurve <- data.frame(x = runif(100, 0, 2 * pi))
@@ -192,11 +344,113 @@ curve(sin(x), add = T, col = 2)
 
 This technique isn't perfect, but that it looks like a pretty good match for this particular example, doesn't it! 
 
+## K Nearest Neighbors
+
+In the version of support vector regression with the radial basis function presented above, we estimated the response by taking a weighted sum of the responses in the training data. The weight was chosen so that observations which are close to the new data are weighted much more heavily than observations that are far away from the new data. $K$-Nearest Neighbors (KNN) is another method of doing a similar thing.
+
+The basic version is that, when we are given new data that we want to predict on, we choose the $K$ observations that are **closest** to the new data, and compute the mean of the corresponding responses. Let's look at the sine curve example from the previous section.
+
+```{r}
+plot(sincurve)
+```
+
+Suppose that we want to predict the value of the response when $x = 3$ using KNN with $K = 2$. The first thing that we need to do is find the two observations that are closest to $x = 3$. To do that, we will compute the distance between $x = 3$ and each observation.
+
+```{r}
+distances <- abs(3 - sincurve$x)
+```
+
+Now, we need to find the two that have the smallest distances to $x = 3$. There are lots of ways to do this. Let's append the distances to the sincurve data frame, and use `arrange`.
+
+```{r}
+sincurve <- mutate(sincurve, d3 = abs( 3 - x))
+arrange(sincurve, d3) %>% 
+  top_n(n = 2, wt = -d3) 
+```
+
+We see that the two observations that are closest to $x = 3$ are when $x = 2.95$ and when $x = 3.11$. Our **prediction** for $y$ would then just be the average of the two $y$ values, `r round(mean(arrange(sincurve, d3) %>% top_n(n = 2, wt = -d3) %>% pull(y)), 3)`.
+
+Let's see what the predictions would look like for a variety of $x$ values.
+
+```{r}
+new_xs <- seq(0, 2 * pi, length.out = 500)
+new_ys <- sapply(new_xs, function(z) {
+  sincurve <- mutate(sincurve, d3 = abs(z - x))
+  arrange(sincurve, d3) %>% 
+    top_n(n = 2, wt = -d3) %>% 
+    pull(y) %>% 
+    mean()
+})
+plot(sincurve$x, sincurve$y)
+lines(new_xs, new_ys, type = "l")
+```
+
+We see that the base KNN method does not work well with outliers. We also see that the predictions are **piecewise constant**, and it also seems to be **overfitting**. We can use the `median` of the responses rather than the mean in order to help the outliers somewhat. We can also do cross-validation on $K$, the number of nearest neighbors that we are choosing. 
+
+```{exercise, label = "knn-median"}
+Consider the sine curve data created above. Do KNN estimation of the response using the **median** of the **5** nearest neighbors, and provide a plot of the predictions.
+```
+
+When we have more than one predictor, it becomes necessary to make a choice for what **distance** function we are going to use. A couple of common ones are the $\ell_2$ distance and the $\ell_1$ distance, given by
+
+\[
+\sqrt{\sum_{i  = 1}^P (x_i - y_i)^2}
+\]
+
+and
+
+\[
+\sum_{i = 1}^P |x_i - y_i|
+\]
+respectively. We will stick with the $\ell_2$ distance in this section.
+
+Let's see how to do KNN prediction and cross validation using packages. The `caret` package has a function `knnreg` that does KNN regression. Note that we get the same answer below as we got when doing it above by hand.
+
+```{r}
+mod <- knnreg(y ~ x, data = sincurve, k = 2)
+predict(mod, newdata = data.frame(x = 3))
+```
+
+In order to do cross validation, we can use the `train` function in `caret` as below.
+
+```{r}
+tune_k <- data.frame(k = 2:10)
+knn_train <- train(y ~ x, 
+      data = sincurve, 
+      method = "knn",
+      tuneGrid = tune_k)
+knn_train$results
+```
+
+Next, we find the smallest RMSE and choose the simplest model that is within one sd of the smallest RMSE. 
+
+```{r}
+best_k <- which.min(knn_train$results$RMSE)
+one_sd <- knn_train$results$RMSE[best_k] + knn_train$results$RMSESD[best_k]
+filter(knn_train$results, RMSE < one_sd) %>% 
+  pull(k)
+```
+
+We would choose k = `r filter(knn_train$results, RMSE < one_sd) %>% pull(k)`.
+
+Finally, we offer some practical advice. We recommend **centering** and **scaling** your predictors before using KNN. Including predictors that have little predictive value for the response can cause KNN to have poor results, as just by chance the "wrong" observations are going to be close to the new data.
 
 
+```{exercise, label = "larger-example"}
+Consider the tecator data set that is contained in the `caret` library. Recall that you can access this data via `data(tecator)`. Model the first response variable in `endpoints` on the `absorp` data using knn3
+
+1. How many neighbors give the lowest RMSE?
+1. How many neighbors is the simplest model that is within one sd of the lowest RMSE?
+1. Use your model to predict the response for the **first** observation in the data frame
+1. What is the error when you predict the response for the first observation in the data set?
+```
 
 
+## Exercises
 
+1. Exercise \@ref(exr:knn-median)
+
+2. Exercise \@ref(exr:larger-example)
 
 
 
