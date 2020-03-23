@@ -431,7 +431,7 @@ filter(knn_train$results, RMSE < one_sd) %>%
   pull(k)
 ```
 
-We would choose k = `r filter(knn_train$results, RMSE < one_sd) %>% pull(k)`.
+We would choose k = `r filter(knn_train$results, RMSE < one_sd) %>% pull(k) %>% min()`.
 
 Finally, we offer some practical advice. We recommend **centering** and **scaling** your predictors before using KNN. Including predictors that have little predictive value for the response can cause KNN to have poor results, as just by chance the "wrong" observations are going to be close to the new data.
 

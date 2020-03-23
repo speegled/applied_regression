@@ -1,0 +1,198 @@
+# Tree Regression Models
+
+In this chapter, we will discuss predicting a continuous response via tree based methods. 
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
+## Basic Regression Trees
+
+In a basic regression tree, we build a tree which determines our prediction for new data. For example, suppose we have the tree pictured below.
+
+```{r}
+library(igraph)
+my_tree <- igraph::make_tree(5)
+plot(my_tree, 
+     layout = layout_as_tree, 
+     edge.label = c("x > 1","x <= 1","y > 2", "y <= 2"), 
+     vertex.label = c("","", 12, 17, 22))
+```
+
+Here I am imaginig that I have at least two predictors, which are named `x` and `y`, and I have a response. If new data comes in with $x = 1.5$ and $y = 1.5$, then we first look to see whether $x > 1$ or $x \le 1$. Since it is bigger than 1, we go to the left. Now, we check whether $y > 2$ or $y \le 2$. Since it is less than or equal to 2, we go to the right. We then predict the response based on the leaf that we arrive at. In this case, our prediction would be 22. 
+
+The million dollar question is, though, how do we come up with a good tree? Well, what we are going to do is go through every single predictor, and split the data into every possible set of two groups based on a simple rule like $x > a$ versus $x \le a$. Since our predictions are going to be **constants** (for now) on each split, we hope that the split will make the sum-squared error of the responses in the two groups as small as possible. There are other possible techniques that one could use. Let's see it in action with simulated data.
+
+```{r}
+set.seed(32120)
+for_tree <- data.frame(x = runif(100, 0, 10),
+                       y = rexp(100, 1/5))
+for_tree$response <- ifelse(for_tree$x > 7, rnorm(100, 1,1), rnorm(100, 5,1))
+for_tree$response <- ifelse(for_tree$x < 7 & for_tree$y < 4, for_tree$response + 7, for_tree$response)
+```
+
+This simulated data will have response values centered about 5 if $x < 7$ and $y \ge 4$, and it will have response values centered about 1 when $x > 7$. 
+
+Now, let's start building our tree. We will need to loop through all possible splits based on the $x$ variable and the $y$ variable separately, and compute the sum of the sample variances of the two.
+
+```{r}
+xs <- for_tree$x
+x1 <- xs[1]
+for_tree %>% group_by(x > x1) %>% 
+  summarize(sse = sum((response - mean(response))^2),
+            n = n()) 
+```
+
+We start by splitting into bigger than $x1$ and less then or equal to $x1$. We see that the SSE associated with being less than $x1$ is smaller than the other, but there are also a lot fewer values associated with $x \le x1$. 
+
+Now, we need to sum the SSE:
+
+```{r}
+for_tree %>% group_by(x > x1) %>% 
+  summarize(sse = sum((response - mean(response))^2),
+            n = n()) %>% 
+  pull(sse) %>% 
+  sum()
+```
+
+Then, we repeat for all values of $x$.
+
+```{r}
+sse_x <- sapply(xs, function(x1) {
+  for_tree %>% group_by(x > x1) %>% 
+  summarize(sse = sum((response - mean(response))^2),
+            n = n()) %>% 
+  pull(sse) %>% 
+  sum()
+})
+min(sse_x)
+```
+
+Then, we do the same thing for all values of $y$, which is an exercise in the R Markdown sheet.
+
+```{r, echo=FALSE}
+ys <- for_tree$y
+sse_y <- sapply(ys, function(y1) {
+  for_tree %>% group_by(y > y1) %>% 
+  summarize(sse = sum((response - mean(response))^2),
+            n = n()) %>% 
+  pull(sse) %>% 
+  sum()
+})
+min(sse_y)
+```
+
+When you compute the SSE for the $y$ splits, you should get the smallest to be 3271.577, which is larger than the smallest $x$ split. Therefore, we would split on $x$. Which one? 
+
+```{r}
+which.min(sse_x)
+for_tree[26,]
+```
+
+So, we would split it into $x > 6.963177$ and $x \le 6.963177$. There would be 68 and 32 observations in the two groups after splitting. Let's also plot the SSE for the various splits in the $x$ variable.
+
+```{r}
+plot(xs, sse_x)
+```
+
+
+```{r, echo=FALSE}
+small_tree <- filter(for_tree, x <= for_tree$x[26])
+small_xs <- small_tree$x
+small_sse_x <- sapply(small_xs, function(x1) {
+  small_tree %>% group_by(x > x1) %>% 
+  summarize(sse = sum((response - mean(response))^2),
+            n = n()) %>% 
+  pull(sse) %>% 
+  sum()
+})
+#min(small_sse_x)
+
+small_ys <- small_tree$y
+small_sse_y <- sapply(small_ys, function(x1) {
+  small_tree %>% group_by(y > x1) %>% 
+  summarize(sse = sum((response - mean(response))^2),
+            n = n()) %>% 
+  pull(sse) %>% 
+  sum()
+})
+#min(small_sse_y)
+#which.min(small_sse_y)
+#small_tree[65,]
+```
+
+We know, based on how the data was created, that we should now **stop** creating the tree. However, the algorithm would continue splitting the data into data into two pieces until it reaches a minimum number of observations in a node. Typically, we require at least 20 observations in a leaf to consider splitting further, and we require the splits to have at least $N/3$ observations in each split. Once all of the leaves are built, we are done. 
+
+It seems clear that the basic regression tree will often **overfit** the data. In order to combat that, we will add one more level of complexity to the situation. Namely, we will add a *penalty* for the number of leaves in the model. Formally, at each proposed split, we would compute
+
+\[
+SSE + c_p \times \#\{\text{leaves in model}\}
+\]
+
+We will only proceed with a split if the penalized measure of performance decreases. The value $c_p$ is called the *complexity parameter*, and is chosen via cross validation. As usual, you can choose the value of $c_p$ that minimizes the SSE, or you can choose the largest value of $c_p$ that yields an SSE within one standard error of the best $c_p$. If you choose the one standard error version, then your model will be simpler and perhaps easier to interpret. 
+
+We will not code this up by hand, but rather see how to use the package `rpart` to do this. 
+
+```{r}
+library(rpart)
+mod_Tree <- rpart(response ~ x + y, 
+                  data = for_tree, 
+                  control = rpart.control(cp = 0))
+mod_Tree
+mod_Tree$variable.importance
+mod_Tree$cptable
+mod_Tree
+```
+
+Now, let's do Cross Validation to determine the best regression tree for minimizing SSE.
+
+```{r}
+tuneGrid <- data.frame(cp = mod_Tree$cptable[,1])
+basic_tree_cv <- train(response ~ x + y, 
+      data = for_tree,
+      method = "rpart",
+      tuneGrid = tuneGrid
+      )
+basic_tree_cv$results
+```
+
+The smallest RMSE was when `cp = 0.0019561889`, and there is a simpler model just barely within one standard error of our estimate for the RMSE with that value of `cp = 0.3232507416`.  Let's re-run `rpart` with both values.
+
+```{r}
+mod_Tree <- rpart(response ~ x + y, 
+                  data = for_tree, 
+                  control = rpart.control(cp = 0.0019561889))
+mod_Tree
+```
+
+We see that this model overfits the true model a bit, by adding one additional split than what we know the true model had. The simpler model that is the one within one sd of the best one fits almost exactly how we created the data.
+
+```{r}
+mod_Tree <- rpart(response ~ x + y, 
+                  data = for_tree, 
+                  control = rpart.control(cp = 0.3232507416))
+mod_Tree
+```
+
+Huh, this one actually is too small. The automated picking of `cp` isn't working quite right, so if we add a complexity parameter of 0.03 into the training mix, we see that it works better than any of the other complexity parameters.
+
+```{r}
+tuneGrid <- data.frame(cp = c(tuneGrid$cp, .03)) 
+basic_tree_cv <- train(response ~ x + y, 
+      data = for_tree,
+      method = "rpart",
+      tuneGrid = tuneGrid
+      )
+basic_tree_cv$results
+```
+
+And we see that `cp = .03` is the best, and it also leads to the correct model.
+
+```{r}
+mod_Tree <- rpart(response ~ x + y, 
+                  data = for_tree, 
+                  control = rpart.control(cp = .03))
+mod_Tree
+```
+
