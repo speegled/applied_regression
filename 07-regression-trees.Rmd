@@ -7,6 +7,11 @@ In this chapter, we will discuss predicting a continuous response via tree based
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
 
+```{r}
+library(tidyverse)
+```
+
+
 ## Basic Regression Trees
 
 In a basic regression tree, we build a tree which determines our prediction for new data. For example, suppose we have the tree pictured below.
@@ -148,6 +153,7 @@ mod_Tree
 Now, let's do Cross Validation to determine the best regression tree for minimizing SSE.
 
 ```{r}
+library(caret)
 tuneGrid <- data.frame(cp = mod_Tree$cptable[,1])
 basic_tree_cv <- train(response ~ x + y, 
       data = for_tree,
