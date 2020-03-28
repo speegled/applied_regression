@@ -411,11 +411,12 @@ mod <- knnreg(y ~ x, data = sincurve, k = 2)
 predict(mod, newdata = data.frame(x = 3))
 ```
 
-In order to do cross validation, we can use the `train` function in `caret` as below.
+In order to do cross validation, we can use the `train` function in `caret` as below. **Note**: since the predictions we make are means of the actual responses, we probably want to use folded cross validation, rather than the default which is bootstrapping.
 
 ```{r}
-tune_k <- data.frame(k = 2:10)
+tune_k <- data.frame(k = 1:20)
 knn_train <- train(y ~ x, 
+                   trControl = trainControl(method = "repeatedcv", repeats = 5),
       data = sincurve, 
       method = "knn",
       tuneGrid = tune_k)
@@ -431,7 +432,7 @@ filter(knn_train$results, RMSE < one_sd) %>%
   pull(k)
 ```
 
-We would choose k = `r filter(knn_train$results, RMSE < one_sd) %>% pull(k) %>% min()`.
+We would choose k = `r filter(knn_train$results, RMSE < one_sd) %>% pull(k) %>% min()` based on the one sd rule, or we could also choose the minimum RMSE, which was `r best_k`. 
 
 Finally, we offer some practical advice. We recommend **centering** and **scaling** your predictors before using KNN. Including predictors that have little predictive value for the response can cause KNN to have poor results, as just by chance the "wrong" observations are going to be close to the new data.
 
