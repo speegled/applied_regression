@@ -25,7 +25,7 @@ plot(my_tree,
      vertex.label = c("","", 12, 17, 22))
 ```
 
-Here I am imaginig that I have at least two predictors, which are named `x` and `y`, and I have a response. If new data comes in with $x = 1.5$ and $y = 1.5$, then we first look to see whether $x > 1$ or $x \le 1$. Since it is bigger than 1, we go to the left. Now, we check whether $y > 2$ or $y \le 2$. Since it is less than or equal to 2, we go to the right. We then predict the response based on the leaf that we arrive at. In this case, our prediction would be 22. 
+Here I am imagining that I have at least two predictors, which are named `x` and `y`, and I have a response. If new data comes in with $x = 1.5$ and $y = 1.5$, then we first look to see whether $x > 1$ or $x \le 1$. Since it is bigger than 1, we go to the left. Now, we check whether $y > 2$ or $y \le 2$. Since it is less than or equal to 2, we go to the right. We then predict the response based on the leaf that we arrive at. In this case, our prediction would be 22. 
 
 The million dollar question is, though, how do we come up with a good tree? Well, what we are going to do is go through every single predictor, and split the data into every possible set of two groups based on a simple rule like $x > a$ versus $x \le a$. Since our predictions are going to be **constants** (for now) on each split, we hope that the split will make the sum-squared error of the responses in the two groups as small as possible. There are other possible techniques that one could use. Let's see it in action with simulated data.
 
@@ -63,7 +63,7 @@ for_tree %>% group_by(x > x1) %>%
 
 Then, we repeat for all values of $x$.
 
-```{r}
+```{r, cache=TRUE}
 sse_x <- sapply(xs, function(x1) {
   for_tree %>% group_by(x > x1) %>% 
   summarize(sse = sum((response - mean(response))^2),
@@ -88,7 +88,7 @@ sse_y <- sapply(ys, function(y1) {
 min(sse_y)
 ```
 
-When you compute the SSE for the $y$ splits, you should get the smallest to be 3271.577, which is larger than the smallest $x$ split. Therefore, we would split on $x$. Which one? 
+When you compute the SSE for the $y$ splits, you should get the smallest to be `r min(sse_y)`, which is larger than the smallest $x$ split. Therefore, we would split on $x$. Which one? 
 
 ```{r}
 which.min(sse_x)
@@ -100,6 +100,14 @@ So, we would split it into $x > 6.963177$ and $x \le 6.963177$. There would be 6
 ```{r}
 plot(xs, sse_x)
 ```
+
+Based on this one split, our predictions for new data coming in would be as follows. If $x > 6.963177$, we would predict the response to be 1.07, and if $x \le 6.963177$, we would predict the response to be 9.5. These values are the means of the responses after the split. Recall from above that response values are centered about 1 when $x > 7$, so this is a pretty good estimate already in that case!
+
+```{r}
+for_tree %>% group_by(x > 6.963177) %>% 
+  summarize(prediction = mean(response))
+```
+
 
 
 ```{r, echo=FALSE}
@@ -139,7 +147,7 @@ We will only proceed with a split if the penalized measure of performance decrea
 
 We will not code this up by hand, but rather see how to use the package `rpart` to do this. 
 
-```{r}
+```{r, cache=TRUE}
 library(rpart)
 mod_Tree <- rpart(response ~ x + y, 
                   data = for_tree, 
@@ -150,22 +158,24 @@ mod_Tree$cptable
 mod_Tree
 ```
 
-Now, let's do Cross Validation to determine the best regression tree for minimizing SSE.
+Now, let's do Cross Validation to determine the best regression tree for minimizing SSE. We'll again use repeated 10-fold CV.
 
-```{r}
+```{r, cache=TRUE}
 library(caret)
 tuneGrid <- data.frame(cp = mod_Tree$cptable[,1])
 basic_tree_cv <- train(response ~ x + y, 
       data = for_tree,
       method = "rpart",
-      tuneGrid = tuneGrid
+      tuneGrid = tuneGrid,
+      trControl = trainControl(method = "repeatedcv", 
+                               repeats = 5)
       )
 basic_tree_cv$results
 ```
 
-The smallest RMSE was when `cp = 0.0019561889`, and there is a simpler model just barely within one standard error of our estimate for the RMSE with that value of `cp = 0.3232507416`.  Let's re-run `rpart` with both values.
+The smallest RMSE was when `cp = 0.0019561889`, and there is a simpler model just barely within one standard error of our estimate for the RMSE with that value of `cp = 0.3232507416`. The previous statement depends on which run of the cross-validation that we do! If you re-run, sometimes the simpler model is within one sd, and sometimes it is not. Let's re-run `rpart` with both values.
 
-```{r}
+```{r, cache=TRUE}
 mod_Tree <- rpart(response ~ x + y, 
                   data = for_tree, 
                   control = rpart.control(cp = 0.0019561889))
@@ -174,7 +184,7 @@ mod_Tree
 
 We see that this model overfits the true model a bit, by adding one additional split than what we know the true model had. The simpler model that is the one within one sd of the best one fits almost exactly how we created the data.
 
-```{r}
+```{r, cache=TRUE}
 mod_Tree <- rpart(response ~ x + y, 
                   data = for_tree, 
                   control = rpart.control(cp = 0.3232507416))
@@ -183,12 +193,14 @@ mod_Tree
 
 Huh, this one actually is too small. The automated picking of `cp` isn't working quite right, so if we add a complexity parameter of 0.03 into the training mix, we see that it works better than any of the other complexity parameters.
 
-```{r}
+```{r, cache=TRUE}
 tuneGrid <- data.frame(cp = c(tuneGrid$cp, .03)) 
 basic_tree_cv <- train(response ~ x + y, 
       data = for_tree,
       method = "rpart",
-      tuneGrid = tuneGrid
+      tuneGrid = tuneGrid,
+      trControl = trainControl(method = "repeatedcv",
+                               repeats = 5)
       )
 basic_tree_cv$results
 ```
@@ -201,4 +213,212 @@ mod_Tree <- rpart(response ~ x + y,
                   control = rpart.control(cp = .03))
 mod_Tree
 ```
+
+
+## Regression Model Trees
+
+In the previous section, we split the data into pieces and approximated each piece by a single constant. One downside to this is that, within a leaf, it is likely that the response is not constant with respect to the predictors, but in fact depends on the predictors. In this section, we will see one way to better approximate data of this type. The basic idea is that we will use a linear model to predict the response at each node (not just each leaf), where the model is built on all of the variables that we used to split to get down to that node. Then, we will predict the response based on a weighted average of each node that the new data visits to get to the leaf! That's a lot to take in.  
+
+Let's break things down into component pieces. We'll create a synthetic data set so that we know what the true model is.
+
+```{r}
+set.seed(3312020)
+dd <- data.frame(x = runif(1000, 0, 10),
+                 y = rexp(1000, 1/5))
+dd <- mutate(dd, response = case_when(
+  x > 5 & y > 5 ~ x + y + 1,
+  x > 5 & y <= 5 ~ 2 * x + 1,
+  x <= 5 & y > 7 ~ 10 * x + 20 * y,
+  TRUE ~ 7
+) + rnorm(1000))
+```
+
+We'll plot this to see what it looks like:
+
+```{r}
+plot(dd)
+```
+
+We can see that there are several things going on! Let's see what the relationship looks like when $x > 5$ and $y > 5$.
+
+```{r}
+mod <- lm(response ~ ., data = filter(dd, x > 5, y > 5))
+summary(mod)
+```
+
+We see that when $x > 5$ and $y > 5$, we get estimates for the coefficients for $x$ and $y$ to be $1.05$ and $0.98$ respecitvely. These are approximately equal to the true values for the generative process of the data, which are 1 and 1. Of course, in general, we won't know what the generative process of the data is, and we won't even know that the data was created by a process of this type at all.
+
+The overview of the algorithm for splitting is:
+
+1. We start by building a model on all of the predictors and all of the observations. 
+2. We determine which, if any, of the variables is the most likely candidate to split on. This is a  major difference between this algorithm and the basic regression tree algorithm.
+3. We test every split on the determined variable (into two nodes of sufficient size), to see which one has the smallest total sum squared error after refitting the OLS on each node separately. 
+4. We split the data into the sets determined in 3, and repeat for each current leaf in the tree.
+
+### Choosing Variable to Split
+
+The basic idea for splitting the data set (i.e., items 1 and 2 in the algorithm presented above) is the same as for the basic regression tree. However, we will need to modify the criterion we are using to choose the *best* split. A natrual choice would be to build a linear model at each split and compute the total residual squared error. We will use a technique similar to one described by [Zeileis, Hothorn, and Hornik](https://eeecon.uibk.ac.at/~zeileis/papers/Zeileis+Hothorn+Hornik-2008.pdf) that tries to accomplish this goal in an efficient fashion.
+
+We assume for simplicity that we are using all of the predictors for both the **splitting** of the data and for the **model building** at each node. 
+
+We start by building an OLS model on the full data. I'm also going to change the names of the predictors in `dd`, because it may be confusing that `y` is a predictor. Sorry about that.
+
+```{r}
+names(dd) <- c("V1", "V2", "response")
+mod_full <- lm(response ~ .,data = dd)
+dd_full <- mutate(dd, 
+                  residuals = mod_full$residuals)
+```
+
+Now, we need to decide which of the two variables, if either, is more suitable for splitting. The idea proposed by Zeileis, et al, is to check for *parameter instability* in each variable, and to choose the variable that has the highest parameter instability. They also provide a method for determining parameter instability, but it would be a bit of a detour from the main thrust of this section. So, we will use a simpler method based on the residuals of the full OLS model.
+
+First, note that the mean of the residuals in the full OLS model is zero.
+
+```{r}
+mean(dd_full$residuals)
+```
+
+Now, if there is not a natural split in the variable `x`, say, then if we sort the residuals according to the values of `x`, then they should look more or less like random fluctuations about 0. Let's separately look at a data set for which there is **not** a split to see what that looks like.
+
+```{r}
+dd_no_split <- data.frame(V1 = runif(1000, 0, 10),
+                          V2 = rexp(1000, 1/5))
+dd_no_split <- mutate(dd_no_split, response = 1 + 2 * V1 + 3 * V2 + rnorm(1000))
+mod_no_split <- lm(response ~ ., data = dd_no_split)
+dd_no_split <- mutate(dd_no_split, 
+                      residuals = mod_no_split$residuals)
+```
+
+So, to be clear, `dd_no_split` **should not** be further split, while `dd` **should** be split.
+
+Let's plot the residuals of the data that needs splitting, after ordering by `V1`.
+
+```{r}
+arrange(dd_full, V1) %>% 
+  pull(residuals) %>% 
+  plot(ylab = "residual", main = "Tree needs splitting")
+```
+
+```{r}
+arrange(dd_no_split, V1) %>% 
+  pull(residuals) %>% 
+  plot(ylab = "residual", main = "Tree does not need splitting")
+```
+
+We can see that after ordering the residuals by `V1`, that there is a definite difference in the residuals. But what makes the one more amenable to splitting than the other? And how can we automate the procedure to find if and which variable to choose? 
+
+We will take the **cumulative sum** of the residuals, after they have been standardized. We will first do this multiple times for the data that does **not** need to be split further so that you can see what types of results to expect.
+
+```{r}
+sdev <- sd(dd_no_split$residuals)
+dd_no_split$cumulative_sum <- arrange(dd_no_split, V1) %>%
+  pull(residuals) %>% 
+  cumsum()
+dd_no_split$cumulative_sum <- dd_no_split$cumulative_sum/(sdev * sqrt(nrow(dd_no_split)))  
+```
+
+As you can see in the above code, we computed the cumulative sum of the residuals, after ordering the data by `V1`. We then normalized the cumulative sum by dividing by the standard deviation of the residuals and dividing by the square root of the number of observations. Now, we plot:
+
+```{r}
+plot(dd_no_split$cumulative_sum, type = "l",
+     ylab = "cumulative sum",
+     main = "no split needed")
+```
+
+In this plot, we see that the largest value of the normalized cumulative sum is about 0.6, and the smallest value is about -0.6.
+
+```{r}
+max(dd_no_split$cumulative_sum)
+min(dd_no_split$cumulative_sum)
+```
+
+Now, let's see what happens when we do the data that needs further splitting.
+
+```{r}
+sdev <- sd(dd_full$residuals)
+dd_full$cumulative_sum <- arrange(dd_full, V1) %>%
+  pull(residuals) %>% 
+  cumsum()
+dd_full$cumulative_sum <- dd_full$cumulative_sum/(sdev * sqrt(nrow(dd_full)))  
+
+plot(dd_full$cumulative_sum, type = "l",
+     ylab = "cumulative sum",
+     main = "yes split needed",
+     sub = "ordered by V1")
+```
+
+We see in this case that the cumulative sum has a maximum value of 
+`r round(max(dd_full$cumulative_sum), 3)`, which is highly unlikely to happen if the model is already fully specified. 
+
+This procedure is automated in R in the package `strucchange`. In order to use this, we will need to sort the data by the separate variables first, and then apply the function `efp`. 
+
+```{r}
+library(strucchange)
+dd_v1 <- arrange(dd, V1)
+qcc_test <- efp(response ~ ., data = dd_v1, type = "OLS-CUSUM")
+plot(qcc_test)
+sctest(qcc_test)
+```
+
+We see that we would reject the null hypothesis that the residuals are centered around zero after arranging them according to `V1` with $p = .002$. In particular, since this value is less than $\alpha = .05$, we conculde that we **do** need to continue splitting. We will continue splitting as long as **any** of the $p$-values that we compute are below the threshold $\alpha$ that we choose.
+
+The test statistic is the largest absolute deviation away from zero in the cumulative sum or residuals.
+
+```{r}
+dd_v2 <- arrange(dd, V2)
+qcc_test_2 <- efp(response ~ ., data = dd_v2, type = "OLS-CUSUM")
+plot(qcc_test_2)
+sctest(qcc_test_2)
+```
+
+We see that the model is more unstable with respect to the parameter `V2` than it was to the parameter `V1`, and it also has a much lower $p$-value. Based on this, we would first split on `V2`. One final note, if we have a many predictors, it is a good idea to apply a correction factor to the $p$-values that you get. A typical choice would be to multiply each $p$-value by the number of predictors that are in the model, which is called a *Bonferroni correction*. Alternatively, and probably preferably, we could use the $\alpha$ level of the test as a tuning parameter to be determined by cross validation.
+
+### Choosing Split Value
+
+Now that we have decided that we want to split on `V2`, we want to figure out the level of the split. We will want to make sure that there are at least 20 observations in each node (that shouldn't be hard, since there are 1000 observations total!). Our plan is to split on each possible value of `V2`, build a new model for each of the split data sets, find the residual SSE for each of the residual sets separately and then add them together.
+
+```{r, cache=TRUE}
+sse_splits <- sapply(21:979, function(x) {
+  ds1 <- dd_v2[1:x,]
+  ds2 <- dd_v2[(x + 1):1000,]
+  mod1 <- lm(response ~ ., data = ds1)
+  sse1 <- sum(mod1$residuals^2)
+  mod2 <- lm(response ~ ., data = ds2)
+  sse2 <- sum(mod2$residuals^2)
+  sse1 + sse2
+}) 
+plot(sse_splits, type = "l")
+```
+
+We see that there is a pretty clear winner where we should be splitting thigs. Let's find the value.
+
+```{r}
+dd_v2$V2[which.min(sse_splits) + 20]
+```
+
+We see that the split should be $V2 \le 6.945864$ versus $V2 > 6.945864$. Note that this is the largest value of $V2$ which is less than 7, and we know that 7 is a correct value to split on, because of how the data was generated! Yay!
+
+Now, we have a tree with two leaves. One leaf corresponds to $V2 < 7$ and the other leaf corresponds to $V2 \ge 7$. We would then need to build linear models of the response on the predictors on both of those leaves, and that would be our model after one split. 
+
+```{r}
+left_dd <- filter(dd, V2 < 7)
+right_dd <- filter(dd, V2 > 7)
+lef_mod <- lm(response ~ ., data = left_dd)
+lef_mod
+right_mod <- lm(response ~ ., data = right_dd)
+right_mod
+```
+
+This is our current model. Note that it is not correct for either leaf, because when $V2 > 7$ and $V1 > 5$, the response is just 7, while when $V2 > 7$ and $V1 \le 5$, the response is $10V1 + 20V2$. When $V2 < 7$, we will need to further split as well. If new data came in with $V1 = 4$ and $V2 = 8$, our prediction for the response would be 
+
+```{r}
+predict(right_mod, newdata = data.frame(V1 = 4, V2 = 8))
+139.54 + 4*(-33.90) + 8*14.59 #double check 
+```
+
+
+As an exercise, you are asked to repeat the variable selection, split, and model building on the left node; that is, when $V2 < 7$. 
+
+
+
 
