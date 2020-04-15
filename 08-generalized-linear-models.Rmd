@@ -652,6 +652,32 @@ so $\lambda = 2.221251. We can also get this via
 predict(mod_final, newdata = data.frame(age = 50, illness = "yes"), type = "response")
 ```
 
+### Overdispersion
+
+Let's consider the `quine` data set from `MASS`. This is a typical example of an overdispersed data set. We are modeling the days absent from school for students based on several predictor variables.
+
+```{r}
+qq <- MASS::quine
+summary(qq)
+```
+
+If we run a Poisson regression, we get:
+
+```{r}
+mod <- glm(Days ~ ., data = qq, family = "poisson")
+summary(mod)
+```
+
+At a first glance, it appears that all of the variables are significant with very low $p$-values. However, note that the residual deviance is considerably larger than its degrees of freedom, which is an indicator for overdispersion. This should cause us to seriously doubt the accuracy of the $p$-values.
+
+There are a couple of options for modeling with overdisperion, including *quasipoisson* regression and *negative binomial* regression. For now, we use quaispoisson, which adds a parameter that attempts to deal with the overdispersion. 
+
+```{r}
+mod_quasi <- glm(Days ~ ., data = qq, family = "quasipoisson")
+summary(mod_quasi)
+```
+
+There is a significant difference in $p$-values between this model and the previous, and we would draw very different conclusions about what variables are significant for modeling days absent. The quasipoisson model is preferred over the Poisson model in this case.
 
 
 [^1]: Extra credit: diagram the sentence "The bigger the value of the log odds, the better."
