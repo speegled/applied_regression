@@ -609,6 +609,48 @@ dispersiontest(mod, trafo = 1)
 
 We see that we reject the null hypothesis in favor of the alternative, and we estimate that the  relationship between variance and the mean is $\sigma^2 \approx 3\mu$. In particular, Poisson regression is inappropriate for this data set.
 
+**Example** From [Advanced Regression Models with SAS and R](https://www.routledge.com/Advanced-Regression-Models-with-SAS-and-R/Korosteleva/p/book/9781138049017). The number of days of hospital stay was recorded for 45 patients with chest pain, along with their gender, age and history of cardial illness. The data is available [here]
+
+```{r eval=FALSE}
+dd <- read.csv("https://mathstat.slu.edu/~speegle/Spring2020/4870/data/Example5.1Data.csv")
+```
+
+
+
+```{r, echo=FALSE}
+dd <- read.csv("/Users/speegled/Dropbox/Spring2020/4870/data/Example5.1Data.csv")
+summary(dd)
+```
+
+We build a model of the number of days in the hospital based on the other variables.
+
+```{r}
+mod <- glm(days ~ ., data = dd, family = "poisson")
+summary(mod)
+```
+
+We see that the data is perhaps *underdispersed*, that is, the variance is less than the mean. This isn't as big of a problem as overdispersion. We can do variable selection via AIC, using the `stepAIC` function from `MASS`.
+
+```{r}
+mod_final <- MASS::stepAIC(mod)
+```
+
+We see that gender is removed, and that we predict the days in hospital based on previous illness of the patient and the age of the patient. We estimate the mean length of stay for patients who are age 50 with previous illness to be
+
+```{r}
+coef(mod_final)
+```
+
+
+\[
+\log \lambda = -0.72142577 + 0.02111739 \times 50 + 0.46362688 
+\]
+
+so $\lambda = 2.221251. We can also get this via
+
+```{r}
+predict(mod_final, newdata = data.frame(age = 50, illness = "yes"), type = "response")
+```
 
 
 
