@@ -11,6 +11,7 @@ rmd_files: [
   "05-variable-selection.Rmd",
   "06-nonlinear-regression.Rmd",
   "07-regression-trees.Rmd",
+  "08-generalized-linear-models.Rmd",
   "solutions.Rmd"
   ]
 
