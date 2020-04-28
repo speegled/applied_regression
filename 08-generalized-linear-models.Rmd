@@ -1,6 +1,6 @@
 # Generalized Linear Models
 
-In this chapter, we discuss a family of models called *generalized linear models*. These models include ordinary least squares regression, and many others. All of the models presented in this chapter can be realized as examples of a common framework. We won't present the common framework in this book, but focus on two specific examples - *logistic regression* and *Poisson regression*. We will also return to the more classical framework of regression, where we are interested in the theory and assessing the fit of the model, rather than focussing exclusively on predictive modeling. 
+In this chapter, we discuss a family of models called *generalized linear models*. These models include ordinary least squares regression, and many others. All[^3] of the models presented in this chapter can be realized as examples of a common framework. We won't present the common framework in this book, but focus on two specific examples - *logistic regression* and *Poisson regression*. We will also return to the more classical framework of regression, where we are interested in the theory and assessing the fit of the model, rather than focussing exclusively on predictive modeling. We will do *a lot* of estimates of regression coefficients for various models in this chapter. I hope that by the time you get to the end of reading it, you will be able to set these up in your sleep.
 
 Since generalized linear models include OLS, let's take a brief review of OLS. Recall that our model is
 
@@ -346,7 +346,7 @@ for_chisq
 
 Now, we perform the $\chi^2$ goodness of fit test on the expected and the observed cell levels. According to Hosmer and Lemeshow, the value of `t_stat` given below should have approximately a $\chi^2$ distribution with 8 degrees of freedom; that is, the number of groups minus 2.
 
-```{r}
+```{r, message=FALSE, warning = FALSE}
 t_stat <- sum((for_chisq$observed - for_chisq$expected)^2/for_chisq$expected)
 pchisq(t_stat, 8, lower.tail = F)
 library(ResourceSelection)
@@ -542,7 +542,7 @@ Recall that an important aspect of our model was that we are assuming that the r
 
 Let's see how to check overdispersion. We first want to see what the distribution of the residual deviance will be under the null hypothesis. So, we replicate the entire process of sampling data, building a model and computing the residual deviance.
 
-```{r}
+```{r, cache=TRUE}
 res_dev <- replicate(10000, {
   x <- runif(100, 0, 2)
   y <- rpois(100, lambda = exp(2 + x))
@@ -602,7 +602,7 @@ We see that we would reject the null hypothesis that the model fits the data. On
 
 This tests $H_0: \alpha = 0$ versus $H_a: \alpha > 0$ in the model for variance of $\sigma^2 = \mu + \alpha \mu$. 
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(AER)
 dispersiontest(mod, trafo = 1)
 ```
@@ -629,7 +629,9 @@ mod <- glm(days ~ ., data = dd, family = "poisson")
 summary(mod)
 ```
 
-We see that the data is perhaps *underdispersed*, that is, the variance is less than the mean. This isn't as big of a problem as overdispersion. We can do variable selection via AIC, using the `stepAIC` function from `MASS`.
+We see that the data is perhaps *underdispersed*, that is, the variance is less than the mean. This isn't as big of a problem as overdispersion, at least at this level of underdispersion. In general, though, we would want to make sure that we are modeling things correctly. I have seen underdispersion that was explained by **zero inflation**, especially when most of the responses are small anyway. Zero-inflation is when the response is Poisson, except for the fact that there are too many zeros. In general, there are just a lot of things to check when modeling count data!
+
+We can do variable selection via AIC, using the `stepAIC` function from `MASS`.
 
 ```{r}
 mod_final <- MASS::stepAIC(mod)
@@ -677,14 +679,248 @@ mod_quasi <- glm(Days ~ ., data = qq, family = "quasipoisson")
 summary(mod_quasi)
 ```
 
-There is a significant difference in $p$-values between this model and the previous, and we would draw very different conclusions about what variables are significant for modeling days absent. The quasipoisson model is preferred over the Poisson model in this case.
+There is a significant difference in $p$-values between this model and the previous, and we would draw very different conclusions about what variables are significant for modeling days absent. The quasipoisson model is preferred over the Poisson model in this case. 
+
+### Negative Binomial Regression
+
+One downside of using quasipoisson is that AIC is not defined for the quasiPoisson model. If we wish to use AIC for variable selection, then we can use *negative binomial* regression instead. Let's look at some details. First, we recall that a negative binomial random variable counts the number of failures before the $k$th success in a series of Bernoulli trials, each with probability of success $p$. It has probability mass function given by
+
+\[
+P(X = x) = {{x + k -1}\choose {k-1}}p^k(1 - p)^{x - k}, \qquad x = 0, 1, 2, \ldots
+\]
+
+Another realization of a negative binomial with parameters $k$ and $p$ is that it is the sum of $k$ independent geometric rvs. In particular, the mean of $X$ will be $\mu = k \frac{1-p}{p}$ and the variance will be $\sigma^2 = k \frac{1-p}{p^2}$. In particular, since $1/p^2 > 1/p$, negative binomial rvs have variances **larger than** their means. For this reason, they are often suggested for modeling count responses that are overdispersed relative to a Poisson response.
+
+Moving away from our intuition of number of trials until the $k$th success, we can formally replace the factorials in ${{x + k -1}\choose {k-1}}$ with gamma functions, and then $k$ can be any positive integer! In this case, we have the probability mass function is given by
+
+\[
+P(X = x) = \frac{\Gamma(x + k)}{\Gamma(k) x!} p^k(1 - p)^{x - k}, \qquad x = 0, 1, 2, \ldots
+\]
+
+While this may defy straightforward interpretation in terms of Bernoulli trials, having the additional flexibility to choose $k$ to be non-integral will be useful when modeling. 
+
+An alternative parameterization that yields the same family of random variables is by the *mean* parameter $\mu$ and the *dispersion* parameter, given by `size`. The variance in this parameterization is $\sigma^2 = \mu + \mu^2/{\text{size}}$. We can go from the mean/dispersion parameterization to the one given above by letting $p = {\text{size}/({\text{size} + \mu)$ and $k = {\text{size}$. Let's check it with some R.
+
+```{r}
+mu <- 10
+size <- 4
+k <- size
+p <- size/(size + mu)
+dnbinom(1:10, size = size, prob = p)
+dnbinom(1:10, size = size, mu = mu)
+```
+
+With the mean-dispersion parameterization, we can see that the variance can be any value that is larger than the mean. This allows quite a bit of fliexibility for modeling overdispersed count processes. 
+
+Now, suppose we have data $(x_1, y_1), \ldots, (x_n, y_n)$ and we believe that the expected value of the response $Y$ given $x$ is modeled by
+\[
+\log E[Y|X = x] = \beta_0 + \beta_1 x
+\]
+then we would have 
+\[
+\log \mu = \beta_0 + \beta_1 x
+\]
+The inverse link function is $\mu = e^{\beta_0 + \beta_1 x}$, and the random component of the model is negative binomial.
+
+Let's create some simulated data.
+
+```{r}
+set.seed(4282020)
+dd <- data.frame(x = runif(100, 0, 10))
+dd <- mutate(dd, y = rnbinom(100, size = runif(1, 3, 10), mu = exp(1 + .2 * x)))
+plot(dd)
+```
+
+Recall that if this were Poisson, then the range would be roughly the expected value $y_0 \pm 2\sqrt{y_0}$, which is not correct. When $x \approx 10$, $y \approx 15$, but the range is bigger than $15 \pm 8$. Let's set up the likelihood function for the model. There are three parameters in the model, $\beta_0, \beta_1$ and the size parameter, which estimates the amount of overdispersion.
+
+\[
+\Pi \ {\text{dnbinom}}(y_i, mu = e^{\beta_0 + \beta_1 x_i}, size = k)
+\]
+
+Let's maximize the log likelihood.
+
+```{r}
+neg_log_likelihood <- function(par, dat) {
+  -1 * sum(log(dnbinom(dat$y, mu = exp(par[1] + par[2] * dat$x), size = par[3])))
+}
+
+optim(par = c(0,0,1), fn = neg_log_likelihood, dat = dd)$par
+```
+
+We get an estimate of $\beta_0 = 0.9586, \beta_1 = 0.209$ and dispersion parameter of 3.598. That's close to the true values of $1, 2$ and unknown. Let's run the analysis using `MASS:glm.nb`.
+
+```{r}
+mod <- MASS::glm.nb(y ~ ., data = dd)
+summary(mod)
+
+```
+
+`MASS::stapAIC` also works with models built with `glm.nb`, so we can do variable selection using AIC when we have a larger collection of variables. Let's look at the `quine` data set.
+
+```{r}
+quine <- MASS::quine
+mod <- MASS::glm.nb(Days ~ ., data = quine)
+mod_final <- MASS::stepAIC(mod, trace = 0)
+summary(mod_final)
+```
+
+Venables and Ripley consider interactions and get a much different looking model. See their book, Modern Applied Statistics with S, Section 7.4 for details.
+
+
+
+
+
+## Zero-truncated and Zero-inflated models
+
+In this section, we present two relatively common occurrences when we have a count response. A count response is *zero truncated* if all of the observations with zero as a response are removed from the data set. A count response is *zero inflated* if there are more zeros than there should be in a Poisson response. 
+
+The reasons for zero truncated could be that we only have a mechanism for collecting data in the case that the response is nonzero. For example, if we are counting the number of days a person with a certain type of disease spends in the hosptial, we might not know how many people have that disease but never need to go to the hospital. We would only discover them once the response is 1 or greater. 
+
+One reason for zero inflated data could be that there is a group of observations that are zero, while the others follow a Poisson model. If we count the number of cigarettes that people smoke in a two-hour period, there could be two sources of zeros. One source of zeros would be people who smoke, but just didn't smoke in that two hour window. That would follow a Poisson response, possibly. However, another source of zeros could be people who never smoke. Adding those zeros in could make the response look like it is not Poisson. The two sources of zeros are called *structural* zeros and *chance* zeros, and we will have to build a model that takes this into account.
+
+### Zero-truncated Poisson
+
+Let's start with zero-truncated models. The zero-truncated Poisson random variable has pmf given by
+
+\[
+P(X = x) = \frac{e^{-\lambda} \lambda^x}{x!(1 - e^{-\lambda})} \qquad x =1, 2, \ldots
+\]
+
+The mean of a zero truncated Poisson is $\mu = \frac{\lambda}{(1 - e^{-\lambda})^2}$. We assume that the mean of the **underlying Poisson process** is modeled by
+
+\[
+\log \lambda = \beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p
+\]
+
+In the language from above, the random component of our model is a zero-truncated Poisson, the model is $\log \lambda = \beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p$, the link function is $\log x$ and the inverse link function is $e^x$. Formally, this procedure may not belong in the generalized linear model section, because we are not modeling the *expected value* of the random component given the parameters, but rather the expected value of some other process. The same comment applies to the next section, where we discuss zero-truncated negative binomial regression. 
+
+We will again use maximum likelihood to estimate the $\lambda$ in the zero-truncated Poisson regression. The pmf is available in the `actuar` package via `actuar::dztpois(x, lambda, log = FALSE)`.  Let's suppose we collect data $(x_1, y_1), \ldots, (x_n, y_n)$ and we wish to find the MLE of $\beta_0$ and $\beta_1$ in our model. This is how we can do it. We first create some simulated data.
+
+```{r}
+set.seed(4282020)
+dd <- data.frame(x = runif(100, -1, 1))
+dd <- mutate(dd, y = rpois(100, lambda = exp(1 + 2 * x)))
+dd <- filter(dd, y > 0) #zero truncated
+```
+
+Fitting zero-truncated Poisson regression to this data using maximum likelihood is an exercise. We can use the `vglm` function in the `VGAM` package to fit the data to the model and perform hypothesis testing as follows.
+
+```{r, echo=FALSE, eval=FALSE}
+library(actuar)
+neg_log_likelihood <- function(pars, dat) {
+  -1 * sum(log(dztpois(dat$y, lambda = exp(pars[1] + pars[2] * dat$x))))
+}
+
+optim(par = c(0, 0), fn = neg_log_likelihood, dat = dd)
+```
+
+```{r, message=FALSE, warning=FALSE}
+library(VGAM)
+mod <- vglm(y ~ x, data = dd, family = pospoisson())
+summary(mod)
+```
+
+We see that the MLE of $\beta_0$ and $\beta_1$ are pretty close to the true values of 1 and 2.
+
+### Zero-truncated Negative Binomial
+
+The zero-truncated negative binomial random variable is a negative binomial random variable which suppresses all instances of 0. For example, if you are counting the number of failures until the second success in a sequence of Bernoulli trials, but you only record an answer if there is at least one failure! That would be a zero-truncated negative binomial random variable.  
+
+It has pmf given by
+
+\[
+P(X = x) =  \frac{\Gamma(x+r) p^r (1-p)^x}{\Gamma(r) x! (1-p^r)}
+\]
+
+where $p$ is the probability of success, $r$ is the number of successes, and $x$ is the number of failures before the $r$th success. As with the regular negative binomial rv, when using this for modeling we will not concern ourselves with forcing $r$ to be an integer. Again, we want to re-parameterize this by the mean/coefficient of variation parameterization. However, I don't know of an R package that has the zero-truncated negative binomial rv with the mean/coefficient of variation parameterization. So, we'll just have to figure it out ourselves. The key observation is that the zero-truncated pmf is just the regular pmf divided by $1 - P(X = 0)$. So, we can use the `dnbinom` function and divide by one minus the probability that $X = 0$.
+
+```{r, message=FALSE, warning=FALSE}
+library(actuar)
+mu <- 10
+size <- 4
+k <- size
+p <- size/(size + mu)
+
+my_dztnbinom <- function (x, size, mu) {
+  dnbinom(x, size = size, mu = mu)/(1 - dnbinom(0, size = size, mu = mu))
+}
+dztnbinom(1:10, size = size, prob = p)
+my_dztnbinom(1:10, size = size, mu = mu)
+```
+
+Now we can overwrite the `dztnbinom` function to allow for the new parameterization.
+
+```{r}
+dztnbinom <- function (x, size, prob, mu, log = FALSE) 
+{
+  if (!missing(mu)) {
+    if (!missing(prob)) 
+      stop("'prob' and 'mu' both specified")
+    dnbinom(x, size = size, mu = mu, log = log)/(1 - dnbinom(0, size = size, mu = mu, log = log))
+  }
+  else 
+    dnbinom(x, prob = prob, mu = mu, log = log)/(1 - dnbinom(0, prob = prob, mu = mu, log = log))
+}
+dztnbinom(1:10, size = size, mu = mu)
+dztnbinom(1:10, size = size, mu = mu)
+```
+
+And now we are ready to do some MLE! Let's specify our model. We want the mean of the **underlying negative binomial** process to be modeled as follows
+
+\[
+\log \mu = \beta_0 + \beta_1 x
+\]
+
+In the previous terminology, $\log x$ is the link function between the mean and an affine combination of the data. The random component is a zero-truncated negative binomial. The inverse link function is $e^x$. Let's simulate some data so that we can see how to estimate the regression coefficients.
+
+```{r}
+set.seed(4262020)
+dd <- data.frame(x = runif(100, -1, 1))
+dd <- mutate(dd, y = rnbinom(100, size = .5, mu = exp(2 + 1 * x)))
+dd
+dd <- filter(dd, y > 0) #zero-truncated!
+```
+
+Now we set up the log-likelihood function and maximize it, as before.
+
+```{r}
+neg_log_likelihood <- function(pars, data) {
+  -1 * sum(log(dztnbinom(data$y, size = pars[3], mu = exp(pars[1] + pars[2] * data$x))))
+}
+
+optim(par = c(1,1,.1), fn = neg_log_likelihood, data = dd)
+```
+
+We see that our estimate are $\hat \beta_0 = 1.95$, $\hat \beta_1 = 1.19$ and $\hat size = 0.573$. Let's compare to what happens when we use the built in R function.
+
+```{r, message=FALSE, warning=FALSE}
+library(VGAM)
+mod <- vgam(y ~ x, data = dd, family = posnegbinomial())
+summary(mod)
+coefficients(mod)
+```
+
+The first intercept is $\hat \beta_0$, while the second intercept is $\log \hat{size}$ and the $x$ coefficient is $\hat \beta_1$. These values match what we computed with `optim`.
+
+```{r}
+log(.573) #compare to (Intercept):2
+```
+
+### Zero-Inflated Poisson
+
+In this last section of the notes, we discuss **zero-inflated** count responses. 
+
+
+
+
+
 
 
 [^1]: Extra credit: diagram the sentence "The bigger the value of the log odds, the better."
 
 [^2]: Pronounced: "shoe!"
 
-
+[^3]: Not all.
 
 
 
