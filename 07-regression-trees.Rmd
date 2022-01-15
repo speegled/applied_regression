@@ -723,7 +723,10 @@ Here are several improvements that we could consider (from the man page of the f
 4. (forward selection): Forward variable selection is employed to define a multivariate model of the outcome in each bag.
 5. (aggregating the predictions): Prediction from each bag are aggregated. In case, of a quantitative outcome, the predictions are simply averaged across the bags.
 
-```{r}
+
+**Note** `randomGLM` was removed from CRAN in 2021.
+
+```{r eval=FALSE}
 library(randomGLM)
 x <- simulated[,-11]
 y <- simulated$y
@@ -734,7 +737,7 @@ mod <- randomGLM(x = x,
 
 To get an idea of the importance of the variables, we can use:
 
-```{r}
+```{r eval=FALSE}
 mod$timesSelectedByForwardRegression
 ```
 

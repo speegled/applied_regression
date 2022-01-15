@@ -618,7 +618,7 @@ dd <- read.csv("https://mathstat.slu.edu/~speegle/Spring2020/4870/data/Example5.
 
 
 ```{r, echo=FALSE}
-dd <- read.csv("/Users/speegled/Dropbox/Spring2020/4870/data/Example5.1Data.csv")
+dd <- read.csv("/Users/speegled/Documents/teachingold/Spring2020/4870/data/Example5.1Data.csv")
 summary(dd)
 ```
 
@@ -906,14 +906,132 @@ The first intercept is $\hat \beta_0$, while the second intercept is $\log \hat{
 log(.573) #compare to (Intercept):2
 ```
 
-### Zero-Inflated Poisson
+### Zero-Inflated Poisson and Negative Binomial
 
-In this last section of the notes, we discuss **zero-inflated** count responses. 
+In this last section of the notes, we discuss **zero-inflated** count responses.  We assume that the response is Poisson (except for the zero inflation) and that the mean of the poisson response depends on an affine combination of the predictors via a log-link function. We also assume that the inflation at zero depends on an affine combination of the predictors via a logit (log-odds) link. That is, we assume that
+
+\[
+P(Y = y) = \begin{cases}
+\pi + ( 1- \pi) e^{-\lambda} &y = 0\\
+(1 - \pi) e^{-\lambda} \lambda^y/y!& y = 1, 2, \ldots
+\end{cases}
+\]
+
+We model $\lambda$ and $\pi$ on the data as follows:
+
+\[
+\log \frac{\pi}{1-\pi} = \beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p 
+\]
 
 
+\[
+\log \lambda = \beta_0 + \beta_{p+1} x_{p+1} + \cdots \beta_m x_m
+\]
+
+Note that we are using some of the variables to predict the *structural zero* and the other variables are used to predict the rate of the Poisson. Deciding which variables should be used for which purpose can be challenging. We can also allow variables to serve both purposes, which often makes the most intuitive sense: if a predictor is important for whether a response is non-zero, why wouldn't it also be important for the magnitude of the response? We can use $p$-values to eliminate variables in our models, or use AIC. 
+Solving the relationships between parameters and predictors for the parameters, we have $\pi = \frac{1}{1 + e^{- \beta_0 - \sum \beta_i x_i}}$ and $\lambda = e^{\beta_0 + \sum \beta_i x_i}$. We will use the function `dzipois` in the `VGAM` library to access the zero-inflated Poisson pmf.
+
+**Example** Suppose you randomly select a person from a population and count the number of cigarettes that person smokes in one hour. In your population, 40% of the people do not smoke, and 60% of the people do smoke. Among those people who do smoke, the rate of cigarettes smoked is 2 cigarettes per hour. What is the probability that the person you selected smokes one cigarette in the hour you observe? 
+
+The zero-inflated negative binomial response is similar in the sense that it adds a log odds model for $\pi$ on top of the base negative binomial model. Details are omitted.
+
+Let's look at an example. In the `pscl` package there is a data set called `bioChemists` that can be loaded via the following commands.
+
+```{r, warning=FALSE, message = FALSE}
+library(pscl)
+data("bioChemists")
+```
+
+Let's explore the data a bit. The response variable is `art`, which is the number of articles produced during the last 3 years of PhD. The predictors are gebder `fem`, marital status `mar`, number of children under 5 `kid5`, the prestige of the PhD department `phd` and the number of articles published by the PhD mentor in the last three years `ment`. Let's look at some visualizations.
+
+```{r}
+plot(bioChemists)
+```
+
+I am especially interested in the top row, which shows how `art` related to each predictor individually. We leave `kid5` as numeric, though we might revisit this decision later. Let's start with a basic Poisson regression on all of the variables.
+
+```{r}
+mod_pois <- glm(art ~ ., data = bioChemists, family = poisson)
+summary(mod_pois)
+```
+
+We see that this is unlikely to be a good model, because of overdispersion. There may also be other reasons this is not a good model!
+
+Let's try negative binomial.
+
+```{r}
+mod_nb <- MASS::glm.nb(art ~ ., data = bioChemists)
+summary(mod_nb)
+plot(mod_nb, which = 5)
+```
+
+This model looks fine. Let's see how it compares to the zero inflated model. We need to specify which variables are part of the model for $\lambda$ and which variables are part of the model for $\pi$, using a `|`. The variables before the `|` are for $\lambda$.
+
+```{r}
+mod_zif_nb <- zeroinfl(art ~ . | ., data = bioChemists, dist = "negbin")
+summary(mod_zif_nb)
+```
+
+The residuals look worse in this model, but notice that they are the **Pearson** residuals and not the **deviance residuals**. To compare apples to apples, let's look at the Pearson residuals in the original negative binomial model. These seem more or less the same as the model we built.
+
+```{r}
+summary(residuals(mod_nb, type = "pearson"))
+```
+
+There are several things that we need to do now. We should remove predictors that aren't significant to the model, and we also need to figure out which model we should be using. I don't have definitive answers for you on this.
+
+1. I have seen it argued that negative binomial models are already flexible enough that we don't normally need to have zero inflated negative binomial responses. 
+2. Some people use the Vuong test to determine whether to use the zero inflated model. Others have problems with the Vuong test. The current consensus seems to be that it is inappropriate to use it, but you shouldn't be surprised to see it [in the wild](https://stats.idre.ucla.edu/r/dae/zip/). I will not discuss how to use it or interpret it.
+3. That leaves us with few options to evaluate our models! Let's look at the number of zeros that we have in our data, compared to the number of zeros that our models predict. I would point out that this has low power, but it does test directly what we are trying to do.
+4. One last option is to base the model on expert opinion, and see whether any of the predictors are significant for the zero inflation part. This is also tricky.
+
+To do this, we really have to understand what `glm.nb` is doing. The dispersion parameter is the value of `size` in `dnbinom`, and the coefficients are how we get `mu`. If we supply those values to `rnbinom`, we get a simulated data set that should match the data set that we already got. Then, we can check to see whether we are predicting enough zeros in our simulated data set.
+
+```{r}
+summary(mod_nb)
+head(predict(mod_nb, type = "response")) #means
+rnbinom(915, size = 2.264387695, mu = predict(mod_nb, type = "response"))
+```
+
+```{r}
+zeros <- replicate(1000, {
+  sum(rnbinom(915, 
+          size = 2.264387695, 
+          mu = predict(mod_nb, type = "response")) == 0)
+})
+quantile(zeros, c(.025, .975))
+sum(bioChemists$art == 0)
+```
+
+This indicates that the negative binomial model without zero inflation seems to be doing an OK job modeling the number of zeros in the data set. Just as a test, let's add a bunch of structural zeros and see whether it then fails this test.
+
+```{r}
+zif_bio <- bioChemists
+zif_bio$art[sample(1:915, 200)] <- 0 #zero inflated
+mod_nb_zif <- MASS::glm.nb(art ~ ., data = zif_bio)
+summary(mod_nb_zif)
+zeros <- replicate(1000, {
+  sum(rnbinom(915, 
+          size = 1.110856224, 
+          mu = predict(mod_nb, type = "response")) == 0)
+})
+quantile(zeros, c(.025, .975))
+sum(zif_bio$art == 0)
+```
+
+Now we see that the model is **not** accurately picking up all of the zeros, and we would want to switch to a zero inflated model. We would recommend checking that the true zeros are now in the 95% quantile interval of predicted zeros from data simulated via the model, but we will not go through that in detail in these notes. We do notice that none of the predictors are significant for the structural zeros, which makes sense because we arbitrarily assigned 200 values to zero (though many of those were likely already zero). 
+
+```{r}
+mod_zifbio_nb <- zeroinfl(art ~ . | ., data = zif_bio, dist = "negbin")
+summary(mod_zifbio_nb)
+```
 
 
+```{r}
+vuong(mod_nb, mod_zif_nb)
+```
 
+We see that the Vuong test is non-commital about whether the zero inflated model is better. It depends on which version of the test that you use.
 
 
 [^1]: Extra credit: diagram the sentence "The bigger the value of the log odds, the better."

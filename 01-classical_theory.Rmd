@@ -353,15 +353,13 @@ ggplot(dd, aes(x, y)) +
 
 It turns out that all 12 of these data sets have very similar lines of best fit!
 
-```{exercise}
+:::exercise
 Consider the data set `ISwR::bp.obese`. If you have never installed the `ISwR` package, you will need to run `install.packages("ISwR")` before accessing this data set.
 
 1. Find the line of best fit for modeling blood pressure versus obesity by minimizing the SSE.
 
 1. Does it appear that the model $y = \beta_0 + \beta_1 x + epsilon$, where $y$ is bp, $x$ is obese, and $\epsilon$ is normal with mean 0 and standard deviation $\sigma$ is correct for this data?
-
-
-```
+:::
 
 
 ## Linear Regression with no intercept
