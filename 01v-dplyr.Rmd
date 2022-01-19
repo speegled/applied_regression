@@ -4,8 +4,9 @@ The `dplyr` package is perhaps the most popular package in the `tidyverse`, and 
 It provides a powerful and intuitive way of wrangling and manipulating data into the forms that we will need for analysis and visualization.
 We assume that the data frame in question consists of a number of **observations** (rows) of various **variables** (columns). 
 Each row should correspond to a single observation, and each column should be measuring a single thing, and have a meaningful name.
+In this vignette, we discuss the basics of `dplyr` along with some string manipulation and time manipulation.
 
-There are **many** functions inside of `dplyr`, but if you learn the following 6, then you will be well on your way to being a boffin data wrangler.
+There are **many** functions inside of `dplyr`, but if you learn the following 6, then you will be well on your way to being a data wrangling boffin.
 
 1. `filter` Use this to create a subset of **observations** of data. That is, we remove some of the rows from the data frame, and keep the rest of them.
 
@@ -19,7 +20,7 @@ There are **many** functions inside of `dplyr`, but if you learn the following 6
 
 6. `%>%` The pipe. Without the pipe, `dplyr` never would have gained popularity. The pipe allows us to chain together operations so that the data wrangling can follow our natural language manner of doing the wrangling.
 
-Let's see how these work with an example. Consider the `babynames` package in the `babynames` library.
+Let's see how these work with some examples. Consider the `babynames` package in the `babynames` library.
 
 ```{r}
 bb <- babynames::babynames
@@ -70,7 +71,106 @@ select(bb, matches("^n"))
 If you don't know regular expressions, that's OK. The `^` indicates that we only want to find matches at the beginning of the variable name, and the `n` indicates what we want to match. In this instance, since there are no other variables with an `n` in them, we wouldn't have to include the `^`. 
 :::
 
+:::example
+Suppose we wanted to create a new variable which contains the **percentage** of babies with of that gender and name in a given year. To do this, we would need to multiple `prop` by 100 and store it in a new variable.
 
+```{r}
+mutate(bb, percent = prop * 100)
+```
 
+A more complicated example would be to create a new variable which contains the first letter of each baby's name. 
+We would need to use `mutate` to do that, along with some string work to pull out the first letter of the name. 
+We will use the `stringr` package to manipulate strings. 
+The particular function we need for this task is `str_extract`.
+Again, we will need a regular expression which matches the first letter of the baby's name.
+Since the first letter is (perhaps?) the only one capitalized, we could probably use `"[A-Z]"`, which matches any letter between A and Z.
+But, to be safe, we **anchor** the match at the front of the name using `^`, just like we did above with variable names.
 
+```{r}
+library(stringr)
+mutate(bb, first_letter = str_extract(name, "^[A-Z]"))
+```
+:::
+
+Now, we get to some more interesting tasks which incolve `group_by` and `summary`.
+
+::: example
+How many babies are there from 1880? We first filter so that only 1880 is shown, then we `summarize` by adding up all of the values of `n`.
+
+```{r}
+bb_1880 <- filter(bb, year == 1880)
+summarize(bb_1880, tot = sum(n))
+```
+
+This is a bit awkward since we created the intermediate data frame `bb_1880`. It would have been nice to just use the result from `filter` directly in `summarize`. That's exactly what pipes do!
+
+```{r}
+bb %>% 
+  filter(year == 1880) %>% #same as filter(bb, year == 1880)
+  summarize(tot = sum(n)) #same as summarize(filter(bb, year == 1880), tot = sum(n))
+```
+
+You read the above as follows. "Take bb, filter to year is only 1880, and then summarize by adding the values of n." The pipes take the place of the statement "and then" when you are thinking to yourself about how to break down a problem.
+
+Now let's add `group_by`. The `group_by` function groups the data frame according to values of one or more variable so that you can perform computations on each group separately. So, if we wanted to find the total number of babies in each year separately, we would proceed as follows:
+
+```{r}
+bb %>% 
+  group_by(year) %>% 
+  summarize(tot = sum(n))
+```
+
+If we wanted to do the same thing, but for Females and Males separately:
+
+```{r}
+bb %>% 
+  group_by(year, sex) %>% 
+  summarize(tot = sum(n))
+```
+
+Finally, what if we wanted to count the number of distinct names given to babies in each year? Here, we would use `n()`, which is a special function that returns the number of observations in a data frame. If it is done with a **grouped** data frame, then it computes the number of observations in each group.
+
+```{r}
+bb %>% 
+  group_by(year) %>% 
+  summarize(count = n())
+```
+
+:::
+
+Next steps: the above 6 functions can take you far. If you want to take your manipulation skills to the next level, the next functions I would learn would be `pivot_longer`, `pivot_wider`, `left_join`, `slice_*` (the family of `slice` functions), and start learning about the `stringr` and `lubridate` packages. There is a homework problem that requires you to use `lubridate`, so here is a quick example, where we convert `seoulweather` date into a `lubridate` object for plotting purposes. 
+
+First, note that if we just pass date to `ggplot2` and plot it, it looks terrible. That's because `ggplot` doesn't know `date` is a date.
+
+```{r}
+ss <- as_tibble(fosdata::seoulweather)
+library(ggplot2)
+ggplot(ss, aes(x = date, y = next_tmax)) + 
+  geom_point()
+```
+
+After we change `date` to a date variable, things look much better, even though there would still be a lot to do to make this make sense. For your homework, you will want to filter down to the mentioned stations and year, use a grouping variable (or color) and then use `geom_line`. This problem is hard. Don't be discouraged if you don't get it. Come and get help in office hours.
+
+```{r}
+library(lubridate)
+ss <- ss %>% 
+  mutate(date = ymd(date))
+ggplot(ss, aes(x = date, y = next_tmax)) + 
+  geom_point()
+```
+
+Something like this is what you are looking for in the homework, but don't worry if yours doesn't look exactly like this.
+
+```{r echo=FALSE}
+ss %>% 
+  filter(year(date) == 2016, station %in% c(1, 2, 3)) %>% 
+  ggplot(aes(x = date, y = present_tmax, color = as.factor(station))) + 
+  geom_line() +
+  labs(color = "station", x = "Date") +
+  scale_y_continuous(name = "Max Temperature") +
+  labs(title = "Seoul Weather 2016", 
+       subtitle = "Station 1 consistently the coolest") + 
+  theme_minimal()
+  
+```
 
