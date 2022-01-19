@@ -6,6 +6,7 @@ site: bookdown::bookdown_site   # needed for R studio integraion (Build tab)
 #
 title: "Applied Regression with R"
 author: "Darrin Speegle"
+favicon: images/favicon.png
 date: "`r Sys.Date()`"
 
    # description field is metadata in the html files that will show up on
@@ -20,4 +21,4 @@ documentclass: book     # needs to be here, not in _output.yml
 
 # Preface
 
-These notes are for the class Applied Regression, taught at SLU in the spring of 2020.
+These notes are for an applied regression course using R. Mathematical derivations are de-emphasized, while simulations are used to provide evidence for many statements throughout the book. The prerequisite material for this book is contained in [Probability, Statistics, and Data: A Fresh Approach Using R](https://mathstat.slu.edu/~speegle/_book/preface.html) by Speegle and Clair. 

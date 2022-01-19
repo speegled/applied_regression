@@ -92,7 +92,7 @@ Missing data is a very common problem. We may have a data set with 2000 observat
 We use the St Louis housing data set that is required for your project. 
 
 ```{r}
-dd <- read.csv("../private/4870/data/train_data.csv", 
+dd <- read.csv("data/train_data.csv", 
                stringsAsFactors = FALSE)
 ```
 We see that this data set consists of 1201 observations of 29 variables. However, some of the variables consist **entirely** of missing data!

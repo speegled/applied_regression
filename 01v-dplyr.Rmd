@@ -1,0 +1,76 @@
+## Vignette: A dplyr primer {-}
+
+The `dplyr` package is perhaps the most popular package in the `tidyverse`, and one of R's most popular packages overall. 
+It provides a powerful and intuitive way of wrangling and manipulating data into the forms that we will need for analysis and visualization.
+We assume that the data frame in question consists of a number of **observations** (rows) of various **variables** (columns). 
+Each row should correspond to a single observation, and each column should be measuring a single thing, and have a meaningful name.
+
+There are **many** functions inside of `dplyr`, but if you learn the following 6, then you will be well on your way to being a boffin data wrangler.
+
+1. `filter` Use this to create a subset of **observations** of data. That is, we remove some of the rows from the data frame, and keep the rest of them.
+
+2. `select` Use this to create a subset of **variables** of data. That is, we remove some of the columns from the data frame, and keep the rest of them.
+
+3. `mutate` Use this to create a new variable that gets added to the data frame. The new variable can be a combination of the other variables in the data frame.
+
+4. `summarize` Use this to reduce the data frame down to a single value. This is most often used in conjunction with `group_by` below, which means **each group** is reduced down to a single value via some computation.
+
+5. `group_by` Organize the data frame into groups. Primarily used with `summarize` but sometimes also with `mutate`. The function `n()` returns the number of observations (rows) in each group.
+
+6. `%>%` The pipe. Without the pipe, `dplyr` never would have gained popularity. The pipe allows us to chain together operations so that the data wrangling can follow our natural language manner of doing the wrangling.
+
+Let's see how these work with an example. Consider the `babynames` package in the `babynames` library.
+
+```{r}
+bb <- babynames::babynames
+bb
+```
+
+This data set lists all names in the United States given to at least 5 babies in a year. It has almost 2 million observations of 5 variables.
+
+:::example
+Create a data frame that contains only those babies born in 1899.
+
+```{r}
+library(dplyr)
+filter(bb, year == 1899)
+```
+
+Create a data frame that contains only those babies born in 1899 that were assigned Female at birth.
+
+```{r}
+filter(bb, year == 1899, sex == "F")
+```
+
+As you can see, if we have multiple conditions separated by a comma, `filter` interprets that as an **and** condition. If we want to use **or**, we need to use the vector valued or operator `|`.
+
+Create a data frame that contains only those babies born either in 1900 or 2000.
+
+```{r}
+filter(bb, year == 1900|year == 2000)
+```
+:::
+
+
+The `select` function is not as complicated or really as useful as the `filter` function.
+
+::: example
+Create a data frame that only contains `year` and `name`.
+
+```{r}
+select(bb, year, name)
+```
+
+Select can be useful if you know regular expressions and want to select from a long list of variables. Instead of putting the variable name in, you use `matches("")` and put a regular expression inside the quotes. For example, to select all variables that start with n.
+
+```{r}
+select(bb, matches("^n"))
+```
+
+If you don't know regular expressions, that's OK. The `^` indicates that we only want to find matches at the beginning of the variable name, and the `n` indicates what we want to match. In this instance, since there are no other variables with an `n` in them, we wouldn't have to include the `^`. 
+:::
+
+
+
+
+

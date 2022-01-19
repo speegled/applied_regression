@@ -2,7 +2,7 @@
 
 ## Review {#review}
 
-We will need several facts and techniques from MATH/STAT 3850 that you may or may not remember. The most important theory for this chapter is that related to *normal* random variables. 
+In this section, we review material that will be used in the first two chapters. The most important theory for this chapter is that related to *normal* random variables. 
 
 Recall, a **normal** random variable with mean $\mu$ and standard deviation $\sigma$ has pdf given by
 \[
@@ -18,14 +18,15 @@ curve(dnorm(x, 0, 2), add= T, col = 2) #red
 curve(dnorm(x, 0, 1), add = T, col = 1) #black
 ```
 
-Recall that the *area* under the curve between $x = a$ and $x = b$ of the pdf of $X$ gives $P(a \le X \le b) = \int_a^b f(x)\, dx$. Probability density functions can also be used to find the *expected value* of a random variable $X$ via
+Recall that the *area* under the curve between $x = a$ and $x = b$ of the pdf of $X$ gives $P(a \le X \le b) = \int_a^b f(x)\, dx$. Probability density functions can also be used to find the *expected value* (also called the *mean*) of a random variable $X$ via
+
 $$
 \mu_X = E[X] = \int_{-\infty}^\infty x f(x)\, dx.
 $$
 
 
 
-```{theorem, label = "normalfacts"} 
+::: theorem
 Key facts about normal random variables.
 
 1. If $X_1$ and $X_2$ are independent normal random variables with means $\mu_1, \mu_2$ and standard deviations $\sigma_1, \sigma_2$, then $X_1 + X_2$ is normal with mean $\mu_1 + \mu_2$ and standard deviation $\sqrt{\sigma_1^2 + \sigma_2^2}$. if 
@@ -33,14 +34,11 @@ Key facts about normal random variables.
 2. If $X \sim N(\mu, \sigma)$ and $a$ is a real number, then $X + a \sim N(\mu + a, \sigma)$.
 
 3. If $X \sim N(\mu, \sigma)$ and $a$ is a real number, then $aX \sim N(a\mu, a\sigma)$.  
-
-
-
-```
+:::
 
 The key things to remember are that the sum of independent normals is again normal, and that translating or scaling a normal is still normal. The means and standard deviations of the resulting random variables can be computed from general facts about sums of rvs, given below.
 
-```{theorem, label = "meanfacts"}
+::: {.theorem #meanfacts}
 The following are facts about expected values of rvs.
 
 1. $E[X + Y] = E[X] + E[Y]$, whether $X$ and $Y$ are independent or dependent!
@@ -50,10 +48,7 @@ The following are facts about expected values of rvs.
 3. $E[aX] = aE[X]$.
 
 4. $E[\sum_{i = 1}^n a_i X_i] = \sum_{i = 1}^n a_i E[X_i]$.  
-
-
-
-```
+:::
 
 Recall that the variance of an rv is $V(X) = E[(X - \mu)^2] = E[X^2] - \mu^2$, and that the standard deviation is the square root of the variance.
 
@@ -256,10 +251,9 @@ The idea is that we want to minimize the sum of the loss function evaluated at t
 Let's look at a different data set. This is the world happiness data set. People were surveyed in various countries around the world and asked to imagine the best life possible for them as a 10, and the worst life possible as a 0. Then they were asked to assign a number to their current life between 0 and 10. The results of the survey are summarized [here](https://mathstat.slu.edu/~speegle/Spring2020/4870/data/world_happiness_data.xls).
 
 ```{r}
-dd <- readxl::read_xls("../4870/data/world_happiness_data.xls") #This won't work for you!
+dd <- ardata::world_happiness
 
-dd <- filter(dd, Year == 2018) %>% 
-  janitor::clean_names()
+dd <- filter(dd, year == 2018)
 
 dd <- select(dd, country_name, life_ladder, log_gdp_per_capita)
 ggplot(dd, aes(x = log_gdp_per_capita, y = life_ladder))  + 
@@ -925,6 +919,11 @@ When you are done using `MASS`, I always recommend detaching it. The reason is t
 ```{r}
 detach("package:MASS", unload = TRUE)
 ```
+
+```{r child="01v-dplyr.Rmd"}
+```
+
+
 
 ## Exercises
 
