@@ -52,18 +52,15 @@ The following are facts about expected values of rvs.
 
 Recall that the variance of an rv is $V(X) = E[(X - \mu)^2] = E[X^2] - \mu^2$, and that the standard deviation is the square root of the variance.
 
-```{theorem, label = "variancefacts"}
-Here are some key facts about variances of rvs.
+:::theorem
+Here are some key facts about variances of random variables.
 
 1. $V(aX) = a^2 V(X)$
 
 2. $V(\sum_{i = 1}^n a_i X_i) = \sum_{i = 1}^n a_i^2 V(X_i)$, *provided* that the random variables are independent!
   
 3. $V(a) = 0$  
-
-
-
-```
+:::
 
 The other key thing that you will need to remember is about simulations. We will be doing quite a bit of simulation work in this chapter.
 
@@ -474,7 +471,58 @@ curve(dnorm(x, 2, sqrt(9/sum(xs^2))),a
       = T, col = 2 )
 ```
 
-That is compelling to me. We have seen that $\hat \beta_1$ is normal with mean $\beta_1$ and standard deviation $\frac{\sigma}{\sqrt{\sum x_i^2}}$
+That is compelling to me. We have seen that $\hat \beta_1$ is normal with mean $\beta_1$ and standard deviation $\frac{\sigma}{\sqrt{\sum x_i^2}}$.
+
+If we wanted to estimate **all** of the parameters in the model, though, we would need to come up with an estimate for $\sigma$ or $\sigma^2$. The traditional way to estimate $\sigma^2$ given a random sample $v_i$ from a population with **known** mean $\mu$ is $S^2 \approx \frac 1n \sum_{i = 1}^n (v_i - \mu)^2$. If we **don't** know $\mu$, then we estimate it from the data, and use $S^2 = \frac 1{n-1} \sum_{i = 1}^n (v_i - \overline{v})^2$, where the rule of thumb is that you subtract one from the denominator for each parameter that you estimated. In this case, we estimated $\mu$, so we subtract 1.
+
+In our case, we have a random sample from a population with known mean 0, but we are estimating one parameter still, namely $\beta$.
+Recall that $y_i \sim \beta x_i + \epsilon_i$, where $\epsilon_i$ are iid normal random variables with mean 0 and standard deviation $\sigam$. Therefore, if we **knew** $\beta$, it would be true that 
+$y_i - \beta x_i \sim N(0, \sigma)$, and we could use that to estimate $\sigma^2 \approx \frac 1n \sum_{i = 1}^n (y_i - \beta x_i)^2$.  But, we don't know $\sigma$, so we have to approximate it with $\hat \beta$, which means we subtract one from the downstairs. Our final guess is
+\[
+\hat \sigma^2 = \frac 1{n - 1}\sum_{i = 1}^n \left(y_i - \hat \beta x_i\right)^2
+\]
+Let's check via simulation whether this is a good estimate.
+
+We assume that the true generative process of the data is $y = 2 * x + \epsilon$, where $\epsilon \sim N(0, 3)$, so that $\sigma^2 = 9$. We take a sample size of $n = 100$ as follows.
+
+```{r}
+set.seed(4870)
+x <- runif(100, 0, 10)
+y <- 2 * x + rnorm(100, 0, 3)
+beta_hat <- sum(x * y) / sum(x^2)
+sigma_hat <- 1/99 * sum((y - beta_hat * x)^2)
+sigma_hat
+```
+
+We get 11.9, which isn't all that close to the correct value, but let's see what happens on average if we repeat the process a bunch of times.
+
+
+```{r}
+sigmas <- replicate(10000, {
+  y <- 2 * x + rnorm(100, 0, 3)
+  beta_hat <- sum(x * y) / sum(x^2)
+  sigma_hat <- 1/99 * sum((y - beta_hat * x)^2)
+  sigma_hat
+})
+mean(sigmas)
+```
+
+We see that, on avereage, the estimate of $\sigma^2$ is right on! That is what we mean by an **unbiased** estimator of $\sigma^2$.
+
+:::tryit
+Show that $\hat \sigma^2 = \frac 1n \sum_{i = 1}^n \left(y_i - 2 * x_i\right)^2$ is an unbiased estimator for $\sigma^2$, using the same set-up as above.
+:::
+
+```{r echo=FALSE, eval=FALSE}
+sigmas <- replicate(10000, {
+  y <- 2 * x + rnorm(100, 0, 3)
+  beta_hat <- sum(x * y) / sum(x^2)
+  sigma_hat <- 1/100 * sum((y - 2 * x)^2)
+  sigma_hat
+})
+mean(sigmas)
+```
+
 
 ```{exercise}
 Suppose you wish to model data $(x_1, y_1), \ldots, (x_n, y_n)$ by 
@@ -658,7 +706,7 @@ curve(dchisq(x, 28), add = T, col = 2)
 
 Now, we are ready to do actual hypothesis testing on the slope without assuming that we know the underlying variance. 
 
-```{theorem, label = "betazerodist"}
+:::{.theorem, #betazerodist}
 Let $(x_1, y_1), \ldots, (x_n, y_n)$ be a random sample from the model
 \[
 y_i = \beta_0 + \beta_1 x_i + \epsilon_i  
@@ -668,8 +716,7 @@ where $\epsilon_i$ are iid normal random variables with mean 0 and variance $\si
 \frac{\hat \beta_1 - \beta_1}{\sqrt{\frac{n S^2}{n \sum x_i^2 - \sum x_i \sum x_i}}}
 \]
 follows a $t$ distribution with $n - 2$ degrees of freedom.
-
-```
+:::
 
 To prove this, we will once again use simulations. We assume $\beta_0 = 1$, $\beta_1 = 2$ and $\sigma = 3$.
 
@@ -870,8 +917,7 @@ library(MASS)
 rlm(life_ladder ~ log_gdp_per_capita, data = happy, psi = psi.bisquare)
 ```
 
-We don'
-a big change by doing it like this.
+We don't see a big change by doing it like this.
 
 Now let's set up a funky simulated data set.
 
