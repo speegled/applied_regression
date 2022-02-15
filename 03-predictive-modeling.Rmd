@@ -2,7 +2,7 @@
 
 In Chapter \@ref(multiple-linear-regression) we saw that it can be hard to decide how to predict future values from a regression model. The reason is that our model isn't constructed so as to efficiently predict future values, but rather for other goals. In this chapter, we focus on doing regression for predictions. 
 
-## Comparing Two Models
+## Comparing Two Models{#comparingtwomodels}
 
 Let's return to the `ISwR::cystfibr` data set. We imagine that we want to determine whether `height` or `weight` is a better predictor for `pemax`. 
 
@@ -189,9 +189,102 @@ boot_rmse$results
 
 All three methods give relatively similar results in this case. We can guess that our RMSE on future, unseen data will be about $\$6100 \pm \$600$. 
 
+## A Brief Return to Inference
+
+We begin by remembering how to construct a 95 percent confidence interval for the mean. 
+
+:::example
+
+Consider a confidence interval for the mean, created using `t.test`. We assume that the assumptions of `t.test` are met, and we find a 95 percent confidence interval. 
+
+```{r}
+x <- rnorm(20) #true mean is 0
+ttest <- t.test(x)
+ttest$conf.int
+```
+
+We can also compute a **bootstrap** confidence interval of the mean. We do so by resampling from the data (with replacement), and computing the mean each time. We then compute the appropriate quantiles of the means to get the bootstrap confidence interval.
+
+```{r}
+means <- replicate(10000, {
+  mean(sample(x, replace = T))
+})
+quantile(means, c(.025, .975))
+```
+
+We see that the two methods give similar results. The booststrap method can sometimes be useful when the data does **not** meet the assumptions of `t.test`, but this is not a course in bootstrapping. The interested reader can consult [Mathematical Statistics with Resampling and R](https://www.amazon.com/Mathematical-Statistics-Resampling-Laura-Chihara-dp-111941654X/dp/111941654X) for more information.
+:::
+
+Next, we show how we can use resampling techniques to construct confidence intervals associated with regression. As an example, we show one way to use the bootstrap to create a confidence interval for the slope. We assume for simplicity that we have only one explanatory variable $x$. We consider the observations $(x_1, y_1), \ldots, (x_n, y_n)$ to be typical of all observations that we could have observed. To bootstrap, we choose $n$ of the observations with replacement and recompute the regression model. When doing so, we get a range of values that the slope could have been, and if we compute quantlies of those values, then that is a confidence interval for the slope. 
+
+Let's again do it with simulated data that follows our assumptions for regression. If you run the following code several times, you will see that the bootstrap method gives similar results to `confint` in this case.
+
+```{r}
+x <- runif(30, 0, 10)
+y <- 1 + 2 * x + rnorm(30, 0, 6)
+plot(x, y)
+df <- data.frame(x = x, y = y)
+mod <- lm(y ~ x)
+mod
+
+slopes <- replicate(2000, {
+  df2 <- df[sample(1:nrow(df), replace = T),] #boostrap
+  mod <- lm(y ~ x, data = df2)
+  coef(mod)[2] #compute slope of bootstrapped data
+})
+quantile(slopes, c(.025, .975))
+confint(mod, parm = "x")
+```
+
+The confidence interval for slope is relatively robust to departures from assumptions, meaning that it often is approximately a 95 percent confidence interval even when normality, homoskedasticity, and few outliers for the model are not met. The next example shows one time where the coverage of the 95 percent confidence interval is not ideal, and compares the coverage to the bootstrap confidence interval.
+
+:::example
+In the following example, we show that the effective type I error rate is about twice as high as it should be when we have strong heteroskedasticity.
+
+```{r}
+x <- runif(30, 0, 10)
+y <- 1 + 2 * x + rnorm(30, 0, x^1.5)
+df <- data.frame(x = x, y = y)
+plot(df, main = "Extreme heteroskedasticity")
+
+mean(replicate(1000, {
+  x <- runif(30, 0, 10)
+  y <- 1 + 2 * x + rnorm(30, 0, x^1.5)
+  df <- data.frame(x = x, y = y)
+
+  mod <- lm(y ~ x)
+  ci <- confint(mod, parm = "x", level = .95)
+  ci[1] < 2 & ci[2] > 2
+})) #should be 0.95
+```
+
+Let's see how the bootstrap confidence interval does. This takes a long time to run. We use the formula for the slope that we derived in Chapter 2 in order to speed it up, as well as running the loop in parallel. We see that the bootstrap confidence interval does better, but is still not perfect. It should have incorrectly rejected the null hypothesis 5 percent of the time.
+
+```{r cache=TRUE}
+library(future.apply)
+future::plan(strategy = "multisession", workers = 10)
+mean(future.apply::future_replicate(1000, {
+  x <- runif(30, 0, 10)
+  y <- 1 + 2 * x + rnorm(30, 0, x^1.5)
+  df <- data.frame(x = x, y = y)
+
+  ci <- quantile(replicate(1000, {
+    df2 <- df[sample(1:30, replace = T),]
+    x <- df2$x
+    y <- df2$y
+    (sum(x* y) - 1/30 * sum(x) * sum(y))/(sum(x^2) - 1/30 * sum(x) * sum(x)) #faster than lm
+  }), c(.025, .975))
+  
+  ci[1] < 2 && ci[2] > 2
+}))
+plan(strategy = "sequential")
+```
+:::
+
+
 ## Simulations of Expected MSE
 
-In the previous section, we saw several methods for estimating the MSE or RMSE for models. One question that you may have is: which method should I be using? If we want to get error bounds for our estimate of RMSE, then we will need to use one that is repeated, but that still leaves repeated LGOCV, repeated $k$-vold CV, and repeated bootstrap. The type of model we are building can have an impact on our choice: if the model doesn't handle data that is repeated well, then bootstrapping would not be a good choice, for example. If model accuracy is highly sensitive to sample size, then LGOCV might not be a good choice, as the model is built on data roughly 70-80% of the size of the original data set.
+In Section \@ref(comparingtwomodels), we saw several methods for estimating the MSE or RMSE for models. One question that you may have is: which method should I be using? If we want to get error bounds for our estimate of RMSE, then we will need to use one that is repeated, but that still leaves repeated LGOCV, repeated $k$-vold CV, and repeated bootstrap. The type of model we are building can have an impact on our choice: if the model doesn't handle data that is repeated well, then bootstrapping would not be a good choice, for example. If model accuracy is highly sensitive to sample size, then LGOCV might not be a good choice, as the model is built on data roughly 70-80% of the size of the original data set.
 
 In this section, though, we will thouroughly examine the estimates for MSE in the case of a simple linear model $y = 1 + 2x + \epsilon$, where $\epsilon \sim N(0, \sigma = 3)$. We suppose that we have data $\{(x_1, y_1), \ldots, (x_N, y_N)\}$, and we do computations in two special cases.
 
@@ -240,6 +333,35 @@ E[(\hat \theta - \theta)^2] = MSE(\hat \theta) = V(\hat \theta) + Bias(\hat \the
 \]
 
 It can be shown, for example, that $S^2 = \frac 1{n - 1} \sum_{i = 1}^n (y_i - \overline{y})^2$ is an unbiased estimator for $\sigma^2$, and that among all unbiased estimators for $\sigma^2$, $S^2$ as the **smallest variance**. However, we can **increase** the bias and the corresponding **decrease** in variance can lead to an estimator for $\sigma^2$ that has a lower MSE. In this case, we can show that $\frac 1n \sum_{i = 1}^n \bigl(y_i - \overline{y}\bigr)^2 = \frac {n-1}{n} S^2$ has lower MSE than $S^2$ does.
+
+:::example
+Not only **can** we show it, we **do** show it. Let's consider a random sample of size 20 from a normal population with mean 0 and variance 4. We compare the MSE of $S^2 = \frac 1{n - 1} \sum_{i = 1}^n (y_i - \overline{y})^2$ with that of $\frac 1n \sum_{i = 1}^n \bigl(y_i - \overline{y}\bigr)^2 = \frac {n-1}{n} S^2$.
+
+```{r}
+x <- rnorm(20, 0, 2)
+(var(x) - 4)^2 #this is the error squared
+
+mean(replicate(10000, {
+  x <- rnorm(20, 0, 2)
+  (var(x) - 4)^2 
+})) 
+
+mean(replicate(10000, {
+    x <- rnorm(20, 0, 2)
+    (19/20 * var(x) - 4)^2 
+}))
+
+```
+
+The above computations show that the MSE of our second estimator for $\sigma^2$ is less than that of $S^2$. However, the second estimator is **biased**. This is an example of being able to **increase** bias while **decreasing** variance by more than enough to make up for the increased bias.
+
+```{r}
+mean(replicate(10000, {
+    x <- rnorm(20, 0, 2)
+    19/20 * var(x) 
+})) #doesn't equal 4
+```
+:::
 
 In the context of modeling, we have a different formulation of the bias-variance trade-off. Suppose that we are modeling an outcome $y$ that consists of independent noise about a curve with constant variance $\sigma^2$. (We can assume the curve is $y = 0$.) Suppose also that we use a model to estimate the outcome. We have that 
 

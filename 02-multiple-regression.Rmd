@@ -55,6 +55,39 @@ summary(mod2)
 ```
 Our model would then be $y = -2.9041 + 2.4214 v + 2.8949 w + \epsilon$, at which point we would probably be done removing variables. 
 
+::: example
+We show how to do several common types of tasks with this (simulated) data set. Before doing inference, we should check the residuals.
+
+```{r out.width=c('50%', '50%'), fig.show="hold", fig.cap="Residual plots for simulated data look fine."}
+plot(mod2)
+```
+
+Since they are fine, we can proceed. If we want a 99 percent confidence interval for $\beta_2$, we would use `confint` as follows:
+
+```{r}
+confint(mod2, parm = "ws", level = 0.99)
+```
+
+A 99 percent confidence interval for $\beta_2$ is $[1.895, 3.895]$.
+
+If we want to test $\beta_1 = 0$ versus $\beta_1\not= 0$, we look at the $p$-value associated with `vs`. We see that it is less than .05, so we reject that $\beta_1 = 0$ and conclude that it is not zero.
+
+Suppose we want a 95 percent confidence interval for the mean value of the response when `vs = 5` and `ws = 5`. We would use
+
+```{r}
+predict(mod2, newdata = data.frame(vs = 5, ws = 5), interval = "conf")
+```
+
+We see that we are 95 percent confident that the **mean** response is between 21.57 and 25.78 with those values of `vs` and `ws`. However, if we were imagining that we were going to get a single additional observation and we want a range of values that we are 95 percent confident that the single additional value will fall in, we would do this:
+
+```{r}
+predict(mod2, newdata = data.frame(vs = 5, ws = 5), interval = "pre")
+```
+
+We get quite a different answer: the next obserevation will be between 13 and 34 with 95 percent confidence. Note that these prediction intervals take into account both the uncertainty in our estimates for the parameters, **and** the inherent uncertainty when sampling a single value.
+
+:::
+
 Let's look at another example. Consider the data in `cystfibr` in the `ISwR` package. Our treatment of this data set follows the treatment given in Dalgaard's book. Let's start by seeing what kind of data we are dealing with. According to the description, "It contains lung function data for cystic fibrosis patients (7–23 years old)." I recommend running `?ISwR::cystfibr` and reading about the variables involved in this data. 
 
 We begin by plotting and summarizing the data.
