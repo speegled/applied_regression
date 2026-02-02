@@ -39,7 +39,7 @@ dd <- dd %>% mutate(x = scale(x),
              z = scale(z))
 ```
 
-Next, as in the case of PCA, we randomly select values in the unit sphere of $R^3$, and we compute the covariance of the projection of the data onto that direction with the response. We will keep track of the largest and that will be our rough estimate for the PLS component 1. We begin with some helper functions, which are the inner product of two vectors and the norm of a vector.
+Next, as in the case of PCA, we will use `optim` to maximize the covariance of the projection of the data set onto a direction on the unit sphere in $R^3$. We begin with some helper functions, which are the inner product of two vectors and the norm of a vector.
 
 ```{r}
 ip <- function(x, y) {
@@ -59,26 +59,20 @@ dd_p <- apply(dd[,1:3], 1, function(x) ip(x, rvec))
 cov(dd_p, dd$response)
 ```
 
-Now, we do this 1000 times, and keep track of the largest component. This time, instead of taking random points on the sphere, we jitter the current best a bit and if it improves things, then we move in that direction.
+Now we put this inside of `optim`. We normalize the vector and take the negative absolute value of the covariance in order to insure that the *minimum* found corresponds to the *maximum covariance*.
 
 ```{r}
-largest_cov <- abs(cov(dd_p, dd$response))
-largest_direction <- rvec
-for(i in 1:1000) {
-  rvec <- largest_direction
-  rvec <- rvec + rnorm(3, 0, .2)
+ff <- function(rvec) {
   rvec <- rvec/mynorm(rvec)
   dd_p <- apply(dd[,1:3], 1, function(x) ip(x, rvec))
-  curr_cov <- abs(cov(dd_p, dd$response))
-  if(curr_cov > largest_cov) {
-    largest_cov <- abs(cov(dd_p, dd$response))
-    largest_direction <- rvec
-    print(largest_direction)
-  }
+  -abs(cov(dd_p, dd$response))
 }
+first_comp <- optim(par = c(-.33,-.66, .66), fn = ff, control = list(reltol = .000001))
+first_comp
+first_comp$par/mynorm(first_comp$par)
 ```
 
-According to this, our estimate for the first PLS component is `r round(largest_direction, 3)`. This is the direction of the data that has the largest covariance with the response. Let's check it against the first component found using the `plsr` function in the `pls` package.
+According to this, our estimate for the first PLS component is `r round(first_comp$par/mynorm(first_comp$par), 3)`. This is the direction of the data that has the largest covariance with the response. Let's check it against the first component found using the `plsr` function in the `pls` package.
 
 ```{r}
 library(pls)
@@ -87,15 +81,7 @@ loadings(plsmod)
 plsmod$projection
 ```
 
-We see that the first component that `plsr` got in the `projection` is $(0.331, 0.668, -0.6667)$, which is pretty close to what we got. We confirm that the covariance for that vector is slightly better than the one we got via our crude technique.
-
-```{r}
-rvec <- plsmod$projection[,1]
-mynorm(rvec)
-dd_p <- apply(dd[,1:3], 1, function(x) ip(x, rvec))
-cov(dd_p, dd$response)
-largest_cov
-```
+We see that the first component that `plsr` got in the `projection` is $(0.331, 0.668, -0.6667)$, which is the negative of what we got, so gives the same line or direction. 
 
 Now, in PCA to get the second component, we looked at all directions perpendicular to the first component and found the one with maximum variance. In PLS, we no longer force the second component to be orthogonal to the first component. That's one difference. But, we do want it to pick up different information than the first component. How do we accomplish that?
 
@@ -104,7 +90,7 @@ A first idea might be to find the direction that has the highest covariance with
 ### Optional PLS Stuff
 
 ```{r}
-first_vec <- largest_direction
+#first_vec <- largest_direction
 dd$direction_1 <- apply(dd[,1:3], 1, function(x) ip(x, first_vec))
 m1 <- lm(response ~ direction_1, data = dd)
 
