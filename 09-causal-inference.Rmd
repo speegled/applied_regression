@@ -1,0 +1,105 @@
+# Causal Inference
+
+In this section, we examine *causality*. Pearl, Glymour and Jewell write, "The ultimate aim of many statistical studies is to predict the effects of interventions... when we perform a study on a new cancer drug, we are trying to identify how a patient's illness responds when we intervene upon it by medicating the patient." This is very different than the point of view that, by necessity, we have taken up to this point, where we were simply **describing** the relationship between variables. We made pains to state that [correlation is not causation](https://xkcd.com/552/)! Here are a couple of correlations for you to think about, all from the [spurious corrleations](http://www.tylervigen.com/spurious-correlations) webpage.
+
+```{r}
+knitr::include_graphics(rep("images/chart_1.jpeg"))
+```
+
+```{r}
+knitr::include_graphics(rep("images/chart_2.jpeg"))
+```
+
+Even the most gullible among us would be hard pressed to believe that decreases in per capita consumption of margarine actually **causes** the divorce rate in Maine to decrease, though we also don't have any specific evidence to rule that out. In general, though, after we collect our data and run our analyses, we are left with the problem of assigning causality. Do we assign it, or don't we? It's not enough to simply punt on the question when faced with the decision. Do we recommend that people with cancer take the medicine that we studied, or don't we? 
+
+The *randomized contorlled experiment* is considered the gold standard for this reason. "In a properly randomized controlled experiment, all factors that affect the outcome are either static, or vary at random, except for one." In this case, the one that was not static or random must be the **cause** any differences in the response. However, this is not always possible. Say, for example, we are trying to determine whether cloud seeding increases precipitation. It is not going to be possible to have all of the factors of two clouds be the same, and there is no meaningful way that we can say that the factors of different clouds the might affect rainfall are randomized. We are stuck with seeding a bunch of different clouds and observing the results. You can read more about randomized controlled trials [here](https://en.wikipedia.org/wiki/Randomized_controlled_trial). Even in drug trials, there are issues. Patients will drop out of the study. They may not take the medicine correctly.
+
+**Example** Suppose we assign 700 patients to take a drug. Of those 700 patients, 350 decline to take the drug, and 350 do take the drug. We record the number of patients who showed improvement after taking the drug, along with the gender of the patient, and whether they took the drug. Here is the data.
+
+```{r, echo=FALSE}
+dd <- data.frame(Gender = c("M", "F", "Total", "M", "F", "Total"),
+                 Drug = c("Yes", "Yes", "Yes", "No", "No", "No"),
+                 Recovered = c(81, 192, 273, 234, 55, 289),
+                 Didnt_Recover = c(87 - 81, 263 - 192, 350 - 273, 270 - 234, 80 - 55, 350 - 289))
+library(tidyverse)
+dd <- mutate(dd, perent_recovered = Recovered/(Recovered + Didnt_Recover))
+dd %>% arrange(Gender)
+```
+
+Here, we see that 78% of all patients who took the drug recovered, while 83% of people who did not take the drug recovered. Based on this, we might say that the drug was ineffective. However, also note that for among women, those who took the drug recovered at a higher rate than those who did not take the drug. Also among men, those who took the drug recovered at a higher rate than those who did not take the drug.
+
+So, how do we interpret this study? If a man asks whether, based on this study, they should take the drug, what would you say? If someone whose gender you don't know emails you and asks whether they should take the drug, what would you say? 
+
+**Example** Suppose we assign 700 patients to take a drug. Of those 700 patients, 350 decline to take the drug, and 350 do take the drug. We record the number of patients who showed improvement after taking the drug, and whether they took the drug. At the end of the study, we also measured the patients blood pressure. Here is the data.
+
+```{r}
+dd <- data.frame(Blood_Pressure = c("Lo", "High", "Total", "Lo", "High", "Total"),
+                 Drug = c("Yes", "Yes", "Yes", "No", "No", "No"),
+                 Recovered = c(81, 192, 273, 234, 55, 289),
+                 Didnt_Recover = c(87 - 81, 263 - 192, 350 - 273, 270 - 234, 80 - 55, 350 - 289))
+library(tidyverse)
+dd <- mutate(dd, perent_recovered = Recovered/(Recovered + Didnt_Recover))
+dd %>% arrange(Blood_Pressure)
+```
+
+How do we interpret this study?
+
+
+**Example** Consider the following data, which consists of blood pressure, age and number of hours of exercise per week and can be downloaded from the course page with the following command.
+
+```{r, echo=FALSE, eval=FALSE}
+age <- round(runif(2000, 23, 70))
+hours_exercised <- round(1 + .1 * age + rnorm(2000, 0, .5), 2)
+plot(age, hours_exercised)
+blood_pressure <- round(110 + .4 * age + rnorm(2000, 0, 1) - .5 * hours_exercised)
+plot(blood_pressure, hours_exercised)
+lm(blood_pressure ~ hours_exercised + age)
+ex_data <- data.frame(age, blood_pressure, hours_exercised)
+write.csv(ex_data, "../4870/data/exercise_data.csv", row.names = FALSE)
+```
+
+```{r, eval=FALSE}
+ex_data <- read.csv("https://mathstat.slu.edu/~speegle/Spring2020/4870/data/exercise_data.csv")
+```
+
+```{r, echo=FALSE}
+ex_data <- read.csv("../4870/data/exercise_data.csv")
+```
+
+If we compute the correlation between hours exercised and blood pressure, we get a strong positive correlation.
+
+```{r}
+cor(ex_data$blood_pressure, ex_data$hours_exercised)
+```
+
+However, if we compute the correlation between hours exercised and blood pressure for each age separately, we typically get negative correlations.
+
+```{r}
+ex_data %>% group_by(age) %>% 
+  summarize(cor = cor(blood_pressure, hours_exercised)) %>% 
+  summarize(percent_negative = mean(cor < 0))
+```
+
+If a person wanted to lower their blood pressure, would you recommend exercising more? Why or why not?
+
+The answer to the above three examples is, from one point of view, we simply don't know. We would have to make some assumptions about what can affect what to proceed with the analysis. 
+
+## Some terminology
+
+In this section, we briefly talk about some terminology related to causal inference. See [Section 1.5](https://www.amazon.com/Causal-Inference-Statistics-Judea-Pearl/dp/1119186846) for the source of these definitions and further details. [This page](http://dagitty.net/learn/index.html) has some good explanations of causal concepts, and some problems to make sure that you understand the terminology.
+
+A *structural causal model* describes how values are assigned to variables of interest. It contains two sets of variables, $U$ and $V$, and a set of functions $f$ that assigns each variable in $V$ a value based on the values of the other variables in the model. If $X$ appears in the variable $Y$'s function, then $X$ is a *direct cause* of $Y$. If $X$ is a direct cause of any variable that appears in $Y$'s function (or if $X$ is a direct cause of $Y$), then $X$ is a *cause* of $Y$. We will also say that $X$ is an ancestor of $Y$, or that $Y$ is a descendent of $X$.
+
+The variables in $U$ are *exogeneous* to the model. That is, we are not saying how those values are assigned. The variables in $V$ are *endogeneous*. In a proper structural causal model, every endogeneous variable will depend on at least one exogeneous variable. 
+
+Suppose we are interested in a single response $Y$. We often will single out one variable $X$ as the **exposure** variable. For example, if we are testing to see whether a medicine is effective, $X$ would be a 0/1 variable indicating whether a patient received the medicine or not. The rest of the variables are called **covariates**. Among covariates, we have several types:
+
+1. Confounders. A covariate $V$ is a confounder if it is a cause of the exposure, and a cause of the response along a path that does not include the exposure. An example of this could be that the race of a patient might influence the type of treatment that a doctor gives the patient, and it also (separately) could influence whether the treatment is successful.
+2. Mediators. A mediator is a variable that is caused by the exposure, and is a cause of the response. It lies in between the exposure and the response. 
+3. Proxy confounders. A proxy confounder is not itself a confounder, but it is a variable that lies between a confounder and the exposure or the outcome. 
+4. Competing exposures. A competing exposure is an ancestor of the outcome that is not related to the exposure.
+
+Now would be a good time to stop and play [practice](http://dagitty.net/learn/graphs/roles.html) until you have the terminology more or less down.
+
+
+
