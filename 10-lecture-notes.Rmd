@@ -1,0 +1,809 @@
+# Lecture Notes
+
+This chapter consists of lecture notes from the class in Spring 2026.
+
+## January 27
+
+Here is a summary of things to know from January 27.
+
+1. The function `lm` creates a model of the data using only those rows which aren't missing any values. This only applies to variables that are listed in the formula as the first argument of `lm`. 
+
+2. The formula for AIC is -2 log(likelhood) + 2k, where k is the number of parameters in the model. This means that AIC is explicitly balancing the **fit** of the model (the likelihood) with the number of parameters used. **Lower values** correspond to **beter fits** according to the AIC. AIC can **only** be used to compare two models that fit the **exact same** data.
+
+3. When using `MASS::stepAIC`, there can often be errors which come up because when a variable us removed, the data set changes. For example, if `y ~ x1 + x2` is the original model, and `x2` is removed, and there is missing data in the variable `x2`, then when `lm` is run on `y ~ x1`, we are using a **different** data set. This causes an error in `MASS::stepAIC`. 
+
+4. We discussed several options for dealing with this.
+
+   a. Remove all rows from the data that contain any missing values before running `stepAIC`.
+   
+   b. Every time `stepAIC` throws an error, remove that variable by hand from the original model and restart `stepAIC` from the beginning.
+   
+   c. Remove variables from the model (if they have two many missing values). 
+   
+   d. Impute missing values. (We will learn how to do this later.)
+   
+5. We also discussed multiple $R^2$ and adjusted $R^2$. Let's see how those values are computed. Multiple $R^2$ is computed as 
+\[
+(\mathrm{var}(y) - \mathrm(var)(\eps))/\mathrm{var}(y) 
+\]
+while adjusted $R^2$ is computed the same, except we use the unbiased estimator for the variance of the residuals. Let's look at an example:
+
+```{r}
+set.seed(1)
+x1 <- runif(30)
+x2 <- runif(30)
+y <- 1  + 2 * x1 + 3 * x2 + rnorm(30, 0, 1)
+mod <- lm(y ~ x1 + x2)
+summary(mod)
+```
+
+Let's check that the formulas match the results from `lm`. 
+
+```{r}
+(var(y) - var(resid(mod)))/var(y)
+summary(mod)$r.sq
+
+(var(y) - sigma(mod)^2)/var(y)
+summary(mod)$adj
+```
+
+The point is that our unbiased estimator for $\sigma^2$ in the model **depends on the number of parameters** and is larger if we have more parameters. This means that, like AIC, the adjusted $R^2$ is evaluating a trade-off between model fit and number of parameters.
+
+**Note**: $R^2$ is always between 0 and 1, while the adjusted $R^2$ can be negative.
+
+## February 3
+
+
+Here is a summary of things to know from February 3. The main goals were to understand *interactions* and *multicollinearity* of the predictors. 
+
+
+There are three types of interactions that we are going to be thinking about in this class. We will provide examples of each type of interaction in the context of exam scores as described by various predictors. 
+
+**factor vs factor interaction** Two factors interact when the effect of changing levels in one of the factors depends on which level the other factor has. As a made up example, suppose students are randomly assigned to study flashcards or to do practice problems in preparation for an exam. The students self-identify as having low prior knowledge or high prior knowledge before starting to study. Here is a chart giving mean scores on exam for the four groups of students.
+
+```{r}
+knitr::kable(
+  data.frame(
+    `Prior Knowledge` = c("**Low**", "**High**"),
+    Flashcards = c("**75**", "80"),
+    `Practice Problems` = c("65", "**90**")
+  ),
+  align = "lcc",
+  escape = FALSE,
+  caption = "Effect of study method by prior knowledge"
+)
+
+```
+
+
+    
+As we can see, if the student has low prior knowledge, flashcards are more helpful, while if the student has high prior knowledge then practice problems are more helpful. That is an **interaction** between prior knowledge and study method, because the effect of changing from flaschards to practice problems depends on the prior knowledge of the student.
+   
+**factor vs numeric interaction** This is a very commonly studied interaction. In this case, the effect of changing a numerical predictor by one unit (the slope) depends on the level of a factor variable. As an example, consider scores on an exam as described by study time and prior knowledge. It is reasonable to expect that each hour of study will be more useful for someone with low prior knowledge, as illustrated in this table:
+
+```{r}
+knitr::kable(
+  data.frame(
+    `Hours Studied` = c(2, 4, 6),
+    `Low Prior Knowledge` = c(65, 75, 85),
+    `High Prior Knowledge` = c(80, 84, 88)
+  ),
+  align = "rcc",
+  caption = "Scores by hours studied and prior knowledge"
+)
+
+```
+
+
+**numeric vs numeric** In this case, the effect of changing a numerical predictor by one unit (the slope) depends on the exact value of a different numeric variable. The model for this is 
+\[
+y ~ \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x1 x_2 + \epsilon
+\]
+So that the change in slope of $x_1$ depends in a very specific way on the value of the interaction variable $x_2$. As an example, we model exam score by hours of sleep (before studying) and hours of studying. It is reasonable to expect that the more sleep you get, the more effective each hour of studying will be. Here is a sample chart of values:
+
+```{r}
+knitr::kable(
+  data.frame(
+    `Hours Studied` = c(2, 4, 6),
+    `Sleep = 2 hrs` = c(65, 66, 67),
+    `Sleep = 4 hrs` = c(70, 72, 73),
+    `Sleep = 6 hrs` = c(74, 80, 87),
+    `Sleep = 8 hrs` = c(78, 86, 94)
+  ),
+  align = "rcccc",
+  caption = "Scores by hours studied and hours of sleep"
+)
+
+```
+
+
+### Simulating Data
+
+**R-Code** Let's look at how this works using R. We start by showing how to **simulate** data of each of the above types of interactions. There are two R functions that you might not be familiar with that we will use: `case_when` and `pivot_wider`. The function `case_when` is a way of encoding piecewise defined functions. For example, if you have
+\[
+f(x) = \begin{cases} x + 1 &x < -1\\
+0 & -1 \le x \le 1\\
+x - 1& x \ge 1
+\end{cases}
+\]
+you can represent this by:
+```{r}
+library(tidyverse)
+f <- function(x) {
+  case_when(
+    x < -1 ~ x + 1,
+    x >= -1 & x<= 1 ~ 0,
+    x > 1 ~ x - 1
+  )
+}
+curve(f(x), from = -3, to = 3)
+```
+
+The function `pivot_wider` transforms a data set from long format to wide format. It is not essential to understand this function for this lecture, but so I will illustrate with an example. What if we want the `babynames` data set to have as each name as a row and the number of female and male babies as the data?
+
+```{r}
+bb <- babynames::babynames
+head(bb)
+bb |> 
+  filter(year == 2005) |> 
+  select(name, n, sex) |> 
+  pivot_wider(names_from = sex,
+              values_from = n, 
+              values_fill = 0) |> 
+  arrange(desc(F + M))
+```
+
+
+For factor vs factor interactions, cross-tables of means are often a good way to recognize the potential need for interactions; at least in the case you only have interaction between two variables.
+
+```{r}
+#factor vs factor
+
+x1 <- factor(c("low", "high"), levels = c("low", "high"))
+x2 <- factor(c("flashcards", "practice_problems"))
+
+dd <- data.frame(x1 = sample(x1, size = 30, replace = T),
+                 x2 = sample(x2, size = 30, replace = T))
+dd <- dd |> 
+  mutate(y = case_when(
+    x1 == "low" & x2 == "flashcards" ~ 75,
+    x1 == "low" & x2 == "practice_problems" ~ 65,
+    x1 == "high" & x2 == "flashcards" ~ 80,
+    x1 == "high" & x2 == "practice_problems" ~ 90, #have to use vectorized & here
+  ) + round(rnorm(30, 0, 10)))
+
+dd |> 
+  group_by(x1, x2) |> 
+  summarize(mu = mean(y)) |> 
+  pivot_wider(names_from = x2, values_from = mu)
+```
+
+For factor vs numeric interactions, scatterplots with lines of best fit for each level of the factor are often a good way to recognize the potential need for interactions; at least in the case you only have interaction between two variables.
+
+```{r}
+#factor vs numeric
+x2 <- runif(30, 0, 10)
+dd <- data.frame(x1 = sample(x1, size = 30, replace = T),
+                 x2 = x2)
+
+dd <- dd |> 
+  mutate(y = case_when(
+    x1 == "low" ~ 1 * x2,
+    x1 == "high" ~ 2 * x2
+  ) + rnorm(30, 0, 2))
+
+dd |> 
+  ggplot(aes(x = x2, y = y, color = x1)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+```
+
+For numeric vs numeric, there are a few different ways of trying to recognize an interaction via exploratory vizualizations, but we will focus on plotting the line of best fit for several different intervals of one of the predictors. Let's see how to simulate the data and to vizualize.
+
+```{r}
+#numeric vs numeric
+n <- 400 #bigger so that we can see things clearly; need plenty of data to have clear results
+sleep <- runif(n, 2, 9)
+study <- runif(n, 1, 6)
+
+dd <- data.frame(sleepc = sleep - mean(sleep),
+                 studyc = study - mean(study))
+
+dd <- dd |> 
+    mutate(score = round(78 + 4.0 * studyc + 3.0 * sleepc + 1.4 * studyc * sleepc + rnorm(n, 0, 4.5), 1))
+
+dd |> 
+  mutate(sleepint = cut(sleepc, 3)) |> #this creates 3 roughly equal groups in the sleep score
+  ggplot(aes(x = studyc, y = score, color = sleepint)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+#compare what happens when we take the coefficient to be near 0
+```
+
+
+### Building Models
+
+We will build models on our simulated data above as well as on real data sets to see what is going on. 
+
+#### factor vs factor:
+
+```{r}
+x1 <- factor(c("low", "high"), levels = c("low", "high"))
+x2 <- factor(c("flashcards", "practice_problems"))
+
+dd <- data.frame(x1 = sample(x1, size = 30, replace = T),
+                 x2 = sample(x2, size = 30, replace = T))
+dd <- dd |> 
+  mutate(y = case_when(
+    x1 == "low" & x2 == "flashcards" ~ 75,
+    x1 == "low" & x2 == "practice_problems" ~ 65,
+    x1 == "high" & x2 == "flashcards" ~ 80,
+    x1 == "high" & x2 == "practice_problems" ~ 90, #have to use vectorized & here
+  ) + round(rnorm(30, 0, 10)))
+
+mod <- lm(y ~ x1 * x2, data = dd)
+summary(mod) #interpret this into predictions/expected values for the combinations of levels!
+```
+
+Consider the `penguins` data set. Is there evidence of an interaction between `species` and `sex` when predicting `body_mass`?
+
+```{r}
+penguins |> 
+  filter(!is.na(sex)) |> 
+  group_by(species, sex) |> 
+  summarize(mu = mean(body_mass)) |> 
+  pivot_wider(names_from = sex, values_from = mu)
+
+mod <- lm(body_mass ~ species * sex, data = penguins)
+summary(mod)
+```
+
+What is the predicted/expected body mass of a male chinstrap penguin? This would make a good exam problem; I give you the ouptut and you interpret.
+
+#### factor vs numeric
+
+```{r}
+x2 <- runif(30, 0, 10)
+dd <- data.frame(x1 = sample(x1, size = 30, replace = T),
+                 x2 = x2)
+
+dd <- dd |> 
+  mutate(y = case_when(
+    x1 == "low" ~ 1 * x2,
+    x1 == "high" ~ 2 * x2
+  ) + rnorm(30, 0, 2))
+mod <- lm(y ~ x1 * x2, data = dd)
+summary(mod)
+```
+
+
+```{r}
+penguins |>
+  ggplot(aes(x = bill_len, y = body_mass, color = species)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+mod <- lm(body_mass ~ bill_len * species, data = penguins)
+summary(mod) #barely significant, but significant
+
+```
+
+
+#### numeric vs numeric
+
+```{r}
+n <- 400 #bigger so that we can see things clearly; need plenty of data to have clear results
+sleep <- runif(n, 2, 9)
+study <- runif(n, 1, 6)
+
+dd <- data.frame(sleepc = sleep - mean(sleep),
+                 studyc = study - mean(study))
+
+dd <- dd |> 
+    mutate(score = round(78 + 4.0 * studyc + 3.0 * sleepc + 1.4 * studyc * sleepc + rnorm(n, 0, 4.5), 1))
+mod <- lm(score ~ sleepc * studyc, data = dd)
+summary(mod)
+```
+
+
+```{r}
+penguins |> 
+  mutate(bill_len = cut(bill_len, 4)) |> 
+  ggplot(aes(x = bill_dep, y = body_mass, color = bill_len)) + 
+  geom_point() +
+  geom_smooth(method = "lm") #oof, this is terrible; we should not build a model based on this. why?
+```
+
+## February 5
+
+Here is a summary of things to know from February 5. We focused on **multicollinearity** of the predictors in a regression model and understanding one-way and two-way ANOVA models. But first, a quick "review" of how to augment a data fram a model.  
+
+### Using `broom::augment`
+
+The easiest way to add fitted values and residuals to a data frame is to use the `broom::augment` function. Here is an example using the `penguins` data set.
+
+```{r}
+library(broom) #part of the tidyverse, but not the tidyverse package
+mod <- lm(body_mass ~ bill_len + bill_dep + flipper_len, data = penguins)
+augmented_data <- broom::augment(mod) #this is in the broom package
+head(augmented_data)
+```
+
+Let's look at each of the new variables. 
+
+   - `.fitted` are the fitted values from the model.
+   - `.resid` are the residuals from the model.
+   - `.hat` are the leverages from the model. These measure how far away each observation is from the center of the data in terms of the **predictor** variables.
+   - `.sigma` are the standard deviations of the residuals after removing each observation one at a time.
+   - `.cooksd` are Cook's distances, which measure how much influence each observation has; that is how much the fitted values would change if we removed that observation from the data set and refit the model.
+   - `.std.resid` are the standardized residuals, which are the residuals divided by their standard deviation. These are useful for finding outliers in the **response** variable.
+
+Let's look at an example or two to see what is going on.
+
+```{r}
+n <- 10
+x <- c(runif(n - 1), 10) 
+y <- x + 2 + rnorm(n, 0, 1)
+mod <- lm(y ~ x)
+augmented_data <- broom::augment(mod)
+augmented_data
+```
+
+Note that both the leverage and Cook's distance are large for the last observation, which is an outlier in the predictor variable.
+
+```{r}
+plot(mod) #this also shows the same thing
+```
+
+```{r}
+n <- 10
+x <- c(runif(n)) 
+y <- x + 2 + rnorm(n, 0, 1)
+y[which.max(x)] <- 20 #make the last one an outlier in y  
+mod <- lm(y ~ x)
+augmented_data <- broom::augment(mod)
+augmented_data
+```
+
+Note that the standardized residual is large for the largest observation, which is an outlier in the response variable. In this case, `.sigma` is also much smaller for that observation, because removing it makes the residuals much smaller. The Cook's distance is also large, because removing that observation would change the fitted values a lot. However, the leverage is not large, because that observation is not far away from the center of the data in terms of the predictor variable.
+
+### Multicollinearity
+
+Multicollinearity occurs when two or more predictor variables are highly correlated with each other. This can cause problems in regression models, because it can make it difficult to determine the individual effect of each predictor on the response variable. It generally does not negatively affect the overall **predictive** power of the model, but it can make the coefficients **unstable** and **difficult to interpret**.
+
+To detect multicollinearity, we can use the Variance Inflation Factor (VIF). A VIF value greater than 5 or 10 is often considered indicative of multicollinearity. Variance Inflation Factor can be computed using the `car` package in R.`car::vif` computes the variance inflation factor by regressing each predictor on all the other predictors and computing the $R^2$ value for that regression. The VIF is then computed as 
+\[
+VIF_j = \frac{1}{1 - R_j^2}
+\]
+
+Let's look at a simulated example with multicollinearity.
+
+```{r}
+set.seed(1)
+n <- 100
+x1 <- rnorm(n)
+x2 <- 0.9 * x1 + rnorm(n, 0, .1) #highly correlated with x
+x3 <- rnorm(n) #not correlated with x1
+y <- 3 + 2 * x1 + 0.5 * x2 + 1 * x3 + rnorm(n, 0, 1)
+mod <- lm(y ~ x1 + x2 + x3)
+summary(mod)
+car::vif(mod) #high VIF for x1 and x2
+```
+
+Note the large standard errors for the coefficients of `x1` and `x2`, as well as the high VIF values.
+
+One would expect that if we ran this model many times and looked at the coefficients for `x1` and `x2`, they would vary widely from one model to the next, because of the multicollinearity. However, the sum of the two coefficients should be more stable, because that is the combined effect of `x1` and `x2`. Let's check this out by simulating the model 1000 times and looking at the distribution of the coefficients.
+
+For this simulation, we introduce `purrr::map_df`, which is a function that applies a function to each element of a list and returns the results as a data frame. Here, we use it to run the simulation 1000 times and collect the results.
+
+```{r}
+simdata <- purrr::map_df(1:1000, function(x) {
+  x1 <- rnorm(n)
+  x2 <- 0.9 * x1 + rnorm(n, 0, .1) #highly correlated with x
+  x3 <- rnorm(n) #not correlated with x1
+  y <- 3 + 2 * x1 + 0.5 * x2 + 1 * x3 + rnorm(n, 0, 1)
+  mod <- lm(y ~ x1 + x2 + x3)
+  broom::tidy(mod) |>  #returns a data frame with the coefficients
+    mutate(trial = x)
+})
+
+simdata |> 
+  filter(term %in% c("x1", "x2")) |> 
+  ggplot(aes(x = estimate, fill = term)) + 
+  geom_density(alpha = 0.5) + 
+  labs(title = "Distribution of Coefficients for x1 and x2",
+       x = "Coefficient Estimate",
+       y = "Density")
+
+#let's compare that to the distribution of the sum of the coefficients
+
+simdata |> 
+  filter(term %in% c("x1", "x2")) |> 
+  group_by(trial) |> 
+  summarize(sum_estimate = sum(estimate)) |> 
+  ggplot(aes(x = sum_estimate)) + 
+  geom_density(fill = "blue", alpha = 0.5) + 
+  labs(title = "Distribution of Sum of Coefficients for x1 and x2",
+       x = "Sum of Coefficient Estimates",
+       y = "Density") + 
+  scale_x_continuous(limits = c(-3, 5))
+```
+
+We see that the "correct" interpretation is that the **sum** of the coefficients for `x1` and `x2` is about 2.5, which is what we would expect from the data generating process. However, the individual coefficients vary widely from one simulation to the next, and would be hard to interpret.
+
+What should you do if you discover multicollinearity in your data? Here are some options:
+
+1. Do nothing. If your goal is prediction only, then multicollinearity may not be a problem. If interpretation is still your goal, you can try to interpret the highly correlated variables jointly, rather than individually.
+2. Remove one or more of the correlated predictors from the model. Often you will choose to keep the variable that is either cheaper to measure, more fundamental theoretically, or more interpretable.
+3. Combine the correlated predictors into a single predictor (e.g., by taking their average or sum). This is often used when you have domain knowledge of the predictors. For example, height and weight could be combined into a body mass index (BMI) variable. Or section scores of the ACT could be combined into a total score.
+4. Use regularization techniques (e.g., ridge regression or lasso) that can handle multicollinearity. (We have not yet covered this material.)
+
+As a summary, multicollinearity does not break your model. It is not an assumption of OLS that the predictors are uncorrelated. However, it can make interpretation of the coefficients difficult, and can lead to large standard errors for the coefficients.
+
+As another example, let's look at so-called polynomial regression, where we include powers of a predictor variable in the model. This can also lead to multicollinearity. 
+
+```{r}
+set.seed(1)
+n <- 100
+x <- runif(n, 0, 3)
+y <- 2 + 1.5 * x - 0.5 * x^2 + 0.3 * x^3 + rnorm(n, 0, 1)
+mod <- lm(y ~ x + I(x^2) + I(x^3)) #using raw = TRUE to get x, x^2, x^3
+summary(mod)
+car::vif(mod) #we have massive multicollinearity here. centering x helps, but does not completely fix the situation.
+```
+
+To remove multicollinearity in polynomial regression, we can use orthogonal polynomials instead of raw polynomials. This can be done using the `poly` function in R.
+
+```{r}
+P <- poly(x, 3, raw = FALSE) #orthogonal polynomials
+head(P)
+plot(x,P[,1]) #first orthogonal polynomial
+plot(x, P[,2]) #second orthogonal polynomial
+plot(x, P[,3]) #third orthogonal polynomial
+P <- data.frame(P,check.names = T)
+P$y <- y
+mod2 <- lm(y ~ ., data = P) #using orthogonal polynomials
+summary(mod2)
+car::vif(mod2) #no multicollinearity here
+```
+
+For model selection, it is generally better to use orthogonal polynomials when including polynomial terms in a regression model, because they do not suffer from multicollinearity. That means it is easier to determine whether to remove the cubic predictor, for example, based on its p-value.
+
+## February 10 
+
+### ANOVA Models\footnote{This section was written with RStudio Copilot turned on, so there may be some errors. Please let me know if you find any.}
+
+ANOVA (Analysis of Variance) models are a special case of linear regression models where the predictors are categorical variables (factors). They are used to compare the means of different groups and to determine if there are significant differences between them. We have already studied linear models which contain only categorical data, so this is a review of that material with some additional nuances.
+
+We begin with a brief review of one-way ANOVA models, which contain a single categorical predictor. The model can be written as 
+\[
+y_{ij} = \mu + \alpha_i + \epsilon_{ij}
+\]
+where $y_{ij}$ is the response variable for the $j$th observation in group $i$, $\mu$ is the overall mean, $\alpha_i$ is the effect of group $i$, and $\epsilon_{ij}$ is the random error term. The null hypothesis is that all group means are equal, i.e., $\alpha_1 = \alpha_2 = \ldots = \alpha_k = 0$. This way of writing the model is called the **effects** coding. Another way to write the model is the **treatment** coding, which is more common in R, and is given by
+\[
+y_{ij} = \beta_0 + \beta_i D_i + \epsilon_{ij}
+\]
+where $D_i$ is a dummy variable that is 1 if the observation is in group $i$ and 0 otherwise. In this case, $\beta_0$ is the mean of the reference group (usually the first group), and $\beta_i$ is the difference between the mean of group $i$ and the mean of the reference group.
+
+We assume that the errors are normally distributed with mean 0 and constant variance. The ANOVA table partitions the total variability in the data into variability between groups and variability within groups. The F-statistic is used to test the null hypothesis, and is computed as the ratio of the mean square between groups to the mean square within groups.
+
+Let's look at an example using the `penguins` data set to compare body mass across species.
+
+```{r}
+library(ggplot2)
+penguins |>
+  ggplot(aes(x = species, y = body_mass)) + 
+  geom_boxplot() + 
+  labs(title = "Body Mass by Penguin Species",
+       x = "Species",
+       y = "Body Mass (g)") #approximately normal with equal variances
+
+mod <- lm(body_mass ~ species, data = penguins)
+summary(mod)
+anova(mod)
+```
+
+Note that the p-value from the ANOVA table matches the p-value for the overall F-test in the linear model summary. If we wish to determine **which** species are different from each other, we can use post-hoc tests such as Tukey's HSD.
+
+```{r}
+library(emmeans)
+emmeans_mod <- emmeans(mod, ~ species)
+pairs(emmeans_mod)
+```
+
+Now let's look at two-way ANOVA models, which contain two categorical predictors. The model can be written as
+
+\[
+y_{ijk} = \mu + \alpha_i + \beta_j + (\alpha\beta)_{ij} + \epsilon_{ijk}
+\]
+where $y_{ijk}$ is the response variable for the $k$th observation in group $i$ of factor A and group $j$ of factor B, $\mu$ is the overall mean, $\alpha_i$ is the effect of level $i$ of factor A, $\beta_j$ is the effect of level $j$ of factor B, $(\alpha\beta)_{ij}$ is the interaction effect between levels $i$ and $j$, and $\epsilon_{ijk}$ is the random error term. The null hypotheses are that all main effects and interaction effects are equal to zero. 
+
+Let's look at an example using the `ToothGrowth` data set, which contains data on tooth length in guinea pigs under different doses of vitamin C and different delivery methods (orange juice vs. ascorbic acid).
+
+```{r}
+data("ToothGrowth")
+head(ToothGrowth)
+tt <- ToothGrowth |>
+  mutate(dose = factor(dose)) 
+ggplot(tt, aes(x = dose, y = len, fill = supp)) +
+  geom_boxplot(position = position_dodge(0.8)) + 
+  labs(title = "Tooth Length by Dose and Supplement Type",
+       x = "Dose (mg)",
+       y = "Tooth Length (mm)")
+```
+
+Note that the boxplots suggest a potential interaction between dose and supplement type. It also looks like the variances are not equal across groups, especially at higher doses. Let's examine the variances more closely.
+
+```{r}
+tt |> 
+  group_by(dose, supp) |> 
+  summarize(var_len = sd(len), n = n())
+```
+
+There is some variation in the standard deviations across groups, but it is not extreme. Also note that the study is balanced, with equal sample sizes in each group, which helps mitigate the impact of unequal variances. 
+
+Let's fit the two-way ANOVA model with interaction.
+
+```{r}
+mod2 <- lm(len ~ dose * supp, data = tt)
+summary(mod2)
+anova(mod2)
+```
+
+To interpret the ANOVA table, we note that the p-value for the interaction term tests whether the effect of dose on tooth length depends on the type of supplement. If the interaction is significant, we should be cautious in interpreting the main effects, as they may not represent the overall effects across all levels of the other factor. If the interaction is not significant, we can consider removing it from the model and interpreting the main effects directly. Let's check the interaction plot to visualize the interaction effect.
+
+```{r}
+ggplot(tt, aes(x = dose, y = len, color = supp, group = supp)) +
+  geom_point(position = position_dodge(0.2)) +
+  geom_line(position = position_dodge(0.2)) +
+  labs(title = "Interaction Plot: Tooth Length by Dose and Supplement Type",
+       x = "Dose (mg)",
+       y = "Tooth Length (mm)")
+```
+
+It appears that OJ at doses 0.5 and 1.0 results in longer tooth lengths compared to VC, but at dose 2.0, both supplements yield similar tooth lengths. This suggests a potential interaction effect.
+
+If we decide to remove the interaction term, we can refit the model without it and interpret the main effects.
+
+```{r}
+mod3 <- lm(len ~ dose + supp, data = tt)
+summary(mod3)
+anova(mod3)
+```
+
+However, in this case, the interaction term was significant, so we should keep it in the model and interpret the effects accordingly.
+
+```{r}
+emmeans_mod2 <- emmeans(mod2, ~ dose * supp)
+pairs(emmeans_mod2)
+```
+
+This provides tests of all pairs of possible interactions. It can be hard to interpret so much output, and we also need to be careful about multiple comparisons. Let's suppose that our research question is: "how do the dose level effects differ by supplement type?" We can use `emmeans` to answer this specific question.
+
+```{r}
+emm <- emmeans(mod2, ~ dose | supp)
+pairs(emm)
+```
+
+This indicates that tooth growth increases with dose for both supplement types, but for OJ the increase is not significant from dose 1 to dose 2, while for VC the increase is significant at each step. To improve this, we might only want to test the increase in dosages from 0.5 to 1 and from 1 to 2, because the increase from 0.5 to 2 is redundant. We can do this by specifying contrasts in `emmeans`. 
+
+```{r}
+contrast(emm, method = "trt.vs.ctrl", by = "supp", adjust = "holm") 
+```
+
+In this case, we note that `contrast` chooses the **base level** of the factor as the control group. So for dose, the control is 0.5, and we are testing 1 vs 0.5 and 2 vs 0.5. The Holm adjustment is a way to control the family-wise error rate when making multiple comparisons. If we wanted to test 0.5 vs 1 and 1 vs 2 instead, we would need to reorder the levels of the factor `dose` so that 1 is the base level. This is not really *treatment vs control*, but the function is flexible enough to handle this situation.
+
+
+### Heading towards mixed models
+
+Now, we return to linear models with interactions. We imagine a scenario where we have several (perhaps more than several\footnote{How many is several? I am not sure, but it is definitely more than a few! [source](https://www.cambridge.org/core/journals/language-and-cognition/article/few-or-several-construal-quantity-and-argumentativity/C371FD195F4461E4C7711E75C46C1458)}) groups of data, and we have a few observations in each group. Let's consider the `sleepstudy` data set in the `lme4` package.
+
+```{r}
+library(lme4)
+data("sleepstudy")
+ss <- sleepstudy |> 
+  janitor::clean_names()
+summary(ss)
+length(unique(ss$subject)) #18 groups, 10 observations per group
+
+ss |> 
+  ggplot(aes(x = days, y = reaction, color = subject)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = F)
+
+```
+
+Based on this data, it seems that we have potentially different **intercepts** and **slopes** for each subject. Let's fit a linear model with an interaction between `days` and `subject`. We will have 18 intercepts and 18 slopes, which is a lot of parameters to estimate with only 180 observations. (It is five observations per parameter estimated - how much confidence would you have in an estimated mean based off of 5 observations? Mathematically, it is fine. But in practice, it is not ideal.)
+
+```{r}
+mod <- lm(reaction ~ days * subject, data = ss)
+summary(mod)
+```
+
+We can see that it appears that both the intercept and the slope change with the subject. Following what we had done before, we would be done with our modeling. Here are some issues:
+
+1. We have no way to predict the reaction time for a new subject that is not in our data set, because we have no estimate of the intercept or slope for that subject.
+2. How would we answer the following question: is reaction time associated with number of days of sleep deprivation? We could look at the overall F-test for the model, but that is not really testing the association between reaction time and days of sleep deprivation. It is testing whether there is an association between reaction time and days of sleep deprivation **for each subject**. We would like to be able to test the overall association between reaction time and days of sleep deprivation, while accounting for the fact that we have different intercepts and slopes for each subject. Based on the plot, it seems like for some subjects, the reaction time might be getting **faster** with more sleep deprivation. 
+3. We have a lot of parameters in this model, which can lead to overfitting. We haven't really talked much about overfitting in this class yet. But, when we are looking for a parsimonious model by variable selection, we are trying to avoid overfitting. In this case, we have a lot of parameters, and we are not really interested in the individual intercepts and slopes for each subject. We are more interested in the overall association between reaction time and days of sleep deprivation, while accounting for the fact that we have (possibly) different intercepts and slopes for each subject.
+
+What is wrong with forgetting that we have the same subjects, and running the following regression?
+
+```{r}
+#THIS IS NOT ADVISED
+mod_wrong <- lm(reaction ~ days, data = ss)
+summary(mod_wrong)
+```
+
+This model is not accounting for the fact that we have repeated measurements for each subject. It is treating each observation as independent, which is not the case. This can lead to underestimated standard errors and inflated type I error rates. We need a way to account for the fact that we have repeated measurements for each subject, and that the intercepts and slopes may vary by subject. This is where mixed models come in, which we will cover in the next lecture.
+
+
+### Intro to Random Effects and Mixed Effect Models - Terminology and First Examples
+
+First off, let's get some terminology down. A **fixed effect** is an effect that is constant across individuals or groups. For example, the effect of a treatment in a clinical trial is often considered a fixed effect, because we are interested in the average effect of the treatment across all individuals. This is a modeling decision that we make based on our research question and the structure of our data. In the `sleepstudy` data set, the effect of `days` on `reaction` could be considered a fixed effect, because we are interested in the overall association between days of sleep deprivation and reaction time across all subjects.
+
+A **random effect** is an effect that varies across individuals or groups. For example, the intercepts and slopes for each subject in the `sleepstudy` data set can be considered random effects, because they vary across subjects. A **mixed effect model** is a model that contains both fixed effects and random effects. In the `sleepstudy` data set, a mixed effect model would include the fixed effect of `days` and the random effects of the intercepts and slopes for each subject.
+
+Mixed effect models go by many different names in different disciplines. If you hear these words, the person may be talking about mixed effect models or something very similar:
+
+- multilevel models
+- hierarchical linear models
+- random effects models
+- linear mixed models
+- Variance components models
+- BLUP models (genetics)
+- Penalized least squares (numerical analysis - these are more general than mixed models, but they include mixed models as a special case)
+- Probably many more
+
+Let's start by fully specifying a mixed effect model which includes a random intercept and a fixed effect slope of one variable. The model can be written as
+\[
+y_{ij} = \beta_0 + \beta_1 x_{ij} + b_{0i} + \epsilon_{ij}
+\]
+where $y_{ij}$ is the response variable for the $j$th observation in group $i$, $\beta_0$ is the overall intercept, $\beta_1$ is the fixed effect slope for predictor $x$, $b_{0i}$ is the random intercept for group $i$, and $\epsilon_{ij}$ is the random error term. We assume that the random effects $b_{0i}$ are normally distributed with mean 0 and variance $\sigma_b^2$, and that the errors $\epsilon_{ij}$ are normally distributed with mean 0 and variance $\sigma^2$. The random effects and errors are assumed to be independent of each other.
+
+Note that we are splitting the **mean** of the intercept and the **variance** of the intercept into two components. We could also have said the $b_{0i}$ are normal with mean $\beta_0$ and variance $\sigma_b^2$.
+
+The fixed effect $\beta_1$ represents the average effect of predictor $x$ on the response variable across all groups, while the random effects $b_{0i}$ represent the deviation of each group's intercept from the overall intercept $\beta_0$. The variance $\sigma_b^2$ captures the variability in the intercepts across groups, while $\sigma^2$ captures the variability within groups.
+
+Here is how we can **simulate** data like this:
+
+```{r}
+g <- 10 #number of groups
+n <- 5 # observations per group
+groups <- factor(letters[1:g]) #this only works if g <= 26!
+set.seed(1)
+x <- runif(g * n, 0, 10) #these are the predictors
+sigma_b <- 2
+b0 <- rnorm(g, 0, sigma_b) #these are the random intercepts for each group
+beta0 <- 3
+beta1 <- 0.5
+sigma <- 1
+y <- beta0 + beta1 * x + rep(b0, each = n) + rnorm(g * n, 0, sigma) #these are the responses, note that sigma^2 = 1, beta_0 = 3, and beta_1 = 0.5
+dd <- data.frame(x = x,
+                 y = y,
+                 g = rep(groups, each = n))
+ggplot(dd, aes(x = x, y = y, color = g)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = F)
+
+```
+
+Here we can see that the slopes all look more or less the same, but the intercepts are probably different. Let's see how we could estimate the parameters in our model. This is not exactly how the programs that we use will do it, but it gives a flavor of the ideas. 
+
+First, we could estimate the fixed effect slope $\beta_1$ and the mean of the random intercept $\beta_0$ by fitting a linear model that ignores the grouping structure of the data. This is not ideal, but it gives us a starting point. We should definitely not use the $p$-values.
+
+```{r}
+mod_fixed <- lm(y ~ x, data = dd)
+summary(mod_fixed)
+```
+
+Next, we could estimate the random effects $b_{0i}$ by fitting a linear model that includes the group as a fixed effect. This will give us estimates of the intercepts for each group, which we can then use to estimate the variance of the random effects.
+
+```{r}
+mod_full <- lm(y ~ x + g, data = dd)
+summary(mod_full)
+```
+
+Finally, we could use the estimates from the previous two models to estimate the variance components $\sigma_b^2$ and $\sigma^2$. This is typically done using restricted maximum likelihood (REML) or maximum likelihood (ML) estimation, which are more efficient than the method of moments that we are using here.
+
+```{r}
+#Not recommended - just for illustration
+broom::tidy(mod_full) |>  
+  filter(str_detect(term, "g|tercept")) |>  
+  mutate(estimate = ifelse(str_detect(term, "Inter"), 0, estimate)) |> 
+  summarize(var_b = var(estimate)) #this is an estimate of sigma_b^2ilt
+```
+
+This is an estimate for the variance of the random intercepts, $\sigma_b^2$. Recall that the true value was 4. Finally, we can estimate $\sigma^2$ by looking at the residuals from the full model.
+
+```{r}
+#just for illustration
+var(resid(mod_full))
+```
+
+This is an estimate for the variance of the errors, $\sigma^2$. Recall that the true value was 1. **Note that there are definitely issues with doing it this way**, but in this simple case the estimates that we get are not too far off.
+
+To use more sophisticated tools, we use the package `lme4`.
+
+```{r}
+mod_mixed <- lme4::lmer(y ~ x + (1 | g), data = dd) #the (1|g) indicates that we have a random intercept. The fixed effects are entered just like before
+summary(mod_mixed)
+```
+
+This model includes a random intercept for each group, but assumes that the slope is the same across groups. The output gives us estimates for the fixed effects (the overall intercept and slope) as well as the variance components (the variance of the random intercepts and the variance of the errors).
+
+### Random Slopes
+
+When we have one predictor with random intercepts and slopes, the model can be written like this:
+
+\[
+y_{ij} = \beta_0 + \beta_1 x_{ij} + b_{0i} + b_{1i} x_{ij} + \epsilon_{ij
+\]
+where $b_{0i}$ is the random intercept for group $i$, and $b_{1i}$ is the random slope for predictor $x$ in group $i$. We assume that the random effects $(b_{0i}, b_{1i})$ are jointly normally distributed with mean 0 and covariance matrix $\Sigma$, and that the errors $\epsilon_{ij}$ are normally distributed with mean 0 and variance $\sigma^2$. The random effects and errors are assumed to be independent of each other. Note that we could also combine the fixed effects with the random effects to say that the intercept has mean $\beta_0$ and the slope has mean $\beta_1$, together with the covariance informarion.
+
+**Aside: Multivariate Normal Distribution**
+
+When we have random slopes, we need to consider the joint distribution of the random intercepts and slopes. This is typically assumed to be a multivariate normal distribution. The multivariate normal distribution is a generalization of the univariate normal distribution to multiple dimensions. It is defined by a mean vector and a covariance matrix. The mean vector gives the expected value of each variable, while the covariance matrix gives the variance of each variable and the covariance between each pair of variables. Let's look at an example:
+
+```{r}
+Sigma <- matrix(c(3, 2, 2, 5), nrow = 2)
+eigen(Sigma) #this is a positive definite matrix, so it is a valid covariance matrix
+dd <- data.frame(MASS::mvrnorm(n = 1000, mu = c(1, 4), Sigma = Sigma))
+
+ggplot(dd, aes(x = X1, y = X2)) + 
+  geom_point() + 
+  coord_equal() 
+```
+
+To force independence of the coordinates, we set the covariances equal to zero. Note that for general rvs, uncorrelated does not imply independent, but for multivariate normal rvs, uncorrelated does imply independent.
+
+**End Aside**
+
+Let's see how to simulate the data from a model with random slopes as described above. We assume for simplicity that the random effects are independent, so that the covariance matrix $\Sigma$ is $2 \times 2$ diagonal. 
+
+```{r}
+g <- 10 #number of groups
+n <- 5 # observations per group
+groups <- factor(letters[1:g]) #this only works if g <= 26!
+x <- runif(g * n, 0, 10) #these are the predictors
+sigma_b <- 1.5
+sigma_c <- 2
+b0 <- rnorm(g, 0, sigma_b) #these are the random intercepts for each group
+b1 <- rnorm(g, 0, sigma_c) #these are the random slopes for each group
+beta0 <- 3
+beta1 <- 2
+sigma <- 1
+y <- beta0 + beta1 * x + rep(b0, each = n) + rep(b1, each = n) * x +  rnorm(g * n, 0, sigma) #these are the responses, note that sigma^2 = 1, beta_0 = 3, and beta_1 = 0.5
+dd <- data.frame(x = x,
+                 y = y,
+                 g = rep(groups, each = n))
+ggplot(dd, aes(x = x, y = y, color = g)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = F)
+```
+
+In order to estimate the parameters of our model, we use `lme4::lmer`. 
+
+```{r}
+mod <- lmer(y ~ x + (1 + x||g), data = dd) #We use || to force there to be no covariance between beta_0 and beta_1
+summary(mod)
+```
+
+Let's apply this now to the `sleepstudy` data from before. 
+
+```{r}
+mod_sleep <- lmer(reaction ~ days + (1 + days || subject), data = ss) #assuming uncorrelated random effects
+summary(mod_sleep)
+```
+
+Note that we can see from the estimates that the slope has mean 10.467 and standard deviation 6. This says that about 4 percent of people will have reaction times that **decrease** over time when this experiment is run, based on our model. 
+
+```{r}
+pnorm(0, 10.467, 6)
+```
+
+While this may not be compelling, imagine a drug trial where we are trying to show that the fixed effect of a drug is positive. If the standard deviation of the random slope is large, then it is possible that a non-trivial proportion of people will have a negative effect of the drug, even if the average effect is positive. This is an important consideration when interpreting the results of a mixed effect model, and it highlights the importance of looking at both the fixed effects and the random effects when making inferences from the model.
+
+### Comparison of Models
+
+
