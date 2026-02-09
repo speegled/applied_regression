@@ -85,11 +85,11 @@ We see that the first component that `plsr` got in the `projection` is $(0.331, 
 
 Now, in PCA to get the second component, we looked at all directions perpendicular to the first component and found the one with maximum variance. In PLS, we no longer force the second component to be orthogonal to the first component. That's one difference. But, we do want it to pick up different information than the first component. How do we accomplish that?
 
-A first idea might be to find the direction that has the highest covariance with the **residuals** of the response after predicting on the directions chosen so far. That is pretty close to what happens, but doesn't work exactly. In partial least squares, we first **deflate** the predictor matrix by subtracting out $d d^T M$, where $d$ is the first direction, $d^T$ is the transpose of $d$, and $M$ is the original matrix. Then, we find the direction of maximum covariance between the residuals of the first model and this new matrix. I include the details below, but this section is **OPTIONAL**.
+A first idea might be to find the direction that has the highest covariance with the **residuals** of the response after predicting on the directions chosen so far. That is pretty close to what happens, but doesn't work exactly. In partial least squares, we first **deflate** the predictor matrix by subtracting out $d d^T M$, where $d$ is the first direction, $d^T$ is the transpose of $d$, and $M$ is the original matrix. Then, we find the direction of maximum covariance between the residuals of the first model and this new matrix. I include the details below, but this section is **OPTIONAL** (and does not work as of February 2, 2026)!
 
 ### Optional PLS Stuff
 
-```{r}
+```{r eval=FALSE}
 #first_vec <- largest_direction
 dd$direction_1 <- apply(dd[,1:3], 1, function(x) ip(x, first_vec))
 m1 <- lm(response ~ direction_1, data = dd)
@@ -119,13 +119,13 @@ plsmod$loading.weights
 
 As we can see, we have recovered the *loading weights*, which map the **deflated** predictors onto the scores. Continuing in this fashion, we could find all of the loading weights, use them to compute the scores, and then compute the loadings via
 
-```{r}
+```{r eval=FALSE}
 corpcor::pseudoinverse(as.matrix(dd[,1:3])) %*% plsmod$scores
 ```
 
 And this would give us our projection, which we could use to transform the original (or new) data into the basis spanned by the partial least squares representation. The trickiest part about this whole thing is understanding why we deflate the data each time we get a new component in our partial least squares. Let's leave that for another time, shall we?
 
-```{r}
+```{r eval=FALSE}
 as.matrix(dd[,1:3]) %*% plsmod$projection %>% 
   head()
 plsmod$scores[1:6,1:3]

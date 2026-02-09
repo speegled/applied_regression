@@ -483,6 +483,36 @@ predict(mod2, newdata = new_patient, interval = "predict")
 ```
 What? This gives us a very different answer! This gives us 116 with a range from 59 to 174. We have kind of said above that from a modeling point of view, it is hard to pick one model over the other. But from a **predictive** point of view, they are giving us very different answers. How can we decide which one is better at predicting future values? That is the topic of the next chapter!
 
+## Using AIC
+
+One tool for assessing the fit of a model to a data set is the Akaike Information Criterion (AIC). The AIC is a number associated with a model of a data set, for which **lower** numbers correspond to **better** models. The formula is
+\[
+AIC = -2 \log \mathrm{likelihood} + 2k
+\]
+where $k$ is the number of parameters included in the model, and the likelihood is the likelihood of the data when using the MLE estimators for the parameters. As we can see from the formula, if we add one parameter to the model, the AIC will go down if the log likelihood increases by 1 or more when adding the parameter. Adding parameters will not decrease the likelihood, so this criterion is balancing how much the parameter increases the likelihood against the value 1.
+
+To understand this, we need to understand lilekihood functions, which are widely used in statistics.
+
+### Likelihood functions
+
+Consider a random sample $x_1, \ldots, x_n$ from a normal distribution with unknown mean and standard deviation. The *likelihood* of the sample is given as a function of both $\mu$ and $\sigma$ by
+\[
+\prod \ttext{dnorm} (x_i, \mu, \sigma)
+\]
+If we choose $\mu$ and $\sigma$ to maximize the likelihood of the data, then we would take the partials with respect to $\mu$ and $\sigma$ and set equal to zero, then solve the equations. We obtain
+\[
+\hat \mu = \overeline{x}
+\]
+and
+\[
+\hat \sigma^2 = \frac 1n \sum_{i = 1}^n(x_i - \overline{x})^2
+\]
+Note that we do **not** obtain the unbiased estimator for $\sigma^2$, which has $n - 1$ in the denominator. We call these estimators the *maximum likelihood estimators*. 
+
+One can similarly show that the maximum likelihood estimators for $\hat \beta_i$ and $\sigma$ in a linear regression model are as follows. The MLE for $\hat \beta_i$ are the **same** as what we obtained when we minimized the SSE. The MLE for $\hat \sigma^2$ is $\frac 1n \sum_{i = 1}^n (\hat \epsilon_i - \overline{\epsilon})^2$. Since $\overline{\epsilon} = 0$, this is usually written as $\frac 1n \sum_{i = 1}^n \epsilon_i^2$.
+
+
+
 
 
 ## Exercises

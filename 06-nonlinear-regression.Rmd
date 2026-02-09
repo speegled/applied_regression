@@ -22,14 +22,14 @@ SSE = \sum_{i = 1}^n g(y_i - \hat y_i)
 
 We have seen before that picking different functions $g$ can lead to better results in some instances. For example, chosing $g$ to be given in the following plot limits the influence of outliers.
 
-```{r}
+```{r }
 curve(robustbase::Mchi(x, cc = 1.6, psi = "bisquare"), from = -2, to = 2,
       ylab = "g(x)")
 ```
 
 Support vector machines give another choice of $g$, which is shown below:
 
-```{r}
+```{r }
 svm <- function(x, epsilon = 1) {
   pmax(0, abs(x) - epsilon)
 }
@@ -51,7 +51,7 @@ Note also that there is a parameter associated with the fit error. This paramete
 
 Let's look at an example, using simulated data.
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, }
 sigma <- matrix(rnorm(9), ncol = 3)
 sigma <- t(sigma) %*% sigma
 dd <- matrix(MASS::mvrnorm(100 * 3, mu = c(0,0,0), Sigma = sigma), ncol = 3)
@@ -63,7 +63,7 @@ summary(lm(response ~ ., data =df))
 ```
 
 
-```{r}
+```{r  }
 svm_error <- function(beta) {
   yhat <- beta[1] + dd %*% beta[2:4]
   lambda * sum(svm(df$response - yhat, epsilon = 1)) + sum(beta[2:4]^2)
@@ -74,7 +74,7 @@ optim(par = c(1,2,3,4), fn = svm_error)
 
 We definitely get quite different values for the parameters than we got when we used `lm`. Let's do CV to see what the estimate RMSE is. In the past, we have been forcing our functions passed to optim to only have one parameter; namely, the one of interest. Here we see that we can have more arguments, and we just can add them to the end of `optim` and they get passed right along to the function we are optimizing. 
 
-```{r}
+```{r }
 svm_error <- function(beta, lambda, dd_train, df_train) {
   yhat <- beta[1] + dd_train %*% beta[2:4]
   lambda * sum(svm(df_train$response - yhat, epsilon = .5)) + sum(beta[2:4]^2)
@@ -98,7 +98,7 @@ mean(svm_rmse)
 
 Now, let's tune over several different values of $\lambda$. 
 
-```{r}
+```{r }
 svm_error <- function(beta, lambda, dd_train, df_train) {
   yhat <- beta[1] + dd_train %*% beta[2:4]
   lambda * sum(svm(df_train$response - yhat, epsilon = .5)) + sum(beta[2:4]^2)
@@ -128,7 +128,7 @@ We see that once we get to a $\lambda$ of about 1/8, the RMSE is about as small 
 
 And now we compare that to `lm`. 
 
-```{r}
+```{r }
 lm_rmse <- replicate(100, {
   train_indices <- sample(100, 75)
   test_indices <- (1:100)[-train_indices]
@@ -174,7 +174,7 @@ ys <- 1 + 2 * xs + rnorm(100, 0, .5)
 plot(xs, ys)
 ```
 
-```{r}
+```{r }
 library(kernlab)
 tuneGrid <- data.frame(C = 2^((-4):4))
 df <- data.frame(x = xs, y = ys)
@@ -189,7 +189,7 @@ caret::train(y ~ x,
 
 There doesn't seem to be much difference between the tuning parameters, so let's just do the default $C = 1$.
 
-```{r}
+```{r }
 mod <- kernlab::ksvm(x = xs, 
                      y = ys, 
                      kernel = "vanilladot", #linear regression
@@ -207,12 +207,12 @@ The observations for which the corresponding $\alpha_i$ are not zero are called 
 \]
 where here the inner product is just the multiplication of the two numbers. In order to do this with the results from `ksvm`, we would need to extract the $\alpha$ values and the corresponding $x$ values, multiply them together with the new x value, which in this case is $x = 1.5$.
 
-```{r}
+```{r }
 (-b(mod) + sum(alpha(mod) * xs[alphaindex(mod)] * 1.5)) 
 predict(mod, newdata = 1.5)
 ```
 In the above, I set `scaled = FALSE` to simplify this process, but in general we will not make that change. Let's see what happens if we change $\epsilon$.  
-```{r}
+```{r }
 mod <- kernlab::ksvm(x = xs, 
                      y = ys, 
                      kernel = "vanilladot", #linear regression
@@ -232,8 +232,8 @@ which(abs(predict(mod, newdata = xs) - ys) > .5)
 
 
 ```{r}
-m <- (diff(predict(mod, newdata = c(1,2))))
-b <- predict(mod, newdata = 0)
+m <- (diff(predict(mod, newdata = c(1,2))))[1,1]
+b <- predict(mod, newdata = 0)[1,1]
 ggplot(df, aes(x = x, y = y, color = support)) + 
   geom_point() +
   geom_abline(slope = m, intercept = b)
@@ -243,7 +243,7 @@ Note that the support vectors for the model correspond to the observations which
 Now let's look at another simulated example, but with multiple predictors.
 
 
-```{r}
+```{r }
 set.seed(342020)
 sigma <- matrix(rnorm(9), ncol = 3)
 sigma <- t(sigma) %*% sigma
@@ -264,7 +264,7 @@ caret::train(response ~ .,
 
 Not much to choose from here; looks like the tuning parameter doesn't matter much, but we'll take it to be $C = 0.25$, which is the smallest RMSE.
 
-```{r}
+```{r }
 mod <- kernlab::ksvm(x = dd, 
                      y = df$response, 
                      kernel = "vanilladot", 
@@ -323,7 +323,7 @@ sincurve <- rbind(sincurve, data.frame(x = seq(0, 1, length.out = 5), y = -1))
 plot(sincurve)
 ```
 
-```{r}
+```{r }
 c_mod <- caret::train(y ~ x, 
              data = sincurve,
              method = "svmRadial"
@@ -372,7 +372,7 @@ We see that the two observations that are closest to $x = 3$ are when $x = 2.95$
 
 Let's see what the predictions would look like for a variety of $x$ values.
 
-```{r}
+```{r }
 new_xs <- seq(0, 2 * pi, length.out = 500)
 new_ys <- sapply(new_xs, function(z) {
   sincurve <- mutate(sincurve, d3 = abs(z - x))
@@ -413,7 +413,7 @@ predict(mod, newdata = data.frame(x = 3))
 
 In order to do cross validation, we can use the `train` function in `caret` as below. **Note**: since the predictions we make are means of the actual responses, we probably want to use folded cross validation, rather than the default which is bootstrapping.
 
-```{r}
+```{r }
 tune_k <- data.frame(k = 1:20)
 knn_train <- train(y ~ x, 
                    trControl = trainControl(method = "repeatedcv", repeats = 5),

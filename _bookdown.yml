@@ -12,6 +12,7 @@ rmd_files: [
   "06-nonlinear-regression.Rmd",
   "07-regression-trees.Rmd",
   "08-generalized-linear-models.Rmd",
+  "10-lecture-notes.Rmd",
   "solutions.Rmd"
   ]
 
@@ -20,6 +21,8 @@ new_session: yes
 
 #before_chapter_script: package-load.R
 #after_chapter_script: package-list.R  # Generate a list of packages used
+
+preview: true
 
 # Book styling
 language:
