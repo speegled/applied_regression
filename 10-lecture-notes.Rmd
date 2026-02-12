@@ -472,7 +472,7 @@ For model selection, it is generally better to use orthogonal polynomials when i
 
 ## February 10 
 
-### ANOVA Models\footnote{This section was written with RStudio Copilot turned on, so there may be some errors. Please let me know if you find any.}
+### ANOVA Models^[This section was written with RStudio Copilot turned on, so there may be some errors. Please let me know if you find any.]
 
 ANOVA (Analysis of Variance) models are a special case of linear regression models where the predictors are categorical variables (factors). They are used to compare the means of different groups and to determine if there are significant differences between them. We have already studied linear models which contain only categorical data, so this is a review of that material with some additional nuances.
 
@@ -595,9 +595,142 @@ contrast(emm, method = "trt.vs.ctrl", by = "supp", adjust = "holm")
 In this case, we note that `contrast` chooses the **base level** of the factor as the control group. So for dose, the control is 0.5, and we are testing 1 vs 0.5 and 2 vs 0.5. The Holm adjustment is a way to control the family-wise error rate when making multiple comparisons. If we wanted to test 0.5 vs 1 and 1 vs 2 instead, we would need to reorder the levels of the factor `dose` so that 1 is the base level. This is not really *treatment vs control*, but the function is flexible enough to handle this situation.
 
 
+
+### Penguins
+
+Let's do one more ANOVA. Suppose we want to model `body_mass` on `species` and `sex`. We have already seen that there is a significant interaction between these two variables. Let's look at the ANOVA table.
+
+```{r}
+mod <- lm(body_mass ~ species * sex, data = penguins)
+summary(mod)
+```
+
+All of them are significant. We should always plot the data though.
+
+```{r}
+ggplot(penguins, aes(x = species, y = body_mass, color = sex)) + 
+  geom_boxplot()
+```
+
+Let's look at the effect of species within each sex. Recall that there was no significant difference between Adelie and Chinstrap overall; now we can see why.
+
+```{r}
+mod2 <- anova(mod)
+emmeans::emmeans(mod, ~ species|sex) |> 
+  pairs()
+```
+
+
+
+
+## Februay 12
+
+### An Example
+
+Let's consider the `accent` data set in the `ardata` package. Twenty-four participants read 60 sentences and agreed to rate the accent of other participants (and themselves) on a scale of 1-6, with lower being better. The data set contains 5760 observations; not every participant rated every combination of participant and sentence. In this example, we are only interested in the reaction time of the rater. In particular, we are interested in whether the mean reaction time is different when the participant listens to themselves.
+
+We point out that there are many things going on in this data! We have the speakers repeating, we have the sentences repeating, and we have the same participant rating 240 sentences.
+
+In this first example, we are going to **ignore** the possible dependence on sentences and speakers, and focus only on the possible dependence on rater. It seems likely that each rater has their own mean time for rating, rather than all of the raters having the same overall mean time for rating. Let's look at a plot.
+
+```{r}
+aa <- ardata::accent
+ggplot(aa, aes(x = factor(pp), y = rt, color = voice)) + 
+  geom_boxplot()
+```
+
+We see some other issues that come up in this plot - reaction time is right skew, and we don't appear to have equal variances across groups. Nonetheless, we continue.
+
+We also note that some of the reaction times are suspiciously small. 
+
+```{r}
+aa |> 
+  slice_min(rt, n = 10)
+```
+
+Let's remove any of the data that has a reaction time less than 0.2 seconds, which already seems very fast.
+
+```{r}
+aa <- aa |> 
+  filter(rt > 0.2)
+```
+
+
+The model that we will use is^[Claude AI typset this through "The key feature"]
+
+\begin{equation}
+\text{RT}_{ij} = \gamma_{00} + \beta_1 \text{Voice}_{ij} + u_{0i} + \epsilon_{ij}
+(\#eq:combined)
+\end{equation}
+
+where:
+
+- $\text{RT}_{ij}$ is the reaction time for participant $i$ on observation $j$
+- $\gamma_{00}$ is the mean RT when rating self voice (the reference category)
+- $\beta_1$ is the difference in mean RT between rating other voices and self voice
+- $u_{0i} \sim N(0, \tau^2)$ represents between-participant variance
+- $\epsilon_{ij} \sim N(0, \sigma^2)$ represents within-participant variance
+- $u_{0i}$ and $\epsilon_{ij}$ are assumed to be independent
+
+**Interpretation:** Each person's reaction time is a function of:
+
+1. The mean RT for self voice ($\gamma_{00}$)
+2. The difference in RT between other and self voice ($\beta_1$), which is constant across all participants
+3. That person's individual baseline deviation ($u_{0i}$), which varies randomly across participants
+4. Random measurement error ($\epsilon_{ij}$)
+
+The key feature of this model is that it allows each participant to have their own baseline reaction time (random intercept) while estimating a common effect of voice type across all participants.
+
+We can estimate these values using `lme4::lmer`.
+
+```{r}
+library(lme4)
+aa <- aa |> 
+  mutate(pp = factor(pp))
+mod <- lme4::lmer(rt ~ voice + (1|pp), data = aa)
+summary(mod)
+```
+
+Make sure you can match the output to the model above. In particular, note that the intercept is the mean RT for self voice, and the coefficient for `voiceother` is the difference in mean RT between other and self voice. 
+
+The variance components tell us:
+- $\hat{\tau}^2 = 0.3354$ (between-participant variance): Participants vary substantially in their baseline RT
+- $\hat{\sigma}^2 = 1.0888$ (within-participant variance): There's also considerable variation within each participant's ratings
+- ICC = $\frac{\hat{\tau}^2}{\hat{\tau}^2 + \hat{\sigma}^2} \approx 0.235$ indicates that approximately 23.5% of the total variance in RT is attributable to differences between participants, while the remaining 76.5% is due to within-participant variation (e.g., differences across sentences, speakers, and random error). This justifies our use of random intercepts for participants.
+
+Let's also assess the normality of the residuals.
+
+```{r}
+plot(mod)
+qqnorm(resid(mod))
+qqline(resid(mod))
+```
+
+As you can see, we have significant skewness and heteroskedasticity. One way to try to help that is by replacing reaction time with its log.
+
+```{r}
+mod <- lme4::lmer(log(rt) ~ voice + (1|pp), data = aa) #here it is good we removed very small values
+summary(mod)
+plot(mod)
+qqnorm(resid(mod))
+qqline(resid(mod))
+```
+
+We continue with `mod`, even though interpretation on the log scale is always more challenging.
+
+Note that `lme4` does not provide a $p$-value for the primary object of interest, which is voiceself. To get a $p$-value, we can use the `lm erTest` package, which estimates the degrees of freedom for the t-test. 
+
+```{r}
+library(lmerTest)
+mod2 <- lmerTest::lmer(log(rt) ~ voice + (1|pp), data = aa)
+summary(mod2)
+```
+
+We fail to reject the null hypothesis that there is no difference in mean log reaction time between self and other voices, $p = 0.41$.
+
 ### Heading towards mixed models
 
-Now, we return to linear models with interactions. We imagine a scenario where we have several (perhaps more than several\footnote{How many is several? I am not sure, but it is definitely more than a few! [source](https://www.cambridge.org/core/journals/language-and-cognition/article/few-or-several-construal-quantity-and-argumentativity/C371FD195F4461E4C7711E75C46C1458)}) groups of data, and we have a few observations in each group. Let's consider the `sleepstudy` data set in the `lme4` package.
+Now, we return to linear models with interactions. We imagine a scenario where we have several (perhaps more than several^[How many is several? I am not sure, but it is definitely more than a few! [source](https://www.cambridge.org/core/journals/language-and-cognition/article/few-or-several-construal-quantity-and-argumentativity/C371FD195F4461E4C7711E75C46C1458)]) groups of data, and we have a few observations in each group. Let's consider the `sleepstudy` data set in the `lme4` package.
 
 ```{r}
 library(lme4)
