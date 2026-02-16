@@ -623,7 +623,7 @@ emmeans::emmeans(mod, ~ species|sex) |>
 
 
 
-## Februay 12
+## February 12
 
 ### An Example
 
@@ -728,6 +728,167 @@ summary(mod2)
 
 We fail to reject the null hypothesis that there is no difference in mean log reaction time between self and other voices, $p = 0.41$.
 
+## February 17
+
+Let's return to the model
+\begin{equation}
+\text{RT}_{ij} = \gamma_{00} + \beta_1 \text{Voice}_{ij} + u_{0i} + \epsilon_{ij}
+(\#eq:combined)
+\end{equation}
+We use the coefficients that we estimated in the previous lecture to **simulate** data from this model, and then we will fit the same model to the simulated data to see if we can recover the parameters that we used to simulate the data. This is a good way to check our understanding of the model and the estimation process. If you can do this reliably with all of the models we cover in this class, you will be in a very good position to understand the models and to apply them to your own data.
+
+Recall that we had the following model (before taking logs):
+
+```{r}
+library(lme4)
+aa <- ardata::accent |> 
+  mutate(pp = factor(pp))
+mod <- lme4::lmer(rt ~ voice + (1|pp), data = aa)
+summary(mod)
+```
+
+Let's simulate the data. It is nice to be able to read the estimates from the table by eye or to do it by code. Let's do it by code, which is more reliable, and check our understanding by looking at the values and making sure they match what we think it should.
+
+```{r}
+gamma <- summary(mod)$coefficients["(Intercept)", "Estimate"] 
+gamma
+beta <- summary(mod)$coefficients["voiceself", "Estimate"]
+beta
+tau <- as.data.frame(VarCorr(mod))$vcov[1] #between-participant variance
+tau #NOTE: we will have to take square root of this inside of rnorm!
+sigma <- as.data.frame(VarCorr(mod))$vcov[2] #within-participant variance
+sigma #NOTE: we will have to take square root of this inside of rnorm!
+```
+We pause here to note that these are all of the parameters of the model. The values of $u_i$ are not considered paramaters of the model; they are considered random effects, and we will simulate them as random draws from a normal distribution with mean 0 and variance $\tau^2$. The values of $\epsilon_{ij}$ are also not considered parameters of the model; they are considered random errors, and we will simulate them as random draws from a normal distribution with mean 0 and variance $\sigma^2$.
+
+Now we can simulate the data. We will simulate data for 24 participants, with 240 observations per participant, which is the same as in the original data set. Note that this simulation makes explicit that we do not model `sentence` or `speaker` at all. We are only modeling the dependence on `pp` (participant) and `voice`.
+
+```{r}
+u <- rnorm(24, mean = 0, sd = sqrt(tau)) #random intercepts for each participant
+n <- 24 * 240 #total number of observations
+sim_data <- data.frame(pp = factor(rep(1:24, each = 240)),
+                       voice = rep(c("self", "other"), times = c(180, 60)))
+                      
+#we assume 180 self ratings and 60 other ratings per participant, which is consistent with the original data set):
+head(table(aa$pp, aa$voice))
+aa |>
+  count(pp, voice)
+
+sim_data <- sim_data |> 
+  mutate(rt = gamma + 
+           beta * case_when(voice == "self" ~ 1, 
+                            TRUE ~ 0) + 
+           u[as.numeric(pp)] + 
+           rnorm(n(), mean = 0, sd = sqrt(sigma))
+    )
+
+lmerTest::lmer(rt ~ voice + (1|pp), data = sim_data) |> 
+  summary()
+c(gamma = gamma, beta = beta, tau = tau, sigma = sigma)
+
+```
+
+### Adding random speaker and sentence effects
+
+Let's return to the `accent` data set and make a more realistic model of reaction time, which takes into account the **speaker** and the **sentence** as well. We will model the speaker and sentence number as random effects as well. The model will be
+\begin{equation}
+\text{RT}_{ijk} = \gamma_{000} + \beta_1 \text{Voice}_{ijk} + u_{0i} + v_{0j} + w_{0k} + \epsilon_{ijk}
+\end{equation}
+where 
+
+- $\text{RT}_{ijk}$ is the reaction time for participant $i$ on sentence $j$ with speaker $k$
+- $\gamma_{000}$ is the mean RT for self voice (the reference category)
+- $\beta_1$ is the difference in mean RT between rating other voices and self voice
+- $u_{0i} \sim N(0, \tau^2)$ represents between-participant variance
+- $v_{0j} \sim N(0, \nu^2)$ represents between-sentence variance
+- $w_{0k} \sim N(0, \omega^2)$ represents between-speaker variance
+- $\epsilon_{ijk} \sim N(0, \sigma^2)$ represents within-participant variance
+- All random effects are assumed to be independent
+
+```{r}
+head(aa)
+mod <- lme4::lmer(rt ~ voice + (1|pp) + (1|sentence) + (1|spk_thisTrial), data = aa)
+summary(mod)
+
+ lme4::lmer(log(rt + .02) ~ voice + (1|pp) + (1|sentence) + (1|spk_thisTrial), data = aa) |> 
+   summary()
+```
+
+### Random intercepts with continunous predictor
+
+Let's consider the `sleepstudy` data set in the `lme4` package. This data set contains reaction times for 18 subjects who were sleep deprived for 10 days. We will model the reaction time as a function of the number of days of sleep deprivation, with random intercepts for each subject. Let's look at the data.
+
+We can fit a regression line to the data, using the same slope but a different intercept for each subject. How do we do that? Try to do it yourself before looking at the code below. This is a good refresher for what we were doing earlier in the class.
+
+
+```{r}
+ss <- lme4::sleepstudy |> 
+  janitor::clean_names()
+
+model <- lm(reaction ~ days + subject, data = ss)
+pred <- broom::augment(model)
+
+model2 <- lmer(reaction ~ days + (1|subject), data = ss)
+pred2 <- broom.mixed::augment(model2)  # note: broom.mixed, not broom
+
+ggplot(pred, aes(x = days, y = .fitted, color = subject)) +
+  geom_line(alpha = 0.8) +
+  #geom_line(data = pred2, aes(x = days, y = .fitted, color = subject), alpha = 0.3) + #uncomment to see the random slopes
+  labs(x = "Days", y = "Reaction") +
+  geom_point(aes(y = reaction)) +
+  theme_minimal()
+```
+
+This would be fine if we were only interested in these subjects. More likely, though, we are imagining the subjects to be a random sample from a larger population, and we want to treat the intercept as a **random effect** and the slope as a **fixed effect**. This way, we can make inferences about the overall effect of days of sleep deprivation on reaction time, while accounting for the fact that each subject has their own baseline reaction time (random intercept). The model would be
+\[
+\text{reaction}_{ij} = \gamma_{00} + \beta_1 \text{days}_{ij} + u_{0i} + \epsilon_{ij}
+\]
+where 
+
+-$\gamma_{00}$ is the mean reaction time for a subject with 0 days of sleep deprivation, 
+-$\beta_1$ is the fixed effect of days of sleep deprivation on reaction time
+-$u_{0i} \sim N(0, \tau^2)$ represents the random intercept for subject $i$
+-$\epsilon_{ij} \sim N(0, \sigma^2)$ represents the error term for observation $j$ of subject $i$
+-$\tau$ and $\sigma$ are the variances of the random intercepts and the error term, respectively.
+-We assume independence between the random intercepts and the error term, and we also assume that the random intercepts are independent across subjects.
+
+In order to build such a model, we use `lme4::lmer` as follows:
+
+```{r}
+mod <- lme4::lmer(reaction ~ days + (1|subject), data = ss) 
+summary(mod)
+```
+
+We see that $\gamma_{00}$ is estimated to be 251.405, which is the mean reaction time for a subject with 0 days of sleep deprivation. The fixed effect of days of sleep deprivation on reaction time is estimated to be 10.467, which means that for each additional day of sleep deprivation, the reaction time increases by about 10.467 milliseconds on average, after accounting for the random intercepts for each subject. The variance of the random intercepts is estimated to be 1378.2, and the variance of the error term is estimated to be 960.5. The ICC ( Intraclass Correlation Coefficient) can be calculated as $\frac{1378.2}{1378.2 + 960.5} \approx 0.59$, which indicates that about 59% of the total variance in reaction time is attributable to differences between subjects, while the remaining 41% is due to within-subject variation (e.g., differences across days and random error). ICC stands for Intraclass Correlation Coefficient, and it is a measure of the proportion of total variance that is attributable to between-group (or between-subject) variance in a mixed effects model. It ranges from 0 to 1, where a value close to 0 indicates that most of the variance is within groups (or subjects), while a value close to 1 indicates that most of the variance is between groups (or subjects).
+
+We also see that $\hat \beta_1$ is significant ($t = 13.02, \text{se} = 0.8042$), which suggests that there is a significant association between days of sleep deprivation and reaction time, even after accounting for the random intercepts for each subject.
+
+Let's check the residuals of our model:
+
+```{r}
+plot(mod)
+qqnorm(resid(mod))
+qqline(resid(mod))
+```
+
+Well, the residuals appear approximately normal, but they also appear to have a U shape in the residuals vs fitted. We will examine that again when we consider **random slopes** as well as random intercepts. For now, we will continue with this model, which only has random intercepts.
+
+One characteristic of mixed effect models is that the estimates for the intercepts of individual subjects are "shrunk" towards the overall mean. This is because the model borrows strength from the other subjects to estimate the intercepts, which can lead to more accurate estimates, especially for subjects with fewer observations. This is known as "partial pooling" or "shrinkage". The amount of shrinkage depends on the variance of the random intercepts and the number of observations for each subject. Subjects with more observations will have less shrinkage, while subjects with fewer observations will have more shrinkage.
+
+We can plot the fixed effect model and the random effect model on the same graph to illustrate this.
+
+```{r}
+pred2 <- broom.mixed::augment(mod)
+ggplot(pred, aes(x = days, y = .fitted, color = subject)) +
+  geom_line(alpha = 0.8) +
+  geom_line(data = pred2, aes(x = days, y = .fitted, color = subject), alpha = 0.3) +
+  labs(x = "Days", y = "Reaction") +
+  geom_point(aes(y = reaction)) +
+  theme_minimal()
+```
+
+We see that the random effects lines (which are lighter) have intercepts which are closer to the overall mean of all of the intercepts than the fixed effect line is. 
+
 ### Heading towards mixed models
 
 Now, we return to linear models with interactions. We imagine a scenario where we have several (perhaps more than several^[How many is several? I am not sure, but it is definitely more than a few! [source](https://www.cambridge.org/core/journals/language-and-cognition/article/few-or-several-construal-quantity-and-argumentativity/C371FD195F4461E4C7711E75C46C1458)]) groups of data, and we have a few observations in each group. Let's consider the `sleepstudy` data set in the `lme4` package.
@@ -740,10 +901,6 @@ ss <- sleepstudy |>
 summary(ss)
 length(unique(ss$subject)) #18 groups, 10 observations per group
 
-ss |> 
-  ggplot(aes(x = days, y = reaction, color = subject)) + 
-  geom_point() + 
-  geom_smooth(method = "lm", se = F)
 
 ```
 
@@ -769,7 +926,6 @@ summary(mod_wrong)
 ```
 
 This model is not accounting for the fact that we have repeated measurements for each subject. It is treating each observation as independent, which is not the case. This can lead to underestimated standard errors and inflated type I error rates. We need a way to account for the fact that we have repeated measurements for each subject, and that the intercepts and slopes may vary by subject. This is where mixed models come in, which we will cover in the next lecture.
-
 
 ### Intro to Random Effects and Mixed Effect Models - Terminology and First Examples
 
