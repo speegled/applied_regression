@@ -30,7 +30,7 @@ language:
     chapter_name: "Chapter "
 
 # Build Settings
-output_dir: "_book"
+output_dir: "docs"
 clean:
  - _main.md
  - _main.tex

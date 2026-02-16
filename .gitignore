@@ -3,7 +3,6 @@ resources/*
 old_code/*
 *.md
 .DS_Store
-_book/*
 .Rproj.user
 _bookdown_files/*
 .R*
