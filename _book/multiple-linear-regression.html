@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 3 Multiple Linear Regression | Applied Regression with R</title>
+  <meta name="description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  <meta name="generator" content="bookdown 0.46 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 3 Multiple Linear Regression | Applied Regression with R" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 3 Multiple Linear Regression | Applied Regression with R" />
+  
+  <meta name="twitter:description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  
+
+<meta name="author" content="Darrin Speegle" />
+
+
+<meta name="date" content="2026-02-16" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon" />
+<link rel="prev" href="classicaltheory.html"/>
+<link rel="next" href="intro-to-predictive-modeling.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<link href="libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet" />
+<script src="libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="libs/plotly-binding-4.11.0/plotly.js"></script>
+<script src="libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+<link href="libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+
+
+<style type="text/css">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Applied Regression with R<br />&nbsp; Notes From STAT 4870/5087</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Preface</a></li>
+<li class="chapter" data-level="2" data-path="classicaltheory.html"><a href="classicaltheory.html"><i class="fa fa-check"></i><b>2</b> Classical Theory of Simple Linear Regression</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="classicaltheory.html"><a href="classicaltheory.html#review"><i class="fa fa-check"></i><b>2.1</b> Review</a>
+<ul>
+<li class="chapter" data-level="2.1.1" data-path="classicaltheory.html"><a href="classicaltheory.html#estimating-means-and-standard-deviations"><i class="fa fa-check"></i><b>2.1.1</b> Estimating Means and standard deviations</a></li>
+<li class="chapter" data-level="2.1.2" data-path="classicaltheory.html"><a href="classicaltheory.html#estimating-the-density-of-an-rv"><i class="fa fa-check"></i><b>2.1.2</b> Estimating the density of an rv</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="classicaltheory.html"><a href="classicaltheory.html#linear-regression-overview"><i class="fa fa-check"></i><b>2.2</b> Linear Regression Overview</a></li>
+<li class="chapter" data-level="2.3" data-path="classicaltheory.html"><a href="classicaltheory.html#linear-regression-with-no-intercept"><i class="fa fa-check"></i><b>2.3</b> Linear Regression with no intercept</a></li>
+<li class="chapter" data-level="2.4" data-path="classicaltheory.html"><a href="classicaltheory.html#the-full-model"><i class="fa fa-check"></i><b>2.4</b> The full model</a>
+<ul>
+<li class="chapter" data-level="2.4.1" data-path="classicaltheory.html"><a href="classicaltheory.html#hypothesis-test-interlude"><i class="fa fa-check"></i><b>2.4.1</b> Hypothesis Test Interlude</a></li>
+</ul></li>
+<li class="chapter" data-level="2.5" data-path="classicaltheory.html"><a href="classicaltheory.html#using-different-loss-functions"><i class="fa fa-check"></i><b>2.5</b> Using different loss functions</a></li>
+<li class="chapter" data-level="" data-path="classicaltheory.html"><a href="classicaltheory.html#vignette-a-dplyr-primer"><i class="fa fa-check"></i>Vignette: A dplyr primer</a></li>
+<li class="chapter" data-level="2.6" data-path="classicaltheory.html"><a href="classicaltheory.html#exercises"><i class="fa fa-check"></i><b>2.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html"><i class="fa fa-check"></i><b>3</b> Multiple Linear Regression</a>
+<ul>
+<li class="chapter" data-level="3.0.1" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#anova"><i class="fa fa-check"></i><b>3.0.1</b> Aside on multiple R squared and ANOVA</a></li>
+<li class="chapter" data-level="3.1" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#more-variable-selection-anova"><i class="fa fa-check"></i><b>3.1</b> More Variable Selection: ANOVA</a></li>
+<li class="chapter" data-level="3.2" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#predictions"><i class="fa fa-check"></i><b>3.2</b> Predictions</a></li>
+<li class="chapter" data-level="3.3" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#using-aic"><i class="fa fa-check"></i><b>3.3</b> Using AIC</a>
+<ul>
+<li class="chapter" data-level="3.3.1" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#likelihood-functions"><i class="fa fa-check"></i><b>3.3.1</b> Likelihood functions</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#exercises-1"><i class="fa fa-check"></i><b>3.4</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html"><i class="fa fa-check"></i><b>4</b> Intro to Predictive Modeling</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#comparingtwomodels"><i class="fa fa-check"></i><b>4.1</b> Comparing Two Models</a></li>
+<li class="chapter" data-level="4.2" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#a-brief-return-to-inference"><i class="fa fa-check"></i><b>4.2</b> A Brief Return to Inference</a></li>
+<li class="chapter" data-level="4.3" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#simulations-of-expected-mse"><i class="fa fa-check"></i><b>4.3</b> Simulations of Expected MSE</a>
+<ul>
+<li class="chapter" data-level="4.3.1" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#estimating-mse-and-bias-variance-tradeoff"><i class="fa fa-check"></i><b>4.3.1</b> Estimating MSE and Bias-Variance Tradeoff</a></li>
+<li class="chapter" data-level="4.3.2" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#estimating-mse-for-new-predictors-uniformly-sampled"><i class="fa fa-check"></i><b>4.3.2</b> Estimating MSE for new predictors uniformly sampled</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#bias-variance-trade-off"><i class="fa fa-check"></i><b>4.4</b> Bias Variance Trade-off</a></li>
+<li class="chapter" data-level="4.5" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#exercises-2"><i class="fa fa-check"></i><b>4.5</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html"><i class="fa fa-check"></i><b>5</b> Regression Predictive Models</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#preprocessing"><i class="fa fa-check"></i><b>5.1</b> Preprocessing</a></li>
+<li class="chapter" data-level="5.2" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#missing-data"><i class="fa fa-check"></i><b>5.2</b> Missing Data</a>
+<ul>
+<li class="chapter" data-level="5.2.1" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#predicting-when-a-level-is-missing-from-the-training-set"><i class="fa fa-check"></i><b>5.2.1</b> Predicting when a level is missing from the training set</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#correlated-predictors"><i class="fa fa-check"></i><b>5.3</b> Correlated Predictors</a></li>
+<li class="chapter" data-level="5.4" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#aside-on-pca"><i class="fa fa-check"></i><b>5.4</b> Aside on PCA</a></li>
+<li class="chapter" data-level="5.5" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#johnson-lindenstrauss-dimension-reduction"><i class="fa fa-check"></i><b>5.5</b> Johnson-Lindenstrauss Dimension Reduction</a></li>
+<li class="chapter" data-level="5.6" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#exercises-3"><i class="fa fa-check"></i><b>5.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="variable-selection.html"><a href="variable-selection.html"><i class="fa fa-check"></i><b>6</b> Variable Selection</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="variable-selection.html"><a href="variable-selection.html#partial-least-squares"><i class="fa fa-check"></i><b>6.1</b> Partial Least Squares</a>
+<ul>
+<li class="chapter" data-level="6.1.1" data-path="variable-selection.html"><a href="variable-selection.html#optional-pls-stuff"><i class="fa fa-check"></i><b>6.1.1</b> Optional PLS Stuff</a></li>
+</ul></li>
+<li class="chapter" data-level="6.2" data-path="variable-selection.html"><a href="variable-selection.html#ridgelasso-and-elastic-net"><i class="fa fa-check"></i><b>6.2</b> Ridge/Lasso and Elastic Net</a>
+<ul>
+<li class="chapter" data-level="6.2.1" data-path="variable-selection.html"><a href="variable-selection.html#ridge-regression"><i class="fa fa-check"></i><b>6.2.1</b> Ridge Regression</a></li>
+<li class="chapter" data-level="6.2.2" data-path="variable-selection.html"><a href="variable-selection.html#lasso"><i class="fa fa-check"></i><b>6.2.2</b> LASSO</a></li>
+</ul></li>
+<li class="chapter" data-level="6.3" data-path="variable-selection.html"><a href="variable-selection.html#step-aic"><i class="fa fa-check"></i><b>6.3</b> Step AIC</a>
+<ul>
+<li class="chapter" data-level="6.3.1" data-path="variable-selection.html"><a href="variable-selection.html#doing-lgocv-with-preprocessing"><i class="fa fa-check"></i><b>6.3.1</b> Doing LGOCV with preprocessing</a></li>
+</ul></li>
+<li class="chapter" data-level="6.4" data-path="variable-selection.html"><a href="variable-selection.html#interactions"><i class="fa fa-check"></i><b>6.4</b> Interactions</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html"><i class="fa fa-check"></i><b>7</b> Non-Linear Regression Models</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#support-vector-regression"><i class="fa fa-check"></i><b>7.1</b> Support Vector Regression</a>
+<ul>
+<li class="chapter" data-level="7.1.1" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#plot-twist"><i class="fa fa-check"></i><b>7.1.1</b> PLOT TWIST</a></li>
+</ul></li>
+<li class="chapter" data-level="7.2" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#k-nearest-neighbors"><i class="fa fa-check"></i><b>7.2</b> K Nearest Neighbors</a></li>
+<li class="chapter" data-level="7.3" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#exercises-4"><i class="fa fa-check"></i><b>7.3</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="tree-regression-models.html"><a href="tree-regression-models.html"><i class="fa fa-check"></i><b>8</b> Tree Regression Models</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="tree-regression-models.html"><a href="tree-regression-models.html#basic-regression-trees"><i class="fa fa-check"></i><b>8.1</b> Basic Regression Trees</a></li>
+<li class="chapter" data-level="8.2" data-path="tree-regression-models.html"><a href="tree-regression-models.html#regression-model-trees"><i class="fa fa-check"></i><b>8.2</b> Regression Model Trees</a>
+<ul>
+<li class="chapter" data-level="8.2.1" data-path="tree-regression-models.html"><a href="tree-regression-models.html#choosing-variable-to-split"><i class="fa fa-check"></i><b>8.2.1</b> Choosing Variable to Split</a></li>
+<li class="chapter" data-level="8.2.2" data-path="tree-regression-models.html"><a href="tree-regression-models.html#choosing-split-value"><i class="fa fa-check"></i><b>8.2.2</b> Choosing Split Value</a></li>
+<li class="chapter" data-level="8.2.3" data-path="tree-regression-models.html"><a href="tree-regression-models.html#predicting-values-smoothing"><i class="fa fa-check"></i><b>8.2.3</b> Predicting values (Smoothing)</a></li>
+<li class="chapter" data-level="8.2.4" data-path="tree-regression-models.html"><a href="tree-regression-models.html#using-r-functions"><i class="fa fa-check"></i><b>8.2.4</b> Using R functions</a></li>
+</ul></li>
+<li class="chapter" data-level="8.3" data-path="tree-regression-models.html"><a href="tree-regression-models.html#bagging"><i class="fa fa-check"></i><b>8.3</b> Bagging</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html"><i class="fa fa-check"></i><b>9</b> Generalized Linear Models</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#logistic-regression"><i class="fa fa-check"></i><b>9.1</b> Logistic Regression</a>
+<ul>
+<li class="chapter" data-level="9.1.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#maximum-likelihood-estimation"><i class="fa fa-check"></i><b>9.1.1</b> Maximum Likelihood Estimation</a></li>
+<li class="chapter" data-level="9.1.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#model-diagnostics"><i class="fa fa-check"></i><b>9.1.2</b> Model Diagnostics</a></li>
+<li class="chapter" data-level="9.1.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#case-study"><i class="fa fa-check"></i><b>9.1.3</b> Case Study</a></li>
+</ul></li>
+<li class="chapter" data-level="9.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#count-response-models"><i class="fa fa-check"></i><b>9.2</b> Count response models</a>
+<ul>
+<li class="chapter" data-level="9.2.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#overdispersion"><i class="fa fa-check"></i><b>9.2.1</b> Overdispersion</a></li>
+<li class="chapter" data-level="9.2.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#negative-binomial-regression"><i class="fa fa-check"></i><b>9.2.2</b> Negative Binomial Regression</a></li>
+</ul></li>
+<li class="chapter" data-level="9.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-and-zero-inflated-models"><i class="fa fa-check"></i><b>9.3</b> Zero-truncated and Zero-inflated models</a>
+<ul>
+<li class="chapter" data-level="9.3.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-poisson"><i class="fa fa-check"></i><b>9.3.1</b> Zero-truncated Poisson</a></li>
+<li class="chapter" data-level="9.3.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-negative-binomial"><i class="fa fa-check"></i><b>9.3.2</b> Zero-truncated Negative Binomial</a></li>
+<li class="chapter" data-level="9.3.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-inflated-poisson-and-negative-binomial"><i class="fa fa-check"></i><b>9.3.3</b> Zero-Inflated Poisson and Negative Binomial</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="lecture-notes.html"><a href="lecture-notes.html"><i class="fa fa-check"></i><b>10</b> Lecture Notes</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="lecture-notes.html"><a href="lecture-notes.html#january-27"><i class="fa fa-check"></i><b>10.1</b> January 27</a></li>
+<li class="chapter" data-level="10.2" data-path="lecture-notes.html"><a href="lecture-notes.html#february-3"><i class="fa fa-check"></i><b>10.2</b> February 3</a>
+<ul>
+<li class="chapter" data-level="10.2.1" data-path="lecture-notes.html"><a href="lecture-notes.html#simulating-data"><i class="fa fa-check"></i><b>10.2.1</b> Simulating Data</a></li>
+<li class="chapter" data-level="10.2.2" data-path="lecture-notes.html"><a href="lecture-notes.html#building-models"><i class="fa fa-check"></i><b>10.2.2</b> Building Models</a></li>
+</ul></li>
+<li class="chapter" data-level="10.3" data-path="lecture-notes.html"><a href="lecture-notes.html#february-5"><i class="fa fa-check"></i><b>10.3</b> February 5</a>
+<ul>
+<li class="chapter" data-level="10.3.1" data-path="lecture-notes.html"><a href="lecture-notes.html#using-broomaugment"><i class="fa fa-check"></i><b>10.3.1</b> Using <code>broom::augment</code></a></li>
+<li class="chapter" data-level="10.3.2" data-path="lecture-notes.html"><a href="lecture-notes.html#multicollinearity"><i class="fa fa-check"></i><b>10.3.2</b> Multicollinearity</a></li>
+</ul></li>
+<li class="chapter" data-level="10.4" data-path="lecture-notes.html"><a href="lecture-notes.html#february-10"><i class="fa fa-check"></i><b>10.4</b> February 10</a>
+<ul>
+<li class="chapter" data-level="10.4.1" data-path="lecture-notes.html"><a href="lecture-notes.html#anova-models"><i class="fa fa-check"></i><b>10.4.1</b> ANOVA Models</a></li>
+<li class="chapter" data-level="10.4.2" data-path="lecture-notes.html"><a href="lecture-notes.html#penguins"><i class="fa fa-check"></i><b>10.4.2</b> Penguins</a></li>
+</ul></li>
+<li class="chapter" data-level="10.5" data-path="lecture-notes.html"><a href="lecture-notes.html#february-12"><i class="fa fa-check"></i><b>10.5</b> February 12</a>
+<ul>
+<li class="chapter" data-level="10.5.1" data-path="lecture-notes.html"><a href="lecture-notes.html#an-example"><i class="fa fa-check"></i><b>10.5.1</b> An Example</a></li>
+</ul></li>
+<li class="chapter" data-level="10.6" data-path="lecture-notes.html"><a href="lecture-notes.html#february-17"><i class="fa fa-check"></i><b>10.6</b> February 17</a>
+<ul>
+<li class="chapter" data-level="10.6.1" data-path="lecture-notes.html"><a href="lecture-notes.html#adding-random-speaker-and-sentence-effects"><i class="fa fa-check"></i><b>10.6.1</b> Adding random speaker and sentence effects</a></li>
+<li class="chapter" data-level="10.6.2" data-path="lecture-notes.html"><a href="lecture-notes.html#random-intercepts-with-continunous-predictor"><i class="fa fa-check"></i><b>10.6.2</b> Random intercepts with continunous predictor</a></li>
+<li class="chapter" data-level="10.6.3" data-path="lecture-notes.html"><a href="lecture-notes.html#heading-towards-mixed-models"><i class="fa fa-check"></i><b>10.6.3</b> Heading towards mixed models</a></li>
+<li class="chapter" data-level="10.6.4" data-path="lecture-notes.html"><a href="lecture-notes.html#intro-to-random-effects-and-mixed-effect-models---terminology-and-first-examples"><i class="fa fa-check"></i><b>10.6.4</b> Intro to Random Effects and Mixed Effect Models - Terminology and First Examples</a></li>
+<li class="chapter" data-level="10.6.5" data-path="lecture-notes.html"><a href="lecture-notes.html#random-slopes"><i class="fa fa-check"></i><b>10.6.5</b> Random Slopes</a></li>
+<li class="chapter" data-level="10.6.6" data-path="lecture-notes.html"><a href="lecture-notes.html#comparison-of-models"><i class="fa fa-check"></i><b>10.6.6</b> Comparison of Models</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="solutions.html"><a href="solutions.html"><i class="fa fa-check"></i><b>11</b> Solutions</a>
+<ul>
+<li class="chapter" data-level="11.1" data-path="solutions.html"><a href="solutions.html#chapter-2-solutions"><i class="fa fa-check"></i><b>11.1</b> Chapter 2 Solutions</a></li>
+<li class="chapter" data-level="11.2" data-path="solutions.html"><a href="solutions.html#chapter-3-solutions"><i class="fa fa-check"></i><b>11.2</b> Chapter 3 Solutions</a></li>
+<li class="chapter" data-level="11.3" data-path="solutions.html"><a href="solutions.html#chapter-5"><i class="fa fa-check"></i><b>11.3</b> Chapter 5</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Applied Regression with R</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="multiple-linear-regression" class="section level1 hasAnchor" number="3">
+<h1><span class="header-section-number">Chapter 3</span> Multiple Linear Regression<a href="multiple-linear-regression.html#multiple-linear-regression" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>In this chapter we consider the case where we have one response variable <span class="math inline">\(y\)</span> and multiple predictor variables <span class="math inline">\(x_1, \ldots, x_K\)</span>. Our model is
+<span class="math display">\[
+y = \beta_0 + \sum_{k = 1}^K \beta_k x_k + \epsilon
+\]</span>
+where <span class="math inline">\(\epsilon\)</span> is normal with mean 0 and standard deviation <span class="math inline">\(\sigma^2\)</span>. Note that this notation is equivalent to
+<span class="math display">\[
+y = \beta_0 + \beta_1 x + \epsilon
+\]</span>
+in the single predictor case. Let’s restrict down to the case where we have <em>three</em> predictors, which is easier notationally.</p>
+<p>Suppose we have data that consists of one response variable and three predictor variables, <span class="math inline">\(v, w\)</span> and <span class="math inline">\(x\)</span>. We are interested in the model</p>
+<p><span class="math display">\[
+y = \beta_0 + \beta_1 v + \beta_2 w + \beta_2 x + \epsilon
+\]</span></p>
+<p>where <span class="math inline">\(\epsilon\)</span> is a normal random variable with mean 0 and variance <span class="math inline">\(\sigma^2\)</span>. Given data <span class="math inline">\((v_1, w_1, x_1, y_1), \ldots, (v_n, w_n, x_n, y_n)\)</span>, we compute the <span class="math inline">\(\hat \beta_i\)</span> by minimizing the SSE,</p>
+<p><span class="math display">\[
+SSE = \sum_{i = 1}^n \bigl(y_i - (\beta_0 + \beta_1 v_i + \beta_2 w_i + \beta_3 x_i)\bigr)^2
+\]</span></p>
+<p>The R function <code>lm</code> will do this for you. Let’s look at some simulated data.</p>
+<div class="sourceCode" id="cb170"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb170-1"><a href="multiple-linear-regression.html#cb170-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1262020</span>)</span>
+<span id="cb170-2"><a href="multiple-linear-regression.html#cb170-2" tabindex="-1"></a>vs <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb170-3"><a href="multiple-linear-regression.html#cb170-3" tabindex="-1"></a>ws <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb170-4"><a href="multiple-linear-regression.html#cb170-4" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb170-5"><a href="multiple-linear-regression.html#cb170-5" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(vs,</span>
+<span id="cb170-6"><a href="multiple-linear-regression.html#cb170-6" tabindex="-1"></a>                 ws,</span>
+<span id="cb170-7"><a href="multiple-linear-regression.html#cb170-7" tabindex="-1"></a>                 xs,</span>
+<span id="cb170-8"><a href="multiple-linear-regression.html#cb170-8" tabindex="-1"></a>                 <span class="at">ys =</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span> vs <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> ws <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">5</span>))</span>
+<span id="cb170-9"><a href="multiple-linear-regression.html#cb170-9" tabindex="-1"></a>mod1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(ys <span class="sc">~</span>., <span class="at">data =</span> dd)</span>
+<span id="cb170-10"><a href="multiple-linear-regression.html#cb170-10" tabindex="-1"></a>mod1</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = ys ~ ., data = dd)
+## 
+## Coefficients:
+## (Intercept)           vs           ws           xs  
+##     -4.9206       2.4045       2.8785       0.4286</code></pre>
+<p>We can also do hypothesis tests of <span class="math inline">\(\beta_i = 0\)</span> versus <span class="math inline">\(\beta_i \not= 0\)</span> by looking at the summary.</p>
+<div class="sourceCode" id="cb172"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb172-1"><a href="multiple-linear-regression.html#cb172-1" tabindex="-1"></a><span class="fu">summary</span>(mod1)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = ys ~ ., data = dd)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -7.5362 -3.6599  0.1165  4.0172  9.1875 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  -4.9206     3.4043  -1.445    0.160    
+## vs            2.4045     0.3471   6.927 2.36e-07 ***
+## ws            2.8785     0.3547   8.115 1.35e-08 ***
+## xs            0.4286     0.3048   1.406    0.172    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 5.014 on 26 degrees of freedom
+## Multiple R-squared:  0.8083, Adjusted R-squared:  0.7862 
+## F-statistic: 36.54 on 3 and 26 DF,  p-value: 1.794e-09</code></pre>
+<p>We see that we reject that <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\beta_2\)</span> are 0, but fail to reject that <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_3\)</span> are zero, at the <span class="math inline">\(\alpha = .05\)</span> level.</p>
+<p>Our primary goal is going to do <strong>variable selection</strong>. Many times, we have more predictors than we really need, and several of them do not contribute to the model. We will remove those predictors in order to form a simpler and more understandable model. We will also see that removing predictors leads to better prediction for future values!</p>
+<p>Based on the above, we might consider removing <code>xs</code> from the model, and re-computing.</p>
+<div class="sourceCode" id="cb174"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb174-1"><a href="multiple-linear-regression.html#cb174-1" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(ys <span class="sc">~</span> vs <span class="sc">+</span> ws, <span class="at">data =</span> dd)</span>
+<span id="cb174-2"><a href="multiple-linear-regression.html#cb174-2" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = ys ~ vs + ws, data = dd)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -8.0710 -4.3232  0.3435  3.7228  8.6027 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  -2.9041     3.1430  -0.924    0.364    
+## vs            2.4214     0.3532   6.856 2.29e-07 ***
+## ws            2.8949     0.3609   8.022 1.28e-08 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 5.103 on 27 degrees of freedom
+## Multiple R-squared:  0.7937, Adjusted R-squared:  0.7784 
+## F-statistic: 51.94 on 2 and 27 DF,  p-value: 5.569e-10</code></pre>
+<p>Our model would then be <span class="math inline">\(y = -2.9041 + 2.4214 v + 2.8949 w + \epsilon\)</span>, at which point we would probably be done removing variables.</p>
+<div class="example">
+<span class="divhead-definition example-before">Example 3.1</span>
+<p><span id="exm:unlabeled-div-8" class="example"><strong>Example 3.1  </strong></span>We show how to do several common types of tasks with this (simulated) data set. Before doing inference, we should check the residuals.</p>
+<div class="sourceCode" id="cb176"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb176-1"><a href="multiple-linear-regression.html#cb176-1" tabindex="-1"></a><span class="fu">plot</span>(mod2)</span></code></pre></div>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-4"></span>
+<img src="02-multiple-regression_files/figure-html/unnamed-chunk-4-1.png" alt="Residual plots for simulated data look fine." width="50%" /><img src="02-multiple-regression_files/figure-html/unnamed-chunk-4-2.png" alt="Residual plots for simulated data look fine." width="50%" /><img src="02-multiple-regression_files/figure-html/unnamed-chunk-4-3.png" alt="Residual plots for simulated data look fine." width="50%" /><img src="02-multiple-regression_files/figure-html/unnamed-chunk-4-4.png" alt="Residual plots for simulated data look fine." width="50%" />
+<p class="caption">
+Figure 3.1: Residual plots for simulated data look fine.
+</p>
+</div>
+<p>Since they are fine, we can proceed. If we want a 99 percent confidence interval for <span class="math inline">\(\beta_2\)</span>, we would use <code>confint</code> as follows:</p>
+<div class="sourceCode" id="cb177"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb177-1"><a href="multiple-linear-regression.html#cb177-1" tabindex="-1"></a><span class="fu">confint</span>(mod2, <span class="at">parm =</span> <span class="st">&quot;ws&quot;</span>, <span class="at">level =</span> <span class="fl">0.99</span>)</span></code></pre></div>
+<pre><code>##       0.5 %   99.5 %
+## ws 1.895039 3.894732</code></pre>
+<p>A 99 percent confidence interval for <span class="math inline">\(\beta_2\)</span> is <span class="math inline">\([1.895, 3.895]\)</span>.</p>
+<p>If we want to test <span class="math inline">\(\beta_1 = 0\)</span> versus <span class="math inline">\(\beta_1\not= 0\)</span>, we look at the <span class="math inline">\(p\)</span>-value associated with <code>vs</code>. We see that it is less than .05, so we reject that <span class="math inline">\(\beta_1 = 0\)</span> and conclude that it is not zero.</p>
+<p>Suppose we want a 95 percent confidence interval for the mean value of the response when <code>vs = 5</code> and <code>ws = 5</code>. We would use</p>
+<div class="sourceCode" id="cb179"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb179-1"><a href="multiple-linear-regression.html#cb179-1" tabindex="-1"></a><span class="fu">predict</span>(mod2, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">vs =</span> <span class="dv">5</span>, <span class="at">ws =</span> <span class="dv">5</span>), <span class="at">interval =</span> <span class="st">&quot;conf&quot;</span>)</span></code></pre></div>
+<pre><code>##        fit      lwr      upr
+## 1 23.67748 21.57271 25.78226</code></pre>
+<p>We see that we are 95 percent confident that the <strong>mean</strong> response is between 21.57 and 25.78 with those values of <code>vs</code> and <code>ws</code>. However, if we were imagining that we were going to get a single additional observation and we want a range of values that we are 95 percent confident that the single additional value will fall in, we would do this:</p>
+<div class="sourceCode" id="cb181"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb181-1"><a href="multiple-linear-regression.html#cb181-1" tabindex="-1"></a><span class="fu">predict</span>(mod2, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">vs =</span> <span class="dv">5</span>, <span class="at">ws =</span> <span class="dv">5</span>), <span class="at">interval =</span> <span class="st">&quot;pre&quot;</span>)</span></code></pre></div>
+<pre><code>##        fit      lwr      upr
+## 1 23.67748 12.99664 34.35833</code></pre>
+<p>We get quite a different answer: the next obserevation will be between 13 and 34 with 95 percent confidence. Note that these prediction intervals take into account both the uncertainty in our estimates for the parameters, <strong>and</strong> the inherent uncertainty when sampling a single value.</p>
+</div>
+<p>Let’s look at another example. Consider the data in <code>cystfibr</code> in the <code>ISwR</code> package. Our treatment of this data set follows the treatment given in Dalgaard’s book. Let’s start by seeing what kind of data we are dealing with. According to the description, “It contains lung function data for cystic fibrosis patients (7–23 years old).” I recommend running <code>?ISwR::cystfibr</code> and reading about the variables involved in this data.</p>
+<p>We begin by plotting and summarizing the data.</p>
+<div class="sourceCode" id="cb183"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb183-1"><a href="multiple-linear-regression.html#cb183-1" tabindex="-1"></a>cystfibr <span class="ot">&lt;-</span> ISwR<span class="sc">::</span>cystfibr</span>
+<span id="cb183-2"><a href="multiple-linear-regression.html#cb183-2" tabindex="-1"></a><span class="fu">summary</span>(cystfibr)</span></code></pre></div>
+<pre><code>##       age             sex           height          weight          bmp       
+##  Min.   : 7.00   Min.   :0.00   Min.   :109.0   Min.   :12.9   Min.   :64.00  
+##  1st Qu.:11.00   1st Qu.:0.00   1st Qu.:139.0   1st Qu.:25.1   1st Qu.:68.00  
+##  Median :14.00   Median :0.00   Median :156.0   Median :37.2   Median :71.00  
+##  Mean   :14.48   Mean   :0.44   Mean   :152.8   Mean   :38.4   Mean   :78.28  
+##  3rd Qu.:17.00   3rd Qu.:1.00   3rd Qu.:174.0   3rd Qu.:51.1   3rd Qu.:90.00  
+##  Max.   :23.00   Max.   :1.00   Max.   :180.0   Max.   :73.8   Max.   :97.00  
+##       fev1             rv             frc             tlc          pemax      
+##  Min.   :18.00   Min.   :158.0   Min.   :104.0   Min.   : 81   Min.   : 65.0  
+##  1st Qu.:26.00   1st Qu.:188.0   1st Qu.:127.0   1st Qu.:101   1st Qu.: 85.0  
+##  Median :33.00   Median :225.0   Median :139.0   Median :113   Median : 95.0  
+##  Mean   :34.72   Mean   :255.2   Mean   :155.4   Mean   :114   Mean   :109.1  
+##  3rd Qu.:44.00   3rd Qu.:305.0   3rd Qu.:183.0   3rd Qu.:128   3rd Qu.:130.0  
+##  Max.   :57.00   Max.   :449.0   Max.   :268.0   Max.   :147   Max.   :195.0</code></pre>
+<p>There’s not a whole lot to see here. <code>frc</code>, <code>weight</code> and <code>pemax</code> appear to be right skew, and <code>sex</code> has been miscoded as numeric rather than as a factor. Let’s recode.</p>
+<div class="sourceCode" id="cb185"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb185-1"><a href="multiple-linear-regression.html#cb185-1" tabindex="-1"></a>cystfibr<span class="sc">$</span>sex <span class="ot">&lt;-</span> <span class="fu">factor</span>(cystfibr<span class="sc">$</span>sex, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Male&quot;</span>, <span class="st">&quot;Female&quot;</span>))</span>
+<span id="cb185-2"><a href="multiple-linear-regression.html#cb185-2" tabindex="-1"></a><span class="fu">summary</span>(cystfibr<span class="sc">$</span>sex)</span></code></pre></div>
+<pre><code>##   Male Female 
+##     14     11</code></pre>
+<p>Now, let’s do a scatterplot.</p>
+<div class="sourceCode" id="cb187"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb187-1"><a href="multiple-linear-regression.html#cb187-1" tabindex="-1"></a><span class="fu">plot</span>(cystfibr)</span></code></pre></div>
+<p><img src="02-multiple-regression_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>That’s pretty spectacular, but not very informative. It looks like <code>height</code> and <code>weight</code> are related, as well as <code>age</code>. The variable <code>pemax</code>, which is the variable of interest, appears to be correlated with some of the other variables, but is is hard to tell. Here is a tidy plot. We use the original <code>ISwR::cystfibr</code> because in this case, we don’t want <code>sex</code> coded as a factor.</p>
+<div class="sourceCode" id="cb188"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb188-1"><a href="multiple-linear-regression.html#cb188-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb188-2"><a href="multiple-linear-regression.html#cb188-2" tabindex="-1"></a>ISwR<span class="sc">::</span>cystfibr <span class="sc">%&gt;%</span> tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>pemax,</span>
+<span id="cb188-3"><a href="multiple-linear-regression.html#cb188-3" tabindex="-1"></a>                                 <span class="at">names_to =</span> <span class="st">&quot;variable&quot;</span>,</span>
+<span id="cb188-4"><a href="multiple-linear-regression.html#cb188-4" tabindex="-1"></a>                                 <span class="at">values_to =</span> <span class="st">&quot;value&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb188-5"><a href="multiple-linear-regression.html#cb188-5" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> value, <span class="at">y =</span> pemax)) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb188-6"><a href="multiple-linear-regression.html#cb188-6" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="at">facets =</span> <span class="sc">~</span>variable, <span class="at">scales =</span> <span class="st">&quot;free_x&quot;</span>) </span></code></pre></div>
+<p><img src="02-multiple-regression_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p>Wait, what do I mean by correlated???</p>
+<p>We define the <strong>covariance</strong> of <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> to be
+<span class="math display">\[
+E[(X - \mu_X) (Y - \mu_Y)] = E[XY] - E[X]E[Y],
+\]</span>
+where <span class="math inline">\(\mu_X\)</span> is the mean of <span class="math inline">\(X\)</span> and <span class="math inline">\(\mu_Y\)</span> is the mean of <span class="math inline">\(Y\)</span>.
+Looking at the first expression, we see that <span class="math inline">\((X - \mu_X) (Y - \mu_Y)\)</span> is positive exactly when <em>either</em> both <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are bigger than their means, <em>or</em> when both <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are less than their means. Therefore, we expect to see a positive covariance if increased values of <span class="math inline">\(X\)</span> are probabilistically associated with increased values of <span class="math inline">\(Y\)</span>, and we expect to see a negatice covariance when increased values of <span class="math inline">\(X\)</span> are associated with decreased values of <span class="math inline">\(Y\)</span>.</p>
+<p>The <strong>correlation</strong> of <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> is given by
+<span class="math display">\[
+\rho(X, Y) = \frac{E[(X - \mu_X) (Y - \mu_Y)]}{\sigma_X \sigma_Y}
+\]</span>
+The correlation is easier to interpret in most cases than the covariance, because the values are between <span class="math inline">\(-1\)</span> and <span class="math inline">\(1\)</span>. A value of <span class="math inline">\(\pm 1\)</span> corresponds to a perfect linear relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, and the larger tha absolute value of the correlation is, the stronger we expect the linear relationship of <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> to be.</p>
+<p>We can estimate the covariance and correlation using the built in R functions <code>cov</code> and <code>cor</code>. If we apply <code>cor</code> to a data frame, then it computes the correlation of each pair of variables separately.</p>
+<div class="sourceCode" id="cb189"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb189-1"><a href="multiple-linear-regression.html#cb189-1" tabindex="-1"></a><span class="fu">cor</span>(<span class="fu">select</span>(cystfibr, <span class="sc">-</span>sex))</span></code></pre></div>
+<pre><code>##               age     height     weight        bmp       fev1         rv
+## age     1.0000000  0.9260520  0.9058675  0.3777643  0.2944880 -0.5519445
+## height  0.9260520  1.0000000  0.9206953  0.4407623  0.3166636 -0.5695199
+## weight  0.9058675  0.9206953  1.0000000  0.6725463  0.4488393 -0.6215056
+## bmp     0.3777643  0.4407623  0.6725463  1.0000000  0.5455204 -0.5823729
+## fev1    0.2944880  0.3166636  0.4488393  0.5455204  1.0000000 -0.6658557
+## rv     -0.5519445 -0.5695199 -0.6215056 -0.5823729 -0.6658557  1.0000000
+## frc    -0.6393569 -0.6242769 -0.6172561 -0.4343888 -0.6651149  0.9106029
+## tlc    -0.4693733 -0.4570819 -0.4184676 -0.3649035 -0.4429945  0.5891391
+## pemax   0.6134741  0.5992195  0.6352220  0.2295148  0.4533757 -0.3155501
+##               frc        tlc      pemax
+## age    -0.6393569 -0.4693733  0.6134741
+## height -0.6242769 -0.4570819  0.5992195
+## weight -0.6172561 -0.4184676  0.6352220
+## bmp    -0.4343888 -0.3649035  0.2295148
+## fev1   -0.6651149 -0.4429945  0.4533757
+## rv      0.9106029  0.5891391 -0.3155501
+## frc     1.0000000  0.7043999 -0.4172078
+## tlc     0.7043999  1.0000000 -0.1816157
+## pemax  -0.4172078 -0.1816157  1.0000000</code></pre>
+<p>Indeed, we see that <code>age</code>, <code>height</code> and <code>weight</code> are pretty strongly correlated, as are some of the lung function variables. <code>pemax</code> is not highly correlated with any one other variable.</p>
+<p>Let’s run multiple regression on all of the variables at once, and see what we get:</p>
+<div class="sourceCode" id="cb191"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb191-1"><a href="multiple-linear-regression.html#cb191-1" tabindex="-1"></a>my.mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(pemax<span class="sc">~</span>., <span class="at">data =</span> cystfibr)</span>
+<span id="cb191-2"><a href="multiple-linear-regression.html#cb191-2" tabindex="-1"></a><span class="fu">summary</span>(my.mod)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = pemax ~ ., data = cystfibr)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -37.338 -11.532   1.081  13.386  33.405 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) 176.0582   225.8912   0.779    0.448
+## age          -2.5420     4.8017  -0.529    0.604
+## sexFemale    -3.7368    15.4598  -0.242    0.812
+## height       -0.4463     0.9034  -0.494    0.628
+## weight        2.9928     2.0080   1.490    0.157
+## bmp          -1.7449     1.1552  -1.510    0.152
+## fev1          1.0807     1.0809   1.000    0.333
+## rv            0.1970     0.1962   1.004    0.331
+## frc          -0.3084     0.4924  -0.626    0.540
+## tlc           0.1886     0.4997   0.377    0.711
+## 
+## Residual standard error: 25.47 on 15 degrees of freedom
+## Multiple R-squared:  0.6373, Adjusted R-squared:  0.4197 
+## F-statistic: 2.929 on 9 and 15 DF,  p-value: 0.03195</code></pre>
+<p>A couple of things to notice: first, the p-value is 0.03195, which indicates that the variables <em>together</em> do have a statistically significant predictive value for <code>pemax</code>. However, looking at the list, no one variable seems necessary. The reason for this is that the <span class="math inline">\(p\)</span>-values for each variable is testing what happens when we remove <em>only</em> that variable. So, for example, we can remove weight and not upset the model too much. Of course, since height is strongly correlated with weight, it may just be that height will serve as a proxy for weight in the event that weight is removed!</p>
+<p>We start to eliminate variables that are not statistically significant in the model. We will begin with the other lung function data, for as long as we are allowed to continue to remove. The order chosen for removal is: tlc, frc, rv, fev1.</p>
+<div class="sourceCode" id="cb193"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb193-1"><a href="multiple-linear-regression.html#cb193-1" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(pemax<span class="sc">~</span>height<span class="sc">+</span>age<span class="sc">+</span>weight<span class="sc">+</span>sex<span class="sc">+</span>bmp<span class="sc">+</span>fev1<span class="sc">+</span>rv<span class="sc">+</span>frc, <span class="at">data =</span> cystfibr))</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = pemax ~ height + age + weight + sex + bmp + fev1 + 
+##     rv + frc, data = cystfibr)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -38.072 -10.067   0.113  13.526  36.990 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept) 221.8055   185.4350   1.196   0.2491  
+## height       -0.5428     0.8428  -0.644   0.5286  
+## age          -3.1346     4.4144  -0.710   0.4879  
+## weight        3.3157     1.7672   1.876   0.0790 .
+## sexFemale    -4.6933    14.8363  -0.316   0.7558  
+## bmp          -1.9403     1.0047  -1.931   0.0714 .
+## fev1          1.0183     1.0392   0.980   0.3417  
+## rv            0.1857     0.1887   0.984   0.3396  
+## frc          -0.2605     0.4628  -0.563   0.5813  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 24.78 on 16 degrees of freedom
+## Multiple R-squared:  0.6339, Adjusted R-squared:  0.4508 
+## F-statistic: 3.463 on 8 and 16 DF,  p-value: 0.01649</code></pre>
+<div class="sourceCode" id="cb195"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb195-1"><a href="multiple-linear-regression.html#cb195-1" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(pemax<span class="sc">~</span>height<span class="sc">+</span>age<span class="sc">+</span>weight<span class="sc">+</span>sex<span class="sc">+</span>bmp<span class="sc">+</span>fev1<span class="sc">+</span>rv, <span class="at">data =</span> cystfibr))</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = pemax ~ height + age + weight + sex + bmp + fev1 + 
+##     rv, data = cystfibr)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -39.425 -12.391   3.834  14.797  36.693 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept) 166.71822  154.31294   1.080   0.2951  
+## height       -0.40981    0.79257  -0.517   0.6118  
+## age          -1.81783    3.66773  -0.496   0.6265  
+## weight        2.87386    1.55120   1.853   0.0814 .
+## sexFemale     0.10239   11.89990   0.009   0.9932  
+## bmp          -1.94971    0.98415  -1.981   0.0640 .
+## fev1          1.41526    0.74788   1.892   0.0756 .
+## rv            0.09567    0.09798   0.976   0.3425  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 24.28 on 17 degrees of freedom
+## Multiple R-squared:  0.6266, Adjusted R-squared:  0.4729 
+## F-statistic: 4.076 on 7 and 17 DF,  p-value: 0.008452</code></pre>
+<div class="sourceCode" id="cb197"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb197-1"><a href="multiple-linear-regression.html#cb197-1" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(pemax<span class="sc">~</span>height<span class="sc">+</span>age<span class="sc">+</span>weight<span class="sc">+</span>sex<span class="sc">+</span>bmp<span class="sc">+</span>fev1, <span class="at">data =</span> cystfibr))</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = pemax ~ height + age + weight + sex + bmp + fev1, 
+##     data = cystfibr)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -43.238  -7.403  -0.081  15.534  36.028 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept) 260.6313   120.5215   2.163   0.0443 *
+## height       -0.6067     0.7655  -0.793   0.4384  
+## age          -2.9062     3.4898  -0.833   0.4159  
+## weight        3.3463     1.4719   2.273   0.0355 *
+## sexFemale    -1.2115    11.8083  -0.103   0.9194  
+## bmp          -2.3042     0.9136  -2.522   0.0213 *
+## fev1          1.0274     0.6329   1.623   0.1219  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 24.24 on 18 degrees of freedom
+## Multiple R-squared:  0.6057, Adjusted R-squared:  0.4743 
+## F-statistic: 4.608 on 6 and 18 DF,  p-value: 0.00529</code></pre>
+<div class="sourceCode" id="cb199"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb199-1"><a href="multiple-linear-regression.html#cb199-1" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(pemax<span class="sc">~</span>height<span class="sc">+</span>age<span class="sc">+</span>weight<span class="sc">+</span>sex<span class="sc">+</span>bmp, <span class="at">data =</span> cystfibr))</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = pemax ~ height + age + weight + sex + bmp, data = cystfibr)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -43.194  -9.412  -2.425   9.157  40.112 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept) 280.4482   124.9556   2.244   0.0369 *
+## height       -0.6853     0.7962  -0.861   0.4001  
+## age          -3.0750     3.6352  -0.846   0.4081  
+## weight        3.5546     1.5281   2.326   0.0312 *
+## sexFemale   -11.5281    10.3720  -1.111   0.2802  
+## bmp          -1.9613     0.9263  -2.117   0.0476 *
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 25.27 on 19 degrees of freedom
+## Multiple R-squared:  0.548,  Adjusted R-squared:  0.429 
+## F-statistic: 4.606 on 5 and 19 DF,  p-value: 0.006388</code></pre>
+<p>When removing variables in a stepwise manner such as above, it is important to consider adding variables back into the model. Since we have removed all of the lung function data one variable at a time, let’s see whether the <strong>group</strong> of lung function data is significant as a whole. This serves as a sort of test as to whether we need to consider adding variables back in to the model.</p>
+<div class="sourceCode" id="cb201"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb201-1"><a href="multiple-linear-regression.html#cb201-1" tabindex="-1"></a>mod1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(pemax<span class="sc">~</span>., <span class="at">data =</span> cystfibr)</span>
+<span id="cb201-2"><a href="multiple-linear-regression.html#cb201-2" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(pemax<span class="sc">~</span>height<span class="sc">+</span>age<span class="sc">+</span>weight<span class="sc">+</span>sex<span class="sc">+</span>bmp, <span class="at">data =</span> cystfibr)</span>
+<span id="cb201-3"><a href="multiple-linear-regression.html#cb201-3" tabindex="-1"></a><span class="fu">anova</span>(mod2, mod1)</span></code></pre></div>
+<pre><code>## Analysis of Variance Table
+## 
+## Model 1: pemax ~ height + age + weight + sex + bmp
+## Model 2: pemax ~ age + sex + height + weight + bmp + fev1 + rv + frc + 
+##     tlc
+##   Res.Df     RSS Df Sum of Sq      F Pr(&gt;F)
+## 1     19 12129.2                           
+## 2     15  9731.2  4      2398 0.9241 0.4758</code></pre>
+<p>Since the <span class="math inline">\(p\)</span>-value is 0.4758, this is an indication that the group of variables is not significant as a whole, and we are at least somewhat justified in removing the group.</p>
+<p>Returning to variable selection, we see that age, height and sex don’t seem important, so let’s start removing.</p>
+<div class="sourceCode" id="cb203"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb203-1"><a href="multiple-linear-regression.html#cb203-1" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(pemax<span class="sc">~</span>height<span class="sc">+</span>weight<span class="sc">+</span>sex<span class="sc">+</span>bmp, <span class="at">data =</span> cystfibr))</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = pemax ~ height + weight + sex + bmp, data = cystfibr)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -46.202 -11.699  -1.845  10.322  38.744 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept) 251.3973   119.2859   2.108   0.0479 *
+## height       -0.8128     0.7762  -1.047   0.3075  
+## weight        2.6947     1.1329   2.379   0.0275 *
+## sexFemale   -11.5458    10.2979  -1.121   0.2755  
+## bmp          -1.4881     0.7330  -2.030   0.0558 .
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 25.09 on 20 degrees of freedom
+## Multiple R-squared:  0.5309, Adjusted R-squared:  0.4371 
+## F-statistic:  5.66 on 4 and 20 DF,  p-value: 0.003253</code></pre>
+<div class="sourceCode" id="cb205"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb205-1"><a href="multiple-linear-regression.html#cb205-1" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(pemax<span class="sc">~</span>weight<span class="sc">+</span>sex<span class="sc">+</span>bmp, <span class="at">data =</span> cystfibr))</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = pemax ~ weight + sex + bmp, data = cystfibr)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -47.05 -11.65   4.23  13.75  45.35 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 132.9306    37.9132   3.506 0.002101 ** 
+## weight        1.5810     0.3910   4.044 0.000585 ***
+## sexFemale   -11.7140    10.3203  -1.135 0.269147    
+## bmp          -1.0140     0.5777  -1.755 0.093826 .  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 25.14 on 21 degrees of freedom
+## Multiple R-squared:  0.5052, Adjusted R-squared:  0.4345 
+## F-statistic: 7.148 on 3 and 21 DF,  p-value: 0.001732</code></pre>
+<div class="sourceCode" id="cb207"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb207-1"><a href="multiple-linear-regression.html#cb207-1" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(pemax<span class="sc">~</span>weight<span class="sc">+</span>bmp, <span class="at">data =</span> cystfibr))</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = pemax ~ weight + bmp, data = cystfibr)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -42.924 -13.399   4.361  16.642  48.404 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 124.8297    37.4786   3.331 0.003033 ** 
+## weight        1.6403     0.3900   4.206 0.000365 ***
+## bmp          -1.0054     0.5814  -1.729 0.097797 .  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 25.31 on 22 degrees of freedom
+## Multiple R-squared:  0.4749, Adjusted R-squared:  0.4271 
+## F-statistic: 9.947 on 2 and 22 DF,  p-value: 0.0008374</code></pre>
+<p>Again, we have removed a group of variables that are related, so let’s see if the group as a whole is significant. If it were, then we would need to consider adding variables back in to our model.</p>
+<div class="sourceCode" id="cb209"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb209-1"><a href="multiple-linear-regression.html#cb209-1" tabindex="-1"></a>mod3 <span class="ot">&lt;-</span> <span class="fu">lm</span>(pemax<span class="sc">~</span>weight<span class="sc">+</span>bmp, <span class="at">data =</span> cystfibr)</span>
+<span id="cb209-2"><a href="multiple-linear-regression.html#cb209-2" tabindex="-1"></a><span class="fu">anova</span>(mod3, mod2)</span></code></pre></div>
+<pre><code>## Analysis of Variance Table
+## 
+## Model 1: pemax ~ weight + bmp
+## Model 2: pemax ~ height + age + weight + sex + bmp
+##   Res.Df   RSS Df Sum of Sq      F Pr(&gt;F)
+## 1     22 14090                           
+## 2     19 12129  3    1961.3 1.0241 0.4041</code></pre>
+<p>This indicates that we are justified in removing the age, weight and sex variables. And now, bmp also doesn’t seem important. We are left with modeling pemax on weight, similar to what we had before.</p>
+<div class="exercise">
+<span class="divhead-definition exercise-before"> 3.1</span>
+<p><span id="exr:unnamed-chunk-18" class="exercise"><strong>Exercise 3.1  </strong></span>Consider the data set <code>ISwR::secher</code>. Read about the data set by typing <code>?ISwR::secher</code>. We are interested in predicting birth weight on the other variables.</p>
+<ol style="list-style-type: lower-alpha">
+<li><p>Should any of the variables be removed immediately without doing any testing?</p></li>
+<li><p>Find a minimal meaningful model that explains birthweight in terms of other variable(s).</p></li>
+<li><p>Check the residuals.</p></li>
+</ol>
+</div>
+<div id="anova" class="section level3 hasAnchor" number="3.0.1">
+<h3><span class="header-section-number">3.0.1</span> Aside on multiple R squared and ANOVA<a href="multiple-linear-regression.html#anova" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The Multiple R Squared value is 0.6373. This means that the model explains 63% of the variance of pemax. To better understand what that means, let’s see how we could calculate it. First, we compute the total variance of <code>pemax</code>.</p>
+<div class="sourceCode" id="cb211"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb211-1"><a href="multiple-linear-regression.html#cb211-1" tabindex="-1"></a>pemax_var <span class="ot">&lt;-</span> <span class="fu">var</span>(cystfibr<span class="sc">$</span>pemax)</span></code></pre></div>
+<p>Now, we compute the variance of the <strong>residuals</strong> of our model. We can think of the variance of the residuals as the variance in <code>pemax</code> that remains unexplained after taking into account the variables in our model. Notice that we don’t correct for the number of parameters we are estimating.</p>
+<div class="sourceCode" id="cb212"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb212-1"><a href="multiple-linear-regression.html#cb212-1" tabindex="-1"></a>residuals_var <span class="ot">&lt;-</span> <span class="fu">var</span>(my.mod<span class="sc">$</span>residuals)</span></code></pre></div>
+<p>So, the percentage of variance explained is:</p>
+<div class="sourceCode" id="cb213"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb213-1"><a href="multiple-linear-regression.html#cb213-1" tabindex="-1"></a>(pemax_var <span class="sc">-</span> residuals_var)<span class="sc">/</span>pemax_var</span></code></pre></div>
+<pre><code>## [1] 0.6373354</code></pre>
+<p>What would have happened if we had used the variance adjusted for the number of parameters that we are estimating?</p>
+<div class="sourceCode" id="cb215"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb215-1"><a href="multiple-linear-regression.html#cb215-1" tabindex="-1"></a>residuals_var_corrected <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>(<span class="dv">25</span> <span class="sc">-</span> (<span class="dv">9</span> <span class="sc">+</span> <span class="dv">1</span>)) <span class="sc">*</span> <span class="fu">sum</span>(my.mod<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb215-2"><a href="multiple-linear-regression.html#cb215-2" tabindex="-1"></a>(pemax_var <span class="sc">-</span> residuals_var_corrected)<span class="sc">/</span>pemax_var</span></code></pre></div>
+<pre><code>## [1] 0.4197366</code></pre>
+<p>In this case, we get the <strong>adjusted</strong> <span class="math inline">\(R^2\)</span>! Whoa!</p>
+<div class="exercise">
+<span class="divhead-definition exercise-before"> 3.2</span>
+<p><span id="exr:unnamed-chunk-23" class="exercise"><strong>Exercise 3.2  </strong></span>In this exercise, you will see evidence that adding variables always increases the multiple R squared, but that adding noise to a model generally decreases the adjusted R squared. Define <code>cystifbr$random &lt;- rnorm(25)</code>.</p>
+<pre><code>a. Compute the Multiple R-squared when `pemax` is modeled on all of the predictors. How does it compare to 0.6373354? You may need to compute it out to many digits to see a difference! 
+  
+b. Repeat for the adjusted R-squared. How does it compare to 0.4197366?</code></pre>
+</div>
+<p>Moving on, we said above that the variables <strong>taken together</strong> have a <span class="math inline">\(p\)</span>-value of 0.03195. What does that mean, exactly?</p>
+<p>Let’s consider the case where we have three predictors and one response, to make things a bit simpler. Our null hypothesis would be that there is no linear association between the three predictors and the response. In other words, if our model is <span class="math inline">\(y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \epsilon\)</span>, then the null hypothesis is that <span class="math inline">\(\beta_1 = \beta_2 = \beta_3 = 0\)</span>, and the alternative hypothesis is that not all of them are zero.</p>
+<p>As we saw above, the multiple R squared will never be zero, but we ask the question: how big is big enough that we can be pretty sure that it isn’t due to chance? We could do it directly via simulations, but we are supposed to be doing classical theory now! So, let’s see what kind of distribuytions the component pieces have.</p>
+<p>We start with the estimate of <span class="math inline">\(\sigma^2\)</span> based on the residuals.</p>
+<div class="sourceCode" id="cb218"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb218-1"><a href="multiple-linear-regression.html#cb218-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1262020</span>)</span>
+<span id="cb218-2"><a href="multiple-linear-regression.html#cb218-2" tabindex="-1"></a>x1s <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb218-3"><a href="multiple-linear-regression.html#cb218-3" tabindex="-1"></a>x2s <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb218-4"><a href="multiple-linear-regression.html#cb218-4" tabindex="-1"></a>x3s <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb218-5"><a href="multiple-linear-regression.html#cb218-5" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x1s =</span> x1s,</span>
+<span id="cb218-6"><a href="multiple-linear-regression.html#cb218-6" tabindex="-1"></a>                 <span class="at">x2s =</span> x2s,</span>
+<span id="cb218-7"><a href="multiple-linear-regression.html#cb218-7" tabindex="-1"></a>                 <span class="at">x3s =</span> x3s,</span>
+<span id="cb218-8"><a href="multiple-linear-regression.html#cb218-8" tabindex="-1"></a>                 <span class="at">ys =</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> x1s <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> x2s <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>) </span>
+<span id="cb218-9"><a href="multiple-linear-regression.html#cb218-9" tabindex="-1"></a>                 )</span>
+<span id="cb218-10"><a href="multiple-linear-regression.html#cb218-10" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(ys <span class="sc">~</span> ., <span class="at">data =</span> dd))</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = ys ~ ., data = dd)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -15.0724  -7.3197   0.2331   8.0343  18.3749 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -10.8411     6.8087  -1.592 0.123415    
+## x1s           2.8090     0.6943   4.046 0.000415 ***
+## x2s           2.7570     0.7094   3.886 0.000628 ***
+## x3s           0.8572     0.6096   1.406 0.171517    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 10.03 on 26 degrees of freedom
+## Multiple R-squared:  0.5521, Adjusted R-squared:  0.5004 
+## F-statistic: 10.68 on 3 and 26 DF,  p-value: 9.334e-05</code></pre>
+<p>Based on our previous work, we would expect an <strong>unbiased</strong> estimator for <span class="math inline">\(\sigma^2\)</span> to be the sum-squared residuals over (30 - 4), where 4 is the number of parameters that we estimated. Let’s see if that is right. First we check that the esimate of the variance <span class="math inline">\(\sigma^2\)</span> in the summary really is computed by dividing by 26.</p>
+<div class="sourceCode" id="cb220"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb220-1"><a href="multiple-linear-regression.html#cb220-1" tabindex="-1"></a>random.mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(ys <span class="sc">~</span> ., <span class="at">data =</span> dd)</span>
+<span id="cb220-2"><a href="multiple-linear-regression.html#cb220-2" tabindex="-1"></a><span class="fu">summary</span>(random.mod)<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span></span></code></pre></div>
+<pre><code>## [1] 100.5415</code></pre>
+<div class="sourceCode" id="cb222"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb222-1"><a href="multiple-linear-regression.html#cb222-1" tabindex="-1"></a><span class="dv">1</span><span class="sc">/</span><span class="dv">26</span><span class="sc">*</span><span class="fu">sum</span>(random.mod<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div>
+<pre><code>## [1] 100.5415</code></pre>
+<p>Yep. Now, let’s see that it appears to be an unbiased estimate for <span class="math inline">\(\sigma^2\)</span>.</p>
+<div class="theorem">
+<span class="divhead-plain theorem-before">Theorem 3.1</span>
+<p><span id="thm:unnamed-chunk-26" class="theorem"><strong>Theorem 3.1  </strong></span>Let <span class="math inline">\(\hat \epsilon_i\)</span> be the residuals when <span class="math inline">\(y = \beta_0 + \sum_{k = 1}^K \beta_k x_k + \epsilon\)</span>, with <span class="math inline">\(\epsilon \sim N(0, \sigma^2)\)</span>. Then
+<span class="math inline">\(\frac{1}{n - (K + 1)}\sum_{i = 1}^n \hat \epsilon^2\)</span> is an unbiased estimator for <span class="math inline">\(\sigma^2\)</span>.</p>
+</div>
+<p>We denote the estimator <span class="math inline">\(\hat \sigma^2 = \frac{1}{n - (K + 1)}\sum_{i = 1}^n \hat \epsilon^2\)</span>.</p>
+<div class="sourceCode" id="cb224"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb224-1"><a href="multiple-linear-regression.html#cb224-1" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb224-2"><a href="multiple-linear-regression.html#cb224-2" tabindex="-1"></a>  dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x1s =</span> x1s,</span>
+<span id="cb224-3"><a href="multiple-linear-regression.html#cb224-3" tabindex="-1"></a>                 <span class="at">x2s =</span> x2s,</span>
+<span id="cb224-4"><a href="multiple-linear-regression.html#cb224-4" tabindex="-1"></a>                 <span class="at">x3s =</span> x3s,</span>
+<span id="cb224-5"><a href="multiple-linear-regression.html#cb224-5" tabindex="-1"></a>                 <span class="at">ys =</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> x1s <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> x2s <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>) </span>
+<span id="cb224-6"><a href="multiple-linear-regression.html#cb224-6" tabindex="-1"></a>                 )</span>
+<span id="cb224-7"><a href="multiple-linear-regression.html#cb224-7" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="fu">lm</span>(ys <span class="sc">~</span> ., <span class="at">data =</span> dd))<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb224-8"><a href="multiple-linear-regression.html#cb224-8" tabindex="-1"></a>})</span>
+<span id="cb224-9"><a href="multiple-linear-regression.html#cb224-9" tabindex="-1"></a><span class="fu">mean</span>(sim_data)</span></code></pre></div>
+<pre><code>## [1] 99.97615</code></pre>
+<p>Yep. (Repeat the above code a few times to see that it appears to be centered at 100.) What kind of rv is our estimate for <span class="math inline">\(\sigma^2\)</span>? We can adjust it to be <span class="math inline">\(\chi^2\)</span>!</p>
+<div class="sourceCode" id="cb226"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb226-1"><a href="multiple-linear-regression.html#cb226-1" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(sim_data <span class="sc">*</span> <span class="dv">26</span><span class="sc">/</span><span class="dv">100</span>))</span>
+<span id="cb226-2"><a href="multiple-linear-regression.html#cb226-2" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dchisq</span>(x, <span class="dv">26</span>), <span class="at">add =</span> T, <span class="at">col =</span> <span class="dv">2</span>)</span></code></pre></div>
+<p><img src="02-multiple-regression_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
+<p>To summarize, we have the following theorem.</p>
+<div class="theorem">
+<span class="divhead-plain theorem-before">Theorem 3.2</span>
+<p><span id="thm:unnamed-chunk-29" class="theorem"><strong>Theorem 3.2  </strong></span>Let <span class="math inline">\(\hat \epsilon_i\)</span> be the residuals when <span class="math inline">\(y = \beta_0 + \sum_{k = 1}^K \beta_k x_k + \epsilon\)</span>, with <span class="math inline">\(\epsilon \sim N(0, \sigma^2)\)</span>, and let <span class="math inline">\(\hat \sigma^2\)</span> denote the estimator for <span class="math inline">\(\sigma\)</span> discussed above. Then, <span class="math inline">\(\frac{n - (K + 1) \hat \sigma^2}{\sigma^2} \sim \chi^2_{n - (K + 1)}\)</span>. That is, <span class="math inline">\(\frac{n - (K + 1) \hat \sigma^2}{\sigma^2}\)</span> is a <span class="math inline">\(\chi^2\)</span> random variable with <span class="math inline">\(n - (K + 1)\)</span> degrees of freedom.</p>
+</div>
+<p>Next, we assume that the null is true. We can estimate the variance as follows, which we denote as <span class="math inline">\(V(y)\)</span>.</p>
+<div class="sourceCode" id="cb227"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb227-1"><a href="multiple-linear-regression.html#cb227-1" tabindex="-1"></a>sim_data_2 <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb227-2"><a href="multiple-linear-regression.html#cb227-2" tabindex="-1"></a>  ys <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>) </span>
+<span id="cb227-3"><a href="multiple-linear-regression.html#cb227-3" tabindex="-1"></a>  <span class="fu">sum</span>((ys <span class="sc">-</span> <span class="fu">mean</span>(ys))<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span><span class="dv">29</span></span>
+<span id="cb227-4"><a href="multiple-linear-regression.html#cb227-4" tabindex="-1"></a>})</span>
+<span id="cb227-5"><a href="multiple-linear-regression.html#cb227-5" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(sim_data_2 <span class="sc">*</span> <span class="dv">29</span> <span class="sc">/</span> <span class="dv">100</span>))</span>
+<span id="cb227-6"><a href="multiple-linear-regression.html#cb227-6" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dchisq</span>(x, <span class="dv">29</span>), <span class="at">add =</span> T, <span class="at">col =</span> <span class="dv">2</span>)</span></code></pre></div>
+<p><img src="02-multiple-regression_files/figure-html/unnamed-chunk-30-1.png" width="672" /></p>
+<p>We see that the variance estimate in this case is a <span class="math inline">\(\chi^2\)</span> random variable with 29 degrees of freedom. Now the cool part. What about the difference between the variance we computed both ways?? Again, let’s assume that the null hypothesis is <code>TRUE</code></p>
+<div class="sourceCode" id="cb228"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb228-1"><a href="multiple-linear-regression.html#cb228-1" tabindex="-1"></a>sim_data_3 <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb228-2"><a href="multiple-linear-regression.html#cb228-2" tabindex="-1"></a>    dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x1s =</span> x1s,</span>
+<span id="cb228-3"><a href="multiple-linear-regression.html#cb228-3" tabindex="-1"></a>                 <span class="at">x2s =</span> x2s,</span>
+<span id="cb228-4"><a href="multiple-linear-regression.html#cb228-4" tabindex="-1"></a>                 <span class="at">x3s =</span> x3s,</span>
+<span id="cb228-5"><a href="multiple-linear-regression.html#cb228-5" tabindex="-1"></a>                 <span class="at">ys =</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>) </span>
+<span id="cb228-6"><a href="multiple-linear-regression.html#cb228-6" tabindex="-1"></a>                 )</span>
+<span id="cb228-7"><a href="multiple-linear-regression.html#cb228-7" tabindex="-1"></a>    <span class="fu">sum</span>((dd<span class="sc">$</span>ys <span class="sc">-</span> <span class="fu">mean</span>(dd<span class="sc">$</span>ys))<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span><span class="dv">29</span> <span class="sc">*</span> <span class="dv">29</span><span class="sc">/</span><span class="dv">100</span> <span class="sc">-</span><span class="fu">summary</span>(<span class="fu">lm</span>(ys <span class="sc">~</span> ., <span class="at">data =</span> dd))<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> <span class="dv">26</span><span class="sc">/</span><span class="dv">100</span> </span>
+<span id="cb228-8"><a href="multiple-linear-regression.html#cb228-8" tabindex="-1"></a>      </span>
+<span id="cb228-9"><a href="multiple-linear-regression.html#cb228-9" tabindex="-1"></a>})</span>
+<span id="cb228-10"><a href="multiple-linear-regression.html#cb228-10" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(sim_data_3))</span>
+<span id="cb228-11"><a href="multiple-linear-regression.html#cb228-11" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dchisq</span>(x, <span class="dv">3</span>), <span class="at">add =</span> T, <span class="at">col =</span> <span class="dv">2</span>)</span></code></pre></div>
+<p><img src="02-multiple-regression_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+<p>Finally, we take the ratio, similar to the multiple R squared.</p>
+<div class="sourceCode" id="cb229"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb229-1"><a href="multiple-linear-regression.html#cb229-1" tabindex="-1"></a>sim_data_3 <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb229-2"><a href="multiple-linear-regression.html#cb229-2" tabindex="-1"></a>    dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x1s =</span> x1s,</span>
+<span id="cb229-3"><a href="multiple-linear-regression.html#cb229-3" tabindex="-1"></a>                 <span class="at">x2s =</span> x2s,</span>
+<span id="cb229-4"><a href="multiple-linear-regression.html#cb229-4" tabindex="-1"></a>                 <span class="at">x3s =</span> x3s,</span>
+<span id="cb229-5"><a href="multiple-linear-regression.html#cb229-5" tabindex="-1"></a>                 <span class="at">ys =</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>) </span>
+<span id="cb229-6"><a href="multiple-linear-regression.html#cb229-6" tabindex="-1"></a>                 )</span>
+<span id="cb229-7"><a href="multiple-linear-regression.html#cb229-7" tabindex="-1"></a>    ((<span class="fu">sum</span>((dd<span class="sc">$</span>ys <span class="sc">-</span> <span class="fu">mean</span>(dd<span class="sc">$</span>ys))<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span><span class="dv">100</span> <span class="sc">-</span><span class="fu">summary</span>(<span class="fu">lm</span>(ys <span class="sc">~</span> ., <span class="at">data =</span> dd))<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> <span class="dv">26</span><span class="sc">/</span><span class="dv">100</span>)<span class="sc">/</span><span class="dv">3</span>)<span class="sc">/</span> (<span class="fu">summary</span>(<span class="fu">lm</span>(ys <span class="sc">~</span> ., <span class="at">data =</span> dd))<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> <span class="dv">26</span><span class="sc">/</span><span class="dv">100</span><span class="sc">/</span><span class="dv">26</span>)</span>
+<span id="cb229-8"><a href="multiple-linear-regression.html#cb229-8" tabindex="-1"></a>})</span>
+<span id="cb229-9"><a href="multiple-linear-regression.html#cb229-9" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(sim_data_3))</span>
+<span id="cb229-10"><a href="multiple-linear-regression.html#cb229-10" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">df</span>(x, <span class="dv">3</span>, <span class="dv">26</span>), <span class="at">add =</span> T, <span class="at">col =</span> <span class="dv">2</span>)</span></code></pre></div>
+<p><img src="02-multiple-regression_files/figure-html/unnamed-chunk-32-1.png" width="672" /></p>
+<p>We again summarize the above in the following theorem.</p>
+<div class="theorem">
+<span class="divhead-plain theorem-before">Theorem 3.3</span>
+<p><span id="thm:unnamed-chunk-33" class="theorem"><strong>Theorem 3.3  </strong></span>With the notation from this section,</p>
+<ol style="list-style-type: lower-alpha">
+<li><p><span class="math inline">\(\frac{(n - 1)V(y)}{\sigma^2} - \frac{n - (K + 1)\hat \sigma^2}{\sigma^2} \sim \chi^2_K\)</span>.</p></li>
+<li><p><span class="math inline">\(F = \frac{\bigl((n - 1)V(y) - (n - (K + 1)) \hat \sigma^2\bigr)/K}{\bigl((n - (K + 1))\hat \sigma^2\bigr)/(n - (K + 1))} \sim F_{K, n - (K + 1)}\)</span></p></li>
+</ol>
+</div>
+<p>Note that <strong>large</strong> values of <span class="math inline">\(F\)</span> correspond to evidence <strong>against</strong> the null hypothesis and in favor of the alternative hypothesis. Therefore, we will compute <span class="math inline">\(F\)</span> and reject the null hypothesis in favor of the alternative if it is larger than <code>qf(.95, K, (n - (K + 1)))</code>. We can compute the <span class="math inline">\(p\)</span> value of <code>pf(F, K, n - (K + 1), lower.tail = FALSE)</code>. Let’s see it in action.</p>
+<div class="sourceCode" id="cb230"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb230-1"><a href="multiple-linear-regression.html#cb230-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1262020</span>)</span>
+<span id="cb230-2"><a href="multiple-linear-regression.html#cb230-2" tabindex="-1"></a>x1s <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb230-3"><a href="multiple-linear-regression.html#cb230-3" tabindex="-1"></a>x2s <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb230-4"><a href="multiple-linear-regression.html#cb230-4" tabindex="-1"></a>x3s <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb230-5"><a href="multiple-linear-regression.html#cb230-5" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x1s =</span> x1s,</span>
+<span id="cb230-6"><a href="multiple-linear-regression.html#cb230-6" tabindex="-1"></a>                 <span class="at">x2s =</span> x2s,</span>
+<span id="cb230-7"><a href="multiple-linear-regression.html#cb230-7" tabindex="-1"></a>                 <span class="at">x3s =</span> x3s,</span>
+<span id="cb230-8"><a href="multiple-linear-regression.html#cb230-8" tabindex="-1"></a>                 <span class="at">ys =</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> x1s <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> x2s <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>) </span>
+<span id="cb230-9"><a href="multiple-linear-regression.html#cb230-9" tabindex="-1"></a>                 )</span>
+<span id="cb230-10"><a href="multiple-linear-regression.html#cb230-10" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(ys <span class="sc">~</span> ., <span class="at">data =</span> dd)</span>
+<span id="cb230-11"><a href="multiple-linear-regression.html#cb230-11" tabindex="-1"></a>vy <span class="ot">&lt;-</span> <span class="fu">var</span>(dd<span class="sc">$</span>ys)</span>
+<span id="cb230-12"><a href="multiple-linear-regression.html#cb230-12" tabindex="-1"></a>sigmahat <span class="ot">&lt;-</span> <span class="fu">sum</span>(mod<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span>(<span class="dv">30</span> <span class="sc">-</span> (<span class="dv">3</span> <span class="sc">+</span> <span class="dv">1</span>))</span>
+<span id="cb230-13"><a href="multiple-linear-regression.html#cb230-13" tabindex="-1"></a>Fstat <span class="ot">&lt;-</span> ((<span class="dv">29</span> <span class="sc">*</span> vy <span class="sc">-</span> <span class="dv">26</span> <span class="sc">*</span> sigmahat)<span class="sc">/</span><span class="dv">3</span>)<span class="sc">/</span>(<span class="dv">26</span> <span class="sc">*</span> sigmahat<span class="sc">/</span><span class="dv">26</span>)</span>
+<span id="cb230-14"><a href="multiple-linear-regression.html#cb230-14" tabindex="-1"></a><span class="fu">pf</span>(Fstat, <span class="dv">3</span>, <span class="dv">26</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<pre><code>## [1] 9.334305e-05</code></pre>
+<div class="sourceCode" id="cb232"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb232-1"><a href="multiple-linear-regression.html#cb232-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(ys <span class="sc">~</span> ., <span class="at">data =</span> dd)</span>
+<span id="cb232-2"><a href="multiple-linear-regression.html#cb232-2" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = ys ~ ., data = dd)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -15.0724  -7.3197   0.2331   8.0343  18.3749 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -10.8411     6.8087  -1.592 0.123415    
+## x1s           2.8090     0.6943   4.046 0.000415 ***
+## x2s           2.7570     0.7094   3.886 0.000628 ***
+## x3s           0.8572     0.6096   1.406 0.171517    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 10.03 on 26 degrees of freedom
+## Multiple R-squared:  0.5521, Adjusted R-squared:  0.5004 
+## F-statistic: 10.68 on 3 and 26 DF,  p-value: 9.334e-05</code></pre>
+<p>We note that the <span class="math inline">\(F\)</span> statistic and the <span class="math inline">\(p\)</span>-value match what <code>lm</code> gives us.</p>
+<div class="exercise">
+<span class="divhead-definition exercise-before"> 3.3</span>
+<p><span id="exr:unnamed-chunk-35" class="exercise"><strong>Exercise 3.3  </strong></span>For this exercise, use the data frame <code>dd</code> that we created in the previous code chunk. Suppose that we know that <span class="math inline">\(\beta_1 \not= 0\)</span>, and we wish to test <span class="math inline">\(H_0: \beta_2 = \beta_3 = 0\)</span> versus <span class="math inline">\(H_a\)</span>: at least one of <span class="math inline">\(\beta_2\)</span> and <span class="math inline">\(\beta_3\)</span> is not zero. Repeat the analysis above to do this hypothesis test. The outline of what you need to do is given below.</p>
+</div>
+<div id="hint-to-exercise" class="section level4 hasAnchor" number="3.0.1.1">
+<h4><span class="header-section-number">3.0.1.1</span> Hint to Exercise<a href="multiple-linear-regression.html#hint-to-exercise" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ol style="list-style-type: lower-alpha">
+<li><p>Build a model <span class="math inline">\(y = \beta_0 + \beta_1 x_1 + \epsilon\)</span>, and estimate <span class="math inline">\(\sigma^2\)</span> based on this model. This estimate will play the role of <span class="math inline">\(V(y)\)</span> in the previous section. Think about how many parameters you are estimating to get an unbiased estimator. Call this estimator <span class="math inline">\(\hat \sigma_1^2\)</span>.</p></li>
+<li><p>Show that <span class="math inline">\((n - 2) \hat \sigma_1^2/\sigma^2\)</span> is <span class="math inline">\(\chi^2\)</span> with <span class="math inline">\(n -2\)</span> degrees of freedom. Be sure to generate the response variable according to the model <span class="math inline">\(y = \beta_0 + \beta_1 x_1 + \epsilon\)</span> for your simulations.</p></li>
+<li><p>Use the same estimate for <span class="math inline">\(\hat \sigma^2\)</span> as we did above. That is, assume that <span class="math inline">\(\beta_1\not= 0\)</span>, but <span class="math inline">\(\beta_2 = \beta_3 = 0\)</span>. Build a model of <span class="math inline">\(y \sim \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \epsilon\)</span> and use that model to estimate the variance. Be sure to generate the response data according to <span class="math inline">\(y = \beta_0 + \beta_1 x_1 + \epsilon\)</span> for your simulations. Let’s call this estimate of the variance <span class="math inline">\(\hat \sigma_2^2\)</span>.</p></li>
+<li><p>Show that <span class="math inline">\(\frac{\bigl(n - 2)\hat \sigma_1^2 - ((n - (K + 1)) \hat \sigma_2^2\bigr)/2}{((n - (K + 1)) \hat \sigma_2^2)/26} \sim F_{2, 26}\)</span>. Be sure to generate the response data according to <span class="math inline">\(y = \beta_0 + \beta_1 x_1 + \epsilon\)</span> for your simulations.</p></li>
+<li><p>Use your result in d. to do the hypothesis test. If you do everything correctly, your <span class="math inline">\(p\)</span>-value will be about 0.001258.</p></li>
+</ol>
+</div>
+</div>
+<div id="more-variable-selection-anova" class="section level2 hasAnchor" number="3.1">
+<h2><span class="header-section-number">3.1</span> More Variable Selection: ANOVA<a href="multiple-linear-regression.html#more-variable-selection-anova" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Let’s look at an ANOVA table:</p>
+<div class="sourceCode" id="cb234"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb234-1"><a href="multiple-linear-regression.html#cb234-1" tabindex="-1"></a><span class="fu">anova</span>(my.mod)</span></code></pre></div>
+<pre><code>## Analysis of Variance Table
+## 
+## Response: pemax
+##           Df  Sum Sq Mean Sq F value   Pr(&gt;F)   
+## age        1 10098.5 10098.5 15.5661 0.001296 **
+## sex        1   955.4   955.4  1.4727 0.243680   
+## height     1   155.0   155.0  0.2389 0.632089   
+## weight     1   632.3   632.3  0.9747 0.339170   
+## bmp        1  2862.2  2862.2  4.4119 0.053010 . 
+## fev1       1  1549.1  1549.1  2.3878 0.143120   
+## rv         1   561.9   561.9  0.8662 0.366757   
+## frc        1   194.6   194.6  0.2999 0.592007   
+## tlc        1    92.4    92.4  0.1424 0.711160   
+## Residuals 15  9731.2   648.7                    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>We get a different result, because in this case, the table is telling us the significance of adding/removing variables one at a time. For example, age is significant all by itself. Then R compares the model with <code>age</code> and <code>sex</code> to the model with just <code>age</code>, just like you did in the exercise in the previous section. Then it compares the model with <code>age</code>, <code>sex</code> and <code>height</code> to the model with just <code>age</code> and <code>sex</code>. Once age is added, sex, height, etc. are not significant. Note that bmp is close to the mystical, magical .05 level<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. However, we are testing 9 things, so we should expect that relatively often we will get a false small p-value.</p>
+<p>One way to test this further is to see whether it is permissible to remove <em>all</em> of the variables once age is included. We do that using anova again, and this is a short-cut to what you did in the exercise in the previous section!</p>
+<div class="sourceCode" id="cb236"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb236-1"><a href="multiple-linear-regression.html#cb236-1" tabindex="-1"></a>my.mod2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(pemax<span class="sc">~</span>age, <span class="at">data =</span> cystfibr)</span>
+<span id="cb236-2"><a href="multiple-linear-regression.html#cb236-2" tabindex="-1"></a><span class="fu">anova</span>(my.mod2, my.mod) <span class="co">#Only use when models are nested! R doesn&#39;t check</span></span></code></pre></div>
+<pre><code>## Analysis of Variance Table
+## 
+## Model 1: pemax ~ age
+## Model 2: pemax ~ age + sex + height + weight + bmp + fev1 + rv + frc + 
+##     tlc
+##   Res.Df     RSS Df Sum of Sq      F Pr(&gt;F)
+## 1     23 16734.2                           
+## 2     15  9731.2  8    7002.9 1.3493 0.2936</code></pre>
+<p>As you can see, the p-value is 0.2936, which is not significant. Therefore, we can reasonably conclude that once age is included in the model, that is about as good as we can do. <em>Note:</em> This does NOT mean that age is necessarily the best predictor of pemax. The reason that it was included in the final model is largely due to the fact that it was listed first in the data set!</p>
+<p>Let’s see what happens if we change the order:</p>
+<div class="sourceCode" id="cb238"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb238-1"><a href="multiple-linear-regression.html#cb238-1" tabindex="-1"></a>my.mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(pemax<span class="sc">~</span>height<span class="sc">+</span>age<span class="sc">+</span>weight<span class="sc">+</span>sex<span class="sc">+</span>bmp<span class="sc">+</span>fev1<span class="sc">+</span>rv<span class="sc">+</span>frc<span class="sc">+</span>tlc, <span class="at">data =</span> cystfibr)</span>
+<span id="cb238-2"><a href="multiple-linear-regression.html#cb238-2" tabindex="-1"></a><span class="fu">summary</span>(my.mod)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = pemax ~ height + age + weight + sex + bmp + fev1 + 
+##     rv + frc + tlc, data = cystfibr)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -37.338 -11.532   1.081  13.386  33.405 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) 176.0582   225.8912   0.779    0.448
+## height       -0.4463     0.9034  -0.494    0.628
+## age          -2.5420     4.8017  -0.529    0.604
+## weight        2.9928     2.0080   1.490    0.157
+## sexFemale    -3.7368    15.4598  -0.242    0.812
+## bmp          -1.7449     1.1552  -1.510    0.152
+## fev1          1.0807     1.0809   1.000    0.333
+## rv            0.1970     0.1962   1.004    0.331
+## frc          -0.3084     0.4924  -0.626    0.540
+## tlc           0.1886     0.4997   0.377    0.711
+## 
+## Residual standard error: 25.47 on 15 degrees of freedom
+## Multiple R-squared:  0.6373, Adjusted R-squared:  0.4197 
+## F-statistic: 2.929 on 9 and 15 DF,  p-value: 0.03195</code></pre>
+<p>Note that the overall p-value is the same.</p>
+<div class="sourceCode" id="cb240"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb240-1"><a href="multiple-linear-regression.html#cb240-1" tabindex="-1"></a><span class="fu">anova</span>(my.mod)</span></code></pre></div>
+<pre><code>## Analysis of Variance Table
+## 
+## Response: pemax
+##           Df Sum Sq Mean Sq F value   Pr(&gt;F)   
+## height     1 9634.6  9634.6 14.8511 0.001562 **
+## age        1  646.2   646.2  0.9960 0.334098   
+## weight     1  769.6   769.6  1.1863 0.293271   
+## sex        1  790.8   790.8  1.2189 0.286964   
+## bmp        1 2862.2  2862.2  4.4119 0.053010 . 
+## fev1       1 1549.1  1549.1  2.3878 0.143120   
+## rv         1  561.9   561.9  0.8662 0.366757   
+## frc        1  194.6   194.6  0.2999 0.592007   
+## tlc        1   92.4    92.4  0.1424 0.711160   
+## Residuals 15 9731.2   648.7                    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>Here, we see that height is significant, and nothing else. If we test the model pemax ~ height versus pemax ~ ., we get</p>
+<div class="sourceCode" id="cb242"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb242-1"><a href="multiple-linear-regression.html#cb242-1" tabindex="-1"></a><span class="fu">anova</span>(my.mod2, my.mod) <span class="co">#Only use when models are nested!</span></span></code></pre></div>
+<pre><code>## Analysis of Variance Table
+## 
+## Model 1: pemax ~ age
+## Model 2: pemax ~ height + age + weight + sex + bmp + fev1 + rv + frc + 
+##     tlc
+##   Res.Df     RSS Df Sum of Sq      F Pr(&gt;F)
+## 1     23 16734.2                           
+## 2     15  9731.2  8    7002.9 1.3493 0.2936</code></pre>
+<p>And again, we can conclude that once we have added height, there is not much to be gained by adding other variables. We leave it to the reader to test whether weight follows the same pattern as height and age.</p>
+<p>Let’s first examine a couple of other ways we could have proceeded.</p>
+<div class="sourceCode" id="cb244"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb244-1"><a href="multiple-linear-regression.html#cb244-1" tabindex="-1"></a>my.mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(pemax<span class="sc">~</span>., <span class="at">data =</span> cystfibr)</span>
+<span id="cb244-2"><a href="multiple-linear-regression.html#cb244-2" tabindex="-1"></a><span class="fu">summary</span>(my.mod)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = pemax ~ ., data = cystfibr)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -37.338 -11.532   1.081  13.386  33.405 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) 176.0582   225.8912   0.779    0.448
+## age          -2.5420     4.8017  -0.529    0.604
+## sexFemale    -3.7368    15.4598  -0.242    0.812
+## height       -0.4463     0.9034  -0.494    0.628
+## weight        2.9928     2.0080   1.490    0.157
+## bmp          -1.7449     1.1552  -1.510    0.152
+## fev1          1.0807     1.0809   1.000    0.333
+## rv            0.1970     0.1962   1.004    0.331
+## frc          -0.3084     0.4924  -0.626    0.540
+## tlc           0.1886     0.4997   0.377    0.711
+## 
+## Residual standard error: 25.47 on 15 degrees of freedom
+## Multiple R-squared:  0.6373, Adjusted R-squared:  0.4197 
+## F-statistic: 2.929 on 9 and 15 DF,  p-value: 0.03195</code></pre>
+<p>Let’s take a look at the residuals.</p>
+<div class="sourceCode" id="cb246"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb246-1"><a href="multiple-linear-regression.html#cb246-1" tabindex="-1"></a>my.mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(pemax<span class="sc">~</span>height, <span class="at">data =</span> cystfibr)</span>
+<span id="cb246-2"><a href="multiple-linear-regression.html#cb246-2" tabindex="-1"></a><span class="fu">plot</span>(pemax<span class="sc">~</span>height, <span class="at">data =</span> cystfibr)</span>
+<span id="cb246-3"><a href="multiple-linear-regression.html#cb246-3" tabindex="-1"></a><span class="fu">abline</span>(my.mod)</span></code></pre></div>
+<p><img src="02-multiple-regression_files/figure-html/unnamed-chunk-42-1.png" width="672" /></p>
+<div class="sourceCode" id="cb247"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb247-1"><a href="multiple-linear-regression.html#cb247-1" tabindex="-1"></a><span class="fu">plot</span>(my.mod)</span></code></pre></div>
+<p><img src="02-multiple-regression_files/figure-html/unnamed-chunk-42-2.png" width="672" /><img src="02-multiple-regression_files/figure-html/unnamed-chunk-42-3.png" width="672" /><img src="02-multiple-regression_files/figure-html/unnamed-chunk-42-4.png" width="672" /><img src="02-multiple-regression_files/figure-html/unnamed-chunk-42-5.png" width="672" /></p>
+</div>
+<div id="predictions" class="section level2 hasAnchor" number="3.2">
+<h2><span class="header-section-number">3.2</span> Predictions<a href="multiple-linear-regression.html#predictions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Let’s return to the <code>cystfibr</code> data set and consider predictions. Suppose that a new patient presents, and we measure all of their data except <code>pemax</code>, and we want to predict their <code>pemax</code>.</p>
+<pre><code>##    age  sex height weight  bmp fev1    rv  frc   tlc pemax
+## 17  17 Male  155.6   42.7 65.8 58.1 127.6 98.8 122.1   165</code></pre>
+<p>We can take our final model of <code>pemax</code> described by <code>weight</code> and use that.</p>
+<div class="sourceCode" id="cb249"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb249-1"><a href="multiple-linear-regression.html#cb249-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(pemax <span class="sc">~</span> weight, <span class="at">data =</span> cystfibr)</span>
+<span id="cb249-2"><a href="multiple-linear-regression.html#cb249-2" tabindex="-1"></a><span class="fu">predict</span>(mod, <span class="at">newdata =</span> new_patient, <span class="at">interval =</span> <span class="st">&quot;predict&quot;</span>)</span></code></pre></div>
+<pre><code>##         fit      lwr      upr
+## 17 114.2181 58.50256 169.9336</code></pre>
+<p>We have an estimate of 146 with a range of possible values from 87 to 205.</p>
+<p>What if we had used height?</p>
+<div class="sourceCode" id="cb251"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb251-1"><a href="multiple-linear-regression.html#cb251-1" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(pemax <span class="sc">~</span> height, <span class="at">data =</span> cystfibr)</span>
+<span id="cb251-2"><a href="multiple-linear-regression.html#cb251-2" tabindex="-1"></a><span class="fu">predict</span>(mod2, <span class="at">newdata =</span> new_patient, <span class="at">interval =</span> <span class="st">&quot;predict&quot;</span>)</span></code></pre></div>
+<pre><code>##         fit      lwr      upr
+## 17 111.7293 54.02243 169.4363</code></pre>
+<p>What? This gives us a very different answer! This gives us 116 with a range from 59 to 174. We have kind of said above that from a modeling point of view, it is hard to pick one model over the other. But from a <strong>predictive</strong> point of view, they are giving us very different answers. How can we decide which one is better at predicting future values? That is the topic of the next chapter!</p>
+</div>
+<div id="using-aic" class="section level2 hasAnchor" number="3.3">
+<h2><span class="header-section-number">3.3</span> Using AIC<a href="multiple-linear-regression.html#using-aic" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>One tool for assessing the fit of a model to a data set is the Akaike Information Criterion (AIC). The AIC is a number associated with a model of a data set, for which <strong>lower</strong> numbers correspond to <strong>better</strong> models. The formula is
+<span class="math display">\[
+AIC = -2 \log \mathrm{likelihood} + 2k
+\]</span>
+where <span class="math inline">\(k\)</span> is the number of parameters included in the model, and the likelihood is the likelihood of the data when using the MLE estimators for the parameters. As we can see from the formula, if we add one parameter to the model, the AIC will go down if the log likelihood increases by 1 or more when adding the parameter. Adding parameters will not decrease the likelihood, so this criterion is balancing how much the parameter increases the likelihood against the value 1.</p>
+<p>To understand this, we need to understand lilekihood functions, which are widely used in statistics.</p>
+<div id="likelihood-functions" class="section level3 hasAnchor" number="3.3.1">
+<h3><span class="header-section-number">3.3.1</span> Likelihood functions<a href="multiple-linear-regression.html#likelihood-functions" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Consider a random sample <span class="math inline">\(x_1, \ldots, x_n\)</span> from a normal distribution with unknown mean and standard deviation. The <em>likelihood</em> of the sample is given as a function of both <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> by
+<span class="math display">\[
+\prod \ttext{dnorm} (x_i, \mu, \sigma)
+\]</span>
+If we choose <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> to maximize the likelihood of the data, then we would take the partials with respect to <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> and set equal to zero, then solve the equations. We obtain
+<span class="math display">\[
+\hat \mu = \overeline{x}
+\]</span>
+and
+<span class="math display">\[
+\hat \sigma^2 = \frac 1n \sum_{i = 1}^n(x_i - \overline{x})^2
+\]</span>
+Note that we do <strong>not</strong> obtain the unbiased estimator for <span class="math inline">\(\sigma^2\)</span>, which has <span class="math inline">\(n - 1\)</span> in the denominator. We call these estimators the <em>maximum likelihood estimators</em>.</p>
+<p>One can similarly show that the maximum likelihood estimators for <span class="math inline">\(\hat \beta_i\)</span> and <span class="math inline">\(\sigma\)</span> in a linear regression model are as follows. The MLE for <span class="math inline">\(\hat \beta_i\)</span> are the <strong>same</strong> as what we obtained when we minimized the SSE. The MLE for <span class="math inline">\(\hat \sigma^2\)</span> is <span class="math inline">\(\frac 1n \sum_{i = 1}^n (\hat \epsilon_i - \overline{\epsilon})^2\)</span>. Since <span class="math inline">\(\overline{\epsilon} = 0\)</span>, this is usually written as <span class="math inline">\(\frac 1n \sum_{i = 1}^n \epsilon_i^2\)</span>.</p>
+</div>
+</div>
+<div id="exercises-1" class="section level2 hasAnchor" number="3.4">
+<h2><span class="header-section-number">3.4</span> Exercises<a href="multiple-linear-regression.html#exercises-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ol style="list-style-type: decimal">
+<li><p>Consider the data set <code>ISwR::secher</code>. Read about the data set by typing <code>?ISwR::secher</code>. We are interested in predicting birth weight on the other variables.</p>
+<ol style="list-style-type: lower-alpha">
+<li><p>Should any of the variables be removed immediately without doing any testing?</p></li>
+<li><p>Find a minimal meaningful model that explains birthweight in terms of other variable(s).</p></li>
+<li><p>Check the residuals.</p></li>
+</ol>
+<p> </p></li>
+<li><p>In this exercise, you will see evidence that adding variables always increases the multiple R squared, but that adding noise to a model generally decreases the adjusted R squared. Consider the <code>cystfibr</code> data set from the section. Define <code>cystifbr$random &lt;- rnorm(25)</code>.</p>
+<ol style="list-style-type: lower-alpha">
+<li><p>Compute the Multiple R-squared when <code>pemax</code> is modeled on all of the predictors. How does it compare to 0.6373354? You may need to compute it out to many digits to see a difference!</p></li>
+<li><p>Repeat for the adjusted R-squared. How does it compare to 0.4197366?</p></li>
+</ol>
+<p> </p></li>
+<li><p>For this exercise, use the data frame <code>dd</code> that we created with the following code:</p></li>
+</ol>
+<div class="sourceCode" id="cb253"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb253-1"><a href="multiple-linear-regression.html#cb253-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1262020</span>)</span>
+<span id="cb253-2"><a href="multiple-linear-regression.html#cb253-2" tabindex="-1"></a>x1s <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb253-3"><a href="multiple-linear-regression.html#cb253-3" tabindex="-1"></a>x2s <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb253-4"><a href="multiple-linear-regression.html#cb253-4" tabindex="-1"></a>x3s <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb253-5"><a href="multiple-linear-regression.html#cb253-5" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x1s =</span> x1s,</span>
+<span id="cb253-6"><a href="multiple-linear-regression.html#cb253-6" tabindex="-1"></a>                 <span class="at">x2s =</span> x2s,</span>
+<span id="cb253-7"><a href="multiple-linear-regression.html#cb253-7" tabindex="-1"></a>                 <span class="at">x3s =</span> x3s,</span>
+<span id="cb253-8"><a href="multiple-linear-regression.html#cb253-8" tabindex="-1"></a>                 <span class="at">ys =</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> x1s <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> x2s <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>) </span>
+<span id="cb253-9"><a href="multiple-linear-regression.html#cb253-9" tabindex="-1"></a>                 )</span></code></pre></div>
+<p>Suppose that we know that <span class="math inline">\(\beta_1 \not= 0\)</span>, and we wish to test <span class="math inline">\(H_0: \beta_2 = \beta_3 = 0\)</span> versus <span class="math inline">\(H_a\)</span>: at least one of <span class="math inline">\(\beta_2\)</span> and <span class="math inline">\(\beta_3\)</span> is not zero. Repeat the analysis in Section <a href="multiple-linear-regression.html#anova">3.0.1</a>, <em>mutatis mutandis</em>. The outline of what you need to do is given in the section.</p>
+
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol start="1">
+<li id="fn1"><p>that’s a joke. it <strong>is</strong> close to .05, but there is nothing magical about .05.<a href="multiple-linear-regression.html#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="classicaltheory.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="intro-to-predictive-modeling.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": {
+    "github": false,
+    "facebook": true,
+    "twitter": true,
+    "linkedin": false,
+    "weibo": false,
+    "instapaper": false,
+    "vk": false,
+    "whatsapp": false,
+    "all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+  },
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": null,
+    "text": null
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": null,
+    "text": null
+  },
+  "download": null,
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "subsection"
+  }
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

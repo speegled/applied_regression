@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 6 Variable Selection | Applied Regression with R</title>
+  <meta name="description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  <meta name="generator" content="bookdown 0.46 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 6 Variable Selection | Applied Regression with R" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 6 Variable Selection | Applied Regression with R" />
+  
+  <meta name="twitter:description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  
+
+<meta name="author" content="Darrin Speegle" />
+
+
+<meta name="date" content="2026-02-16" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon" />
+<link rel="prev" href="regression-predictive-models.html"/>
+<link rel="next" href="non-linear-regression-models.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<link href="libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet" />
+<script src="libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="libs/plotly-binding-4.11.0/plotly.js"></script>
+<script src="libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+<link href="libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+
+
+<style type="text/css">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Applied Regression with R<br />&nbsp; Notes From STAT 4870/5087</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Preface</a></li>
+<li class="chapter" data-level="2" data-path="classicaltheory.html"><a href="classicaltheory.html"><i class="fa fa-check"></i><b>2</b> Classical Theory of Simple Linear Regression</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="classicaltheory.html"><a href="classicaltheory.html#review"><i class="fa fa-check"></i><b>2.1</b> Review</a>
+<ul>
+<li class="chapter" data-level="2.1.1" data-path="classicaltheory.html"><a href="classicaltheory.html#estimating-means-and-standard-deviations"><i class="fa fa-check"></i><b>2.1.1</b> Estimating Means and standard deviations</a></li>
+<li class="chapter" data-level="2.1.2" data-path="classicaltheory.html"><a href="classicaltheory.html#estimating-the-density-of-an-rv"><i class="fa fa-check"></i><b>2.1.2</b> Estimating the density of an rv</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="classicaltheory.html"><a href="classicaltheory.html#linear-regression-overview"><i class="fa fa-check"></i><b>2.2</b> Linear Regression Overview</a></li>
+<li class="chapter" data-level="2.3" data-path="classicaltheory.html"><a href="classicaltheory.html#linear-regression-with-no-intercept"><i class="fa fa-check"></i><b>2.3</b> Linear Regression with no intercept</a></li>
+<li class="chapter" data-level="2.4" data-path="classicaltheory.html"><a href="classicaltheory.html#the-full-model"><i class="fa fa-check"></i><b>2.4</b> The full model</a>
+<ul>
+<li class="chapter" data-level="2.4.1" data-path="classicaltheory.html"><a href="classicaltheory.html#hypothesis-test-interlude"><i class="fa fa-check"></i><b>2.4.1</b> Hypothesis Test Interlude</a></li>
+</ul></li>
+<li class="chapter" data-level="2.5" data-path="classicaltheory.html"><a href="classicaltheory.html#using-different-loss-functions"><i class="fa fa-check"></i><b>2.5</b> Using different loss functions</a></li>
+<li class="chapter" data-level="" data-path="classicaltheory.html"><a href="classicaltheory.html#vignette-a-dplyr-primer"><i class="fa fa-check"></i>Vignette: A dplyr primer</a></li>
+<li class="chapter" data-level="2.6" data-path="classicaltheory.html"><a href="classicaltheory.html#exercises"><i class="fa fa-check"></i><b>2.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html"><i class="fa fa-check"></i><b>3</b> Multiple Linear Regression</a>
+<ul>
+<li class="chapter" data-level="3.0.1" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#anova"><i class="fa fa-check"></i><b>3.0.1</b> Aside on multiple R squared and ANOVA</a></li>
+<li class="chapter" data-level="3.1" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#more-variable-selection-anova"><i class="fa fa-check"></i><b>3.1</b> More Variable Selection: ANOVA</a></li>
+<li class="chapter" data-level="3.2" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#predictions"><i class="fa fa-check"></i><b>3.2</b> Predictions</a></li>
+<li class="chapter" data-level="3.3" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#using-aic"><i class="fa fa-check"></i><b>3.3</b> Using AIC</a>
+<ul>
+<li class="chapter" data-level="3.3.1" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#likelihood-functions"><i class="fa fa-check"></i><b>3.3.1</b> Likelihood functions</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#exercises-1"><i class="fa fa-check"></i><b>3.4</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html"><i class="fa fa-check"></i><b>4</b> Intro to Predictive Modeling</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#comparingtwomodels"><i class="fa fa-check"></i><b>4.1</b> Comparing Two Models</a></li>
+<li class="chapter" data-level="4.2" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#a-brief-return-to-inference"><i class="fa fa-check"></i><b>4.2</b> A Brief Return to Inference</a></li>
+<li class="chapter" data-level="4.3" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#simulations-of-expected-mse"><i class="fa fa-check"></i><b>4.3</b> Simulations of Expected MSE</a>
+<ul>
+<li class="chapter" data-level="4.3.1" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#estimating-mse-and-bias-variance-tradeoff"><i class="fa fa-check"></i><b>4.3.1</b> Estimating MSE and Bias-Variance Tradeoff</a></li>
+<li class="chapter" data-level="4.3.2" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#estimating-mse-for-new-predictors-uniformly-sampled"><i class="fa fa-check"></i><b>4.3.2</b> Estimating MSE for new predictors uniformly sampled</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#bias-variance-trade-off"><i class="fa fa-check"></i><b>4.4</b> Bias Variance Trade-off</a></li>
+<li class="chapter" data-level="4.5" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#exercises-2"><i class="fa fa-check"></i><b>4.5</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html"><i class="fa fa-check"></i><b>5</b> Regression Predictive Models</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#preprocessing"><i class="fa fa-check"></i><b>5.1</b> Preprocessing</a></li>
+<li class="chapter" data-level="5.2" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#missing-data"><i class="fa fa-check"></i><b>5.2</b> Missing Data</a>
+<ul>
+<li class="chapter" data-level="5.2.1" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#predicting-when-a-level-is-missing-from-the-training-set"><i class="fa fa-check"></i><b>5.2.1</b> Predicting when a level is missing from the training set</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#correlated-predictors"><i class="fa fa-check"></i><b>5.3</b> Correlated Predictors</a></li>
+<li class="chapter" data-level="5.4" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#aside-on-pca"><i class="fa fa-check"></i><b>5.4</b> Aside on PCA</a></li>
+<li class="chapter" data-level="5.5" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#johnson-lindenstrauss-dimension-reduction"><i class="fa fa-check"></i><b>5.5</b> Johnson-Lindenstrauss Dimension Reduction</a></li>
+<li class="chapter" data-level="5.6" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#exercises-3"><i class="fa fa-check"></i><b>5.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="variable-selection.html"><a href="variable-selection.html"><i class="fa fa-check"></i><b>6</b> Variable Selection</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="variable-selection.html"><a href="variable-selection.html#partial-least-squares"><i class="fa fa-check"></i><b>6.1</b> Partial Least Squares</a>
+<ul>
+<li class="chapter" data-level="6.1.1" data-path="variable-selection.html"><a href="variable-selection.html#optional-pls-stuff"><i class="fa fa-check"></i><b>6.1.1</b> Optional PLS Stuff</a></li>
+</ul></li>
+<li class="chapter" data-level="6.2" data-path="variable-selection.html"><a href="variable-selection.html#ridgelasso-and-elastic-net"><i class="fa fa-check"></i><b>6.2</b> Ridge/Lasso and Elastic Net</a>
+<ul>
+<li class="chapter" data-level="6.2.1" data-path="variable-selection.html"><a href="variable-selection.html#ridge-regression"><i class="fa fa-check"></i><b>6.2.1</b> Ridge Regression</a></li>
+<li class="chapter" data-level="6.2.2" data-path="variable-selection.html"><a href="variable-selection.html#lasso"><i class="fa fa-check"></i><b>6.2.2</b> LASSO</a></li>
+</ul></li>
+<li class="chapter" data-level="6.3" data-path="variable-selection.html"><a href="variable-selection.html#step-aic"><i class="fa fa-check"></i><b>6.3</b> Step AIC</a>
+<ul>
+<li class="chapter" data-level="6.3.1" data-path="variable-selection.html"><a href="variable-selection.html#doing-lgocv-with-preprocessing"><i class="fa fa-check"></i><b>6.3.1</b> Doing LGOCV with preprocessing</a></li>
+</ul></li>
+<li class="chapter" data-level="6.4" data-path="variable-selection.html"><a href="variable-selection.html#interactions"><i class="fa fa-check"></i><b>6.4</b> Interactions</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html"><i class="fa fa-check"></i><b>7</b> Non-Linear Regression Models</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#support-vector-regression"><i class="fa fa-check"></i><b>7.1</b> Support Vector Regression</a>
+<ul>
+<li class="chapter" data-level="7.1.1" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#plot-twist"><i class="fa fa-check"></i><b>7.1.1</b> PLOT TWIST</a></li>
+</ul></li>
+<li class="chapter" data-level="7.2" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#k-nearest-neighbors"><i class="fa fa-check"></i><b>7.2</b> K Nearest Neighbors</a></li>
+<li class="chapter" data-level="7.3" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#exercises-4"><i class="fa fa-check"></i><b>7.3</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="tree-regression-models.html"><a href="tree-regression-models.html"><i class="fa fa-check"></i><b>8</b> Tree Regression Models</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="tree-regression-models.html"><a href="tree-regression-models.html#basic-regression-trees"><i class="fa fa-check"></i><b>8.1</b> Basic Regression Trees</a></li>
+<li class="chapter" data-level="8.2" data-path="tree-regression-models.html"><a href="tree-regression-models.html#regression-model-trees"><i class="fa fa-check"></i><b>8.2</b> Regression Model Trees</a>
+<ul>
+<li class="chapter" data-level="8.2.1" data-path="tree-regression-models.html"><a href="tree-regression-models.html#choosing-variable-to-split"><i class="fa fa-check"></i><b>8.2.1</b> Choosing Variable to Split</a></li>
+<li class="chapter" data-level="8.2.2" data-path="tree-regression-models.html"><a href="tree-regression-models.html#choosing-split-value"><i class="fa fa-check"></i><b>8.2.2</b> Choosing Split Value</a></li>
+<li class="chapter" data-level="8.2.3" data-path="tree-regression-models.html"><a href="tree-regression-models.html#predicting-values-smoothing"><i class="fa fa-check"></i><b>8.2.3</b> Predicting values (Smoothing)</a></li>
+<li class="chapter" data-level="8.2.4" data-path="tree-regression-models.html"><a href="tree-regression-models.html#using-r-functions"><i class="fa fa-check"></i><b>8.2.4</b> Using R functions</a></li>
+</ul></li>
+<li class="chapter" data-level="8.3" data-path="tree-regression-models.html"><a href="tree-regression-models.html#bagging"><i class="fa fa-check"></i><b>8.3</b> Bagging</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html"><i class="fa fa-check"></i><b>9</b> Generalized Linear Models</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#logistic-regression"><i class="fa fa-check"></i><b>9.1</b> Logistic Regression</a>
+<ul>
+<li class="chapter" data-level="9.1.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#maximum-likelihood-estimation"><i class="fa fa-check"></i><b>9.1.1</b> Maximum Likelihood Estimation</a></li>
+<li class="chapter" data-level="9.1.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#model-diagnostics"><i class="fa fa-check"></i><b>9.1.2</b> Model Diagnostics</a></li>
+<li class="chapter" data-level="9.1.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#case-study"><i class="fa fa-check"></i><b>9.1.3</b> Case Study</a></li>
+</ul></li>
+<li class="chapter" data-level="9.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#count-response-models"><i class="fa fa-check"></i><b>9.2</b> Count response models</a>
+<ul>
+<li class="chapter" data-level="9.2.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#overdispersion"><i class="fa fa-check"></i><b>9.2.1</b> Overdispersion</a></li>
+<li class="chapter" data-level="9.2.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#negative-binomial-regression"><i class="fa fa-check"></i><b>9.2.2</b> Negative Binomial Regression</a></li>
+</ul></li>
+<li class="chapter" data-level="9.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-and-zero-inflated-models"><i class="fa fa-check"></i><b>9.3</b> Zero-truncated and Zero-inflated models</a>
+<ul>
+<li class="chapter" data-level="9.3.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-poisson"><i class="fa fa-check"></i><b>9.3.1</b> Zero-truncated Poisson</a></li>
+<li class="chapter" data-level="9.3.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-negative-binomial"><i class="fa fa-check"></i><b>9.3.2</b> Zero-truncated Negative Binomial</a></li>
+<li class="chapter" data-level="9.3.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-inflated-poisson-and-negative-binomial"><i class="fa fa-check"></i><b>9.3.3</b> Zero-Inflated Poisson and Negative Binomial</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="lecture-notes.html"><a href="lecture-notes.html"><i class="fa fa-check"></i><b>10</b> Lecture Notes</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="lecture-notes.html"><a href="lecture-notes.html#january-27"><i class="fa fa-check"></i><b>10.1</b> January 27</a></li>
+<li class="chapter" data-level="10.2" data-path="lecture-notes.html"><a href="lecture-notes.html#february-3"><i class="fa fa-check"></i><b>10.2</b> February 3</a>
+<ul>
+<li class="chapter" data-level="10.2.1" data-path="lecture-notes.html"><a href="lecture-notes.html#simulating-data"><i class="fa fa-check"></i><b>10.2.1</b> Simulating Data</a></li>
+<li class="chapter" data-level="10.2.2" data-path="lecture-notes.html"><a href="lecture-notes.html#building-models"><i class="fa fa-check"></i><b>10.2.2</b> Building Models</a></li>
+</ul></li>
+<li class="chapter" data-level="10.3" data-path="lecture-notes.html"><a href="lecture-notes.html#february-5"><i class="fa fa-check"></i><b>10.3</b> February 5</a>
+<ul>
+<li class="chapter" data-level="10.3.1" data-path="lecture-notes.html"><a href="lecture-notes.html#using-broomaugment"><i class="fa fa-check"></i><b>10.3.1</b> Using <code>broom::augment</code></a></li>
+<li class="chapter" data-level="10.3.2" data-path="lecture-notes.html"><a href="lecture-notes.html#multicollinearity"><i class="fa fa-check"></i><b>10.3.2</b> Multicollinearity</a></li>
+</ul></li>
+<li class="chapter" data-level="10.4" data-path="lecture-notes.html"><a href="lecture-notes.html#february-10"><i class="fa fa-check"></i><b>10.4</b> February 10</a>
+<ul>
+<li class="chapter" data-level="10.4.1" data-path="lecture-notes.html"><a href="lecture-notes.html#anova-models"><i class="fa fa-check"></i><b>10.4.1</b> ANOVA Models</a></li>
+<li class="chapter" data-level="10.4.2" data-path="lecture-notes.html"><a href="lecture-notes.html#penguins"><i class="fa fa-check"></i><b>10.4.2</b> Penguins</a></li>
+</ul></li>
+<li class="chapter" data-level="10.5" data-path="lecture-notes.html"><a href="lecture-notes.html#february-12"><i class="fa fa-check"></i><b>10.5</b> February 12</a>
+<ul>
+<li class="chapter" data-level="10.5.1" data-path="lecture-notes.html"><a href="lecture-notes.html#an-example"><i class="fa fa-check"></i><b>10.5.1</b> An Example</a></li>
+</ul></li>
+<li class="chapter" data-level="10.6" data-path="lecture-notes.html"><a href="lecture-notes.html#february-17"><i class="fa fa-check"></i><b>10.6</b> February 17</a>
+<ul>
+<li class="chapter" data-level="10.6.1" data-path="lecture-notes.html"><a href="lecture-notes.html#adding-random-speaker-and-sentence-effects"><i class="fa fa-check"></i><b>10.6.1</b> Adding random speaker and sentence effects</a></li>
+<li class="chapter" data-level="10.6.2" data-path="lecture-notes.html"><a href="lecture-notes.html#random-intercepts-with-continunous-predictor"><i class="fa fa-check"></i><b>10.6.2</b> Random intercepts with continunous predictor</a></li>
+<li class="chapter" data-level="10.6.3" data-path="lecture-notes.html"><a href="lecture-notes.html#heading-towards-mixed-models"><i class="fa fa-check"></i><b>10.6.3</b> Heading towards mixed models</a></li>
+<li class="chapter" data-level="10.6.4" data-path="lecture-notes.html"><a href="lecture-notes.html#intro-to-random-effects-and-mixed-effect-models---terminology-and-first-examples"><i class="fa fa-check"></i><b>10.6.4</b> Intro to Random Effects and Mixed Effect Models - Terminology and First Examples</a></li>
+<li class="chapter" data-level="10.6.5" data-path="lecture-notes.html"><a href="lecture-notes.html#random-slopes"><i class="fa fa-check"></i><b>10.6.5</b> Random Slopes</a></li>
+<li class="chapter" data-level="10.6.6" data-path="lecture-notes.html"><a href="lecture-notes.html#comparison-of-models"><i class="fa fa-check"></i><b>10.6.6</b> Comparison of Models</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="solutions.html"><a href="solutions.html"><i class="fa fa-check"></i><b>11</b> Solutions</a>
+<ul>
+<li class="chapter" data-level="11.1" data-path="solutions.html"><a href="solutions.html#chapter-2-solutions"><i class="fa fa-check"></i><b>11.1</b> Chapter 2 Solutions</a></li>
+<li class="chapter" data-level="11.2" data-path="solutions.html"><a href="solutions.html#chapter-3-solutions"><i class="fa fa-check"></i><b>11.2</b> Chapter 3 Solutions</a></li>
+<li class="chapter" data-level="11.3" data-path="solutions.html"><a href="solutions.html#chapter-5"><i class="fa fa-check"></i><b>11.3</b> Chapter 5</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Applied Regression with R</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="variable-selection" class="section level1 hasAnchor" number="6">
+<h1><span class="header-section-number">Chapter 6</span> Variable Selection<a href="variable-selection.html#variable-selection" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>We have already seen times when we have more predictors than optimal for predicting the response. We discussed an <em>ad hoc</em> method of variable selection using <span class="math inline">\(p\)</span>-values, which can be useful for explanatory model building. We also looked at projecting the predictors onto a smaller subspace using PCA, which works about as well as projecting randomly onto subspaces in many cases.</p>
+<p>The issue with PCA regression is that the choice of directions of maximal variance may have nothing to do with the response. It **could* be that the predictive value of the predictors is in a direction that has small variance relative to other directions, in which case it would be hidden in one of the later components. For this reason, we will want to consider the relationship of the components in the predictors with the response. That is the idea behind partial least squares.</p>
+<p>In the next section, we will consider ridge and lasso regression. These methods attempt to minimize an error function that also includes the magnitudes of the coefficients. The thought is that if a predictor doesn’t have much predictive power, then the penalty associated with the coefficient will force the coefficient to be zero, which is the same as eliminating it from the model.</p>
+<p>Next, we will talk about the Akaike Information Criterion, which is a classical way of variable selection that also performs well in predictive models.</p>
+<p>Finally, we will take a <strong>long</strong> overdue detour and talk about interactions. Interactions really belonged in the classical theory section, but are also useful for predictive modeling. We will discuss their use both in explanatory model building and predictive model building.</p>
+<div id="partial-least-squares" class="section level2 hasAnchor" number="6.1">
+<h2><span class="header-section-number">6.1</span> Partial Least Squares<a href="variable-selection.html#partial-least-squares" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>As mentioned above, partial least squares first finds the direction in the predictor space that has maximum covariance with the response. Let’s do that using simulations so that we can understand what is going on. Our data is also simulated data.</p>
+<div class="sourceCode" id="cb517"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb517-1"><a href="variable-selection.html#cb517-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2162020</span>)</span>
+<span id="cb517-2"><a href="variable-selection.html#cb517-2" tabindex="-1"></a>Sigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">9</span>), <span class="at">nrow =</span> <span class="dv">3</span>)</span>
+<span id="cb517-3"><a href="variable-selection.html#cb517-3" tabindex="-1"></a>Sigma <span class="ot">&lt;-</span> Sigma <span class="sc">%*%</span> <span class="fu">t</span>(Sigma)</span>
+<span id="cb517-4"><a href="variable-selection.html#cb517-4" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(<span class="dv">500</span>, <span class="at">mu =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">Sigma =</span> Sigma))</span>
+<span id="cb517-5"><a href="variable-selection.html#cb517-5" tabindex="-1"></a><span class="fu">names</span>(dd) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;x&quot;</span>, <span class="st">&quot;y&quot;</span>, <span class="st">&quot;z&quot;</span>)</span>
+<span id="cb517-6"><a href="variable-selection.html#cb517-6" tabindex="-1"></a><span class="fu">cor</span>(dd)</span></code></pre></div>
+<pre><code>##            x          y          z
+## x  1.0000000  0.3970130 -0.4702539
+## y  0.3970130  1.0000000 -0.9928534
+## z -0.4702539 -0.9928534  1.0000000</code></pre>
+<div class="sourceCode" id="cb519"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb519-1"><a href="variable-selection.html#cb519-1" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">mutate</span>(dd, <span class="at">response =</span> <span class="dv">2</span> <span class="sc">*</span> (x <span class="sc">+</span> <span class="dv">4</span> <span class="sc">*</span>y) <span class="sc">+</span> .<span class="dv">25</span> <span class="sc">*</span> (x <span class="sc">+</span> <span class="dv">6</span><span class="sc">*</span>y <span class="sc">+</span> z) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">500</span>, <span class="dv">0</span>, <span class="dv">7</span>))</span>
+<span id="cb519-2"><a href="variable-selection.html#cb519-2" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(response <span class="sc">~</span>., <span class="at">data =</span> dd))</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = response ~ ., data = dd)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -20.1504  -4.6839  -0.2462   4.6686  19.8194 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  -0.1148     0.3203  -0.358 0.720159    
+## x             2.3100     0.6733   3.431 0.000652 ***
+## y            12.5728     3.1097   4.043 6.11e-05 ***
+## z             4.3116     3.9722   1.085 0.278256    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 7.147 on 496 degrees of freedom
+## Multiple R-squared:  0.7119, Adjusted R-squared:  0.7101 
+## F-statistic: 408.5 on 3 and 496 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>We begin by centering and scaling the predictors.</p>
+<div class="sourceCode" id="cb521"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb521-1"><a href="variable-selection.html#cb521-1" tabindex="-1"></a>dd <span class="ot">&lt;-</span> dd <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">x =</span> <span class="fu">scale</span>(x),</span>
+<span id="cb521-2"><a href="variable-selection.html#cb521-2" tabindex="-1"></a>             <span class="at">y =</span> <span class="fu">scale</span>(y),</span>
+<span id="cb521-3"><a href="variable-selection.html#cb521-3" tabindex="-1"></a>             <span class="at">z =</span> <span class="fu">scale</span>(z))</span></code></pre></div>
+<p>Next, as in the case of PCA, we will use <code>optim</code> to maximize the covariance of the projection of the data set onto a direction on the unit sphere in <span class="math inline">\(R^3\)</span>. We begin with some helper functions, which are the inner product of two vectors and the norm of a vector.</p>
+<div class="sourceCode" id="cb522"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb522-1"><a href="variable-selection.html#cb522-1" tabindex="-1"></a>ip <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y) {</span>
+<span id="cb522-2"><a href="variable-selection.html#cb522-2" tabindex="-1"></a>  <span class="fu">sum</span>(x <span class="sc">*</span> y)</span>
+<span id="cb522-3"><a href="variable-selection.html#cb522-3" tabindex="-1"></a>}</span>
+<span id="cb522-4"><a href="variable-selection.html#cb522-4" tabindex="-1"></a>mynorm <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb522-5"><a href="variable-selection.html#cb522-5" tabindex="-1"></a>  <span class="fu">sqrt</span>(<span class="fu">sum</span>(x<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb522-6"><a href="variable-selection.html#cb522-6" tabindex="-1"></a>}</span></code></pre></div>
+<p>Next, we see how to take a random sample from the sphere, project the data onto that direction, and compute the covariance with the response.</p>
+<div class="sourceCode" id="cb523"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb523-1"><a href="variable-selection.html#cb523-1" tabindex="-1"></a>rvec <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">3</span>)</span>
+<span id="cb523-2"><a href="variable-selection.html#cb523-2" tabindex="-1"></a>rvec <span class="ot">&lt;-</span> rvec<span class="sc">/</span><span class="fu">mynorm</span>(rvec)</span>
+<span id="cb523-3"><a href="variable-selection.html#cb523-3" tabindex="-1"></a>dd_p <span class="ot">&lt;-</span> <span class="fu">apply</span>(dd[,<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="dv">1</span>, <span class="cf">function</span>(x) <span class="fu">ip</span>(x, rvec))</span>
+<span id="cb523-4"><a href="variable-selection.html#cb523-4" tabindex="-1"></a><span class="fu">cov</span>(dd_p, dd<span class="sc">$</span>response)</span></code></pre></div>
+<pre><code>## [1] 0.3228743</code></pre>
+<p>Now we put this inside of <code>optim</code>. We normalize the vector and take the negative absolute value of the covariance in order to insure that the <em>minimum</em> found corresponds to the <em>maximum covariance</em>.</p>
+<div class="sourceCode" id="cb525"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb525-1"><a href="variable-selection.html#cb525-1" tabindex="-1"></a>ff <span class="ot">&lt;-</span> <span class="cf">function</span>(rvec) {</span>
+<span id="cb525-2"><a href="variable-selection.html#cb525-2" tabindex="-1"></a>  rvec <span class="ot">&lt;-</span> rvec<span class="sc">/</span><span class="fu">mynorm</span>(rvec)</span>
+<span id="cb525-3"><a href="variable-selection.html#cb525-3" tabindex="-1"></a>  dd_p <span class="ot">&lt;-</span> <span class="fu">apply</span>(dd[,<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="dv">1</span>, <span class="cf">function</span>(x) <span class="fu">ip</span>(x, rvec))</span>
+<span id="cb525-4"><a href="variable-selection.html#cb525-4" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">abs</span>(<span class="fu">cov</span>(dd_p, dd<span class="sc">$</span>response))</span>
+<span id="cb525-5"><a href="variable-selection.html#cb525-5" tabindex="-1"></a>}</span>
+<span id="cb525-6"><a href="variable-selection.html#cb525-6" tabindex="-1"></a>first_comp <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="sc">-</span>.<span class="dv">33</span>,<span class="sc">-</span>.<span class="dv">66</span>, .<span class="dv">66</span>), <span class="at">fn =</span> ff, <span class="at">control =</span> <span class="fu">list</span>(<span class="at">reltol =</span> .<span class="dv">000001</span>))</span>
+<span id="cb525-7"><a href="variable-selection.html#cb525-7" tabindex="-1"></a>first_comp</span></code></pre></div>
+<pre><code>## $par
+## [1] -0.3346406 -0.6749531  0.6739219
+## 
+## $value
+## [1] -16.67199
+## 
+## $counts
+## function gradient 
+##       30       NA 
+## 
+## $convergence
+## [1] 0
+## 
+## $message
+## NULL</code></pre>
+<div class="sourceCode" id="cb527"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb527-1"><a href="variable-selection.html#cb527-1" tabindex="-1"></a>first_comp<span class="sc">$</span>par<span class="sc">/</span><span class="fu">mynorm</span>(first_comp<span class="sc">$</span>par)</span></code></pre></div>
+<pre><code>## [1] -0.3310651 -0.6677415  0.6667212</code></pre>
+<p>According to this, our estimate for the first PLS component is -0.331, -0.668, 0.667. This is the direction of the data that has the largest covariance with the response. Let’s check it against the first component found using the <code>plsr</code> function in the <code>pls</code> package.</p>
+<div class="sourceCode" id="cb529"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb529-1"><a href="variable-selection.html#cb529-1" tabindex="-1"></a><span class="fu">library</span>(pls)</span></code></pre></div>
+<pre><code>## 
+## Attaching package: &#39;pls&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:caret&#39;:
+## 
+##     R2</code></pre>
+<pre><code>## The following object is masked from &#39;package:stats&#39;:
+## 
+##     loadings</code></pre>
+<div class="sourceCode" id="cb533"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb533-1"><a href="variable-selection.html#cb533-1" tabindex="-1"></a>plsmod <span class="ot">&lt;-</span> <span class="fu">plsr</span>(response <span class="sc">~</span> x <span class="sc">+</span> y <span class="sc">+</span> z, <span class="at">data =</span> dd)</span>
+<span id="cb533-2"><a href="variable-selection.html#cb533-2" tabindex="-1"></a><span class="fu">loadings</span>(plsmod)</span></code></pre></div>
+<pre><code>## 
+## Loadings:
+##   Comp 1 Comp 2 Comp 3
+## x  0.401 -0.942  0.100
+## y  0.645  0.281  0.678
+## z -0.655 -0.186  0.728
+## 
+##                Comp 1 Comp 2 Comp 3
+## SS loadings     1.006  1.002  1.000
+## Proportion Var  0.335  0.334  0.333
+## Cumulative Var  0.335  0.669  1.002</code></pre>
+<div class="sourceCode" id="cb535"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb535-1"><a href="variable-selection.html#cb535-1" tabindex="-1"></a>plsmod<span class="sc">$</span>projection</span></code></pre></div>
+<pre><code>##       Comp 1     Comp 2     Comp 3
+## x  0.3306078 -0.9135712 0.06426708
+## y  0.6676654  0.3579067 0.69202962
+## z -0.6670243 -0.2072125 0.72009477</code></pre>
+<p>We see that the first component that <code>plsr</code> got in the <code>projection</code> is <span class="math inline">\((0.331, 0.668, -0.6667)\)</span>, which is the negative of what we got, so gives the same line or direction.</p>
+<p>Now, in PCA to get the second component, we looked at all directions perpendicular to the first component and found the one with maximum variance. In PLS, we no longer force the second component to be orthogonal to the first component. That’s one difference. But, we do want it to pick up different information than the first component. How do we accomplish that?</p>
+<p>A first idea might be to find the direction that has the highest covariance with the <strong>residuals</strong> of the response after predicting on the directions chosen so far. That is pretty close to what happens, but doesn’t work exactly. In partial least squares, we first <strong>deflate</strong> the predictor matrix by subtracting out <span class="math inline">\(d d^T M\)</span>, where <span class="math inline">\(d\)</span> is the first direction, <span class="math inline">\(d^T\)</span> is the transpose of <span class="math inline">\(d\)</span>, and <span class="math inline">\(M\)</span> is the original matrix. Then, we find the direction of maximum covariance between the residuals of the first model and this new matrix. I include the details below, but this section is <strong>OPTIONAL</strong> (and does not work as of February 2, 2026)!</p>
+<div id="optional-pls-stuff" class="section level3 hasAnchor" number="6.1.1">
+<h3><span class="header-section-number">6.1.1</span> Optional PLS Stuff<a href="variable-selection.html#optional-pls-stuff" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb537"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb537-1"><a href="variable-selection.html#cb537-1" tabindex="-1"></a><span class="co">#first_vec &lt;- largest_direction</span></span>
+<span id="cb537-2"><a href="variable-selection.html#cb537-2" tabindex="-1"></a>dd<span class="sc">$</span>direction_1 <span class="ot">&lt;-</span> <span class="fu">apply</span>(dd[,<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="dv">1</span>, <span class="cf">function</span>(x) <span class="fu">ip</span>(x, first_vec))</span>
+<span id="cb537-3"><a href="variable-selection.html#cb537-3" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(response <span class="sc">~</span> direction_1, <span class="at">data =</span> dd)</span>
+<span id="cb537-4"><a href="variable-selection.html#cb537-4" tabindex="-1"></a></span>
+<span id="cb537-5"><a href="variable-selection.html#cb537-5" tabindex="-1"></a>pvec <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>)</span>
+<span id="cb537-6"><a href="variable-selection.html#cb537-6" tabindex="-1"></a><span class="co">#first_vec</span></span>
+<span id="cb537-7"><a href="variable-selection.html#cb537-7" tabindex="-1"></a><span class="co">#dd$direction_1 &lt;- apply(dd[,1:3], 1, function(x) ip(x, first_vec))</span></span>
+<span id="cb537-8"><a href="variable-selection.html#cb537-8" tabindex="-1"></a>E <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(dd[,<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>])</span>
+<span id="cb537-9"><a href="variable-selection.html#cb537-9" tabindex="-1"></a>new_dat <span class="ot">&lt;-</span> E <span class="sc">-</span> dd<span class="sc">$</span>direction_1<span class="sc">%*%</span> <span class="fu">t</span>(dd<span class="sc">$</span>direction_1) <span class="sc">%*%</span> E <span class="sc">/</span>(<span class="fu">mynorm</span>(dd<span class="sc">$</span>direction_1)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb537-10"><a href="variable-selection.html#cb537-10" tabindex="-1"></a>projections <span class="ot">&lt;-</span> <span class="fu">apply</span>(new_dat, <span class="dv">1</span>, <span class="cf">function</span>(x) <span class="fu">ip</span>(x, pvec))</span>
+<span id="cb537-11"><a href="variable-selection.html#cb537-11" tabindex="-1"></a>best_cov <span class="ot">&lt;-</span> <span class="fu">abs</span>(<span class="fu">cov</span>(m1<span class="sc">$</span>residuals, projections))</span>
+<span id="cb537-12"><a href="variable-selection.html#cb537-12" tabindex="-1"></a>best_dir <span class="ot">&lt;-</span> pvec</span>
+<span id="cb537-13"><a href="variable-selection.html#cb537-13" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">1000</span>) {</span>
+<span id="cb537-14"><a href="variable-selection.html#cb537-14" tabindex="-1"></a>  pvec <span class="ot">&lt;-</span> best_dir <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">3</span>,<span class="dv">0</span>,.<span class="dv">02</span>)</span>
+<span id="cb537-15"><a href="variable-selection.html#cb537-15" tabindex="-1"></a>  pvec <span class="ot">&lt;-</span> pvec<span class="sc">/</span><span class="fu">mynorm</span>(pvec)</span>
+<span id="cb537-16"><a href="variable-selection.html#cb537-16" tabindex="-1"></a>  projections <span class="ot">&lt;-</span> <span class="fu">apply</span>(new_dat, <span class="dv">1</span>, <span class="cf">function</span>(x) <span class="fu">ip</span>(x, pvec))</span>
+<span id="cb537-17"><a href="variable-selection.html#cb537-17" tabindex="-1"></a>  covv <span class="ot">&lt;-</span> <span class="fu">abs</span>(<span class="fu">cov</span>(m1<span class="sc">$</span>residuals, projections))</span>
+<span id="cb537-18"><a href="variable-selection.html#cb537-18" tabindex="-1"></a>  <span class="cf">if</span>(covv <span class="sc">&gt;</span> best_cov) {</span>
+<span id="cb537-19"><a href="variable-selection.html#cb537-19" tabindex="-1"></a>    best_cov <span class="ot">&lt;-</span> covv</span>
+<span id="cb537-20"><a href="variable-selection.html#cb537-20" tabindex="-1"></a>    best_dir <span class="ot">&lt;-</span> pvec</span>
+<span id="cb537-21"><a href="variable-selection.html#cb537-21" tabindex="-1"></a>    <span class="fu">print</span>(pvec)</span>
+<span id="cb537-22"><a href="variable-selection.html#cb537-22" tabindex="-1"></a>  }</span>
+<span id="cb537-23"><a href="variable-selection.html#cb537-23" tabindex="-1"></a>}</span>
+<span id="cb537-24"><a href="variable-selection.html#cb537-24" tabindex="-1"></a>best_dir</span>
+<span id="cb537-25"><a href="variable-selection.html#cb537-25" tabindex="-1"></a>plsmod<span class="sc">$</span>loading.weights</span></code></pre></div>
+<p>As we can see, we have recovered the <em>loading weights</em>, which map the <strong>deflated</strong> predictors onto the scores. Continuing in this fashion, we could find all of the loading weights, use them to compute the scores, and then compute the loadings via</p>
+<div class="sourceCode" id="cb538"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb538-1"><a href="variable-selection.html#cb538-1" tabindex="-1"></a>corpcor<span class="sc">::</span><span class="fu">pseudoinverse</span>(<span class="fu">as.matrix</span>(dd[,<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>])) <span class="sc">%*%</span> plsmod<span class="sc">$</span>scores</span></code></pre></div>
+<p>And this would give us our projection, which we could use to transform the original (or new) data into the basis spanned by the partial least squares representation. The trickiest part about this whole thing is understanding why we deflate the data each time we get a new component in our partial least squares. Let’s leave that for another time, shall we?</p>
+<div class="sourceCode" id="cb539"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb539-1"><a href="variable-selection.html#cb539-1" tabindex="-1"></a><span class="fu">as.matrix</span>(dd[,<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]) <span class="sc">%*%</span> plsmod<span class="sc">$</span>projection <span class="sc">%&gt;%</span> </span>
+<span id="cb539-2"><a href="variable-selection.html#cb539-2" tabindex="-1"></a>  <span class="fu">head</span>()</span>
+<span id="cb539-3"><a href="variable-selection.html#cb539-3" tabindex="-1"></a>plsmod<span class="sc">$</span>scores[<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code></pre></div>
+</div>
+</div>
+<div id="ridgelasso-and-elastic-net" class="section level2 hasAnchor" number="6.2">
+<h2><span class="header-section-number">6.2</span> Ridge/Lasso and Elastic Net<a href="variable-selection.html#ridgelasso-and-elastic-net" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>PCR and partial least squares regression both have the goal of reducing the number of predictor variables by replacing the given predictors with a smaller set of linear combinations of the predictors. This has the advantage of finding directions in the data that are aligned with either the signal of the data or the response, but has as a disadvantage that it can be hard to interpret the new predictors. The techniques of this section work directly with the predictors, and lead to models that tend to be more easily interpretable.</p>
+<div id="ridge-regression" class="section level3 hasAnchor" number="6.2.1">
+<h3><span class="header-section-number">6.2.1</span> Ridge Regression<a href="variable-selection.html#ridge-regression" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>We start with <strong>ridge regression</strong>. The basic idea is that minimizing SSE has no penalty at all on having arbitrarily large coefficients. If we add a penalty related to the size of the coefficients, then minimizing this new cost function will keep the coefficients relatively small. Ideally, it would force some of them to be either zero, or close enough to zero that we could round to zero and remove that variable from the model that we are building.</p>
+<p>Some more details. Suppose our model is</p>
+<p><span class="math display">\[
+y = \beta_0 + \sum_{p = 1}^P \beta_p x_p + \epsilon
+\]</span></p>
+<p>Recall that the SSE based on data is
+<span class="math display">\[
+SSE = \sum_{i = 1}^n\bigl(y_i - \hat y_i\bigr)^2
+\]</span>
+where <span class="math inline">\(\hat y_i\)</span> is the estimate of the response <span class="math inline">\(y\)</span>. In ridge regression, we add a penalty based on the size of the coefficients <span class="math inline">\(\beta_p\)</span>:</p>
+<p><span class="math display">\[
+SSE_{L^2} = \sum_{i = 1}^n \bigl(y_i - \hat y_i\bigr)^2 + \lambda \sum_{p = 1}^P \beta_p^2
+\]</span>
+Note that there is also a tuning parameter <span class="math inline">\(\lambda\)</span> in the SSE. Depending on the scales of the predictors and the responses, as well as the relationship between the response and predictor, different <span class="math inline">\(\lambda\)</span> will need to be chosen.</p>
+<p>Let’s see how this works with a simple simulated example. It is suggested to center and scale our predictors before using ridge regression. We begin with an OLS model.</p>
+<div class="sourceCode" id="cb540"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb540-1"><a href="variable-selection.html#cb540-1" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">9</span>), <span class="at">nrow =</span> <span class="dv">3</span>)</span>
+<span id="cb540-2"><a href="variable-selection.html#cb540-2" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fu">t</span>(sigma) <span class="sc">%*%</span> sigma</span>
+<span id="cb540-3"><a href="variable-selection.html#cb540-3" tabindex="-1"></a>dd <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(<span class="dv">500</span>, <span class="at">mu =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">Sigma =</span> sigma)</span>
+<span id="cb540-4"><a href="variable-selection.html#cb540-4" tabindex="-1"></a>response <span class="ot">&lt;-</span> dd[,<span class="dv">1</span>] <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> dd[,<span class="dv">2</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">500</span>,<span class="dv">0</span>,<span class="dv">3</span>)</span>
+<span id="cb540-5"><a href="variable-selection.html#cb540-5" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">scale</span>(dd)</span>
+<span id="cb540-6"><a href="variable-selection.html#cb540-6" tabindex="-1"></a><span class="fu">lm</span>(response <span class="sc">~</span> dd) <span class="sc">%&gt;%</span> <span class="fu">summary</span>()</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = response ~ dd)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -10.6434  -1.8859   0.0092   1.9260   8.9199 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -0.08689    0.13719  -0.633    0.527    
+## dd1          1.21044    0.20621   5.870 7.99e-09 ***
+## dd2          2.94994    0.23453  12.578  &lt; 2e-16 ***
+## dd3          0.07277    0.16791   0.433    0.665    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 3.068 on 496 degrees of freedom
+## Multiple R-squared:  0.6276, Adjusted R-squared:  0.6254 
+## F-statistic: 278.7 on 3 and 496 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Now, let’s choose <span class="math inline">\(\lambda = 1\)</span> and minimize the <span class="math inline">\(SSE_{L^2}\)</span> cost function.</p>
+<div class="sourceCode" id="cb542"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb542-1"><a href="variable-selection.html#cb542-1" tabindex="-1"></a>ssel2 <span class="ot">&lt;-</span> <span class="cf">function</span>(dd, response, beta_0, beta, <span class="at">lambda =</span> <span class="dv">1</span>) {</span>
+<span id="cb542-2"><a href="variable-selection.html#cb542-2" tabindex="-1"></a>  <span class="fu">sum</span>((dd <span class="sc">%*%</span> beta <span class="sc">+</span> beta_0 <span class="sc">-</span> response)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> lambda <span class="sc">*</span> <span class="fu">sum</span>(beta<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb542-3"><a href="variable-selection.html#cb542-3" tabindex="-1"></a>}</span>
+<span id="cb542-4"><a href="variable-selection.html#cb542-4" tabindex="-1"></a><span class="fu">ssel2</span>(dd, response, <span class="dv">0</span>, <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="sc">-</span><span class="dv">1</span>))</span></code></pre></div>
+<pre><code>## [1] 15192.85</code></pre>
+<p>Now, if we want to minimize this, we use the <code>optim</code> function. First, we define the cost function just in terms of the variables that we are trying to minimize.</p>
+<div class="sourceCode" id="cb544"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb544-1"><a href="variable-selection.html#cb544-1" tabindex="-1"></a>sse_for_optim <span class="ot">&lt;-</span> <span class="cf">function</span>(beta) {</span>
+<span id="cb544-2"><a href="variable-selection.html#cb544-2" tabindex="-1"></a>  <span class="fu">ssel2</span>(dd, response, beta[<span class="dv">1</span>], beta[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>])</span>
+<span id="cb544-3"><a href="variable-selection.html#cb544-3" tabindex="-1"></a>}</span>
+<span id="cb544-4"><a href="variable-selection.html#cb544-4" tabindex="-1"></a><span class="fu">optim</span>(<span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">fn =</span> sse_for_optim)</span></code></pre></div>
+<pre><code>## $par
+## [1] -0.08659782  1.21575017  2.93705301  0.07794478
+## 
+## $value
+## [1] 4677.807
+## 
+## $counts
+## function gradient 
+##      237       NA 
+## 
+## $convergence
+## [1] 0
+## 
+## $message
+## NULL</code></pre>
+<div class="sourceCode" id="cb546"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb546-1"><a href="variable-selection.html#cb546-1" tabindex="-1"></a><span class="fu">lm</span>(response <span class="sc">~</span> dd)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = response ~ dd)
+## 
+## Coefficients:
+## (Intercept)          dd1          dd2          dd3  
+##    -0.08689      1.21044      2.94994      0.07277</code></pre>
+<p>We see that regularizing with <span class="math inline">\(\lambda = 1\)</span> had little impact on the result! Since the actual minimum SSE is about 4000, and the coefficients are about 1, that makes sense. In order to get them on the same scale, we would need to have <span class="math inline">\(\lambda = 1000\)</span> or so. Let’s try again with <span class="math inline">\(\lambda = 1000\)</span> just to see. Before we do this, you should think about whether larger <span class="math inline">\(\lambda\)</span> will be associated with coefficients that are closer to what we get with OLS, or further.</p>
+<div class="sourceCode" id="cb548"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb548-1"><a href="variable-selection.html#cb548-1" tabindex="-1"></a>sse_for_optim <span class="ot">&lt;-</span> <span class="cf">function</span>(beta) {</span>
+<span id="cb548-2"><a href="variable-selection.html#cb548-2" tabindex="-1"></a>  <span class="fu">ssel2</span>(dd, response, beta[<span class="dv">1</span>], beta[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">lambda =</span> <span class="dv">1000</span>)</span>
+<span id="cb548-3"><a href="variable-selection.html#cb548-3" tabindex="-1"></a>}</span>
+<span id="cb548-4"><a href="variable-selection.html#cb548-4" tabindex="-1"></a><span class="fu">optim</span>(<span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">fn =</span> sse_for_optim)</span></code></pre></div>
+<pre><code>## $par
+## [1] -0.08675374  0.84098357  1.00561179  0.43253603
+## 
+## $value
+## [1] 8683.054
+## 
+## $counts
+## function gradient 
+##      229       NA 
+## 
+## $convergence
+## [1] 0
+## 
+## $message
+## NULL</code></pre>
+<div class="sourceCode" id="cb550"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb550-1"><a href="variable-selection.html#cb550-1" tabindex="-1"></a><span class="fu">lm</span>(response <span class="sc">~</span> dd)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = response ~ dd)
+## 
+## Coefficients:
+## (Intercept)          dd1          dd2          dd3  
+##    -0.08689      1.21044      2.94994      0.07277</code></pre>
+<p>Still not a huge difference, but note that the large coefficients are now closer to the same size. If we do ridge regression with highly correlated predictors, it is often the case that the coefficients associated with the highly correlated predictors end up being about the same size. That is, ridge regression tends to spread out the weight of that direction across all of the predictors.</p>
+<p>There are several R packages that implement ridge regression. One that gives the same answer as the algorithm described in the book is <code>ridge</code>.</p>
+<div class="sourceCode" id="cb552"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb552-1"><a href="variable-selection.html#cb552-1" tabindex="-1"></a>ridge<span class="sc">::</span><span class="fu">linearRidge</span>(response <span class="sc">~</span> dd, <span class="at">lambda =</span> <span class="dv">1000</span>, <span class="at">scaling =</span> <span class="st">&quot;scale&quot;</span>)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## ridge::linearRidge(formula = response ~ dd, lambda = 1000, scaling = &quot;scale&quot;)
+## 
+## (Intercept)         dd1         dd2         dd3 
+## -0.08688725  0.84102269  1.00541365  0.43255100</code></pre>
+<p>However, as we saw above, it can be tricky to find the right <span class="math inline">\(\lambda\)</span>, so other packages do more scaling and trickery, which means that their answers have twists from the algorithm that we described above. Here is the technique suggested by the book.</p>
+<div class="sourceCode" id="cb554"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb554-1"><a href="variable-selection.html#cb554-1" tabindex="-1"></a>emod <span class="ot">&lt;-</span> elasticnet<span class="sc">::</span><span class="fu">enet</span>(<span class="at">x =</span> dd, <span class="at">y =</span> response, <span class="at">lambda =</span> <span class="dv">1000</span>)</span>
+<span id="cb554-2"><a href="variable-selection.html#cb554-2" tabindex="-1"></a>enetCoef<span class="ot">&lt;-</span> <span class="fu">predict</span>(emod, <span class="at">newx =</span> dd,</span>
+<span id="cb554-3"><a href="variable-selection.html#cb554-3" tabindex="-1"></a>                   <span class="at">s =</span> <span class="dv">1</span>, </span>
+<span id="cb554-4"><a href="variable-selection.html#cb554-4" tabindex="-1"></a>                   <span class="at">mode =</span> <span class="st">&quot;fraction&quot;</span>,</span>
+<span id="cb554-5"><a href="variable-selection.html#cb554-5" tabindex="-1"></a>                   <span class="at">type =</span> <span class="st">&quot;coefficients&quot;</span>)</span>
+<span id="cb554-6"><a href="variable-selection.html#cb554-6" tabindex="-1"></a>enetCoef</span></code></pre></div>
+<pre><code>## $s
+## [1] 1
+## 
+## $fraction
+## 0 
+## 1 
+## 
+## $mode
+## [1] &quot;fraction&quot;
+## 
+## $coefficients
+## [1] 3.417175 3.883957 2.155023</code></pre>
+<p>As long as the method is internally consistent with how it penalizes, it doesn’t matter so much whether it matches the exact definition we gave; it’s more of a frustration than a problem. As before, in any real problem, we will use cross validation to decide which <span class="math inline">\(\lambda\)</span> to pick. We could again use <code>train</code>, as below:</p>
+<div class="sourceCode" id="cb556"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb556-1"><a href="variable-selection.html#cb556-1" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb556-2"><a href="variable-selection.html#cb556-2" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;tecator&quot;</span>)</span>
+<span id="cb556-3"><a href="variable-selection.html#cb556-3" tabindex="-1"></a><span class="fu">train</span>(<span class="at">x =</span> <span class="fu">as.data.frame</span>(absorp),</span>
+<span id="cb556-4"><a href="variable-selection.html#cb556-4" tabindex="-1"></a>      <span class="at">y =</span> endpoints[,<span class="dv">1</span>],</span>
+<span id="cb556-5"><a href="variable-selection.html#cb556-5" tabindex="-1"></a>      <span class="at">method =</span> <span class="st">&quot;ridge&quot;</span>)</span></code></pre></div>
+<pre><code>## Ridge Regression 
+## 
+## 215 samples
+## 100 predictors
+## 
+## No pre-processing
+## Resampling: Bootstrapped (25 reps) 
+## Summary of sample sizes: 215, 215, 215, 215, 215, 215, ... 
+## Resampling results across tuning parameters:
+## 
+##   lambda  RMSE      Rsquared   MAE     
+##   0e+00   4.747683  0.8176289  2.505947
+##   1e-04   2.665362  0.9298474  2.102598
+##   1e-01   4.042693  0.8439936  3.231493
+## 
+## RMSE was used to select the optimal model using the smallest value.
+## The final value used for the model was lambda = 1e-04.</code></pre>
+<p>But we can get some better information more easily out of the dedicated package <code>glmnet</code>. Let’s see how to do it. I am following <a href="https://daviddalpiaz.github.io/r4sl/regularization.html">this book</a> which has tons of interesting things!</p>
+<div class="sourceCode" id="cb558"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb558-1"><a href="variable-selection.html#cb558-1" tabindex="-1"></a><span class="fu">library</span>(glmnet)</span></code></pre></div>
+<pre><code>## Loading required package: Matrix</code></pre>
+<pre><code>## 
+## Attaching package: &#39;Matrix&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:tidyr&#39;:
+## 
+##     expand, pack, unpack</code></pre>
+<pre><code>## Loaded glmnet 4.1-10</code></pre>
+<div class="sourceCode" id="cb563"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb563-1"><a href="variable-selection.html#cb563-1" tabindex="-1"></a>fit_ridge <span class="ot">&lt;-</span> <span class="fu">glmnet</span>(<span class="at">x =</span> absorp, <span class="at">y =</span> endpoints[,<span class="dv">1</span>], <span class="at">alpha =</span> <span class="dv">0</span>)</span>
+<span id="cb563-2"><a href="variable-selection.html#cb563-2" tabindex="-1"></a><span class="fu">plot</span>(fit_ridge, <span class="at">label =</span> T, <span class="at">xvar =</span> <span class="st">&quot;lambda&quot;</span>)</span></code></pre></div>
+<p><img src="05-variable-selection_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p>Here, we can see that as <span class="math inline">\(\lambda\)</span> gets bigger the coefficients of the variables are forced to be smaller and smaller, until eventually they are essentially zero.</p>
+<div class="sourceCode" id="cb564"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb564-1"><a href="variable-selection.html#cb564-1" tabindex="-1"></a>fit_ridge_cv <span class="ot">&lt;-</span> <span class="fu">cv.glmnet</span>(absorp, endpoints[,<span class="dv">1</span>], <span class="at">alpha =</span> <span class="dv">0</span>)</span>
+<span id="cb564-2"><a href="variable-selection.html#cb564-2" tabindex="-1"></a><span class="fu">plot</span>(fit_ridge_cv)</span></code></pre></div>
+<p><img src="05-variable-selection_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p>The first vertical dotted line is where the smallest MSE is, and the second line is where the MSE is one standard error away from the smallest. In this case, <strong>larger</strong> <span class="math inline">\(\lambda\)</span> corresponds to <strong>simpler</strong> models, or at least, models that have been more regularized.</p>
+<p>The function <code>glmnet</code> returns the models associated with each of those two <span class="math inline">\(\lambda\)</span>’s for further investigation and use. We can see the coefficients used in the model:</p>
+<div class="sourceCode" id="cb565"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb565-1"><a href="variable-selection.html#cb565-1" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">coef</span>(fit_ridge_cv, <span class="at">s =</span> <span class="st">&quot;lambda.min&quot;</span>), <span class="at">type =</span> <span class="st">&quot;l&quot;</span>)</span>
+<span id="cb565-2"><a href="variable-selection.html#cb565-2" tabindex="-1"></a><span class="fu">points</span>(<span class="fu">coef</span>(fit_ridge_cv, <span class="at">s =</span> <span class="st">&quot;lambda.1se&quot;</span>), <span class="at">type =</span> <span class="st">&quot;l&quot;</span>, <span class="at">col =</span> <span class="dv">2</span>)</span></code></pre></div>
+<p><img src="05-variable-selection_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<p>We see that there isn’t a big difference in the coefficients for the two models! If we wanted to predict values, we could use <code>predict</code>.</p>
+<div class="sourceCode" id="cb566"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb566-1"><a href="variable-selection.html#cb566-1" tabindex="-1"></a><span class="fu">predict</span>(fit_ridge_cv, <span class="at">newx =</span> absorp[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,], <span class="at">s =</span> <span class="st">&quot;lambda.min&quot;</span>)</span></code></pre></div>
+<pre><code>##      lambda.min
+## [1,]   63.72555
+## [2,]   51.59263</code></pre>
+<div class="sourceCode" id="cb568"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb568-1"><a href="variable-selection.html#cb568-1" tabindex="-1"></a><span class="fu">predict</span>(fit_ridge_cv, <span class="at">newx =</span> absorp[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,], <span class="at">s =</span> <span class="st">&quot;lambda.1se&quot;</span>)</span></code></pre></div>
+<pre><code>##      lambda.1se
+## [1,]   63.76570
+## [2,]   52.24934</code></pre>
+<div class="sourceCode" id="cb570"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb570-1"><a href="variable-selection.html#cb570-1" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">predict</span>(fit_ridge_cv, <span class="at">newx =</span> absorp, <span class="at">s =</span> <span class="st">&quot;lambda.min&quot;</span>) <span class="sc">-</span> <span class="fu">predict</span>(fit_ridge_cv, <span class="at">newx =</span> absorp), <span class="at">ylab =</span> <span class="st">&quot;Moisture&quot;</span>, <span class="at">main =</span> <span class="st">&quot;Difference in Predictions of Moisture Content&quot;</span>)</span></code></pre></div>
+<p><img src="05-variable-selection_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p>Ridge regression is a regularization technique. The point is that if there are highly correlated variables and we resample, we are likely to get similar results using ridge regression with a similar penalty. Let’s check that out. We will need to come up with a covariance matrix that produces highly correlated predictors.</p>
+<div class="sourceCode" id="cb571"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb571-1"><a href="variable-selection.html#cb571-1" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">runif</span>(<span class="dv">16</span>, .<span class="dv">9</span>, <span class="fl">1.1</span>), <span class="at">nrow =</span> <span class="dv">4</span>)</span>
+<span id="cb571-2"><a href="variable-selection.html#cb571-2" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> sigma <span class="sc">%*%</span> <span class="fu">t</span>(sigma)</span>
+<span id="cb571-3"><a href="variable-selection.html#cb571-3" tabindex="-1"></a>df <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(<span class="dv">500</span>, <span class="at">mu =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">Sigma =</span> sigma)</span>
+<span id="cb571-4"><a href="variable-selection.html#cb571-4" tabindex="-1"></a><span class="fu">cor</span>(df)</span></code></pre></div>
+<pre><code>##           [,1]      [,2]      [,3]      [,4]
+## [1,] 1.0000000 0.9985527 0.9968135 0.9984802
+## [2,] 0.9985527 1.0000000 0.9990332 0.9977036
+## [3,] 0.9968135 0.9990332 1.0000000 0.9943828
+## [4,] 0.9984802 0.9977036 0.9943828 1.0000000</code></pre>
+<div class="sourceCode" id="cb573"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb573-1"><a href="variable-selection.html#cb573-1" tabindex="-1"></a>response <span class="ot">&lt;-</span> df[,<span class="dv">1</span>] <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> df[,<span class="dv">2</span>] <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> df[,<span class="dv">3</span>] <span class="sc">+</span> <span class="dv">4</span> <span class="sc">*</span> df[,<span class="dv">4</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">500</span>, <span class="dv">0</span>, <span class="dv">3</span>)</span>
+<span id="cb573-2"><a href="variable-selection.html#cb573-2" tabindex="-1"></a><span class="fu">lm</span>(response <span class="sc">~</span> df)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = response ~ df)
+## 
+## Coefficients:
+## (Intercept)          df1          df2          df3          df4  
+##    -0.03692      1.37135      4.82689      1.71488      2.13211</code></pre>
+<p>You should check that if you run the above code multiple times, you get quite different answers for the regression coefficients. Now, let’s do ridge regression.</p>
+<div class="sourceCode" id="cb575"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb575-1"><a href="variable-selection.html#cb575-1" tabindex="-1"></a>ridge_model <span class="ot">&lt;-</span> <span class="fu">cv.glmnet</span>(<span class="at">x =</span> df, <span class="at">y =</span> response, <span class="at">alpha =</span> <span class="dv">0</span>)</span>
+<span id="cb575-2"><a href="variable-selection.html#cb575-2" tabindex="-1"></a><span class="fu">coefficients</span>(ridge_model)</span></code></pre></div>
+<pre><code>## 5 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##              lambda.1se
+## (Intercept) -0.02811019
+## V1           2.39274221
+## V2           2.44496492
+## V3           2.36813286
+## V4           2.34281774</code></pre>
+<p>The ridge-regression model typically gives a model of about <span class="math inline">\(t = 2.5 x_1 + 2.5 x_2 + 2.5 x_3 + 2.5 x_4\)</span>, which is about <span class="math inline">\(y = 10 x_i\)</span> for any of the predictors <span class="math inline">\(x_i\)</span>.</p>
+</div>
+<div id="lasso" class="section level3 hasAnchor" number="6.2.2">
+<h3><span class="header-section-number">6.2.2</span> LASSO<a href="variable-selection.html#lasso" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Unlike ridge regression, the LASSO is more of a variable selection technique. If we are trying to force the non-important or redundant predictors’ coefficients to be zero, we would want to use the so-called <span class="math inline">\(L_0\)</span> norm as a penalty:</p>
+<p><span class="math display">\[
+SSE_{L_0} = \sum\bigl(\hat y_i - y_i\bigr)^2 + \lambda\bigl| \{p: \beta_p \not= 0\}\bigr|
+\]</span></p>
+<p>However, this is a hard problem to solve when there are lots of variables! It essentially involves computing the SSE for each subset of predictors and seeing which one is the smallest. If we had 100 predictors, like in <code>tecator</code>, that would mean <span class="math inline">\(2^{100} \approx 1,267,561,000,000,000,000,000,000,000,000\)</span> subsets. That’s gonna take some time, and even if we could do it, what if we found a data set that had 1000 predictors? I don’t have that kind of time. Instead, we solve the <strong>convex relaxation</strong> of the problem, which is to minimize</p>
+<p><span class="math display">\[
+SSE_{L_1} = \sum\bigl(\hat y_i - y_i\bigr)^2 + \lambda \sum_{i = 1}^P |\beta_i|
+\]</span></p>
+<p>Again, we don’t typically penalize the intercept, though we could if that made sense for the problem you were working on. Let’s see how it works when we have the same four highly correlated synthetic data as we had in the last section.</p>
+<div class="sourceCode" id="cb577"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb577-1"><a href="variable-selection.html#cb577-1" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">runif</span>(<span class="dv">16</span>, .<span class="dv">9</span>, <span class="fl">1.1</span>), <span class="at">nrow =</span> <span class="dv">4</span>)</span>
+<span id="cb577-2"><a href="variable-selection.html#cb577-2" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> sigma <span class="sc">%*%</span> <span class="fu">t</span>(sigma)</span>
+<span id="cb577-3"><a href="variable-selection.html#cb577-3" tabindex="-1"></a>df <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(<span class="dv">500</span>, <span class="at">mu =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">Sigma =</span> sigma)</span>
+<span id="cb577-4"><a href="variable-selection.html#cb577-4" tabindex="-1"></a>response <span class="ot">&lt;-</span> df[,<span class="dv">1</span>] <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> df[,<span class="dv">2</span>] <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> df[,<span class="dv">3</span>] <span class="sc">+</span> <span class="dv">4</span> <span class="sc">*</span> df[,<span class="dv">4</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">500</span>, <span class="dv">0</span>, <span class="dv">3</span>)</span></code></pre></div>
+<p>We will again use <code>glmnet</code>.</p>
+<div class="sourceCode" id="cb578"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb578-1"><a href="variable-selection.html#cb578-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">glmnet</span>(<span class="at">x =</span> df, <span class="at">y =</span> response, <span class="at">alpha =</span> <span class="dv">1</span>)</span>
+<span id="cb578-2"><a href="variable-selection.html#cb578-2" tabindex="-1"></a><span class="fu">plot</span>(mod, <span class="at">xvar =</span> <span class="st">&quot;lambda&quot;</span>, <span class="at">label =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p><img src="05-variable-selection_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
+<div class="sourceCode" id="cb579"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb579-1"><a href="variable-selection.html#cb579-1" tabindex="-1"></a>cv_mod <span class="ot">&lt;-</span> <span class="fu">cv.glmnet</span>(<span class="at">x =</span> df, <span class="at">y =</span> response, <span class="at">alpha =</span> <span class="dv">1</span>)</span>
+<span id="cb579-2"><a href="variable-selection.html#cb579-2" tabindex="-1"></a><span class="fu">plot</span>(cv_mod)</span></code></pre></div>
+<p><img src="05-variable-selection_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
+<div class="sourceCode" id="cb580"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb580-1"><a href="variable-selection.html#cb580-1" tabindex="-1"></a><span class="fu">coef</span>(cv_mod)</span></code></pre></div>
+<pre><code>## 5 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##             lambda.1se
+## (Intercept) -0.2694488
+## V1           .        
+## V2           1.5778919
+## V3           1.8329282
+## V4           6.3441077</code></pre>
+<p>We see that the LASSO removed two of the variables, and the other two add up to about 10. (At least, that is what it seemed to be doing when I was practicing!) If we resample, then the LASSO will likely select different variables with different coefficients. So, LASSO doesn’t regularize as much as ridge regression, but it does do some variable selection. Let’s run it again on <code>tecator</code>.</p>
+<div class="sourceCode" id="cb582"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb582-1"><a href="variable-selection.html#cb582-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">glmnet</span>(<span class="at">x =</span> absorp, <span class="at">y =</span> endpoints[,<span class="dv">1</span>], <span class="at">alpha =</span> <span class="dv">1</span>)</span>
+<span id="cb582-2"><a href="variable-selection.html#cb582-2" tabindex="-1"></a><span class="fu">plot</span>(mod, <span class="at">xvar =</span> <span class="st">&quot;lambda&quot;</span>, <span class="at">label =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p><img src="05-variable-selection_files/figure-html/unnamed-chunk-29-1.png" width="672" /></p>
+<div class="sourceCode" id="cb583"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb583-1"><a href="variable-selection.html#cb583-1" tabindex="-1"></a>cv_mod <span class="ot">&lt;-</span> <span class="fu">cv.glmnet</span>(<span class="at">x =</span> absorp, <span class="at">y =</span> endpoints[,<span class="dv">1</span>], <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">type.measure =</span> <span class="st">&quot;mse&quot;</span>)</span>
+<span id="cb583-2"><a href="variable-selection.html#cb583-2" tabindex="-1"></a><span class="fu">plot</span>(cv_mod)</span></code></pre></div>
+<p><img src="05-variable-selection_files/figure-html/unnamed-chunk-30-1.png" width="672" /></p>
+<div class="sourceCode" id="cb584"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb584-1"><a href="variable-selection.html#cb584-1" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">coef</span>(cv_mod))</span></code></pre></div>
+<p><img src="05-variable-selection_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+<div class="sourceCode" id="cb585"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb585-1"><a href="variable-selection.html#cb585-1" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">abs</span>(<span class="fu">coef</span>(cv_mod)) <span class="sc">&gt;</span> <span class="dv">0</span>)</span></code></pre></div>
+<pre><code>## [1] 20</code></pre>
+<p>This model has 20 non-zero variables. That is quite a few more than PCR and PLS ended up with, but <strong>these are the original variables</strong> so we might have some hope of interpreting things. So, downside is more variables, upside is that the variables are more immediately interpretable. Now let’s just see what the estimated RMSE was. The first one is for the <span class="math inline">\(\lambda\)</span> that is one standard error away from the minimum value, and the second is the minimum MSE observed.</p>
+<div class="sourceCode" id="cb587"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb587-1"><a href="variable-selection.html#cb587-1" tabindex="-1"></a>cv_mod<span class="sc">$</span>cvm[cv_mod<span class="sc">$</span>lambda <span class="sc">==</span> cv_mod<span class="sc">$</span>lambda<span class="fl">.1</span>se]</span></code></pre></div>
+<pre><code>## [1] 8.430149</code></pre>
+<div class="sourceCode" id="cb589"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb589-1"><a href="variable-selection.html#cb589-1" tabindex="-1"></a>cv_mod<span class="sc">$</span>cvm[cv_mod<span class="sc">$</span>lambda <span class="sc">==</span> cv_mod<span class="sc">$</span>lambda.min]</span></code></pre></div>
+<pre><code>## [1] 7.841857</code></pre>
+</div>
+</div>
+<div id="step-aic" class="section level2 hasAnchor" number="6.3">
+<h2><span class="header-section-number">6.3</span> Step AIC<a href="variable-selection.html#step-aic" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We mentioned before that we would ideally like to minimize <span class="math inline">\(SSE_{L_0}\)</span>, which is the sum-squared error plus a penalty based on how many of the coefficients are non-zero. While checking all subsets of coefficients would take too long, we can try a <em>stepwise</em> approach, which would approximate this. Let’s see how this would work in the example from above that is running through the chapter, but let’s make the correlation between variables smaller.</p>
+<div class="sourceCode" id="cb591"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb591-1"><a href="variable-selection.html#cb591-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2292020</span>)</span>
+<span id="cb591-2"><a href="variable-selection.html#cb591-2" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">runif</span>(<span class="dv">16</span>, <span class="sc">-</span>.<span class="dv">5</span>, <span class="fl">1.5</span>), <span class="at">nrow =</span> <span class="dv">4</span>)</span>
+<span id="cb591-3"><a href="variable-selection.html#cb591-3" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> sigma <span class="sc">%*%</span> <span class="fu">t</span>(sigma)</span>
+<span id="cb591-4"><a href="variable-selection.html#cb591-4" tabindex="-1"></a>df <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(<span class="dv">500</span>, <span class="at">mu =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">Sigma =</span> sigma)</span>
+<span id="cb591-5"><a href="variable-selection.html#cb591-5" tabindex="-1"></a>response <span class="ot">&lt;-</span> df[,<span class="dv">1</span>] <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> df[,<span class="dv">2</span>] <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> df[,<span class="dv">3</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">500</span>, <span class="dv">0</span>, <span class="dv">3</span>)</span>
+<span id="cb591-6"><a href="variable-selection.html#cb591-6" tabindex="-1"></a><span class="fu">cor</span>(df)</span></code></pre></div>
+<pre><code>##           [,1]       [,2]       [,3]       [,4]
+## [1,] 1.0000000  0.3755164  0.5917336  0.5171758
+## [2,] 0.3755164  1.0000000  0.9393433 -0.3369446
+## [3,] 0.5917336  0.9393433  1.0000000 -0.1552404
+## [4,] 0.5171758 -0.3369446 -0.1552404  1.0000000</code></pre>
+<p>We do LOOCV on the full model, then we do LOOCV estimate of MSE after removing each variable separately. So, in all, we do 5 LOOCV MSE estimates. If none of the 4 reduced models are better, then we are done. If one is better, that becomes our new “full model” and we see whether we can remove any of the other three variables.</p>
+<p>One twist, though, is that in the real algorithm, we would also want to check whether adding variables back in would improve the MSE. We will not implement that here.</p>
+<p>The reason that we are using LOOCV is that it is easy to compute for linear models without actually doing the interation! We won’t go through the details, but we will include the code here for anyone interested.</p>
+<p>First, we find the hat matrix and the leverage values.</p>
+<div class="sourceCode" id="cb593"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb593-1"><a href="variable-selection.html#cb593-1" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(df)</span>
+<span id="cb593-2"><a href="variable-selection.html#cb593-2" tabindex="-1"></a>dd<span class="sc">$</span>response <span class="ot">&lt;-</span> response</span>
+<span id="cb593-3"><a href="variable-selection.html#cb593-3" tabindex="-1"></a>full_mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(response <span class="sc">~</span> ., <span class="at">data =</span> dd)</span>
+<span id="cb593-4"><a href="variable-selection.html#cb593-4" tabindex="-1"></a></span>
+<span id="cb593-5"><a href="variable-selection.html#cb593-5" tabindex="-1"></a>df_intercept <span class="ot">&lt;-</span> <span class="fu">cbind</span>(df, <span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">500</span>))</span>
+<span id="cb593-6"><a href="variable-selection.html#cb593-6" tabindex="-1"></a>hat_matrix <span class="ot">&lt;-</span> df_intercept <span class="sc">%*%</span> </span>
+<span id="cb593-7"><a href="variable-selection.html#cb593-7" tabindex="-1"></a>  <span class="fu">solve</span>(<span class="fu">t</span>(df_intercept) <span class="sc">%*%</span> </span>
+<span id="cb593-8"><a href="variable-selection.html#cb593-8" tabindex="-1"></a>          df_intercept) <span class="sc">%*%</span> </span>
+<span id="cb593-9"><a href="variable-selection.html#cb593-9" tabindex="-1"></a>  <span class="fu">t</span>(df_intercept)  <span class="co">#this is the hat matrix</span></span>
+<span id="cb593-10"><a href="variable-selection.html#cb593-10" tabindex="-1"></a></span>
+<span id="cb593-11"><a href="variable-selection.html#cb593-11" tabindex="-1"></a><span class="fu">diag</span>(hat_matrix)[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>] </span></code></pre></div>
+<pre><code>## [1] 0.011226329 0.007003272 0.003909106 0.005312969 0.008961232</code></pre>
+<div class="sourceCode" id="cb595"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb595-1"><a href="variable-selection.html#cb595-1" tabindex="-1"></a><span class="fu">hatvalues</span>(full_mod)[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>] <span class="co">#see, the diagonal of the hat matrix is given by hatvalues!</span></span></code></pre></div>
+<pre><code>##           1           2           3           4           5 
+## 0.011226329 0.007003272 0.003909106 0.005312969 0.008961232</code></pre>
+<div class="sourceCode" id="cb597"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb597-1"><a href="variable-selection.html#cb597-1" tabindex="-1"></a><span class="fu">predict</span>(full_mod)[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code></pre></div>
+<pre><code>##         1         2         3         4         5 
+## -8.117599 -8.990833  6.272003 -1.299794 13.264895</code></pre>
+<div class="sourceCode" id="cb599"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb599-1"><a href="variable-selection.html#cb599-1" tabindex="-1"></a>(hat_matrix <span class="sc">%*%</span> response)[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>] </span></code></pre></div>
+<pre><code>## [1] -8.117599 -8.990833  6.272003 -1.299794 13.264895</code></pre>
+<p>The hat matrix is called the hat matrix because when you multiply the hat matrix times the response, you get the predicted values! Sounds like magic, I know, but you can see that it is true above.</p>
+<p>You can also get the residuals from the hat matrix:</p>
+<div class="sourceCode" id="cb601"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb601-1"><a href="variable-selection.html#cb601-1" tabindex="-1"></a>((<span class="fu">diag</span>(<span class="dv">1</span>, <span class="dv">500</span>) <span class="sc">-</span> hat_matrix) <span class="sc">%*%</span> response)[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code></pre></div>
+<pre><code>## [1] -1.3411735 -0.5974403 -2.4618286  0.9980398 -3.2304093</code></pre>
+<div class="sourceCode" id="cb603"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb603-1"><a href="variable-selection.html#cb603-1" tabindex="-1"></a>full_mod<span class="sc">$</span>residuals[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code></pre></div>
+<pre><code>##          1          2          3          4          5 
+## -1.3411735 -0.5974403 -2.4618286  0.9980398 -3.2304093</code></pre>
+<p>So far, this doesn’t seem too magical. But, check this out. We can get the LOOCV MSE score directly from the hat matrix.</p>
+<div class="sourceCode" id="cb605"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb605-1"><a href="variable-selection.html#cb605-1" tabindex="-1"></a><span class="dv">1</span><span class="sc">/</span><span class="dv">500</span> <span class="sc">*</span> <span class="fu">sum</span>(((<span class="fu">diag</span>(<span class="dv">1</span>, <span class="dv">500</span>) <span class="sc">-</span> hat_matrix) <span class="sc">%*%</span> response)<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">hatvalues</span>(full_mod))<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div>
+<pre><code>## [1] 8.008726</code></pre>
+<p>Perhaps easier to understand:</p>
+<div class="sourceCode" id="cb607"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb607-1"><a href="variable-selection.html#cb607-1" tabindex="-1"></a><span class="fu">mean</span>((full_mod<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">hatvalues</span>(full_mod))<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div>
+<pre><code>## [1] 8.008726</code></pre>
+<p>It is the average value of the residuals squared, weighted by the reciprocal of 1 minus the leverage squared. Let’s verify through actual LOOCV.</p>
+<div class="sourceCode" id="cb609"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb609-1"><a href="variable-selection.html#cb609-1" tabindex="-1"></a>errors <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">500</span>, <span class="cf">function</span>(x) {</span>
+<span id="cb609-2"><a href="variable-selection.html#cb609-2" tabindex="-1"></a>  dd_small <span class="ot">&lt;-</span> dd[<span class="sc">-</span>x,]</span>
+<span id="cb609-3"><a href="variable-selection.html#cb609-3" tabindex="-1"></a>  mod_small <span class="ot">&lt;-</span> <span class="fu">lm</span>(response <span class="sc">~</span> ., <span class="at">data =</span> dd_small)</span>
+<span id="cb609-4"><a href="variable-selection.html#cb609-4" tabindex="-1"></a>  <span class="fu">predict</span>(mod_small, <span class="at">newdata =</span> dd[x,]) <span class="sc">-</span> dd<span class="sc">$</span>response[x]</span>
+<span id="cb609-5"><a href="variable-selection.html#cb609-5" tabindex="-1"></a>})</span>
+<span id="cb609-6"><a href="variable-selection.html#cb609-6" tabindex="-1"></a><span class="fu">mean</span>(errors<span class="sc">^</span><span class="dv">2</span>) <span class="co">#behold!</span></span></code></pre></div>
+<pre><code>## [1] 8.008726</code></pre>
+<p>Now, let’s remove each of the four variables separately, and estimate the MSE via LOOCV.</p>
+<div class="sourceCode" id="cb611"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb611-1"><a href="variable-selection.html#cb611-1" tabindex="-1"></a>loocvs <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="cf">function</span>(x) {</span>
+<span id="cb611-2"><a href="variable-selection.html#cb611-2" tabindex="-1"></a>  dd_skinny <span class="ot">&lt;-</span> dd[,<span class="sc">-</span>x]</span>
+<span id="cb611-3"><a href="variable-selection.html#cb611-3" tabindex="-1"></a>  skinny_mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(response <span class="sc">~</span> ., <span class="at">data =</span> dd_skinny)</span>
+<span id="cb611-4"><a href="variable-selection.html#cb611-4" tabindex="-1"></a>  <span class="fu">mean</span>((skinny_mod<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span>((<span class="dv">1</span> <span class="sc">-</span> <span class="fu">hatvalues</span>(skinny_mod))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb611-5"><a href="variable-selection.html#cb611-5" tabindex="-1"></a>})</span>
+<span id="cb611-6"><a href="variable-selection.html#cb611-6" tabindex="-1"></a>loocvs</span></code></pre></div>
+<pre><code>## [1] 8.661742 8.960961 9.540100 7.985612</code></pre>
+<p>By inspection, we see that we should remove variable number 4, because doing so has the lowest LOOCV estimate of MSE, and it is lower than the full model, which was 8.0087257. Then, we would repeat the above, seeing if we can remove any of variables 1, 2 and 3.</p>
+<p>There is another way of doing this, using the Akaike Information Criterion. It can be shown that under some assumptions, the AIC is asymptotically equivalent to doing LOOCV. Here, by asymptotically equivalent, I mean that as the number of data points goes to infinity, LOOCV with MSE and the AIC will both yield the same suggestion as to which variable to remove, or whether to stay with the model you have.</p>
+<div class="sourceCode" id="cb613"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb613-1"><a href="variable-selection.html#cb613-1" tabindex="-1"></a>MASS<span class="sc">::</span><span class="fu">stepAIC</span>(full_mod, <span class="at">steps =</span> <span class="dv">1</span>)</span></code></pre></div>
+<pre><code>## Start:  AIC=1040.09
+## response ~ V1 + V2 + V3 + V4
+## 
+##        Df Sum of Sq    RSS    AIC
+## - V4    1      6.75 3930.5 1039.0
+## &lt;none&gt;              3923.7 1040.1
+## - V1    1    337.21 4260.9 1079.3
+## - V2    1    481.29 4405.0 1095.9
+## - V3    1    768.89 4692.6 1127.6
+## 
+## Step:  AIC=1038.95
+## response ~ V1 + V2 + V3</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = response ~ V1 + V2 + V3, data = dd)
+## 
+## Coefficients:
+## (Intercept)           V1           V2           V3  
+##      -0.128        1.183        2.226        2.697</code></pre>
+<p>Note that, in this case, <code>stepAIC</code> also chooses to remove the 4th variable. It is not the case that these two techniques will always give the same suggestion, though, even though in the limit as the number of observations goes to infinity they will.</p>
+<p>Let’s try them out on the tecator data set.</p>
+<div class="sourceCode" id="cb616"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb616-1"><a href="variable-selection.html#cb616-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;tecator&quot;</span>)</span>
+<span id="cb616-2"><a href="variable-selection.html#cb616-2" tabindex="-1"></a>compute_loocv <span class="ot">&lt;-</span> <span class="cf">function</span>(full_model) {</span>
+<span id="cb616-3"><a href="variable-selection.html#cb616-3" tabindex="-1"></a>  <span class="fu">mean</span>((full_model<span class="sc">$</span>residuals)<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>((<span class="dv">1</span> <span class="sc">-</span> <span class="fu">hatvalues</span>(full_model))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb616-4"><a href="variable-selection.html#cb616-4" tabindex="-1"></a>}</span>
+<span id="cb616-5"><a href="variable-selection.html#cb616-5" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(absorp)</span>
+<span id="cb616-6"><a href="variable-selection.html#cb616-6" tabindex="-1"></a>dd<span class="sc">$</span>response <span class="ot">&lt;-</span> endpoints[,<span class="dv">1</span>]</span>
+<span id="cb616-7"><a href="variable-selection.html#cb616-7" tabindex="-1"></a>full_model <span class="ot">&lt;-</span> <span class="fu">lm</span>(response <span class="sc">~</span> ., <span class="at">data =</span> dd)</span>
+<span id="cb616-8"><a href="variable-selection.html#cb616-8" tabindex="-1"></a>mse_full <span class="ot">&lt;-</span> <span class="fu">compute_loocv</span>(full_model)</span>
+<span id="cb616-9"><a href="variable-selection.html#cb616-9" tabindex="-1"></a>mse_loocv <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(absorp), <span class="cf">function</span>(x) {</span>
+<span id="cb616-10"><a href="variable-selection.html#cb616-10" tabindex="-1"></a>  dd_skinny <span class="ot">&lt;-</span> dd[,<span class="sc">-</span>x]</span>
+<span id="cb616-11"><a href="variable-selection.html#cb616-11" tabindex="-1"></a>  skinny_model <span class="ot">&lt;-</span> <span class="fu">lm</span>(response <span class="sc">~</span> ., <span class="at">data =</span> dd_skinny)</span>
+<span id="cb616-12"><a href="variable-selection.html#cb616-12" tabindex="-1"></a>  <span class="fu">compute_loocv</span>(skinny_model)</span>
+<span id="cb616-13"><a href="variable-selection.html#cb616-13" tabindex="-1"></a>})</span>
+<span id="cb616-14"><a href="variable-selection.html#cb616-14" tabindex="-1"></a><span class="fu">which.min</span>(mse_loocv)</span></code></pre></div>
+<pre><code>## [1] 45</code></pre>
+<div class="sourceCode" id="cb618"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb618-1"><a href="variable-selection.html#cb618-1" tabindex="-1"></a>mse_loocv[<span class="dv">45</span>]</span></code></pre></div>
+<pre><code>## [1] 5.069154</code></pre>
+<p>This suggests that our first move should be to remove variable 45, resulting in a decrease of almost a full unit in MSE! Now, let’s see what <code>stepAIC</code> suggests.</p>
+<div class="sourceCode" id="cb620"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb620-1"><a href="variable-selection.html#cb620-1" tabindex="-1"></a>MASS<span class="sc">::</span><span class="fu">stepAIC</span>(full_model, <span class="at">steps =</span> <span class="dv">1</span>)</span></code></pre></div>
+<pre><code>## Start:  AIC=60.45
+## response ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + 
+##     V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + 
+##     V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + 
+##     V31 + V32 + V33 + V34 + V35 + V36 + V37 + V38 + V39 + V40 + 
+##     V41 + V42 + V43 + V44 + V45 + V46 + V47 + V48 + V49 + V50 + 
+##     V51 + V52 + V53 + V54 + V55 + V56 + V57 + V58 + V59 + V60 + 
+##     V61 + V62 + V63 + V64 + V65 + V66 + V67 + V68 + V69 + V70 + 
+##     V71 + V72 + V73 + V74 + V75 + V76 + V77 + V78 + V79 + V80 + 
+##     V81 + V82 + V83 + V84 + V85 + V86 + V87 + V88 + V89 + V90 + 
+##     V91 + V92 + V93 + V94 + V95 + V96 + V97 + V98 + V99 + V100
+## 
+##        Df Sum of Sq    RSS    AIC
+## - V53   1    0.0007 111.30 58.448
+## - V46   1    0.0015 111.30 58.449
+## - V33   1    0.0023 111.31 58.451
+## - V100  1    0.0138 111.32 58.473
+## - V62   1    0.0272 111.33 58.499
+## - V49   1    0.0320 111.33 58.508
+## - V92   1    0.0566 111.36 58.556
+## - V98   1    0.0666 111.37 58.575
+## - V65   1    0.0669 111.37 58.576
+## - V83   1    0.0680 111.37 58.578
+## - V66   1    0.0708 111.37 58.583
+## - V8    1    0.0765 111.38 58.594
+## - V57   1    0.0783 111.38 58.598
+## - V93   1    0.0994 111.40 58.639
+## - V82   1    0.1009 111.40 58.641
+## - V71   1    0.1013 111.40 58.642
+## - V35   1    0.1058 111.41 58.651
+## - V84   1    0.1115 111.41 58.662
+## - V88   1    0.1430 111.44 58.723
+## - V89   1    0.1471 111.45 58.730
+## - V17   1    0.1697 111.47 58.774
+## - V38   1    0.2166 111.52 58.865
+## - V27   1    0.2428 111.55 58.915
+## - V31   1    0.2429 111.55 58.915
+## - V21   1    0.3045 111.61 59.034
+## - V23   1    0.3121 111.61 59.049
+## - V10   1    0.3417 111.64 59.106
+## - V3    1    0.3488 111.65 59.119
+## - V90   1    0.3851 111.69 59.189
+## - V58   1    0.4252 111.73 59.266
+## - V32   1    0.4309 111.73 59.277
+## - V77   1    0.4424 111.75 59.300
+## - V15   1    0.4834 111.79 59.378
+## - V96   1    0.5194 111.82 59.448
+## - V99   1    0.5234 111.83 59.455
+## - V91   1    0.6011 111.90 59.605
+## - V44   1    0.6438 111.95 59.687
+## - V48   1    0.7641 112.07 59.918
+## - V85   1    0.8571 112.16 60.096
+## - V24   1    0.8879 112.19 60.155
+## - V16   1    0.8906 112.19 60.160
+## - V86   1    0.9197 112.22 60.216
+## - V19   1    0.9287 112.23 60.233
+## - V76   1    0.9535 112.26 60.281
+## &lt;none&gt;              111.30 60.447
+## - V75   1    1.0744 112.38 60.512
+## - V79   1    1.0843 112.39 60.531
+## - V6    1    1.1885 112.49 60.730
+## - V26   1    1.1969 112.50 60.746
+## - V7    1    1.2217 112.52 60.794
+## - V37   1    1.2328 112.53 60.815
+## - V72   1    1.2393 112.54 60.827
+## - V94   1    1.3491 112.65 61.037
+## - V4    1    1.3614 112.66 61.060
+## - V14   1    1.4448 112.75 61.220
+## - V97   1    1.4506 112.75 61.231
+## - V20   1    1.4895 112.79 61.305
+## - V9    1    1.5530 112.86 61.426
+## - V36   1    1.7076 113.01 61.720
+## - V78   1    1.7111 113.01 61.727
+## - V45   1    1.7674 113.07 61.834
+## - V5    1    1.7865 113.09 61.870
+## - V43   1    1.7958 113.10 61.888
+## - V22   1    1.8900 113.19 62.067
+## - V95   1    1.9140 113.22 62.112
+## - V56   1    1.9799 113.28 62.238
+## - V87   1    2.1377 113.44 62.537
+## - V67   1    2.1895 113.49 62.635
+## - V13   1    2.2347 113.54 62.721
+## - V50   1    2.3598 113.66 62.957
+## - V11   1    2.3943 113.70 63.022
+## - V30   1    2.5125 113.81 63.246
+## - V61   1    2.5446 113.85 63.307
+## - V70   1    2.9922 114.30 64.150
+## - V34   1    3.0151 114.32 64.193
+## - V52   1    3.0318 114.33 64.225
+## - V74   1    3.1353 114.44 64.419
+## - V18   1    3.2424 114.55 64.620
+## - V25   1    3.3923 114.69 64.902
+## - V64   1    3.5160 114.82 65.133
+## - V12   1    3.7266 115.03 65.527
+## - V54   1    4.2069 115.51 66.423
+## - V63   1    4.3076 115.61 66.610
+## - V40   1    4.5296 115.83 67.023
+## - V41   1    4.7874 116.09 67.501
+## - V81   1    4.8758 116.18 67.665
+## - V42   1    5.2058 116.51 68.275
+## - V59   1    5.3076 116.61 68.462
+## - V39   1    5.5383 116.84 68.887
+## - V51   1    5.6801 116.98 69.148
+## - V47   1    6.0536 117.36 69.833
+## - V2    1    6.5034 117.81 70.656
+## - V68   1    7.2777 118.58 72.064
+## - V55   1    7.7127 119.02 72.852
+## - V60   1    7.8261 119.13 73.056
+## - V80   1    9.0669 120.37 75.284
+## - V69   1    9.1436 120.45 75.421
+## - V28   1   10.7574 122.06 78.283
+## - V73   1   11.1660 122.47 79.001
+## - V29   1   13.8452 125.15 83.654
+## - V1    1   17.6484 128.95 90.090
+## 
+## Step:  AIC=58.45
+## response ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + 
+##     V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + 
+##     V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + 
+##     V31 + V32 + V33 + V34 + V35 + V36 + V37 + V38 + V39 + V40 + 
+##     V41 + V42 + V43 + V44 + V45 + V46 + V47 + V48 + V49 + V50 + 
+##     V51 + V52 + V54 + V55 + V56 + V57 + V58 + V59 + V60 + V61 + 
+##     V62 + V63 + V64 + V65 + V66 + V67 + V68 + V69 + V70 + V71 + 
+##     V72 + V73 + V74 + V75 + V76 + V77 + V78 + V79 + V80 + V81 + 
+##     V82 + V83 + V84 + V85 + V86 + V87 + V88 + V89 + V90 + V91 + 
+##     V92 + V93 + V94 + V95 + V96 + V97 + V98 + V99 + V100</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = response ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + 
+##     V9 + V10 + V11 + V12 + V13 + V14 + V15 + V16 + V17 + V18 + 
+##     V19 + V20 + V21 + V22 + V23 + V24 + V25 + V26 + V27 + V28 + 
+##     V29 + V30 + V31 + V32 + V33 + V34 + V35 + V36 + V37 + V38 + 
+##     V39 + V40 + V41 + V42 + V43 + V44 + V45 + V46 + V47 + V48 + 
+##     V49 + V50 + V51 + V52 + V54 + V55 + V56 + V57 + V58 + V59 + 
+##     V60 + V61 + V62 + V63 + V64 + V65 + V66 + V67 + V68 + V69 + 
+##     V70 + V71 + V72 + V73 + V74 + V75 + V76 + V77 + V78 + V79 + 
+##     V80 + V81 + V82 + V83 + V84 + V85 + V86 + V87 + V88 + V89 + 
+##     V90 + V91 + V92 + V93 + V94 + V95 + V96 + V97 + V98 + V99 + 
+##     V100, data = dd)
+## 
+## Coefficients:
+## (Intercept)           V1           V2           V3           V4           V5  
+##       71.37    -10338.44     11550.42      4259.29    -14703.59     21567.86  
+##          V6           V7           V8           V9          V10          V11  
+##   -15454.15     10328.62     -1612.30     -5336.83     -3225.32     13370.83  
+##         V12          V13          V14          V15          V16          V17  
+##   -28943.35     28217.12    -19579.32      7543.65      6323.67      2103.59  
+##         V18          V19          V20          V21          V22          V23  
+##    -9108.90     -7061.12     15198.90      9252.58    -25652.88      8725.91  
+##         V24          V25          V26          V27          V28          V29  
+##    10599.14    -12988.63      5293.43      2450.95    -21885.34     37596.78  
+##         V30          V31          V32          V33          V34          V35  
+##   -22931.67      8458.75    -10202.41      -542.36     13335.26     -2013.96  
+##         V36          V37          V38          V39          V40          V41  
+##    -6198.43      5362.24      3036.97    -21844.96     27828.42    -34639.66  
+##         V42          V43          V44          V45          V46          V47  
+##    38549.25    -19187.86      7514.46     -9714.93       172.94      7110.41  
+##         V48          V49          V50          V51          V52          V54  
+##    -3144.88     -1084.80     12313.87    -25918.87     22976.77    -23841.37  
+##         V55          V56          V57          V58          V59          V60  
+##    24371.65     -7424.54     -1046.07     -2363.86      8526.48     -9102.37  
+##         V61          V62          V63          V64          V65          V66  
+##     4919.08      -533.98     -9006.74     10866.91     -1837.46      2162.23  
+##         V67          V68          V69          V70          V71          V72  
+##   -12315.99     21048.23    -20292.75     10473.39     -1790.42      5770.86  
+##         V73          V74          V75          V76          V77          V78  
+##   -15138.82      8224.69     -4318.45      3818.17     -2684.13      5921.11  
+##         V79          V80          V81          V82          V83          V84  
+##    -5136.84     17331.88    -15554.02      2602.40      2424.86      3371.18  
+##         V85          V86          V87          V88          V89          V90  
+##    -9400.50    -10783.81     18928.08     -4734.18     -4097.03      7079.03  
+##         V91          V92          V93          V94          V95          V96  
+##    -9836.26      2820.59     -3087.80     10464.46    -10748.35      4941.16  
+##         V97          V98          V99         V100  
+##     7866.82     -1532.22     -4723.08      -330.32</code></pre>
+<p>Hmmm, it suggests to remove variable 53.</p>
+<div class="sourceCode" id="cb623"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb623-1"><a href="variable-selection.html#cb623-1" tabindex="-1"></a>mse_loocv[<span class="dv">53</span>]</span></code></pre></div>
+<pre><code>## [1] 5.826543</code></pre>
+<div class="sourceCode" id="cb625"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb625-1"><a href="variable-selection.html#cb625-1" tabindex="-1"></a>mse_loocv[<span class="dv">45</span>]</span></code></pre></div>
+<pre><code>## [1] 5.069154</code></pre>
+<p>This really isn’t doing a good job of selling itself as a proxy for LOOCV.</p>
+<div id="doing-lgocv-with-preprocessing" class="section level3 hasAnchor" number="6.3.1">
+<h3><span class="header-section-number">6.3.1</span> Doing LGOCV with preprocessing<a href="variable-selection.html#doing-lgocv-with-preprocessing" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ol style="list-style-type: decimal">
+<li>If there are tuning parameters, set tuning parameter.</li>
+<li>Split into test/train</li>
+<li>Preprocess train based only on train.</li>
+<li>Build model.</li>
+<li>Process test based on the preprocessing model from 2.</li>
+<li>Predict response from model built in 3.</li>
+<li>Compute error</li>
+<li>Repeat 1-6 100-ish times.</li>
+<li>Take mean and standard deviation; that is the mean error estimate for this tuning parameter value.</li>
+<li>Repeat for next tuning parameter value.</li>
+<li>Choose the tuning parameter value that gives the simplest model that is within one standard deviation of the smallest mean error.</li>
+</ol>
+<p>Then, if you want to apply your model to new data that comes in, you build your model on the entire data with the best tuning parameter, including any preprocessing steps. Apply those same preprocessing steps to the new data and then predict.</p>
+<p>Let’s run through the entire thing with the Chemical Manufacturing Process data.</p>
+<div class="sourceCode" id="cb627"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb627-1"><a href="variable-selection.html#cb627-1" tabindex="-1"></a><span class="fu">library</span>(AppliedPredictiveModeling)</span>
+<span id="cb627-2"><a href="variable-selection.html#cb627-2" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;ChemicalManufacturingProcess&quot;</span>)</span></code></pre></div>
+<p>Let’s pretend like the very last observation is the new data that will be coming in at the end.</p>
+<div class="sourceCode" id="cb628"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb628-1"><a href="variable-selection.html#cb628-1" tabindex="-1"></a>newdata <span class="ot">&lt;-</span> ChemicalManufacturingProcess[<span class="dv">176</span>,]</span>
+<span id="cb628-2"><a href="variable-selection.html#cb628-2" tabindex="-1"></a>ChemicalManufacturingProcess <span class="ot">&lt;-</span> ChemicalManufacturingProcess[<span class="sc">-</span><span class="dv">176</span>,]</span></code></pre></div>
+<p>We’ll do Johnson-Lindenstrauss dimension reduction followed by regression. We’ll choose either 2 or 3 dimensions to project onto, for simplicity.</p>
+<div class="sourceCode" id="cb629"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb629-1"><a href="variable-selection.html#cb629-1" tabindex="-1"></a><span class="co"># 1. If there are tuning parameters, set tuning parameter.</span></span>
+<span id="cb629-2"><a href="variable-selection.html#cb629-2" tabindex="-1"></a></span>
+<span id="cb629-3"><a href="variable-selection.html#cb629-3" tabindex="-1"></a>num_dim <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb629-4"><a href="variable-selection.html#cb629-4" tabindex="-1"></a></span>
+<span id="cb629-5"><a href="variable-selection.html#cb629-5" tabindex="-1"></a><span class="co"># 1. Split into test/train</span></span>
+<span id="cb629-6"><a href="variable-selection.html#cb629-6" tabindex="-1"></a></span>
+<span id="cb629-7"><a href="variable-selection.html#cb629-7" tabindex="-1"></a>train_indices <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(ChemicalManufacturingProcess), <span class="dv">135</span>)</span>
+<span id="cb629-8"><a href="variable-selection.html#cb629-8" tabindex="-1"></a>test_indices <span class="ot">&lt;-</span> (<span class="dv">1</span><span class="sc">:</span><span class="dv">175</span>)[<span class="sc">-</span>train_indices]</span>
+<span id="cb629-9"><a href="variable-selection.html#cb629-9" tabindex="-1"></a>train_data <span class="ot">&lt;-</span> ChemicalManufacturingProcess[train_indices,]</span>
+<span id="cb629-10"><a href="variable-selection.html#cb629-10" tabindex="-1"></a>test_data <span class="ot">&lt;-</span> ChemicalManufacturingProcess[test_indices,]</span>
+<span id="cb629-11"><a href="variable-selection.html#cb629-11" tabindex="-1"></a></span>
+<span id="cb629-12"><a href="variable-selection.html#cb629-12" tabindex="-1"></a><span class="co"># 2. Preprocess train based only on train. We only want to do this for the predictors.</span></span>
+<span id="cb629-13"><a href="variable-selection.html#cb629-13" tabindex="-1"></a></span>
+<span id="cb629-14"><a href="variable-selection.html#cb629-14" tabindex="-1"></a>train_predictors <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">select</span>(train_data, <span class="sc">-</span>Yield))</span>
+<span id="cb629-15"><a href="variable-selection.html#cb629-15" tabindex="-1"></a>train_response <span class="ot">&lt;-</span> train_data<span class="sc">$</span>Yield</span>
+<span id="cb629-16"><a href="variable-selection.html#cb629-16" tabindex="-1"></a>pre_model <span class="ot">&lt;-</span> <span class="fu">preProcess</span>(<span class="at">x =</span> train_predictors, </span>
+<span id="cb629-17"><a href="variable-selection.html#cb629-17" tabindex="-1"></a>                        <span class="at">method =</span> <span class="fu">c</span>(<span class="st">&quot;center&quot;</span>, </span>
+<span id="cb629-18"><a href="variable-selection.html#cb629-18" tabindex="-1"></a>                                   <span class="st">&quot;scale&quot;</span>, </span>
+<span id="cb629-19"><a href="variable-selection.html#cb629-19" tabindex="-1"></a>                                   <span class="st">&quot;medianImpute&quot;</span>, </span>
+<span id="cb629-20"><a href="variable-selection.html#cb629-20" tabindex="-1"></a>                                   <span class="st">&quot;nzv&quot;</span>))</span>
+<span id="cb629-21"><a href="variable-selection.html#cb629-21" tabindex="-1"></a>train_predictors <span class="ot">&lt;-</span> <span class="fu">predict</span>(pre_model, <span class="at">newdata =</span> train_predictors)</span>
+<span id="cb629-22"><a href="variable-selection.html#cb629-22" tabindex="-1"></a></span>
+<span id="cb629-23"><a href="variable-selection.html#cb629-23" tabindex="-1"></a><span class="co"># 3. Build model.</span></span>
+<span id="cb629-24"><a href="variable-selection.html#cb629-24" tabindex="-1"></a></span>
+<span id="cb629-25"><a href="variable-selection.html#cb629-25" tabindex="-1"></a>jl_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="fu">ncol</span>(train_predictors) <span class="sc">*</span> num_dim), <span class="at">ncol =</span> num_dim)</span>
+<span id="cb629-26"><a href="variable-selection.html#cb629-26" tabindex="-1"></a>projected_predictors <span class="ot">&lt;-</span> train_predictors <span class="sc">%*%</span> jl_matrix</span>
+<span id="cb629-27"><a href="variable-selection.html#cb629-27" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(train_response <span class="sc">~</span> ., <span class="at">data =</span> <span class="fu">as.data.frame</span>(projected_predictors))</span>
+<span id="cb629-28"><a href="variable-selection.html#cb629-28" tabindex="-1"></a></span>
+<span id="cb629-29"><a href="variable-selection.html#cb629-29" tabindex="-1"></a><span class="co"># 4. Process test based on the preprocessing model from 2.</span></span>
+<span id="cb629-30"><a href="variable-selection.html#cb629-30" tabindex="-1"></a></span>
+<span id="cb629-31"><a href="variable-selection.html#cb629-31" tabindex="-1"></a>test_predictors <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">select</span>(test_data, <span class="sc">-</span><span class="st">&quot;Yield&quot;</span>))</span>
+<span id="cb629-32"><a href="variable-selection.html#cb629-32" tabindex="-1"></a>test_response <span class="ot">&lt;-</span> test_data<span class="sc">$</span>Yield</span>
+<span id="cb629-33"><a href="variable-selection.html#cb629-33" tabindex="-1"></a>test_predictors <span class="ot">&lt;-</span> <span class="fu">predict</span>(pre_model, <span class="at">newdata =</span> test_predictors)</span>
+<span id="cb629-34"><a href="variable-selection.html#cb629-34" tabindex="-1"></a></span>
+<span id="cb629-35"><a href="variable-selection.html#cb629-35" tabindex="-1"></a></span>
+<span id="cb629-36"><a href="variable-selection.html#cb629-36" tabindex="-1"></a><span class="co"># 5. Predict response from model built in 3.</span></span>
+<span id="cb629-37"><a href="variable-selection.html#cb629-37" tabindex="-1"></a></span>
+<span id="cb629-38"><a href="variable-selection.html#cb629-38" tabindex="-1"></a>test_projected <span class="ot">&lt;-</span> test_predictors <span class="sc">%*%</span> jl_matrix</span>
+<span id="cb629-39"><a href="variable-selection.html#cb629-39" tabindex="-1"></a>test_response_model <span class="ot">&lt;-</span> <span class="fu">predict</span>(mod, <span class="at">newdata =</span> <span class="fu">as.data.frame</span>(test_projected))</span>
+<span id="cb629-40"><a href="variable-selection.html#cb629-40" tabindex="-1"></a></span>
+<span id="cb629-41"><a href="variable-selection.html#cb629-41" tabindex="-1"></a><span class="co"># 6. Compute error</span></span>
+<span id="cb629-42"><a href="variable-selection.html#cb629-42" tabindex="-1"></a></span>
+<span id="cb629-43"><a href="variable-selection.html#cb629-43" tabindex="-1"></a>error <span class="ot">&lt;-</span> test_response_model <span class="sc">-</span> test_response</span>
+<span id="cb629-44"><a href="variable-selection.html#cb629-44" tabindex="-1"></a><span class="fu">mean</span>(error<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div>
+<pre><code>## [1] 4.157727</code></pre>
+<div class="sourceCode" id="cb631"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb631-1"><a href="variable-selection.html#cb631-1" tabindex="-1"></a><span class="co"># 7. Repeat 1-6 100-ish times.</span></span>
+<span id="cb631-2"><a href="variable-selection.html#cb631-2" tabindex="-1"></a></span>
+<span id="cb631-3"><a href="variable-selection.html#cb631-3" tabindex="-1"></a>lgocv_errors <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">100</span>, {</span>
+<span id="cb631-4"><a href="variable-selection.html#cb631-4" tabindex="-1"></a>  train_indices <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(ChemicalManufacturingProcess), <span class="dv">135</span>)</span>
+<span id="cb631-5"><a href="variable-selection.html#cb631-5" tabindex="-1"></a>  test_indices <span class="ot">&lt;-</span> (<span class="dv">1</span><span class="sc">:</span><span class="dv">175</span>)[<span class="sc">-</span>train_indices]</span>
+<span id="cb631-6"><a href="variable-selection.html#cb631-6" tabindex="-1"></a>  train_data <span class="ot">&lt;-</span> ChemicalManufacturingProcess[train_indices,]</span>
+<span id="cb631-7"><a href="variable-selection.html#cb631-7" tabindex="-1"></a>  test_data <span class="ot">&lt;-</span> ChemicalManufacturingProcess[test_indices,]</span>
+<span id="cb631-8"><a href="variable-selection.html#cb631-8" tabindex="-1"></a>  </span>
+<span id="cb631-9"><a href="variable-selection.html#cb631-9" tabindex="-1"></a>  train_predictors <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">select</span>(train_data, <span class="sc">-</span>Yield))</span>
+<span id="cb631-10"><a href="variable-selection.html#cb631-10" tabindex="-1"></a>  train_response <span class="ot">&lt;-</span> train_data<span class="sc">$</span>Yield</span>
+<span id="cb631-11"><a href="variable-selection.html#cb631-11" tabindex="-1"></a>  pre_model <span class="ot">&lt;-</span> <span class="fu">preProcess</span>(<span class="at">x =</span> train_predictors, </span>
+<span id="cb631-12"><a href="variable-selection.html#cb631-12" tabindex="-1"></a>                          <span class="at">method =</span> <span class="fu">c</span>(<span class="st">&quot;center&quot;</span>, </span>
+<span id="cb631-13"><a href="variable-selection.html#cb631-13" tabindex="-1"></a>                                     <span class="st">&quot;scale&quot;</span>, </span>
+<span id="cb631-14"><a href="variable-selection.html#cb631-14" tabindex="-1"></a>                                     <span class="st">&quot;medianImpute&quot;</span>, </span>
+<span id="cb631-15"><a href="variable-selection.html#cb631-15" tabindex="-1"></a>                                     <span class="st">&quot;nzv&quot;</span>))</span>
+<span id="cb631-16"><a href="variable-selection.html#cb631-16" tabindex="-1"></a>  train_predictors <span class="ot">&lt;-</span> <span class="fu">predict</span>(pre_model, <span class="at">newdata =</span> train_predictors)</span>
+<span id="cb631-17"><a href="variable-selection.html#cb631-17" tabindex="-1"></a>  </span>
+<span id="cb631-18"><a href="variable-selection.html#cb631-18" tabindex="-1"></a>  jl_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="fu">ncol</span>(train_predictors) <span class="sc">*</span> num_dim), <span class="at">ncol =</span> num_dim)</span>
+<span id="cb631-19"><a href="variable-selection.html#cb631-19" tabindex="-1"></a>  projected_predictors <span class="ot">&lt;-</span> train_predictors <span class="sc">%*%</span> jl_matrix</span>
+<span id="cb631-20"><a href="variable-selection.html#cb631-20" tabindex="-1"></a>  mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(train_response <span class="sc">~</span> ., <span class="at">data =</span> <span class="fu">as.data.frame</span>(projected_predictors))</span>
+<span id="cb631-21"><a href="variable-selection.html#cb631-21" tabindex="-1"></a>  </span>
+<span id="cb631-22"><a href="variable-selection.html#cb631-22" tabindex="-1"></a>  test_predictors <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">select</span>(test_data, <span class="sc">-</span><span class="st">&quot;Yield&quot;</span>))</span>
+<span id="cb631-23"><a href="variable-selection.html#cb631-23" tabindex="-1"></a>  test_response <span class="ot">&lt;-</span> test_data<span class="sc">$</span>Yield</span>
+<span id="cb631-24"><a href="variable-selection.html#cb631-24" tabindex="-1"></a>  test_predictors <span class="ot">&lt;-</span> <span class="fu">predict</span>(pre_model, <span class="at">newdata =</span> test_predictors)</span>
+<span id="cb631-25"><a href="variable-selection.html#cb631-25" tabindex="-1"></a>  </span>
+<span id="cb631-26"><a href="variable-selection.html#cb631-26" tabindex="-1"></a>  test_projected <span class="ot">&lt;-</span> test_predictors <span class="sc">%*%</span> jl_matrix</span>
+<span id="cb631-27"><a href="variable-selection.html#cb631-27" tabindex="-1"></a>  test_response_model <span class="ot">&lt;-</span> <span class="fu">predict</span>(mod, <span class="at">newdata =</span> <span class="fu">as.data.frame</span>(test_projected))</span>
+<span id="cb631-28"><a href="variable-selection.html#cb631-28" tabindex="-1"></a>  </span>
+<span id="cb631-29"><a href="variable-selection.html#cb631-29" tabindex="-1"></a>  error <span class="ot">&lt;-</span> test_response_model <span class="sc">-</span> test_response</span>
+<span id="cb631-30"><a href="variable-selection.html#cb631-30" tabindex="-1"></a>  <span class="fu">mean</span>(error<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb631-31"><a href="variable-selection.html#cb631-31" tabindex="-1"></a>})</span>
+<span id="cb631-32"><a href="variable-selection.html#cb631-32" tabindex="-1"></a></span>
+<span id="cb631-33"><a href="variable-selection.html#cb631-33" tabindex="-1"></a><span class="co"># 8. Take mean and standard deviation; that is the mean error estimate for this tuning parameter value.</span></span>
+<span id="cb631-34"><a href="variable-selection.html#cb631-34" tabindex="-1"></a></span>
+<span id="cb631-35"><a href="variable-selection.html#cb631-35" tabindex="-1"></a><span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(lgocv_errors), <span class="at">sdev =</span> <span class="fu">sd</span>(lgocv_errors))</span></code></pre></div>
+<pre><code>##     mean     sdev 
+## 5.482381 5.347087</code></pre>
+<div class="sourceCode" id="cb633"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb633-1"><a href="variable-selection.html#cb633-1" tabindex="-1"></a><span class="co"># 9. Repeat for next tuning parameter value.</span></span>
+<span id="cb633-2"><a href="variable-selection.html#cb633-2" tabindex="-1"></a></span>
+<span id="cb633-3"><a href="variable-selection.html#cb633-3" tabindex="-1"></a><span class="fu">sapply</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(num_dim) {</span>
+<span id="cb633-4"><a href="variable-selection.html#cb633-4" tabindex="-1"></a>  lgocv_errors <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">100</span>, {</span>
+<span id="cb633-5"><a href="variable-selection.html#cb633-5" tabindex="-1"></a>    train_indices <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(ChemicalManufacturingProcess), <span class="dv">135</span>)</span>
+<span id="cb633-6"><a href="variable-selection.html#cb633-6" tabindex="-1"></a>    test_indices <span class="ot">&lt;-</span> (<span class="dv">1</span><span class="sc">:</span><span class="dv">175</span>)[<span class="sc">-</span>train_indices]</span>
+<span id="cb633-7"><a href="variable-selection.html#cb633-7" tabindex="-1"></a>    train_data <span class="ot">&lt;-</span> ChemicalManufacturingProcess[train_indices,]</span>
+<span id="cb633-8"><a href="variable-selection.html#cb633-8" tabindex="-1"></a>    test_data <span class="ot">&lt;-</span> ChemicalManufacturingProcess[test_indices,]</span>
+<span id="cb633-9"><a href="variable-selection.html#cb633-9" tabindex="-1"></a>    </span>
+<span id="cb633-10"><a href="variable-selection.html#cb633-10" tabindex="-1"></a>    train_predictors <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">select</span>(train_data, <span class="sc">-</span>Yield))</span>
+<span id="cb633-11"><a href="variable-selection.html#cb633-11" tabindex="-1"></a>    train_response <span class="ot">&lt;-</span> train_data<span class="sc">$</span>Yield</span>
+<span id="cb633-12"><a href="variable-selection.html#cb633-12" tabindex="-1"></a>    pre_model <span class="ot">&lt;-</span> <span class="fu">preProcess</span>(<span class="at">x =</span> train_predictors, </span>
+<span id="cb633-13"><a href="variable-selection.html#cb633-13" tabindex="-1"></a>                            <span class="at">method =</span> <span class="fu">c</span>(<span class="st">&quot;center&quot;</span>, </span>
+<span id="cb633-14"><a href="variable-selection.html#cb633-14" tabindex="-1"></a>                                       <span class="st">&quot;scale&quot;</span>, </span>
+<span id="cb633-15"><a href="variable-selection.html#cb633-15" tabindex="-1"></a>                                       <span class="st">&quot;medianImpute&quot;</span>, </span>
+<span id="cb633-16"><a href="variable-selection.html#cb633-16" tabindex="-1"></a>                                       <span class="st">&quot;nzv&quot;</span>))</span>
+<span id="cb633-17"><a href="variable-selection.html#cb633-17" tabindex="-1"></a>    train_predictors <span class="ot">&lt;-</span> <span class="fu">predict</span>(pre_model, <span class="at">newdata =</span> train_predictors)</span>
+<span id="cb633-18"><a href="variable-selection.html#cb633-18" tabindex="-1"></a>    </span>
+<span id="cb633-19"><a href="variable-selection.html#cb633-19" tabindex="-1"></a>    jl_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="fu">ncol</span>(train_predictors) <span class="sc">*</span> num_dim), <span class="at">ncol =</span> num_dim)</span>
+<span id="cb633-20"><a href="variable-selection.html#cb633-20" tabindex="-1"></a>    projected_predictors <span class="ot">&lt;-</span> train_predictors <span class="sc">%*%</span> jl_matrix</span>
+<span id="cb633-21"><a href="variable-selection.html#cb633-21" tabindex="-1"></a>    mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(train_response <span class="sc">~</span> ., <span class="at">data =</span> <span class="fu">as.data.frame</span>(projected_predictors))</span>
+<span id="cb633-22"><a href="variable-selection.html#cb633-22" tabindex="-1"></a>    </span>
+<span id="cb633-23"><a href="variable-selection.html#cb633-23" tabindex="-1"></a>    test_predictors <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">select</span>(test_data, <span class="sc">-</span><span class="st">&quot;Yield&quot;</span>))</span>
+<span id="cb633-24"><a href="variable-selection.html#cb633-24" tabindex="-1"></a>    test_response <span class="ot">&lt;-</span> test_data<span class="sc">$</span>Yield</span>
+<span id="cb633-25"><a href="variable-selection.html#cb633-25" tabindex="-1"></a>    test_predictors <span class="ot">&lt;-</span> <span class="fu">predict</span>(pre_model, <span class="at">newdata =</span> test_predictors)</span>
+<span id="cb633-26"><a href="variable-selection.html#cb633-26" tabindex="-1"></a>    </span>
+<span id="cb633-27"><a href="variable-selection.html#cb633-27" tabindex="-1"></a>    test_projected <span class="ot">&lt;-</span> test_predictors <span class="sc">%*%</span> jl_matrix</span>
+<span id="cb633-28"><a href="variable-selection.html#cb633-28" tabindex="-1"></a>    test_response_model <span class="ot">&lt;-</span> <span class="fu">predict</span>(mod, <span class="at">newdata =</span> <span class="fu">as.data.frame</span>(test_projected))</span>
+<span id="cb633-29"><a href="variable-selection.html#cb633-29" tabindex="-1"></a>    </span>
+<span id="cb633-30"><a href="variable-selection.html#cb633-30" tabindex="-1"></a>    error <span class="ot">&lt;-</span> test_response_model <span class="sc">-</span> test_response</span>
+<span id="cb633-31"><a href="variable-selection.html#cb633-31" tabindex="-1"></a>    <span class="fu">mean</span>(error<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb633-32"><a href="variable-selection.html#cb633-32" tabindex="-1"></a>  })</span>
+<span id="cb633-33"><a href="variable-selection.html#cb633-33" tabindex="-1"></a>  </span>
+<span id="cb633-34"><a href="variable-selection.html#cb633-34" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(lgocv_errors), <span class="at">sdev =</span> <span class="fu">sd</span>(lgocv_errors))</span>
+<span id="cb633-35"><a href="variable-selection.html#cb633-35" tabindex="-1"></a>})</span></code></pre></div>
+<pre><code>##          [,1]     [,2]
+## mean 6.187856 10.17358
+## sdev 9.245854 16.81770</code></pre>
+<div class="sourceCode" id="cb635"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb635-1"><a href="variable-selection.html#cb635-1" tabindex="-1"></a><span class="co"># 10. Choose the tuning parameter value that gives the simplest model that is within one standard deviation of the smallest mean error. </span></span></code></pre></div>
+<p>By inspection, the model with <code>num_dim = 2</code> is the one that is the best.</p>
+</div>
+</div>
+<div id="interactions" class="section level2 hasAnchor" number="6.4">
+<h2><span class="header-section-number">6.4</span> Interactions<a href="variable-selection.html#interactions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>This section is long, long overdue. We are going to talk about interactions between variables. It can, and often does, happen that the values of one variable affect the way that another variable affects the response. For example, suppose you were measuring how fast honey emtpied out of a jar as a function of the angle that the jar is held and the ambient temperature. It is reasonable to wonder whether at higher temperatures, the angle will have a different effect on how quickly the honey drains than at lower temperatures. Another example would be estimating the drop in blood pressure per mg of drug pressure medicine administered. It is reasonable to wonder whether the rate at which drug pressure drops is different per mg for women than for men, or for children than for adults.</p>
+<p>The interpretation of interactions is different depending on whether the predictors are categorical or numeric.</p>
+<ol style="list-style-type: decimal">
+<li><p>For categorical data, interactions are an effect for each combination of the levels in the categorical data.</p></li>
+<li><p>For an interaction between categorical and numeric, interactions indicate a different slope for each of the levels of the categorical data.</p></li>
+<li><p>For interaction between numeric data, the interactions indicate that at a fixed level of the first variable, there is a linear response in the other variable, but the slope of that response changes with the value of the first variable. In practice, interaction between numeric variables creates a new variable which is the product of the two variables, and includes that in the regression model.</p></li>
+</ol>
+<p>Let’s look at an example from ISwR.</p>
+<div class="sourceCode" id="cb636"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb636-1"><a href="variable-selection.html#cb636-1" tabindex="-1"></a>juul <span class="ot">&lt;-</span> ISwR<span class="sc">::</span>juul</span></code></pre></div>
+<p>We model <code>igf</code> on age, sex and tanner level, with interactions.</p>
+<div class="sourceCode" id="cb637"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb637-1"><a href="variable-selection.html#cb637-1" tabindex="-1"></a>juul<span class="sc">$</span>sex <span class="ot">&lt;-</span> <span class="fu">factor</span>(juul<span class="sc">$</span>sex, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;boy&quot;</span>, <span class="st">&quot;girl&quot;</span>))</span>
+<span id="cb637-2"><a href="variable-selection.html#cb637-2" tabindex="-1"></a>juul<span class="sc">$</span>tanner <span class="ot">&lt;-</span> <span class="fu">factor</span>(juul<span class="sc">$</span>tanner)</span>
+<span id="cb637-3"><a href="variable-selection.html#cb637-3" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(igf1 <span class="sc">~</span> (age <span class="sc">+</span> sex <span class="sc">+</span> tanner)<span class="sc">^</span><span class="dv">2</span>, <span class="at">data =</span> juul) <span class="co">#includes all interactions between pairs of variables</span></span>
+<span id="cb637-4"><a href="variable-selection.html#cb637-4" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = igf1 ~ (age + sex + tanner)^2, data = juul)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -305.19  -64.79   -8.88   50.38  420.47 
+## 
+## Coefficients:
+##                 Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)       79.825     17.421   4.582 5.36e-06 ***
+## age               14.886      2.003   7.433 2.82e-13 ***
+## sexgirl          -32.310     31.855  -1.014 0.310761    
+## tanner2          -69.726    130.855  -0.533 0.594291    
+## tanner3          425.075    214.842   1.979 0.048221 *  
+## tanner4          783.073    157.695   4.966 8.42e-07 ***
+## tanner5          679.253     59.014  11.510  &lt; 2e-16 ***
+## age:sexgirl        5.666      3.445   1.645 0.100421    
+## age:tanner2       10.759     10.099   1.065 0.287051    
+## age:tanner3      -17.335     15.563  -1.114 0.265680    
+## age:tanner4      -36.425     10.118  -3.600 0.000338 ***
+## age:tanner5      -31.978      3.511  -9.108  &lt; 2e-16 ***
+## sexgirl:tanner2   19.597     33.013   0.594 0.552938    
+## sexgirl:tanner3  -15.709     44.616  -0.352 0.724870    
+## sexgirl:tanner4 -113.617     40.775  -2.786 0.005459 ** 
+## sexgirl:tanner5  -49.724     35.264  -1.410 0.158933    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 105 on 776 degrees of freedom
+##   (547 observations deleted due to missingness)
+## Multiple R-squared:  0.6382, Adjusted R-squared:  0.6312 
+## F-statistic: 91.26 on 15 and 776 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Let’s go through the interpretations. Note that if we do not re-code <code>sex</code> and <code>tanner</code> as categorical, then our output would have been quite different.</p>
+<p>Looking at the <code>age</code> coefficient, we would be tempted to say that the <code>igf</code> level is associated with an increase of 14.887 micrograms/liter for each year of age increase. However, that can (read: would) be misleading. Looking further down the list, we see coefficients associated with <code>age:sex</code> and <code>age:tanner</code>. So, the increase of 14.886 per year is <strong>for boys</strong> in <strong>tanner level 1</strong>.</p>
+<p>If we look at <code>age:sexgirl</code>, we see that we need to add 5.666 to the estimate for boys in order to get the estimate for the <code>igf</code> level increase per year. In other words, for girls (in tanner level 1), the increase is <code>14.866 + 5.666 = 20.532</code>. R has as its default that it reports the values for the first level of the factor, and then the interactions indicate the change from that first value for the other levels. It chose <code>boys</code> because we listed <code>boy</code> before <code>girl</code> in the <code>levels</code> argument to <code>factor</code>. It is important to know which level R is considering the base level for interpreting the coefficients!</p>
+<p>Note that we didn’t specify the levels in the <code>tanner</code> variable. In this case, R chooses a natural order for the levels. If the data is numeric, it will arrange them in increasing order, and if the data is character, then it will arrange them in alphabetical order. If we want to be sure, we can type <code>levels(juul$tanner)</code> and it will give us the labels of the levels in the order that it has them.</p>
+<div class="sourceCode" id="cb639"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb639-1"><a href="variable-selection.html#cb639-1" tabindex="-1"></a><span class="fu">levels</span>(juul<span class="sc">$</span>tanner)</span></code></pre></div>
+<pre><code>## [1] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; &quot;5&quot;</code></pre>
+<p>We see that tanner level 1 is the “base” level. So, the <code>igf</code> increases by 14.886 per year for <strong>boys</strong> in <strong>tanner 1</strong>. Girls in tanner 2 have a an estimated increase of 14.886 + 5.666 + 10.759 per year. (Note: this sounds like I am saying that for an individual girl, she would expect to see her igf1 level increase by this much per year. That is not what I mean. I mean that each extra year is associated with igf1 levels that are 31.291 micrograms/liter higher. What is the difference?)</p>
+<p>Now, let’s estimate the mean <code>igf</code> level for girls in tanner 2 who are 12 years old. It would be</p>
+<p><span class="math display">\[
+79.825 -32.310 - 69.726 + (14.886124 + 5.666282 + 10.758917 ) * 12 + 19.597 =  373.1219
+\]</span></p>
+<p>I have used more sig digits in the slope of age because we are multiplying by 12, and otherwise it doesn’t match the answer given by predict very well.</p>
+<div class="sourceCode" id="cb641"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb641-1"><a href="variable-selection.html#cb641-1" tabindex="-1"></a><span class="fu">predict</span>(mod, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">age =</span> <span class="dv">12</span>,</span>
+<span id="cb641-2"><a href="variable-selection.html#cb641-2" tabindex="-1"></a>                                  <span class="at">sex =</span> <span class="st">&quot;girl&quot;</span>,</span>
+<span id="cb641-3"><a href="variable-selection.html#cb641-3" tabindex="-1"></a>                                  <span class="at">tanner  =</span> <span class="st">&quot;2&quot;</span>))</span></code></pre></div>
+<pre><code>##        1 
+## 373.1214</code></pre>
+<p>Now let’s look at significance. Dalgaard writes “The exact definition of the interaction terms and the interpretation of their associated regression coefficients can be elusive. Some peculiar things happen if an interaction term is present but one or more of the main effects are missing.” Note that if we re-do the model with the main effect <code>sex</code> missing, it simply reparametrizes the model. The <span class="math inline">\(R^2\)</span> and <span class="math inline">\(F\)</span> statistic are exactly the same.</p>
+<div class="sourceCode" id="cb643"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb643-1"><a href="variable-selection.html#cb643-1" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(igf1 <span class="sc">~</span> age <span class="sc">+</span> tanner <span class="sc">+</span> age<span class="sc">:</span>tanner <span class="sc">+</span> sex<span class="sc">:</span>tanner <span class="sc">+</span> sex<span class="sc">:</span>age, <span class="at">data =</span> juul)</span>
+<span id="cb643-2"><a href="variable-selection.html#cb643-2" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = igf1 ~ age + tanner + age:tanner + sex:tanner + 
+##     sex:age, data = juul)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -305.19  -64.79   -8.88   50.38  420.47 
+## 
+## Coefficients:
+##                 Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)       79.825     17.421   4.582 5.36e-06 ***
+## age               14.886      2.003   7.433 2.82e-13 ***
+## tanner2          -69.726    130.855  -0.533 0.594291    
+## tanner3          425.075    214.842   1.979 0.048221 *  
+## tanner4          783.073    157.695   4.966 8.42e-07 ***
+## tanner5          679.253     59.014  11.510  &lt; 2e-16 ***
+## age:tanner2       10.759     10.099   1.065 0.287051    
+## age:tanner3      -17.335     15.563  -1.114 0.265680    
+## age:tanner4      -36.425     10.118  -3.600 0.000338 ***
+## age:tanner5      -31.978      3.511  -9.108  &lt; 2e-16 ***
+## tanner1:sexgirl  -32.310     31.855  -1.014 0.310761    
+## tanner2:sexgirl  -12.713     50.409  -0.252 0.800957    
+## tanner3:sexgirl  -48.019     59.208  -0.811 0.417602    
+## tanner4:sexgirl -145.927     60.031  -2.431 0.015288 *  
+## tanner5:sexgirl  -82.034     61.259  -1.339 0.180921    
+## age:sexgirl        5.666      3.445   1.645 0.100421    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 105 on 776 degrees of freedom
+##   (547 observations deleted due to missingness)
+## Multiple R-squared:  0.6382, Adjusted R-squared:  0.6312 
+## F-statistic: 91.26 on 15 and 776 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Let’s remind ourselves what the original model summary was.</p>
+<div class="sourceCode" id="cb645"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb645-1"><a href="variable-selection.html#cb645-1" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = igf1 ~ (age + sex + tanner)^2, data = juul)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -305.19  -64.79   -8.88   50.38  420.47 
+## 
+## Coefficients:
+##                 Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)       79.825     17.421   4.582 5.36e-06 ***
+## age               14.886      2.003   7.433 2.82e-13 ***
+## sexgirl          -32.310     31.855  -1.014 0.310761    
+## tanner2          -69.726    130.855  -0.533 0.594291    
+## tanner3          425.075    214.842   1.979 0.048221 *  
+## tanner4          783.073    157.695   4.966 8.42e-07 ***
+## tanner5          679.253     59.014  11.510  &lt; 2e-16 ***
+## age:sexgirl        5.666      3.445   1.645 0.100421    
+## age:tanner2       10.759     10.099   1.065 0.287051    
+## age:tanner3      -17.335     15.563  -1.114 0.265680    
+## age:tanner4      -36.425     10.118  -3.600 0.000338 ***
+## age:tanner5      -31.978      3.511  -9.108  &lt; 2e-16 ***
+## sexgirl:tanner2   19.597     33.013   0.594 0.552938    
+## sexgirl:tanner3  -15.709     44.616  -0.352 0.724870    
+## sexgirl:tanner4 -113.617     40.775  -2.786 0.005459 ** 
+## sexgirl:tanner5  -49.724     35.264  -1.410 0.158933    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 105 on 776 degrees of freedom
+##   (547 observations deleted due to missingness)
+## Multiple R-squared:  0.6382, Adjusted R-squared:  0.6312 
+## F-statistic: 91.26 on 15 and 776 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>We see a significant interaction between sex and tanner, between age and tanner, and but not between age and sex. It might be reasonable to remove the interaction term between age and sex. I don’t normally use <code>update</code>, but now would be a good time to start. Here are two ways of specifying the model.</p>
+<div class="sourceCode" id="cb647"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb647-1"><a href="variable-selection.html#cb647-1" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(igf1 <span class="sc">~</span> age <span class="sc">+</span> sex <span class="sc">+</span> tanner <span class="sc">+</span> age<span class="sc">:</span>tanner <span class="sc">+</span> sex<span class="sc">:</span>tanner, <span class="at">data =</span> juul)</span>
+<span id="cb647-2"><a href="variable-selection.html#cb647-2" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = igf1 ~ age + sex + tanner + age:tanner + sex:tanner, 
+##     data = juul)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -304.62  -65.53  -11.11   49.80  420.05 
+## 
+## Coefficients:
+##                 Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)      72.9654    16.9334   4.309 1.85e-05 ***
+## age              15.7618     1.9329   8.155 1.40e-15 ***
+## sexgirl          15.9878    12.3617   1.293 0.196278    
+## tanner2         -89.9559   130.4190  -0.690 0.490560    
+## tanner3         413.8241   214.9690   1.925 0.054589 .  
+## tanner4         752.8186   156.7903   4.801 1.89e-06 ***
+## tanner5         592.5482    26.5562  22.313  &lt; 2e-16 ***
+## age:tanner2      11.9745    10.0830   1.188 0.235354    
+## age:tanner3     -16.8972    15.5773  -1.085 0.278377    
+## age:tanner4     -34.9263    10.0877  -3.462 0.000565 ***
+## age:tanner5     -27.4666     2.1939 -12.520  &lt; 2e-16 ***
+## sexgirl:tanner2  40.3612    30.5379   1.322 0.186665    
+## sexgirl:tanner3   6.8416    42.5043   0.161 0.872165    
+## sexgirl:tanner4 -79.1319    35.0095  -2.260 0.024079 *  
+## sexgirl:tanner5   0.6685    17.4808   0.038 0.969505    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 105.1 on 777 degrees of freedom
+##   (547 observations deleted due to missingness)
+## Multiple R-squared:  0.637,  Adjusted R-squared:  0.6304 
+## F-statistic: 97.38 on 14 and 777 DF,  p-value: &lt; 2.2e-16</code></pre>
+<div class="sourceCode" id="cb649"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb649-1"><a href="variable-selection.html#cb649-1" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">update</span>(mod, <span class="at">formula. =</span> . <span class="sc">~</span>. <span class="sc">-</span>age<span class="sc">:</span>sex)</span>
+<span id="cb649-2"><a href="variable-selection.html#cb649-2" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = igf1 ~ age + sex + tanner + age:tanner + sex:tanner, 
+##     data = juul)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -304.62  -65.53  -11.11   49.80  420.05 
+## 
+## Coefficients:
+##                 Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)      72.9654    16.9334   4.309 1.85e-05 ***
+## age              15.7618     1.9329   8.155 1.40e-15 ***
+## sexgirl          15.9878    12.3617   1.293 0.196278    
+## tanner2         -89.9559   130.4190  -0.690 0.490560    
+## tanner3         413.8241   214.9690   1.925 0.054589 .  
+## tanner4         752.8186   156.7903   4.801 1.89e-06 ***
+## tanner5         592.5482    26.5562  22.313  &lt; 2e-16 ***
+## age:tanner2      11.9745    10.0830   1.188 0.235354    
+## age:tanner3     -16.8972    15.5773  -1.085 0.278377    
+## age:tanner4     -34.9263    10.0877  -3.462 0.000565 ***
+## age:tanner5     -27.4666     2.1939 -12.520  &lt; 2e-16 ***
+## sexgirl:tanner2  40.3612    30.5379   1.322 0.186665    
+## sexgirl:tanner3   6.8416    42.5043   0.161 0.872165    
+## sexgirl:tanner4 -79.1319    35.0095  -2.260 0.024079 *  
+## sexgirl:tanner5   0.6685    17.4808   0.038 0.969505    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 105.1 on 777 degrees of freedom
+##   (547 observations deleted due to missingness)
+## Multiple R-squared:  0.637,  Adjusted R-squared:  0.6304 
+## F-statistic: 97.38 on 14 and 777 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>At this point, the interaction between sex and tanner is significant, as is the interaction between age and tanner. I would not proceed any further with reducing the model. I tend to only consider removing main effect terms if all of the interactions associated with those terms are not significant. Note also that this is the default behavior of <code>stepAIC</code>, which can also be applied to models with interactions.</p>
+<div class="sourceCode" id="cb651"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb651-1"><a href="variable-selection.html#cb651-1" tabindex="-1"></a>MASS<span class="sc">::</span><span class="fu">stepAIC</span>(mod)</span></code></pre></div>
+<pre><code>## Start:  AIC=7387.28
+## igf1 ~ (age + sex + tanner)^2
+## 
+##              Df Sum of Sq     RSS    AIC
+## &lt;none&gt;                    8550733 7387.3
+## - age:sex     1     29810 8580542 7388.0
+## - sex:tanner  4    114024 8664757 7389.8
+## - age:tanner  4   1036392 9587125 7469.9</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = igf1 ~ (age + sex + tanner)^2, data = juul)
+## 
+## Coefficients:
+##     (Intercept)              age          sexgirl          tanner2  
+##          79.825           14.886          -32.310          -69.726  
+##         tanner3          tanner4          tanner5      age:sexgirl  
+##         425.075          783.073          679.253            5.666  
+##     age:tanner2      age:tanner3      age:tanner4      age:tanner5  
+##          10.759          -17.335          -36.425          -31.978  
+## sexgirl:tanner2  sexgirl:tanner3  sexgirl:tanner4  sexgirl:tanner5  
+##          19.597          -15.709         -113.617          -49.724</code></pre>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="regression-predictive-models.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="non-linear-regression-models.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": {
+    "github": false,
+    "facebook": true,
+    "twitter": true,
+    "linkedin": false,
+    "weibo": false,
+    "instapaper": false,
+    "vk": false,
+    "whatsapp": false,
+    "all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+  },
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": null,
+    "text": null
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": null,
+    "text": null
+  },
+  "download": null,
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "subsection"
+  }
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 4 Intro to Predictive Modeling | Applied Regression with R</title>
+  <meta name="description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  <meta name="generator" content="bookdown 0.46 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 4 Intro to Predictive Modeling | Applied Regression with R" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 4 Intro to Predictive Modeling | Applied Regression with R" />
+  
+  <meta name="twitter:description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  
+
+<meta name="author" content="Darrin Speegle" />
+
+
+<meta name="date" content="2026-02-16" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon" />
+<link rel="prev" href="multiple-linear-regression.html"/>
+<link rel="next" href="regression-predictive-models.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<link href="libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet" />
+<script src="libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="libs/plotly-binding-4.11.0/plotly.js"></script>
+<script src="libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+<link href="libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+
+
+<style type="text/css">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Applied Regression with R<br />&nbsp; Notes From STAT 4870/5087</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Preface</a></li>
+<li class="chapter" data-level="2" data-path="classicaltheory.html"><a href="classicaltheory.html"><i class="fa fa-check"></i><b>2</b> Classical Theory of Simple Linear Regression</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="classicaltheory.html"><a href="classicaltheory.html#review"><i class="fa fa-check"></i><b>2.1</b> Review</a>
+<ul>
+<li class="chapter" data-level="2.1.1" data-path="classicaltheory.html"><a href="classicaltheory.html#estimating-means-and-standard-deviations"><i class="fa fa-check"></i><b>2.1.1</b> Estimating Means and standard deviations</a></li>
+<li class="chapter" data-level="2.1.2" data-path="classicaltheory.html"><a href="classicaltheory.html#estimating-the-density-of-an-rv"><i class="fa fa-check"></i><b>2.1.2</b> Estimating the density of an rv</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="classicaltheory.html"><a href="classicaltheory.html#linear-regression-overview"><i class="fa fa-check"></i><b>2.2</b> Linear Regression Overview</a></li>
+<li class="chapter" data-level="2.3" data-path="classicaltheory.html"><a href="classicaltheory.html#linear-regression-with-no-intercept"><i class="fa fa-check"></i><b>2.3</b> Linear Regression with no intercept</a></li>
+<li class="chapter" data-level="2.4" data-path="classicaltheory.html"><a href="classicaltheory.html#the-full-model"><i class="fa fa-check"></i><b>2.4</b> The full model</a>
+<ul>
+<li class="chapter" data-level="2.4.1" data-path="classicaltheory.html"><a href="classicaltheory.html#hypothesis-test-interlude"><i class="fa fa-check"></i><b>2.4.1</b> Hypothesis Test Interlude</a></li>
+</ul></li>
+<li class="chapter" data-level="2.5" data-path="classicaltheory.html"><a href="classicaltheory.html#using-different-loss-functions"><i class="fa fa-check"></i><b>2.5</b> Using different loss functions</a></li>
+<li class="chapter" data-level="" data-path="classicaltheory.html"><a href="classicaltheory.html#vignette-a-dplyr-primer"><i class="fa fa-check"></i>Vignette: A dplyr primer</a></li>
+<li class="chapter" data-level="2.6" data-path="classicaltheory.html"><a href="classicaltheory.html#exercises"><i class="fa fa-check"></i><b>2.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html"><i class="fa fa-check"></i><b>3</b> Multiple Linear Regression</a>
+<ul>
+<li class="chapter" data-level="3.0.1" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#anova"><i class="fa fa-check"></i><b>3.0.1</b> Aside on multiple R squared and ANOVA</a></li>
+<li class="chapter" data-level="3.1" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#more-variable-selection-anova"><i class="fa fa-check"></i><b>3.1</b> More Variable Selection: ANOVA</a></li>
+<li class="chapter" data-level="3.2" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#predictions"><i class="fa fa-check"></i><b>3.2</b> Predictions</a></li>
+<li class="chapter" data-level="3.3" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#using-aic"><i class="fa fa-check"></i><b>3.3</b> Using AIC</a>
+<ul>
+<li class="chapter" data-level="3.3.1" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#likelihood-functions"><i class="fa fa-check"></i><b>3.3.1</b> Likelihood functions</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#exercises-1"><i class="fa fa-check"></i><b>3.4</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html"><i class="fa fa-check"></i><b>4</b> Intro to Predictive Modeling</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#comparingtwomodels"><i class="fa fa-check"></i><b>4.1</b> Comparing Two Models</a></li>
+<li class="chapter" data-level="4.2" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#a-brief-return-to-inference"><i class="fa fa-check"></i><b>4.2</b> A Brief Return to Inference</a></li>
+<li class="chapter" data-level="4.3" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#simulations-of-expected-mse"><i class="fa fa-check"></i><b>4.3</b> Simulations of Expected MSE</a>
+<ul>
+<li class="chapter" data-level="4.3.1" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#estimating-mse-and-bias-variance-tradeoff"><i class="fa fa-check"></i><b>4.3.1</b> Estimating MSE and Bias-Variance Tradeoff</a></li>
+<li class="chapter" data-level="4.3.2" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#estimating-mse-for-new-predictors-uniformly-sampled"><i class="fa fa-check"></i><b>4.3.2</b> Estimating MSE for new predictors uniformly sampled</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#bias-variance-trade-off"><i class="fa fa-check"></i><b>4.4</b> Bias Variance Trade-off</a></li>
+<li class="chapter" data-level="4.5" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#exercises-2"><i class="fa fa-check"></i><b>4.5</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html"><i class="fa fa-check"></i><b>5</b> Regression Predictive Models</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#preprocessing"><i class="fa fa-check"></i><b>5.1</b> Preprocessing</a></li>
+<li class="chapter" data-level="5.2" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#missing-data"><i class="fa fa-check"></i><b>5.2</b> Missing Data</a>
+<ul>
+<li class="chapter" data-level="5.2.1" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#predicting-when-a-level-is-missing-from-the-training-set"><i class="fa fa-check"></i><b>5.2.1</b> Predicting when a level is missing from the training set</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#correlated-predictors"><i class="fa fa-check"></i><b>5.3</b> Correlated Predictors</a></li>
+<li class="chapter" data-level="5.4" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#aside-on-pca"><i class="fa fa-check"></i><b>5.4</b> Aside on PCA</a></li>
+<li class="chapter" data-level="5.5" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#johnson-lindenstrauss-dimension-reduction"><i class="fa fa-check"></i><b>5.5</b> Johnson-Lindenstrauss Dimension Reduction</a></li>
+<li class="chapter" data-level="5.6" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#exercises-3"><i class="fa fa-check"></i><b>5.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="variable-selection.html"><a href="variable-selection.html"><i class="fa fa-check"></i><b>6</b> Variable Selection</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="variable-selection.html"><a href="variable-selection.html#partial-least-squares"><i class="fa fa-check"></i><b>6.1</b> Partial Least Squares</a>
+<ul>
+<li class="chapter" data-level="6.1.1" data-path="variable-selection.html"><a href="variable-selection.html#optional-pls-stuff"><i class="fa fa-check"></i><b>6.1.1</b> Optional PLS Stuff</a></li>
+</ul></li>
+<li class="chapter" data-level="6.2" data-path="variable-selection.html"><a href="variable-selection.html#ridgelasso-and-elastic-net"><i class="fa fa-check"></i><b>6.2</b> Ridge/Lasso and Elastic Net</a>
+<ul>
+<li class="chapter" data-level="6.2.1" data-path="variable-selection.html"><a href="variable-selection.html#ridge-regression"><i class="fa fa-check"></i><b>6.2.1</b> Ridge Regression</a></li>
+<li class="chapter" data-level="6.2.2" data-path="variable-selection.html"><a href="variable-selection.html#lasso"><i class="fa fa-check"></i><b>6.2.2</b> LASSO</a></li>
+</ul></li>
+<li class="chapter" data-level="6.3" data-path="variable-selection.html"><a href="variable-selection.html#step-aic"><i class="fa fa-check"></i><b>6.3</b> Step AIC</a>
+<ul>
+<li class="chapter" data-level="6.3.1" data-path="variable-selection.html"><a href="variable-selection.html#doing-lgocv-with-preprocessing"><i class="fa fa-check"></i><b>6.3.1</b> Doing LGOCV with preprocessing</a></li>
+</ul></li>
+<li class="chapter" data-level="6.4" data-path="variable-selection.html"><a href="variable-selection.html#interactions"><i class="fa fa-check"></i><b>6.4</b> Interactions</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html"><i class="fa fa-check"></i><b>7</b> Non-Linear Regression Models</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#support-vector-regression"><i class="fa fa-check"></i><b>7.1</b> Support Vector Regression</a>
+<ul>
+<li class="chapter" data-level="7.1.1" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#plot-twist"><i class="fa fa-check"></i><b>7.1.1</b> PLOT TWIST</a></li>
+</ul></li>
+<li class="chapter" data-level="7.2" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#k-nearest-neighbors"><i class="fa fa-check"></i><b>7.2</b> K Nearest Neighbors</a></li>
+<li class="chapter" data-level="7.3" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#exercises-4"><i class="fa fa-check"></i><b>7.3</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="tree-regression-models.html"><a href="tree-regression-models.html"><i class="fa fa-check"></i><b>8</b> Tree Regression Models</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="tree-regression-models.html"><a href="tree-regression-models.html#basic-regression-trees"><i class="fa fa-check"></i><b>8.1</b> Basic Regression Trees</a></li>
+<li class="chapter" data-level="8.2" data-path="tree-regression-models.html"><a href="tree-regression-models.html#regression-model-trees"><i class="fa fa-check"></i><b>8.2</b> Regression Model Trees</a>
+<ul>
+<li class="chapter" data-level="8.2.1" data-path="tree-regression-models.html"><a href="tree-regression-models.html#choosing-variable-to-split"><i class="fa fa-check"></i><b>8.2.1</b> Choosing Variable to Split</a></li>
+<li class="chapter" data-level="8.2.2" data-path="tree-regression-models.html"><a href="tree-regression-models.html#choosing-split-value"><i class="fa fa-check"></i><b>8.2.2</b> Choosing Split Value</a></li>
+<li class="chapter" data-level="8.2.3" data-path="tree-regression-models.html"><a href="tree-regression-models.html#predicting-values-smoothing"><i class="fa fa-check"></i><b>8.2.3</b> Predicting values (Smoothing)</a></li>
+<li class="chapter" data-level="8.2.4" data-path="tree-regression-models.html"><a href="tree-regression-models.html#using-r-functions"><i class="fa fa-check"></i><b>8.2.4</b> Using R functions</a></li>
+</ul></li>
+<li class="chapter" data-level="8.3" data-path="tree-regression-models.html"><a href="tree-regression-models.html#bagging"><i class="fa fa-check"></i><b>8.3</b> Bagging</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html"><i class="fa fa-check"></i><b>9</b> Generalized Linear Models</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#logistic-regression"><i class="fa fa-check"></i><b>9.1</b> Logistic Regression</a>
+<ul>
+<li class="chapter" data-level="9.1.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#maximum-likelihood-estimation"><i class="fa fa-check"></i><b>9.1.1</b> Maximum Likelihood Estimation</a></li>
+<li class="chapter" data-level="9.1.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#model-diagnostics"><i class="fa fa-check"></i><b>9.1.2</b> Model Diagnostics</a></li>
+<li class="chapter" data-level="9.1.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#case-study"><i class="fa fa-check"></i><b>9.1.3</b> Case Study</a></li>
+</ul></li>
+<li class="chapter" data-level="9.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#count-response-models"><i class="fa fa-check"></i><b>9.2</b> Count response models</a>
+<ul>
+<li class="chapter" data-level="9.2.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#overdispersion"><i class="fa fa-check"></i><b>9.2.1</b> Overdispersion</a></li>
+<li class="chapter" data-level="9.2.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#negative-binomial-regression"><i class="fa fa-check"></i><b>9.2.2</b> Negative Binomial Regression</a></li>
+</ul></li>
+<li class="chapter" data-level="9.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-and-zero-inflated-models"><i class="fa fa-check"></i><b>9.3</b> Zero-truncated and Zero-inflated models</a>
+<ul>
+<li class="chapter" data-level="9.3.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-poisson"><i class="fa fa-check"></i><b>9.3.1</b> Zero-truncated Poisson</a></li>
+<li class="chapter" data-level="9.3.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-negative-binomial"><i class="fa fa-check"></i><b>9.3.2</b> Zero-truncated Negative Binomial</a></li>
+<li class="chapter" data-level="9.3.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-inflated-poisson-and-negative-binomial"><i class="fa fa-check"></i><b>9.3.3</b> Zero-Inflated Poisson and Negative Binomial</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="lecture-notes.html"><a href="lecture-notes.html"><i class="fa fa-check"></i><b>10</b> Lecture Notes</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="lecture-notes.html"><a href="lecture-notes.html#january-27"><i class="fa fa-check"></i><b>10.1</b> January 27</a></li>
+<li class="chapter" data-level="10.2" data-path="lecture-notes.html"><a href="lecture-notes.html#february-3"><i class="fa fa-check"></i><b>10.2</b> February 3</a>
+<ul>
+<li class="chapter" data-level="10.2.1" data-path="lecture-notes.html"><a href="lecture-notes.html#simulating-data"><i class="fa fa-check"></i><b>10.2.1</b> Simulating Data</a></li>
+<li class="chapter" data-level="10.2.2" data-path="lecture-notes.html"><a href="lecture-notes.html#building-models"><i class="fa fa-check"></i><b>10.2.2</b> Building Models</a></li>
+</ul></li>
+<li class="chapter" data-level="10.3" data-path="lecture-notes.html"><a href="lecture-notes.html#february-5"><i class="fa fa-check"></i><b>10.3</b> February 5</a>
+<ul>
+<li class="chapter" data-level="10.3.1" data-path="lecture-notes.html"><a href="lecture-notes.html#using-broomaugment"><i class="fa fa-check"></i><b>10.3.1</b> Using <code>broom::augment</code></a></li>
+<li class="chapter" data-level="10.3.2" data-path="lecture-notes.html"><a href="lecture-notes.html#multicollinearity"><i class="fa fa-check"></i><b>10.3.2</b> Multicollinearity</a></li>
+</ul></li>
+<li class="chapter" data-level="10.4" data-path="lecture-notes.html"><a href="lecture-notes.html#february-10"><i class="fa fa-check"></i><b>10.4</b> February 10</a>
+<ul>
+<li class="chapter" data-level="10.4.1" data-path="lecture-notes.html"><a href="lecture-notes.html#anova-models"><i class="fa fa-check"></i><b>10.4.1</b> ANOVA Models</a></li>
+<li class="chapter" data-level="10.4.2" data-path="lecture-notes.html"><a href="lecture-notes.html#penguins"><i class="fa fa-check"></i><b>10.4.2</b> Penguins</a></li>
+</ul></li>
+<li class="chapter" data-level="10.5" data-path="lecture-notes.html"><a href="lecture-notes.html#february-12"><i class="fa fa-check"></i><b>10.5</b> February 12</a>
+<ul>
+<li class="chapter" data-level="10.5.1" data-path="lecture-notes.html"><a href="lecture-notes.html#an-example"><i class="fa fa-check"></i><b>10.5.1</b> An Example</a></li>
+</ul></li>
+<li class="chapter" data-level="10.6" data-path="lecture-notes.html"><a href="lecture-notes.html#february-17"><i class="fa fa-check"></i><b>10.6</b> February 17</a>
+<ul>
+<li class="chapter" data-level="10.6.1" data-path="lecture-notes.html"><a href="lecture-notes.html#adding-random-speaker-and-sentence-effects"><i class="fa fa-check"></i><b>10.6.1</b> Adding random speaker and sentence effects</a></li>
+<li class="chapter" data-level="10.6.2" data-path="lecture-notes.html"><a href="lecture-notes.html#random-intercepts-with-continunous-predictor"><i class="fa fa-check"></i><b>10.6.2</b> Random intercepts with continunous predictor</a></li>
+<li class="chapter" data-level="10.6.3" data-path="lecture-notes.html"><a href="lecture-notes.html#heading-towards-mixed-models"><i class="fa fa-check"></i><b>10.6.3</b> Heading towards mixed models</a></li>
+<li class="chapter" data-level="10.6.4" data-path="lecture-notes.html"><a href="lecture-notes.html#intro-to-random-effects-and-mixed-effect-models---terminology-and-first-examples"><i class="fa fa-check"></i><b>10.6.4</b> Intro to Random Effects and Mixed Effect Models - Terminology and First Examples</a></li>
+<li class="chapter" data-level="10.6.5" data-path="lecture-notes.html"><a href="lecture-notes.html#random-slopes"><i class="fa fa-check"></i><b>10.6.5</b> Random Slopes</a></li>
+<li class="chapter" data-level="10.6.6" data-path="lecture-notes.html"><a href="lecture-notes.html#comparison-of-models"><i class="fa fa-check"></i><b>10.6.6</b> Comparison of Models</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="solutions.html"><a href="solutions.html"><i class="fa fa-check"></i><b>11</b> Solutions</a>
+<ul>
+<li class="chapter" data-level="11.1" data-path="solutions.html"><a href="solutions.html#chapter-2-solutions"><i class="fa fa-check"></i><b>11.1</b> Chapter 2 Solutions</a></li>
+<li class="chapter" data-level="11.2" data-path="solutions.html"><a href="solutions.html#chapter-3-solutions"><i class="fa fa-check"></i><b>11.2</b> Chapter 3 Solutions</a></li>
+<li class="chapter" data-level="11.3" data-path="solutions.html"><a href="solutions.html#chapter-5"><i class="fa fa-check"></i><b>11.3</b> Chapter 5</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Applied Regression with R</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="intro-to-predictive-modeling" class="section level1 hasAnchor" number="4">
+<h1><span class="header-section-number">Chapter 4</span> Intro to Predictive Modeling<a href="intro-to-predictive-modeling.html#intro-to-predictive-modeling" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>In Chapter <a href="multiple-linear-regression.html#multiple-linear-regression">3</a> we saw that it can be hard to decide how to predict future values from a regression model. The reason is that our model isn’t constructed so as to efficiently predict future values, but rather for other goals. In this chapter, we focus on doing regression for predictions.</p>
+<div id="comparingtwomodels" class="section level2 hasAnchor" number="4.1">
+<h2><span class="header-section-number">4.1</span> Comparing Two Models<a href="intro-to-predictive-modeling.html#comparingtwomodels" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Let’s return to the <code>ISwR::cystfibr</code> data set. We imagine that we want to determine whether <code>height</code> or <code>weight</code> is a better predictor for <code>pemax</code>.</p>
+<div class="sourceCode" id="cb254"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb254-1"><a href="intro-to-predictive-modeling.html#cb254-1" tabindex="-1"></a>cystfibr <span class="ot">&lt;-</span> ISwR<span class="sc">::</span>cystfibr</span></code></pre></div>
+<p>Our idea is that we want to split the data set into two parts. One of the parts is the <strong>training</strong> data, and the other part is the <strong>testing</strong> data. We are required to build our model 100% solely on the training data, and we will determine how will it can predict future values based on the testing data. As a first step, let’s imagine that our training data consists of all of the data except for the 6th observation. The test data is then the data that is not in the training data, that is, the 6th observation.</p>
+<div class="sourceCode" id="cb255"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb255-1"><a href="intro-to-predictive-modeling.html#cb255-1" tabindex="-1"></a>train_data <span class="ot">&lt;-</span> cystfibr[<span class="sc">-</span><span class="dv">6</span>,]</span>
+<span id="cb255-2"><a href="intro-to-predictive-modeling.html#cb255-2" tabindex="-1"></a>test_data <span class="ot">&lt;-</span> cystfibr[<span class="dv">6</span>,]</span></code></pre></div>
+<p>We build our two models (based on height or weight separately), and we compute the error when predicting the value in the test data.</p>
+<div class="sourceCode" id="cb256"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb256-1"><a href="intro-to-predictive-modeling.html#cb256-1" tabindex="-1"></a>mod1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(pemax <span class="sc">~</span> height, <span class="at">data =</span> train_data)</span>
+<span id="cb256-2"><a href="intro-to-predictive-modeling.html#cb256-2" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(pemax <span class="sc">~</span> weight, <span class="at">data =</span> train_data)</span>
+<span id="cb256-3"><a href="intro-to-predictive-modeling.html#cb256-3" tabindex="-1"></a><span class="fu">predict</span>(mod1, <span class="at">newdata =</span> test_data) <span class="sc">-</span> test_data<span class="sc">$</span>pemax  <span class="co">#this is the error using model 1</span></span></code></pre></div>
+<pre><code>##        6 
+## 8.621298</code></pre>
+<div class="sourceCode" id="cb258"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb258-1"><a href="intro-to-predictive-modeling.html#cb258-1" tabindex="-1"></a><span class="fu">predict</span>(mod2, <span class="at">newdata =</span> test_data) <span class="sc">-</span> test_data<span class="sc">$</span>pemax <span class="co">#this is the error using model 2</span></span></code></pre></div>
+<pre><code>##        6 
+## 4.775489</code></pre>
+<p>We see that model 1 did a better job predicting the value of <code>pemax</code> in this case than model 2 did. Now, we repeat this for every observation. That is, for each observation, we remove it from the data set, train our model, and compute the error when predicting the new value. This is called <strong>Leave one out cross validation</strong> (LOOCV).</p>
+<p>Here are the details on how to do it in R.</p>
+<div class="sourceCode" id="cb260"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb260-1"><a href="intro-to-predictive-modeling.html#cb260-1" tabindex="-1"></a>height_errors <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(cystfibr), <span class="cf">function</span>(x){</span>
+<span id="cb260-2"><a href="intro-to-predictive-modeling.html#cb260-2" tabindex="-1"></a>  train_data <span class="ot">&lt;-</span> cystfibr[<span class="sc">-</span>x,]</span>
+<span id="cb260-3"><a href="intro-to-predictive-modeling.html#cb260-3" tabindex="-1"></a>  test_data <span class="ot">&lt;-</span> cystfibr[x,]</span>
+<span id="cb260-4"><a href="intro-to-predictive-modeling.html#cb260-4" tabindex="-1"></a>  mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(pemax <span class="sc">~</span> height, <span class="at">data =</span> train_data)</span>
+<span id="cb260-5"><a href="intro-to-predictive-modeling.html#cb260-5" tabindex="-1"></a>  <span class="fu">predict</span>(mod, <span class="at">newdata =</span> test_data) <span class="sc">-</span> test_data<span class="sc">$</span>pemax</span>
+<span id="cb260-6"><a href="intro-to-predictive-modeling.html#cb260-6" tabindex="-1"></a>})</span>
+<span id="cb260-7"><a href="intro-to-predictive-modeling.html#cb260-7" tabindex="-1"></a>height_errors</span></code></pre></div>
+<pre><code>##          1          2          3          4          5          6          7 
+## -33.920085 -17.163862 -20.016129  -2.007188 -11.025840   8.621298  33.154993 
+##          8          9         10         11         12         13         14 
+##  -3.637413  34.297888  16.851617   2.191805  20.110890  16.569973  35.471233 
+##         15         16         17         18         19         20         21 
+## -19.019928 -25.722616 -39.286566  11.783307  -4.213606  28.258534  47.718375 
+##         22         23         24         25 
+## -30.346873 -34.178520  38.018016 -68.435878</code></pre>
+<div class="sourceCode" id="cb262"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb262-1"><a href="intro-to-predictive-modeling.html#cb262-1" tabindex="-1"></a>weight_errors <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(cystfibr), <span class="cf">function</span>(x){</span>
+<span id="cb262-2"><a href="intro-to-predictive-modeling.html#cb262-2" tabindex="-1"></a>  train_data <span class="ot">&lt;-</span> cystfibr[<span class="sc">-</span>x,]</span>
+<span id="cb262-3"><a href="intro-to-predictive-modeling.html#cb262-3" tabindex="-1"></a>  test_data <span class="ot">&lt;-</span> cystfibr[x,]</span>
+<span id="cb262-4"><a href="intro-to-predictive-modeling.html#cb262-4" tabindex="-1"></a>  mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(pemax <span class="sc">~</span> weight, <span class="at">data =</span> train_data)</span>
+<span id="cb262-5"><a href="intro-to-predictive-modeling.html#cb262-5" tabindex="-1"></a>  <span class="fu">predict</span>(mod, <span class="at">newdata =</span> test_data) <span class="sc">-</span> test_data<span class="sc">$</span>pemax</span>
+<span id="cb262-6"><a href="intro-to-predictive-modeling.html#cb262-6" tabindex="-1"></a>})</span>
+<span id="cb262-7"><a href="intro-to-predictive-modeling.html#cb262-7" tabindex="-1"></a>weight_errors</span></code></pre></div>
+<pre><code>##           1           2           3           4           5           6 
+## -18.1454890  -7.0206108 -22.3306483  -2.4888298  -6.4368299   4.7754887 
+##           7           8           9          10          11          12 
+##  36.7303628 -13.4657504  24.9013559   6.2140517   0.9329037  24.5308972 
+##          13          14          15          16          17          18 
+##  18.5253420  47.1982421 -29.0366653 -30.4253120 -50.6977861  16.5412245 
+##          19          20          21          22          23          24 
+## -16.6026998  23.6413130  46.8093696 -23.4400631 -17.4084988  31.0813452 
+##          25 
+## -57.0067353</code></pre>
+<p>Now we need to decide which errors are “smaller”. A common measurement is the mean-sqaured error (MSE), or equivalently the root mean-squared error (RMSE). Let’s use it.</p>
+<div class="sourceCode" id="cb264"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb264-1"><a href="intro-to-predictive-modeling.html#cb264-1" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>(height_errors<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div>
+<pre><code>## [1] 28.68975</code></pre>
+<div class="sourceCode" id="cb266"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb266-1"><a href="intro-to-predictive-modeling.html#cb266-1" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>(weight_errors<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div>
+<pre><code>## [1] 27.5804</code></pre>
+<p>And we see that the MSE for using just weight is slighlty better than the MSE for using just height.</p>
+<p>Next, let’s get a common misconception out of the way. Many people who haven’t worked with things like this before would think that it would be best to build the model on <strong>all</strong> of the variables. Let’s do that and compute the RMSE.</p>
+<div class="sourceCode" id="cb268"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb268-1"><a href="intro-to-predictive-modeling.html#cb268-1" tabindex="-1"></a>full_errors <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(cystfibr), <span class="cf">function</span>(x){</span>
+<span id="cb268-2"><a href="intro-to-predictive-modeling.html#cb268-2" tabindex="-1"></a>  train_data <span class="ot">&lt;-</span> cystfibr[<span class="sc">-</span>x,]</span>
+<span id="cb268-3"><a href="intro-to-predictive-modeling.html#cb268-3" tabindex="-1"></a>  test_data <span class="ot">&lt;-</span> cystfibr[x,]</span>
+<span id="cb268-4"><a href="intro-to-predictive-modeling.html#cb268-4" tabindex="-1"></a>  mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(pemax <span class="sc">~</span> ., <span class="at">data =</span> train_data)</span>
+<span id="cb268-5"><a href="intro-to-predictive-modeling.html#cb268-5" tabindex="-1"></a>  <span class="fu">predict</span>(mod, <span class="at">newdata =</span> test_data) <span class="sc">-</span> test_data<span class="sc">$</span>pemax</span>
+<span id="cb268-6"><a href="intro-to-predictive-modeling.html#cb268-6" tabindex="-1"></a>})</span>
+<span id="cb268-7"><a href="intro-to-predictive-modeling.html#cb268-7" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>(full_errors<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div>
+<pre><code>## [1] 32.39895</code></pre>
+<p>We see that the RMSE is about 17% higher with the full model than it is with the model using just weight!</p>
+<div class="exercise">
+<span class="divhead-definition exercise-before"> 4.1</span>
+<p><span id="exr:exercise-4-1" class="exercise"><strong>Exercise 4.1  </strong></span>The aim of this exercise is to illustrate the difference between using <span class="math inline">\(p\)</span>-values for determining whether to select variables, and using estimates of MSE.</p>
+<ol style="list-style-type: lower-alpha">
+<li><p>Find the LOOCV estimate for the MSE when estimating <code>pemax</code> via <code>weight + bmp + fev1 + rv</code>, and compare to just using <code>weight</code>.</p></li>
+<li><p>Use <code>lm</code> to model <code>pemax ~ weight + bmp + fev1 + rv</code> and observe that <code>rv</code> is the only non-significant variable. Remove it, and estimate the MSE via LOOCV again. Did removing <code>rv</code> improve the estimate of MSE?</p></li>
+</ol>
+</div>
+<p>LOOCV works well for small data sets such as <code>cystfibr</code>, but can become unwieldy when the data set is large and the method of estimation is involved. For each model that we want to test, we would need to build it <span class="math inline">\(n-1\)</span> times, where <span class="math inline">\(n\)</span> is the number of observations. Let’s examine a couple of alternatives for when LOOCV takes too long.</p>
+<p>We can also use LGOCV, which stands for leave group out cross validation. As you might guess, this means that instead of leaving one observation out and building the model, we leave a group of observations out. Within this paradigm, there are several ways to proceed.</p>
+<ol style="list-style-type: decimal">
+<li><p>We could randomly select 70% to leave in, and leave 30% out, and estimate the MSE based on this split.</p></li>
+<li><p>We could repeatedly select 70% to leave in, estimate the MSE based on the 30% left out each time, and take the average.</p></li>
+<li><p>We could split the data into <span class="math inline">\(k\)</span> groups, and estimate the MSE based on leaving out each of the groups separately, and take the average.</p></li>
+<li><p>We could repeatedly split the data into <span class="math inline">\(k\)</span> groups, and estimate the MSE based on leaving out each of the groups separately, and take the average. Then take the average of the averages.</p></li>
+<li><p>We could <strong>bootstrap</strong> resample from the data set. A bootstrap resample is one that resamples observations from a data set <strong>with replacement</strong>. So, the same observation can appear multiple times in the resampled version. In this case, generally about 38% of the observations do not appear in the resampled version (so-called out of bag), and they can be used to estimate the error of estimation.</p></li>
+</ol>
+<p>Let’s look at how to implement these in R. We will use the <code>insurance</code> data set that is available on the course web page.</p>
+<div class="sourceCode" id="cb270"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb270-1"><a href="intro-to-predictive-modeling.html#cb270-1" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/insurance.csv&quot;</span>)</span>
+<span id="cb270-2"><a href="intro-to-predictive-modeling.html#cb270-2" tabindex="-1"></a><span class="fu">summary</span>(dd)</span></code></pre></div>
+<pre><code>##       age            sex                 bmi           children    
+##  Min.   :18.00   Length:1338        Min.   :16.00   Min.   :0.000  
+##  1st Qu.:27.00   Class :character   1st Qu.:26.30   1st Qu.:0.000  
+##  Median :39.00   Mode  :character   Median :30.40   Median :1.000  
+##  Mean   :39.21                      Mean   :30.67   Mean   :1.095  
+##  3rd Qu.:51.00                      3rd Qu.:34.70   3rd Qu.:2.000  
+##  Max.   :64.00                      Max.   :53.10   Max.   :5.000  
+##     smoker             region             expenses    
+##  Length:1338        Length:1338        Min.   : 1122  
+##  Class :character   Class :character   1st Qu.: 4740  
+##  Mode  :character   Mode  :character   Median : 9382  
+##                                        Mean   :13270  
+##                                        3rd Qu.:16640  
+##                                        Max.   :63770</code></pre>
+<p>The first think that I notice is that the expenses look right skew. Let’s plot a histogram.</p>
+<div class="sourceCode" id="cb272"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb272-1"><a href="intro-to-predictive-modeling.html#cb272-1" tabindex="-1"></a><span class="fu">hist</span>(dd<span class="sc">$</span>expenses)</span></code></pre></div>
+<p><img src="03-predictive-modeling_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>And we can compute the skewness of the data via</p>
+<div class="sourceCode" id="cb273"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb273-1"><a href="intro-to-predictive-modeling.html#cb273-1" tabindex="-1"></a>e1071<span class="sc">::</span><span class="fu">skewness</span>(dd<span class="sc">$</span>expenses)</span></code></pre></div>
+<pre><code>## [1] 1.512483</code></pre>
+<p>That is moderately skew; about like an exponential rv.</p>
+<div class="sourceCode" id="cb275"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb275-1"><a href="intro-to-predictive-modeling.html#cb275-1" tabindex="-1"></a>e1071<span class="sc">::</span><span class="fu">skewness</span>(<span class="fu">log</span>(dd<span class="sc">$</span>expenses))</span></code></pre></div>
+<pre><code>## [1] -0.08989552</code></pre>
+<p>Yep. It might be worth taking the log of expenses and modeling that instead, but I will leave that as an exercise.</p>
+<p>If we want to do repeated 70/30 splits, then that is perhaps easiest to do by hand.</p>
+<div class="sourceCode" id="cb277"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb277-1"><a href="intro-to-predictive-modeling.html#cb277-1" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="fu">nrow</span>(dd)</span>
+<span id="cb277-2"><a href="intro-to-predictive-modeling.html#cb277-2" tabindex="-1"></a>train_indices <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>N,<span class="fu">ceiling</span>(N <span class="sc">*</span> .<span class="dv">7</span>))</span>
+<span id="cb277-3"><a href="intro-to-predictive-modeling.html#cb277-3" tabindex="-1"></a>test_indices <span class="ot">&lt;-</span> <span class="fu">setdiff</span>((<span class="dv">1</span><span class="sc">:</span>N), train_indices)</span>
+<span id="cb277-4"><a href="intro-to-predictive-modeling.html#cb277-4" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(expenses <span class="sc">~</span> ., <span class="at">data =</span> dd)</span>
+<span id="cb277-5"><a href="intro-to-predictive-modeling.html#cb277-5" tabindex="-1"></a>errors <span class="ot">&lt;-</span> <span class="fu">predict</span>(mod, <span class="at">newdata =</span> dd[test_indices,]) <span class="sc">-</span> dd<span class="sc">$</span>expenses[test_indices]</span>
+<span id="cb277-6"><a href="intro-to-predictive-modeling.html#cb277-6" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>(errors<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div>
+<pre><code>## [1] 6078.235</code></pre>
+<p>We see that with the first train/test split, we have an estimated RMSE of 6078. (For comparison purposes, if we simply took the mean value, then the RMSE would be about $12K).</p>
+<p>Now, we can repeat the train/test split a bunch of times… say 50. If our model building procedure were slower than this, we might not be able to do 50.</p>
+<div class="sourceCode" id="cb279"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb279-1"><a href="intro-to-predictive-modeling.html#cb279-1" tabindex="-1"></a>rmse <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">50</span>, {</span>
+<span id="cb279-2"><a href="intro-to-predictive-modeling.html#cb279-2" tabindex="-1"></a>  train_indices <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>N,<span class="fu">ceiling</span>(N <span class="sc">*</span> .<span class="dv">7</span>))</span>
+<span id="cb279-3"><a href="intro-to-predictive-modeling.html#cb279-3" tabindex="-1"></a>  test_indices <span class="ot">&lt;-</span> <span class="fu">setdiff</span>((<span class="dv">1</span><span class="sc">:</span>N), train_indices)</span>
+<span id="cb279-4"><a href="intro-to-predictive-modeling.html#cb279-4" tabindex="-1"></a>  mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(expenses <span class="sc">~</span> ., <span class="at">data =</span> dd)</span>
+<span id="cb279-5"><a href="intro-to-predictive-modeling.html#cb279-5" tabindex="-1"></a>  errors <span class="ot">&lt;-</span> <span class="fu">predict</span>(mod, <span class="at">newdata =</span> dd[test_indices,]) <span class="sc">-</span> dd<span class="sc">$</span>expenses[test_indices]</span>
+<span id="cb279-6"><a href="intro-to-predictive-modeling.html#cb279-6" tabindex="-1"></a>  <span class="fu">sqrt</span>(<span class="fu">mean</span>(errors<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb279-7"><a href="intro-to-predictive-modeling.html#cb279-7" tabindex="-1"></a>})</span></code></pre></div>
+<p>Once we have these values, we can compute the mean and standard deviation to get a feeling for the <strong>range</strong> of MSE that we would expect to get with this model.</p>
+<div class="sourceCode" id="cb280"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb280-1"><a href="intro-to-predictive-modeling.html#cb280-1" tabindex="-1"></a><span class="fu">mean</span>(rmse)</span></code></pre></div>
+<pre><code>## [1] 6012.363</code></pre>
+<div class="sourceCode" id="cb282"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb282-1"><a href="intro-to-predictive-modeling.html#cb282-1" tabindex="-1"></a><span class="fu">quantile</span>(rmse, <span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">975</span>))</span></code></pre></div>
+<pre><code>##     2.5%    97.5% 
+## 5493.653 6456.679</code></pre>
+<div class="sourceCode" id="cb284"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb284-1"><a href="intro-to-predictive-modeling.html#cb284-1" tabindex="-1"></a><span class="fu">c</span>(<span class="fu">mean</span>(rmse) <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sd</span>(rmse), <span class="fu">mean</span>(rmse) <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sd</span>(rmse))</span></code></pre></div>
+<pre><code>## [1] 5483.693 6541.033</code></pre>
+<p>We can either compute the 95% confidence interval of the RMSE from the quantiles or by taking two times the standard deviation. This is saying that we would be surprised if the true RMSE of this model on unseen, future data is less than $5500 or more than $6500</p>
+<div class="exercise">
+<span class="divhead-definition exercise-before"> 4.2</span>
+<p><span id="exr:exercise-4-2" class="exercise"><strong>Exercise 4.2  </strong></span>Consider the <code>insurance</code> data set. Estimate the RMSE with error bounds when modeling expenses on the other variables after taking the log of expenses, using repeated LGOCV. Note that we will still want to get the RMSE of the estimate for <strong>expenses</strong>, not the log of expenses. Compare your answer to what we achieved in the previous example.</p>
+</div>
+<p>We could also do this for repeated <span class="math inline">\(k\)</span>-fold CV, but let’s instead start using the <code>caret</code> function <code>train</code>. The <code>train</code> function is a powerful tool that allows us to train many types of models with different types of cross validation. This example is about as simple of an example as we can do.</p>
+<div class="sourceCode" id="cb286"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb286-1"><a href="intro-to-predictive-modeling.html#cb286-1" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code></pre></div>
+<pre><code>## Loading required package: lattice</code></pre>
+<pre><code>## 
+## Attaching package: &#39;caret&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:purrr&#39;:
+## 
+##     lift</code></pre>
+<div class="sourceCode" id="cb290"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb290-1"><a href="intro-to-predictive-modeling.html#cb290-1" tabindex="-1"></a>repeated_cv <span class="ot">&lt;-</span> <span class="fu">train</span>(<span class="at">x =</span> <span class="fu">select</span>(dd, <span class="sc">-</span>expenses), </span>
+<span id="cb290-2"><a href="intro-to-predictive-modeling.html#cb290-2" tabindex="-1"></a>      <span class="at">y =</span> dd<span class="sc">$</span>expenses,</span>
+<span id="cb290-3"><a href="intro-to-predictive-modeling.html#cb290-3" tabindex="-1"></a>      <span class="at">method =</span> <span class="st">&quot;lm&quot;</span>,</span>
+<span id="cb290-4"><a href="intro-to-predictive-modeling.html#cb290-4" tabindex="-1"></a>      <span class="at">trControl =</span> <span class="fu">trainControl</span>(<span class="at">method =</span> <span class="st">&quot;repeatedcv&quot;</span>,</span>
+<span id="cb290-5"><a href="intro-to-predictive-modeling.html#cb290-5" tabindex="-1"></a>                               <span class="at">repeats =</span> <span class="dv">5</span>))</span>
+<span id="cb290-6"><a href="intro-to-predictive-modeling.html#cb290-6" tabindex="-1"></a>repeated_cv<span class="sc">$</span>results</span></code></pre></div>
+<pre><code>##   intercept     RMSE Rsquared      MAE   RMSESD RsquaredSD    MAESD
+## 1      TRUE 6075.715 0.749578 4204.284 468.2735 0.05094532 238.2151</code></pre>
+<p>From this table, we see that the repeated 10-fold CV estimated RMSE is 6073 with standard deviation 368. Recall that using repeated LGOCV, we got an estimated RMSE of 6012 and a standard deviation of 264.</p>
+<p>Finally, let’s see what happens with the bootstrap, which is the default in <code>caret</code> for <code>lm</code>.</p>
+<div class="sourceCode" id="cb292"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb292-1"><a href="intro-to-predictive-modeling.html#cb292-1" tabindex="-1"></a>boot_rmse <span class="ot">&lt;-</span> <span class="fu">train</span>(<span class="at">x =</span> <span class="fu">select</span>(dd, <span class="sc">-</span>expenses), </span>
+<span id="cb292-2"><a href="intro-to-predictive-modeling.html#cb292-2" tabindex="-1"></a>      <span class="at">y =</span> dd<span class="sc">$</span>expenses,</span>
+<span id="cb292-3"><a href="intro-to-predictive-modeling.html#cb292-3" tabindex="-1"></a>      <span class="at">method =</span> <span class="st">&quot;lm&quot;</span>)</span>
+<span id="cb292-4"><a href="intro-to-predictive-modeling.html#cb292-4" tabindex="-1"></a>boot_rmse<span class="sc">$</span>results</span></code></pre></div>
+<pre><code>##   intercept    RMSE Rsquared      MAE   RMSESD RsquaredSD    MAESD
+## 1      TRUE 6100.99 0.744509 4195.662 186.2232 0.02058286 124.0694</code></pre>
+<p>All three methods give relatively similar results in this case. We can guess that our RMSE on future, unseen data will be about <span class="math inline">\(\$6100 \pm \$600\)</span>.</p>
+</div>
+<div id="a-brief-return-to-inference" class="section level2 hasAnchor" number="4.2">
+<h2><span class="header-section-number">4.2</span> A Brief Return to Inference<a href="intro-to-predictive-modeling.html#a-brief-return-to-inference" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We begin by remembering how to construct a 95 percent confidence interval for the mean.</p>
+<div class="example">
+<span class="divhead-definition example-before">Example 4.1</span>
+<p><span id="exm:unlabeled-div-9" class="example"><strong>Example 4.1  </strong></span>Consider a confidence interval for the mean, created using <code>t.test</code>. We assume that the assumptions of <code>t.test</code> are met, and we find a 95 percent confidence interval.</p>
+<div class="sourceCode" id="cb294"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb294-1"><a href="intro-to-predictive-modeling.html#cb294-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">20</span>) <span class="co">#true mean is 0</span></span>
+<span id="cb294-2"><a href="intro-to-predictive-modeling.html#cb294-2" tabindex="-1"></a>ttest <span class="ot">&lt;-</span> <span class="fu">t.test</span>(x)</span>
+<span id="cb294-3"><a href="intro-to-predictive-modeling.html#cb294-3" tabindex="-1"></a>ttest<span class="sc">$</span>conf.int</span></code></pre></div>
+<pre><code>## [1] -0.6640873  0.3546049
+## attr(,&quot;conf.level&quot;)
+## [1] 0.95</code></pre>
+<p>We can also compute a <strong>bootstrap</strong> confidence interval of the mean. We do so by resampling from the data (with replacement), and computing the mean each time. We then compute the appropriate quantiles of the means to get the bootstrap confidence interval.</p>
+<div class="sourceCode" id="cb296"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb296-1"><a href="intro-to-predictive-modeling.html#cb296-1" tabindex="-1"></a>means <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb296-2"><a href="intro-to-predictive-modeling.html#cb296-2" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="fu">sample</span>(x, <span class="at">replace =</span> T))</span>
+<span id="cb296-3"><a href="intro-to-predictive-modeling.html#cb296-3" tabindex="-1"></a>})</span>
+<span id="cb296-4"><a href="intro-to-predictive-modeling.html#cb296-4" tabindex="-1"></a><span class="fu">quantile</span>(means, <span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">975</span>))</span></code></pre></div>
+<pre><code>##       2.5%      97.5% 
+## -0.5850437  0.3230967</code></pre>
+<p>We see that the two methods give similar results. The booststrap method can sometimes be useful when the data does <strong>not</strong> meet the assumptions of <code>t.test</code>, but this is not a course in bootstrapping. The interested reader can consult <a href="https://www.amazon.com/Mathematical-Statistics-Resampling-Laura-Chihara-dp-111941654X/dp/111941654X">Mathematical Statistics with Resampling and R</a> for more information.</p>
+</div>
+<p>Next, we show how we can use resampling techniques to construct confidence intervals associated with regression. As an example, we show one way to use the bootstrap to create a confidence interval for the slope. We assume for simplicity that we have only one explanatory variable <span class="math inline">\(x\)</span>. We consider the observations <span class="math inline">\((x_1, y_1), \ldots, (x_n, y_n)\)</span> to be typical of all observations that we could have observed. To bootstrap, we choose <span class="math inline">\(n\)</span> of the observations with replacement and recompute the regression model. When doing so, we get a range of values that the slope could have been, and if we compute quantlies of those values, then that is a confidence interval for the slope.</p>
+<p>Let’s again do it with simulated data that follows our assumptions for regression. If you run the following code several times, you will see that the bootstrap method gives similar results to <code>confint</code> in this case.</p>
+<div class="sourceCode" id="cb298"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb298-1"><a href="intro-to-predictive-modeling.html#cb298-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb298-2"><a href="intro-to-predictive-modeling.html#cb298-2" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> x <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">6</span>)</span>
+<span id="cb298-3"><a href="intro-to-predictive-modeling.html#cb298-3" tabindex="-1"></a><span class="fu">plot</span>(x, y)</span></code></pre></div>
+<p><img src="03-predictive-modeling_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<div class="sourceCode" id="cb299"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb299-1"><a href="intro-to-predictive-modeling.html#cb299-1" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)</span>
+<span id="cb299-2"><a href="intro-to-predictive-modeling.html#cb299-2" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x)</span>
+<span id="cb299-3"><a href="intro-to-predictive-modeling.html#cb299-3" tabindex="-1"></a>mod</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = y ~ x)
+## 
+## Coefficients:
+## (Intercept)            x  
+##      -1.843        2.213</code></pre>
+<div class="sourceCode" id="cb301"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb301-1"><a href="intro-to-predictive-modeling.html#cb301-1" tabindex="-1"></a>slopes <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">2000</span>, {</span>
+<span id="cb301-2"><a href="intro-to-predictive-modeling.html#cb301-2" tabindex="-1"></a>  df2 <span class="ot">&lt;-</span> df[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df), <span class="at">replace =</span> T),] <span class="co">#boostrap</span></span>
+<span id="cb301-3"><a href="intro-to-predictive-modeling.html#cb301-3" tabindex="-1"></a>  mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x, <span class="at">data =</span> df2)</span>
+<span id="cb301-4"><a href="intro-to-predictive-modeling.html#cb301-4" tabindex="-1"></a>  <span class="fu">coef</span>(mod)[<span class="dv">2</span>] <span class="co">#compute slope of bootstrapped data</span></span>
+<span id="cb301-5"><a href="intro-to-predictive-modeling.html#cb301-5" tabindex="-1"></a>})</span>
+<span id="cb301-6"><a href="intro-to-predictive-modeling.html#cb301-6" tabindex="-1"></a><span class="fu">quantile</span>(slopes, <span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">975</span>))</span></code></pre></div>
+<pre><code>##     2.5%    97.5% 
+## 1.456506 2.985619</code></pre>
+<div class="sourceCode" id="cb303"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb303-1"><a href="intro-to-predictive-modeling.html#cb303-1" tabindex="-1"></a><span class="fu">confint</span>(mod, <span class="at">parm =</span> <span class="st">&quot;x&quot;</span>)</span></code></pre></div>
+<pre><code>##      2.5 %   97.5 %
+## x 1.461876 2.964663</code></pre>
+<p>The confidence interval for slope is relatively robust to departures from assumptions, meaning that it often is approximately a 95 percent confidence interval even when normality, homoskedasticity, and few outliers for the model are not met. The next example shows one time where the coverage of the 95 percent confidence interval is not ideal, and compares the coverage to the bootstrap confidence interval.</p>
+<div class="example">
+<span class="divhead-definition example-before">Example 4.2</span>
+<p><span id="exm:unlabeled-div-10" class="example"><strong>Example 4.2  </strong></span>In the following example, we show that the effective type I error rate is about twice as high as it should be when we have strong heteroskedasticity.</p>
+<div class="sourceCode" id="cb305"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb305-1"><a href="intro-to-predictive-modeling.html#cb305-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb305-2"><a href="intro-to-predictive-modeling.html#cb305-2" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> x <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">0</span>, x<span class="sc">^</span><span class="fl">1.5</span>)</span>
+<span id="cb305-3"><a href="intro-to-predictive-modeling.html#cb305-3" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)</span>
+<span id="cb305-4"><a href="intro-to-predictive-modeling.html#cb305-4" tabindex="-1"></a><span class="fu">plot</span>(df, <span class="at">main =</span> <span class="st">&quot;Extreme heteroskedasticity&quot;</span>)</span></code></pre></div>
+<p><img src="03-predictive-modeling_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+<div class="sourceCode" id="cb306"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb306-1"><a href="intro-to-predictive-modeling.html#cb306-1" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">replicate</span>(<span class="dv">1000</span>, {</span>
+<span id="cb306-2"><a href="intro-to-predictive-modeling.html#cb306-2" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb306-3"><a href="intro-to-predictive-modeling.html#cb306-3" tabindex="-1"></a>  y <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> x <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">0</span>, x<span class="sc">^</span><span class="fl">1.5</span>)</span>
+<span id="cb306-4"><a href="intro-to-predictive-modeling.html#cb306-4" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)</span>
+<span id="cb306-5"><a href="intro-to-predictive-modeling.html#cb306-5" tabindex="-1"></a></span>
+<span id="cb306-6"><a href="intro-to-predictive-modeling.html#cb306-6" tabindex="-1"></a>  mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x)</span>
+<span id="cb306-7"><a href="intro-to-predictive-modeling.html#cb306-7" tabindex="-1"></a>  ci <span class="ot">&lt;-</span> <span class="fu">confint</span>(mod, <span class="at">parm =</span> <span class="st">&quot;x&quot;</span>, <span class="at">level =</span> .<span class="dv">95</span>)</span>
+<span id="cb306-8"><a href="intro-to-predictive-modeling.html#cb306-8" tabindex="-1"></a>  ci[<span class="dv">1</span>] <span class="sc">&lt;</span> <span class="dv">2</span> <span class="sc">&amp;</span> ci[<span class="dv">2</span>] <span class="sc">&gt;</span> <span class="dv">2</span></span>
+<span id="cb306-9"><a href="intro-to-predictive-modeling.html#cb306-9" tabindex="-1"></a>})) <span class="co">#should be 0.95</span></span></code></pre></div>
+<pre><code>## [1] 0.897</code></pre>
+<p>Let’s see how the bootstrap confidence interval does. This takes a long time to run. We use the formula for the slope that we derived in Chapter 2 in order to speed it up, as well as running the loop in parallel. We see that the bootstrap confidence interval does better, but is still not perfect. It should have incorrectly rejected the null hypothesis 5 percent of the time.</p>
+<div class="sourceCode" id="cb308"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb308-1"><a href="intro-to-predictive-modeling.html#cb308-1" tabindex="-1"></a><span class="fu">library</span>(future.apply)</span></code></pre></div>
+<pre><code>## Loading required package: future</code></pre>
+<pre><code>## 
+## Attaching package: &#39;future&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:caret&#39;:
+## 
+##     cluster</code></pre>
+<div class="sourceCode" id="cb312"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb312-1"><a href="intro-to-predictive-modeling.html#cb312-1" tabindex="-1"></a>future<span class="sc">::</span><span class="fu">plan</span>(<span class="at">strategy =</span> <span class="st">&quot;multisession&quot;</span>, <span class="at">workers =</span> <span class="dv">10</span>)</span>
+<span id="cb312-2"><a href="intro-to-predictive-modeling.html#cb312-2" tabindex="-1"></a><span class="fu">mean</span>(future.apply<span class="sc">::</span><span class="fu">future_replicate</span>(<span class="dv">1000</span>, {</span>
+<span id="cb312-3"><a href="intro-to-predictive-modeling.html#cb312-3" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb312-4"><a href="intro-to-predictive-modeling.html#cb312-4" tabindex="-1"></a>  y <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> x <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">0</span>, x<span class="sc">^</span><span class="fl">1.5</span>)</span>
+<span id="cb312-5"><a href="intro-to-predictive-modeling.html#cb312-5" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)</span>
+<span id="cb312-6"><a href="intro-to-predictive-modeling.html#cb312-6" tabindex="-1"></a></span>
+<span id="cb312-7"><a href="intro-to-predictive-modeling.html#cb312-7" tabindex="-1"></a>  ci <span class="ot">&lt;-</span> <span class="fu">quantile</span>(<span class="fu">replicate</span>(<span class="dv">1000</span>, {</span>
+<span id="cb312-8"><a href="intro-to-predictive-modeling.html#cb312-8" tabindex="-1"></a>    df2 <span class="ot">&lt;-</span> df[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>, <span class="at">replace =</span> T),]</span>
+<span id="cb312-9"><a href="intro-to-predictive-modeling.html#cb312-9" tabindex="-1"></a>    x <span class="ot">&lt;-</span> df2<span class="sc">$</span>x</span>
+<span id="cb312-10"><a href="intro-to-predictive-modeling.html#cb312-10" tabindex="-1"></a>    y <span class="ot">&lt;-</span> df2<span class="sc">$</span>y</span>
+<span id="cb312-11"><a href="intro-to-predictive-modeling.html#cb312-11" tabindex="-1"></a>    (<span class="fu">sum</span>(x<span class="sc">*</span> y) <span class="sc">-</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">30</span> <span class="sc">*</span> <span class="fu">sum</span>(x) <span class="sc">*</span> <span class="fu">sum</span>(y))<span class="sc">/</span>(<span class="fu">sum</span>(x<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">30</span> <span class="sc">*</span> <span class="fu">sum</span>(x) <span class="sc">*</span> <span class="fu">sum</span>(x)) <span class="co">#faster than lm</span></span>
+<span id="cb312-12"><a href="intro-to-predictive-modeling.html#cb312-12" tabindex="-1"></a>  }), <span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">975</span>))</span>
+<span id="cb312-13"><a href="intro-to-predictive-modeling.html#cb312-13" tabindex="-1"></a>  </span>
+<span id="cb312-14"><a href="intro-to-predictive-modeling.html#cb312-14" tabindex="-1"></a>  ci[<span class="dv">1</span>] <span class="sc">&lt;</span> <span class="dv">2</span> <span class="sc">&amp;&amp;</span> ci[<span class="dv">2</span>] <span class="sc">&gt;</span> <span class="dv">2</span></span>
+<span id="cb312-15"><a href="intro-to-predictive-modeling.html#cb312-15" tabindex="-1"></a>}))</span></code></pre></div>
+<pre><code>## [1] 0.907</code></pre>
+<div class="sourceCode" id="cb314"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb314-1"><a href="intro-to-predictive-modeling.html#cb314-1" tabindex="-1"></a><span class="fu">plan</span>(<span class="at">strategy =</span> <span class="st">&quot;sequential&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="simulations-of-expected-mse" class="section level2 hasAnchor" number="4.3">
+<h2><span class="header-section-number">4.3</span> Simulations of Expected MSE<a href="intro-to-predictive-modeling.html#simulations-of-expected-mse" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>In Section <a href="intro-to-predictive-modeling.html#comparingtwomodels">4.1</a>, we saw several methods for estimating the MSE or RMSE for models. One question that you may have is: which method should I be using? If we want to get error bounds for our estimate of RMSE, then we will need to use one that is repeated, but that still leaves repeated LGOCV, repeated <span class="math inline">\(k\)</span>-vold CV, and repeated bootstrap. The type of model we are building can have an impact on our choice: if the model doesn’t handle data that is repeated well, then bootstrapping would not be a good choice, for example. If model accuracy is highly sensitive to sample size, then LGOCV might not be a good choice, as the model is built on data roughly 70-80% of the size of the original data set.</p>
+<p>In this section, though, we will thouroughly examine the estimates for MSE in the case of a simple linear model <span class="math inline">\(y = 1 + 2x + \epsilon\)</span>, where <span class="math inline">\(\epsilon \sim N(0, \sigma = 3)\)</span>. We suppose that we have data <span class="math inline">\(\{(x_1, y_1), \ldots, (x_N, y_N)\}\)</span>, and we do computations in two special cases.</p>
+<ol style="list-style-type: decimal">
+<li><p>We assume that future <span class="math inline">\(x\)</span> values are a fixed constant <span class="math inline">\(x_0\)</span>. In this case, it can be shown that the expected MSE of the model is given by
+<span class="math display">\[
+\sigma^2 + \sigma^2/N + \sigma^2 \frac{(x_0 - \overline{x})^2}{S_{xx}},
+\]</span>
+where <span class="math inline">\(S_{xx} = \sum_{i = 1}^N (x_i - \overline{x})^2\)</span>.</p></li>
+<li><p>We assume that future <span class="math inline">\(x\)</span> values are generated through a random process with pdf <span class="math inline">\(f\)</span>. It can be shown that the expected MSE of the model is given by
+<span class="math display">\[
+\sigma^2 + \sigma^2/N + \sigma^2 \int \frac{(x - \overline{x})^2}{S_{xx}} f(x)\, dx
+\]</span>
+where <span class="math inline">\(S_{xx} = \sum_{i = 1}^N (x_i - \overline{x})^2\)</span>. A consequence of this is that, in order to minimize expected MSE, the mean of the predictors should equal the mean of the future values!</p></li>
+</ol>
+<div id="estimating-mse-and-bias-variance-tradeoff" class="section level3 hasAnchor" number="4.3.1">
+<h3><span class="header-section-number">4.3.1</span> Estimating MSE and Bias-Variance Tradeoff<a href="intro-to-predictive-modeling.html#estimating-mse-and-bias-variance-tradeoff" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Let’s start with case 1. We assume the <span class="math inline">\(x_i\)</span> are uniformly sampled on <span class="math inline">\([0, 1]\)</span> and we have 100 samples. We make predictions at <span class="math inline">\(x_0 = 0.75\)</span> and compute the MSE.</p>
+<div class="sourceCode" id="cb315"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb315-1"><a href="intro-to-predictive-modeling.html#cb315-1" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb315-2"><a href="intro-to-predictive-modeling.html#cb315-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2052020</span>)</span>
+<span id="cb315-3"><a href="intro-to-predictive-modeling.html#cb315-3" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> N)</span>
+<span id="cb315-4"><a href="intro-to-predictive-modeling.html#cb315-4" tabindex="-1"></a>ys <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> xs <span class="sc">+</span> <span class="fu">rnorm</span>(N, <span class="dv">0</span>, <span class="dv">3</span>)</span>
+<span id="cb315-5"><a href="intro-to-predictive-modeling.html#cb315-5" tabindex="-1"></a>sxx <span class="ot">&lt;-</span> <span class="fu">sum</span>((xs <span class="sc">-</span> <span class="fu">mean</span>(xs))<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb315-6"><a href="intro-to-predictive-modeling.html#cb315-6" tabindex="-1"></a>true_mse <span class="ot">&lt;-</span> <span class="dv">9</span> <span class="sc">+</span> <span class="dv">9</span><span class="sc">/</span>N <span class="sc">+</span> <span class="dv">9</span> <span class="sc">*</span> (.<span class="dv">75</span> <span class="sc">-</span> <span class="fu">mean</span>(xs))<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>sxx </span></code></pre></div>
+<p>We see from above that the <strong>true</strong> MSE is 9.156 in this case. Let’s estimate it directly.</p>
+<div class="sourceCode" id="cb316"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb316-1"><a href="intro-to-predictive-modeling.html#cb316-1" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb316-2"><a href="intro-to-predictive-modeling.html#cb316-2" tabindex="-1"></a>  ys <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> xs <span class="sc">+</span> <span class="fu">rnorm</span>(N, <span class="dv">0</span>, <span class="dv">3</span>)</span>
+<span id="cb316-3"><a href="intro-to-predictive-modeling.html#cb316-3" tabindex="-1"></a>  mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(ys <span class="sc">~</span> xs)</span>
+<span id="cb316-4"><a href="intro-to-predictive-modeling.html#cb316-4" tabindex="-1"></a>  <span class="fu">predict</span>(mod, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">xs =</span> <span class="fl">0.75</span>)) <span class="sc">-</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> .<span class="dv">75</span> <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">3</span>))</span>
+<span id="cb316-5"><a href="intro-to-predictive-modeling.html#cb316-5" tabindex="-1"></a>})</span>
+<span id="cb316-6"><a href="intro-to-predictive-modeling.html#cb316-6" tabindex="-1"></a><span class="fu">mean</span>(sim_data<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div>
+<pre><code>## [1] 9.317569</code></pre>
+<p>Pretty close.</p>
+<p>One reason that the full model of <code>pemax ~ .</code> in <code>cystfibr</code> does worse than just <code>pemax ~ weight</code> or <code>pemax ~ height</code> is the so-called bias-variance trade-off. The easiest version of this principle was observed in STAT 3850. Assume that <span class="math inline">\(\hat \theta\)</span> is an estimator for <span class="math inline">\(\theta\)</span> and <span class="math inline">\(E[\hat \theta] = \theta_0\)</span>.</p>
+<p><span class="math display">\[
+E[(\hat \theta - \theta)^2] = MSE(\hat \theta) = V(\hat \theta) + Bias(\hat \theta)^2 = V(\hat \theta) + (E[\hat \theta] - \theta)^2
+\]</span></p>
+<p>It can be shown, for example, that <span class="math inline">\(S^2 = \frac 1{n - 1} \sum_{i = 1}^n (y_i - \overline{y})^2\)</span> is an unbiased estimator for <span class="math inline">\(\sigma^2\)</span>, and that among all unbiased estimators for <span class="math inline">\(\sigma^2\)</span>, <span class="math inline">\(S^2\)</span> as the <strong>smallest variance</strong>. However, we can <strong>increase</strong> the bias and the corresponding <strong>decrease</strong> in variance can lead to an estimator for <span class="math inline">\(\sigma^2\)</span> that has a lower MSE. In this case, we can show that <span class="math inline">\(\frac 1n \sum_{i = 1}^n \bigl(y_i - \overline{y}\bigr)^2 = \frac {n-1}{n} S^2\)</span> has lower MSE than <span class="math inline">\(S^2\)</span> does.</p>
+<div class="example">
+<span class="divhead-definition example-before">Example 4.3</span>
+<p><span id="exm:unlabeled-div-11" class="example"><strong>Example 4.3  </strong></span>Not only <strong>can</strong> we show it, we <strong>do</strong> show it. Let’s consider a random sample of size 20 from a normal population with mean 0 and variance 4. We compare the MSE of <span class="math inline">\(S^2 = \frac 1{n - 1} \sum_{i = 1}^n (y_i - \overline{y})^2\)</span> with that of <span class="math inline">\(\frac 1n \sum_{i = 1}^n \bigl(y_i - \overline{y}\bigr)^2 = \frac {n-1}{n} S^2\)</span>.</p>
+<div class="sourceCode" id="cb318"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb318-1"><a href="intro-to-predictive-modeling.html#cb318-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">0</span>, <span class="dv">2</span>)</span>
+<span id="cb318-2"><a href="intro-to-predictive-modeling.html#cb318-2" tabindex="-1"></a>(<span class="fu">var</span>(x) <span class="sc">-</span> <span class="dv">4</span>)<span class="sc">^</span><span class="dv">2</span> <span class="co">#this is the error squared</span></span></code></pre></div>
+<pre><code>## [1] 0.238362</code></pre>
+<div class="sourceCode" id="cb320"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb320-1"><a href="intro-to-predictive-modeling.html#cb320-1" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb320-2"><a href="intro-to-predictive-modeling.html#cb320-2" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">0</span>, <span class="dv">2</span>)</span>
+<span id="cb320-3"><a href="intro-to-predictive-modeling.html#cb320-3" tabindex="-1"></a>  (<span class="fu">var</span>(x) <span class="sc">-</span> <span class="dv">4</span>)<span class="sc">^</span><span class="dv">2</span> </span>
+<span id="cb320-4"><a href="intro-to-predictive-modeling.html#cb320-4" tabindex="-1"></a>})) </span></code></pre></div>
+<pre><code>## [1] 1.697097</code></pre>
+<div class="sourceCode" id="cb322"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb322-1"><a href="intro-to-predictive-modeling.html#cb322-1" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb322-2"><a href="intro-to-predictive-modeling.html#cb322-2" tabindex="-1"></a>    x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">0</span>, <span class="dv">2</span>)</span>
+<span id="cb322-3"><a href="intro-to-predictive-modeling.html#cb322-3" tabindex="-1"></a>    (<span class="dv">19</span><span class="sc">/</span><span class="dv">20</span> <span class="sc">*</span> <span class="fu">var</span>(x) <span class="sc">-</span> <span class="dv">4</span>)<span class="sc">^</span><span class="dv">2</span> </span>
+<span id="cb322-4"><a href="intro-to-predictive-modeling.html#cb322-4" tabindex="-1"></a>}))</span></code></pre></div>
+<pre><code>## [1] 1.564936</code></pre>
+<p>The above computations show that the MSE of our second estimator for <span class="math inline">\(\sigma^2\)</span> is less than that of <span class="math inline">\(S^2\)</span>. However, the second estimator is <strong>biased</strong>. This is an example of being able to <strong>increase</strong> bias while <strong>decreasing</strong> variance by more than enough to make up for the increased bias.</p>
+<div class="sourceCode" id="cb324"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb324-1"><a href="intro-to-predictive-modeling.html#cb324-1" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb324-2"><a href="intro-to-predictive-modeling.html#cb324-2" tabindex="-1"></a>    x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">0</span>, <span class="dv">2</span>)</span>
+<span id="cb324-3"><a href="intro-to-predictive-modeling.html#cb324-3" tabindex="-1"></a>    <span class="dv">19</span><span class="sc">/</span><span class="dv">20</span> <span class="sc">*</span> <span class="fu">var</span>(x) </span>
+<span id="cb324-4"><a href="intro-to-predictive-modeling.html#cb324-4" tabindex="-1"></a>})) <span class="co">#doesn&#39;t equal 4</span></span></code></pre></div>
+<pre><code>## [1] 3.81408</code></pre>
+</div>
+<p>In the context of modeling, we have a different formulation of the bias-variance trade-off. Suppose that we are modeling an outcome <span class="math inline">\(y\)</span> that consists of independent noise about a curve with constant variance <span class="math inline">\(\sigma^2\)</span>. (We can assume the curve is <span class="math inline">\(y = 0\)</span>.) Suppose also that we use a model to estimate the outcome. We have that</p>
+<p><span class="math display">\[
+E[MSE] = \sigma^2 + (\text{Model Bias})^2 + \text{Model Variance}
+\]</span></p>
+<p>We are never going to be able to get rid of the <span class="math inline">\(\sigma^2\)</span> part, because each time we draw new samples, the <span class="math inline">\(\sigma^2\)</span> is going to be there. However, we can trade-off between the model bias and the model variance. Often, we can reduce the bias by increasing the variance, or reduce the variance by increasing the bias in such a way that the overall expected value of the MSE decreases. Let’s look at an example with simulated data to further understand what each component of the above means!</p>
+<p>We again consider data generated from <span class="math inline">\(y = 1 + 2x + \epsilon\)</span>, and we look at the MSE when predicting values at <span class="math inline">\(x_0 = 0.75\)</span>, which we computed above to be 9.156. Let’s estimate the <strong>bias</strong> of the prediction.</p>
+<div class="sourceCode" id="cb326"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb326-1"><a href="intro-to-predictive-modeling.html#cb326-1" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb326-2"><a href="intro-to-predictive-modeling.html#cb326-2" tabindex="-1"></a>  ys <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> xs <span class="sc">+</span> <span class="fu">rnorm</span>(N, <span class="dv">0</span>, <span class="dv">3</span>)</span>
+<span id="cb326-3"><a href="intro-to-predictive-modeling.html#cb326-3" tabindex="-1"></a>  mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(ys <span class="sc">~</span> xs)</span>
+<span id="cb326-4"><a href="intro-to-predictive-modeling.html#cb326-4" tabindex="-1"></a>  <span class="fu">predict</span>(mod, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">xs =</span> .<span class="dv">75</span>))</span>
+<span id="cb326-5"><a href="intro-to-predictive-modeling.html#cb326-5" tabindex="-1"></a>})</span>
+<span id="cb326-6"><a href="intro-to-predictive-modeling.html#cb326-6" tabindex="-1"></a><span class="fu">mean</span>(sim_data)</span></code></pre></div>
+<pre><code>## [1] 2.495605</code></pre>
+<div class="sourceCode" id="cb328"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb328-1"><a href="intro-to-predictive-modeling.html#cb328-1" tabindex="-1"></a><span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> .<span class="dv">75</span></span></code></pre></div>
+<pre><code>## [1] 2.5</code></pre>
+<p>We see that this is, in fact, an <strong>unbiased</strong> estimator for <span class="math inline">\(y\)</span> when <span class="math inline">\(x_0 = 0.75\)</span>. We could have recalled that <span class="math inline">\(E[\hat \beta_0] = \beta_0\)</span> and <span class="math inline">\(E[\hat \beta_1] = \beta_1\)</span>, and seen <span class="math inline">\(E[\hat \beta_0 + \hat \beta_1 \times 0.75] = \beta_0 + \beta_1 \times .75 = 2.5\)</span>, as well. So, the bias squared is 0. Now, we need to estimate the <strong>variance</strong> of the <strong>model</strong> when <span class="math inline">\(x_0 = 0.75\)</span>. To do so, we take the variance of the simulated data.</p>
+<div class="sourceCode" id="cb330"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb330-1"><a href="intro-to-predictive-modeling.html#cb330-1" tabindex="-1"></a><span class="fu">var</span>(sim_data) <span class="sc">+</span> <span class="dv">3</span><span class="sc">^</span><span class="dv">2</span></span></code></pre></div>
+<pre><code>## [1] 9.156808</code></pre>
+<div class="sourceCode" id="cb332"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb332-1"><a href="intro-to-predictive-modeling.html#cb332-1" tabindex="-1"></a>true_mse</span></code></pre></div>
+<pre><code>## [1] 9.156163</code></pre>
+<p>Adding this to <span class="math inline">\(\sigma^2\)</span> gives us the MSE. If we repeat this a couple of times, we see this is correct.</p>
+<p><strong>Example</strong> Suppose we have data generated by <span class="math inline">\(y = sin(2 \pi x) + \epsilon\)</span>, where <span class="math inline">\(\epsilon \sim N(0, \sigma = .4)\)</span>. We choose to predict new values by splitting the data into two groups and approximating with a horizontal line, see the textbook for details. Let’s generate some data and plot our predictions.</p>
+<div class="sourceCode" id="cb334"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb334-1"><a href="intro-to-predictive-modeling.html#cb334-1" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">20</span></span>
+<span id="cb334-2"><a href="intro-to-predictive-modeling.html#cb334-2" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> N)</span>
+<span id="cb334-3"><a href="intro-to-predictive-modeling.html#cb334-3" tabindex="-1"></a>ys <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> xs) <span class="sc">+</span> <span class="fu">rnorm</span>(N, <span class="dv">0</span>, .<span class="dv">4</span>)</span>
+<span id="cb334-4"><a href="intro-to-predictive-modeling.html#cb334-4" tabindex="-1"></a><span class="fu">plot</span>(xs, ys)</span>
+<span id="cb334-5"><a href="intro-to-predictive-modeling.html#cb334-5" tabindex="-1"></a>y1 <span class="ot">&lt;-</span> <span class="fu">mean</span>(ys[xs <span class="sc">&lt;</span> .<span class="dv">5</span>])</span>
+<span id="cb334-6"><a href="intro-to-predictive-modeling.html#cb334-6" tabindex="-1"></a>y2 <span class="ot">&lt;-</span> <span class="fu">mean</span>(ys[xs <span class="sc">&gt;=</span> .<span class="dv">5</span>])</span>
+<span id="cb334-7"><a href="intro-to-predictive-modeling.html#cb334-7" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">ifelse</span>(x <span class="sc">&lt;</span> .<span class="dv">5</span>, y1, y2), <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="dv">2</span>)</span></code></pre></div>
+<p><img src="03-predictive-modeling_files/figure-html/unnamed-chunk-29-1.png" width="672" /></p>
+<p>The red line is our prediction at the various <span class="math inline">\(x\)</span> values. In particular, when <span class="math inline">\(x_0 = 0.75\)</span>, our prediction is <code>y2</code>, -0.629. In this case, we will</p>
+<ol style="list-style-type: decimal">
+<li>estimate the MSE.</li>
+</ol>
+<div class="sourceCode" id="cb335"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb335-1"><a href="intro-to-predictive-modeling.html#cb335-1" tabindex="-1"></a>for_mse <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb335-2"><a href="intro-to-predictive-modeling.html#cb335-2" tabindex="-1"></a>  ys <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> xs) <span class="sc">+</span> <span class="fu">rnorm</span>(N, <span class="dv">0</span>, .<span class="dv">4</span>)</span>
+<span id="cb335-3"><a href="intro-to-predictive-modeling.html#cb335-3" tabindex="-1"></a>  y2 <span class="ot">&lt;-</span> <span class="fu">mean</span>(ys[xs <span class="sc">&gt;=</span> .<span class="dv">5</span>])</span>
+<span id="cb335-4"><a href="intro-to-predictive-modeling.html#cb335-4" tabindex="-1"></a>  new_y <span class="ot">=</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> <span class="fl">0.75</span>) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, .<span class="dv">4</span>)</span>
+<span id="cb335-5"><a href="intro-to-predictive-modeling.html#cb335-5" tabindex="-1"></a>  y2 <span class="sc">-</span> new_y</span>
+<span id="cb335-6"><a href="intro-to-predictive-modeling.html#cb335-6" tabindex="-1"></a>})</span>
+<span id="cb335-7"><a href="intro-to-predictive-modeling.html#cb335-7" tabindex="-1"></a>mse_estimate <span class="ot">&lt;-</span> <span class="fu">mean</span>(for_mse<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb335-8"><a href="intro-to-predictive-modeling.html#cb335-8" tabindex="-1"></a>mse_estimate</span></code></pre></div>
+<pre><code>## [1] 0.3367772</code></pre>
+<pre><code>&amp;nbsp;</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>We know <span class="math inline">\(\sigma^2\)</span></li>
+</ol>
+<div class="sourceCode" id="cb338"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb338-1"><a href="intro-to-predictive-modeling.html#cb338-1" tabindex="-1"></a>sigma_squared <span class="ot">&lt;-</span> .<span class="dv">4</span><span class="sc">^</span><span class="dv">2</span></span></code></pre></div>
+<pre><code>&amp;nbsp;</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Estimate the Bias at <span class="math inline">\(x_0 = 0.75\)</span></li>
+</ol>
+<div class="sourceCode" id="cb340"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb340-1"><a href="intro-to-predictive-modeling.html#cb340-1" tabindex="-1"></a>for_bias <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb340-2"><a href="intro-to-predictive-modeling.html#cb340-2" tabindex="-1"></a>  ys <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> xs) <span class="sc">+</span> <span class="fu">rnorm</span>(N, <span class="dv">0</span>, .<span class="dv">4</span>)</span>
+<span id="cb340-3"><a href="intro-to-predictive-modeling.html#cb340-3" tabindex="-1"></a>  y2 <span class="ot">&lt;-</span> <span class="fu">mean</span>(ys[xs <span class="sc">&gt;=</span> .<span class="dv">5</span>])</span>
+<span id="cb340-4"><a href="intro-to-predictive-modeling.html#cb340-4" tabindex="-1"></a>  new_y <span class="ot">=</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> <span class="fl">0.75</span>) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, .<span class="dv">4</span>)</span>
+<span id="cb340-5"><a href="intro-to-predictive-modeling.html#cb340-5" tabindex="-1"></a>  y2 <span class="sc">-</span> new_y</span>
+<span id="cb340-6"><a href="intro-to-predictive-modeling.html#cb340-6" tabindex="-1"></a>})</span>
+<span id="cb340-7"><a href="intro-to-predictive-modeling.html#cb340-7" tabindex="-1"></a>bias_estimate <span class="ot">&lt;-</span> <span class="fu">mean</span>(for_bias)</span>
+<span id="cb340-8"><a href="intro-to-predictive-modeling.html#cb340-8" tabindex="-1"></a>bias_estimate</span></code></pre></div>
+<pre><code>## [1] 0.3997964</code></pre>
+<pre><code>&amp;nbsp;</code></pre>
+<ol start="4" style="list-style-type: decimal">
+<li>Estimate the model variance at <span class="math inline">\(x_0 = 0.75\)</span>.</li>
+</ol>
+<div class="sourceCode" id="cb343"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb343-1"><a href="intro-to-predictive-modeling.html#cb343-1" tabindex="-1"></a>for_model_variance <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb343-2"><a href="intro-to-predictive-modeling.html#cb343-2" tabindex="-1"></a>  ys <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> xs) <span class="sc">+</span> <span class="fu">rnorm</span>(N, <span class="dv">0</span>, .<span class="dv">4</span>)</span>
+<span id="cb343-3"><a href="intro-to-predictive-modeling.html#cb343-3" tabindex="-1"></a>  y2 <span class="ot">&lt;-</span> <span class="fu">mean</span>(ys[xs <span class="sc">&gt;=</span> .<span class="dv">5</span>])</span>
+<span id="cb343-4"><a href="intro-to-predictive-modeling.html#cb343-4" tabindex="-1"></a>  new_y <span class="ot">=</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> <span class="fl">0.75</span>) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, .<span class="dv">4</span>)</span>
+<span id="cb343-5"><a href="intro-to-predictive-modeling.html#cb343-5" tabindex="-1"></a>  y2</span>
+<span id="cb343-6"><a href="intro-to-predictive-modeling.html#cb343-6" tabindex="-1"></a>})</span>
+<span id="cb343-7"><a href="intro-to-predictive-modeling.html#cb343-7" tabindex="-1"></a>model_variance_estimate <span class="ot">&lt;-</span> <span class="fu">var</span>(for_model_variance)</span>
+<span id="cb343-8"><a href="intro-to-predictive-modeling.html#cb343-8" tabindex="-1"></a>model_variance_estimate</span></code></pre></div>
+<pre><code>## [1] 0.01605485</code></pre>
+<pre><code>&amp;nbsp;</code></pre>
+<ol start="5" style="list-style-type: decimal">
+<li>Check the bias-variance trade-off.</li>
+</ol>
+<div class="sourceCode" id="cb346"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb346-1"><a href="intro-to-predictive-modeling.html#cb346-1" tabindex="-1"></a>sigma_squared <span class="sc">+</span> bias_estimate<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> model_variance_estimate</span></code></pre></div>
+<pre><code>## [1] 0.335892</code></pre>
+<div class="sourceCode" id="cb348"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb348-1"><a href="intro-to-predictive-modeling.html#cb348-1" tabindex="-1"></a>mse_estimate</span></code></pre></div>
+<pre><code>## [1] 0.3367772</code></pre>
+</div>
+<div id="estimating-mse-for-new-predictors-uniformly-sampled" class="section level3 hasAnchor" number="4.3.2">
+<h3><span class="header-section-number">4.3.2</span> Estimating MSE for new predictors uniformly sampled<a href="intro-to-predictive-modeling.html#estimating-mse-for-new-predictors-uniformly-sampled" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>In this section, we imagine that our predictors that we are using for model building are uniformly sampled between 0 and 1, and future predictors will be drawn from a uniform random variable on the interval <span class="math inline">\((0, 1)\)</span>. In the special case that the original <span class="math inline">\(x_i\)</span> are uniformly sampled from 0 to <span class="math inline">\(M\)</span> (ie <code>seq(0, M, length.out = N)</code> and new <span class="math inline">\(x\)</span> values are chosen uniformly over the interval <span class="math inline">\([0, M]\)</span> we get an expected MSE of
+<span class="math display">\[
+\sigma^2\bigl(1 + 1/N + \frac{M^2}{12 S_{xx}}\bigr)
+\]</span>
+Let’s make a computation when <span class="math inline">\(N = 100\)</span> and <span class="math inline">\(M = 10\)</span> in our model where <span class="math inline">\(\sigma^2 = 9\)</span>.</p>
+<div class="sourceCode" id="cb350"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb350-1"><a href="intro-to-predictive-modeling.html#cb350-1" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb350-2"><a href="intro-to-predictive-modeling.html#cb350-2" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb350-3"><a href="intro-to-predictive-modeling.html#cb350-3" tabindex="-1"></a>minx <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb350-4"><a href="intro-to-predictive-modeling.html#cb350-4" tabindex="-1"></a>maxx <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb350-5"><a href="intro-to-predictive-modeling.html#cb350-5" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">seq</span>(minx, maxx, <span class="at">length.out =</span> N)</span>
+<span id="cb350-6"><a href="intro-to-predictive-modeling.html#cb350-6" tabindex="-1"></a>sxx <span class="ot">&lt;-</span> <span class="fu">sum</span>((xs <span class="sc">-</span> <span class="fu">mean</span>(xs))<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb350-7"><a href="intro-to-predictive-modeling.html#cb350-7" tabindex="-1"></a>mse_real <span class="ot">&lt;-</span> sigma<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> (<span class="dv">1</span>  <span class="sc">+</span> <span class="dv">1</span><span class="sc">/</span>N <span class="sc">+</span> maxx<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span><span class="dv">12</span><span class="sc">/</span>sxx)</span>
+<span id="cb350-8"><a href="intro-to-predictive-modeling.html#cb350-8" tabindex="-1"></a>mse_real</span></code></pre></div>
+<pre><code>## [1] 9.178218</code></pre>
+<p>We see that the <strong>true</strong> expected MSE from building a model like this is 9.178. Since we are going to be doing simulation in this section, let’s convince ourselves that we can simulate this value correctly.</p>
+<div class="sourceCode" id="cb352"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb352-1"><a href="intro-to-predictive-modeling.html#cb352-1" tabindex="-1"></a>mean_x <span class="ot">&lt;-</span> <span class="fu">mean</span>(xs)</span>
+<span id="cb352-2"><a href="intro-to-predictive-modeling.html#cb352-2" tabindex="-1"></a>sxx <span class="ot">&lt;-</span> <span class="fu">sum</span>((xs <span class="sc">-</span> mean_x)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb352-3"><a href="intro-to-predictive-modeling.html#cb352-3" tabindex="-1"></a>mse_sim <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">40000</span>, {</span>
+<span id="cb352-4"><a href="intro-to-predictive-modeling.html#cb352-4" tabindex="-1"></a>  ys <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> xs <span class="sc">+</span> <span class="fu">rnorm</span>(N, <span class="dv">0</span>, sigma)</span>
+<span id="cb352-5"><a href="intro-to-predictive-modeling.html#cb352-5" tabindex="-1"></a>  dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(xs, ys)</span>
+<span id="cb352-6"><a href="intro-to-predictive-modeling.html#cb352-6" tabindex="-1"></a>  sxy <span class="ot">&lt;-</span> <span class="fu">sum</span>((dd<span class="sc">$</span>xs <span class="sc">-</span> mean_x) <span class="sc">*</span> dd<span class="sc">$</span>ys)</span>
+<span id="cb352-7"><a href="intro-to-predictive-modeling.html#cb352-7" tabindex="-1"></a>  coeffs_2 <span class="ot">&lt;-</span> sxy<span class="sc">/</span>sxx</span>
+<span id="cb352-8"><a href="intro-to-predictive-modeling.html#cb352-8" tabindex="-1"></a>  coeffs_1 <span class="ot">&lt;-</span> <span class="fu">mean</span>(dd<span class="sc">$</span>ys) <span class="sc">-</span> coeffs_2 <span class="sc">*</span> mean_x</span>
+<span id="cb352-9"><a href="intro-to-predictive-modeling.html#cb352-9" tabindex="-1"></a>  x_star <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1</span>, minx, maxx)</span>
+<span id="cb352-10"><a href="intro-to-predictive-modeling.html#cb352-10" tabindex="-1"></a>  y_star <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> x_star <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">3</span>)</span>
+<span id="cb352-11"><a href="intro-to-predictive-modeling.html#cb352-11" tabindex="-1"></a>  (coeffs_1 <span class="sc">+</span> coeffs_2 <span class="sc">*</span> x_star <span class="sc">-</span> y_star)<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb352-12"><a href="intro-to-predictive-modeling.html#cb352-12" tabindex="-1"></a>})</span>
+<span id="cb352-13"><a href="intro-to-predictive-modeling.html#cb352-13" tabindex="-1"></a><span class="fu">mean</span>(mse_sim)</span></code></pre></div>
+<pre><code>## [1] 9.11871</code></pre>
+<div class="sourceCode" id="cb354"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb354-1"><a href="intro-to-predictive-modeling.html#cb354-1" tabindex="-1"></a>mse_real</span></code></pre></div>
+<pre><code>## [1] 9.178218</code></pre>
+<p>If you run the above code a few times, you should see that the estimate value through simulation is close to the true value we computed above. To be clear, we could have done the following to get <code>coeffs_1</code> and <code>coeffs_2</code>, but we want to resample a bunch and the way done above is much faster, and gets the same answer as illustrated below:</p>
+<div class="sourceCode" id="cb356"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb356-1"><a href="intro-to-predictive-modeling.html#cb356-1" tabindex="-1"></a>ys <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> xs <span class="sc">+</span> <span class="fu">rnorm</span>(N, <span class="dv">0</span>, sigma)</span>
+<span id="cb356-2"><a href="intro-to-predictive-modeling.html#cb356-2" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(xs, ys)</span>
+<span id="cb356-3"><a href="intro-to-predictive-modeling.html#cb356-3" tabindex="-1"></a>sxy <span class="ot">&lt;-</span> <span class="fu">sum</span>((dd<span class="sc">$</span>xs <span class="sc">-</span> mean_x) <span class="sc">*</span> dd<span class="sc">$</span>ys)</span>
+<span id="cb356-4"><a href="intro-to-predictive-modeling.html#cb356-4" tabindex="-1"></a>coeffs_2 <span class="ot">&lt;-</span> sxy<span class="sc">/</span>sxx</span>
+<span id="cb356-5"><a href="intro-to-predictive-modeling.html#cb356-5" tabindex="-1"></a>coeffs_1 <span class="ot">&lt;-</span> <span class="fu">mean</span>(dd<span class="sc">$</span>ys) <span class="sc">-</span> coeffs_2 <span class="sc">*</span> mean_x</span>
+<span id="cb356-6"><a href="intro-to-predictive-modeling.html#cb356-6" tabindex="-1"></a><span class="fu">lm</span>(ys <span class="sc">~</span> xs, <span class="at">data =</span> dd)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = ys ~ xs, data = dd)
+## 
+## Coefficients:
+## (Intercept)           xs  
+##      0.5729       2.0471</code></pre>
+<div class="sourceCode" id="cb358"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb358-1"><a href="intro-to-predictive-modeling.html#cb358-1" tabindex="-1"></a>coeffs_1</span></code></pre></div>
+<pre><code>## [1] 0.5728652</code></pre>
+<div class="sourceCode" id="cb360"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb360-1"><a href="intro-to-predictive-modeling.html#cb360-1" tabindex="-1"></a>coeffs_2</span></code></pre></div>
+<pre><code>## [1] 2.047111</code></pre>
+<p>Now let’s look at estimating the MSE using bootstrapping. We are assuming that the <code>xs</code> are fixed here, and the random part is generating the <code>ys</code>.</p>
+<div class="sourceCode" id="cb362"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb362-1"><a href="intro-to-predictive-modeling.html#cb362-1" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">100</span>, {</span>
+<span id="cb362-2"><a href="intro-to-predictive-modeling.html#cb362-2" tabindex="-1"></a>  dd<span class="sc">$</span>ys <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> dd<span class="sc">$</span>xs <span class="sc">+</span> <span class="fu">rnorm</span>(N, <span class="dv">0</span>, sigma) </span>
+<span id="cb362-3"><a href="intro-to-predictive-modeling.html#cb362-3" tabindex="-1"></a>  boot_error <span class="ot">&lt;-</span> <span class="fu">train</span>(ys <span class="sc">~</span> xs, <span class="at">data =</span> dd, <span class="at">method =</span> <span class="st">&quot;lm&quot;</span>)</span>
+<span id="cb362-4"><a href="intro-to-predictive-modeling.html#cb362-4" tabindex="-1"></a>  boot_error<span class="sc">$</span>results<span class="sc">$</span>RMSE</span>
+<span id="cb362-5"><a href="intro-to-predictive-modeling.html#cb362-5" tabindex="-1"></a>})</span>
+<span id="cb362-6"><a href="intro-to-predictive-modeling.html#cb362-6" tabindex="-1"></a><span class="fu">mean</span>(sim_data)</span></code></pre></div>
+<pre><code>## [1] 3.080155</code></pre>
+<div class="sourceCode" id="cb364"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb364-1"><a href="intro-to-predictive-modeling.html#cb364-1" tabindex="-1"></a><span class="fu">min</span>(sim_data)</span></code></pre></div>
+<pre><code>## [1] 2.41035</code></pre>
+<div class="sourceCode" id="cb366"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb366-1"><a href="intro-to-predictive-modeling.html#cb366-1" tabindex="-1"></a><span class="fu">sd</span>(sim_data)</span></code></pre></div>
+<pre><code>## [1] 0.229929</code></pre>
+<div class="sourceCode" id="cb368"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb368-1"><a href="intro-to-predictive-modeling.html#cb368-1" tabindex="-1"></a><span class="fu">t.test</span>(sim_data<span class="sc">^</span><span class="dv">2</span>, <span class="at">mu =</span> true_mse)</span></code></pre></div>
+<pre><code>## 
+##  One Sample t-test
+## 
+## data:  sim_data^2
+## t = 2.7295, df = 99, p-value = 0.007508
+## alternative hypothesis: true mean is not equal to 9.156163
+## 95 percent confidence interval:
+##  9.260884 9.818500
+## sample estimates:
+## mean of x 
+##  9.539692</code></pre>
+<p>This runs too slow on my computer, and the following code speeds things up.</p>
+<div class="sourceCode" id="cb370"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb370-1"><a href="intro-to-predictive-modeling.html#cb370-1" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">1000</span>, {<span class="fu">replicate</span>(<span class="dv">25</span>, {</span>
+<span id="cb370-2"><a href="intro-to-predictive-modeling.html#cb370-2" tabindex="-1"></a>  dd<span class="sc">$</span>ys <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> dd<span class="sc">$</span>xs <span class="sc">+</span> <span class="fu">rnorm</span>(N, <span class="dv">0</span>, sigma)</span>
+<span id="cb370-3"><a href="intro-to-predictive-modeling.html#cb370-3" tabindex="-1"></a>  train_indices <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(dd), <span class="at">replace =</span> T)</span>
+<span id="cb370-4"><a href="intro-to-predictive-modeling.html#cb370-4" tabindex="-1"></a>  train <span class="ot">&lt;-</span> dd[train_indices,]</span>
+<span id="cb370-5"><a href="intro-to-predictive-modeling.html#cb370-5" tabindex="-1"></a>  test <span class="ot">&lt;-</span> dd[<span class="sc">-</span>train_indices,]</span>
+<span id="cb370-6"><a href="intro-to-predictive-modeling.html#cb370-6" tabindex="-1"></a>  sxx <span class="ot">&lt;-</span> <span class="fu">sum</span>((train<span class="sc">$</span>xs <span class="sc">-</span> <span class="fu">mean</span>(train<span class="sc">$</span>xs))<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb370-7"><a href="intro-to-predictive-modeling.html#cb370-7" tabindex="-1"></a>  sxy <span class="ot">&lt;-</span> <span class="fu">sum</span>((train<span class="sc">$</span>xs <span class="sc">-</span> <span class="fu">mean</span>(train<span class="sc">$</span>xs)) <span class="sc">*</span> train<span class="sc">$</span>ys)</span>
+<span id="cb370-8"><a href="intro-to-predictive-modeling.html#cb370-8" tabindex="-1"></a>  coeffs_2 <span class="ot">&lt;-</span> sxy<span class="sc">/</span>sxx</span>
+<span id="cb370-9"><a href="intro-to-predictive-modeling.html#cb370-9" tabindex="-1"></a>  coeffs_1 <span class="ot">&lt;-</span> <span class="fu">mean</span>(train<span class="sc">$</span>ys) <span class="sc">-</span> coeffs_2 <span class="sc">*</span> <span class="fu">mean</span>(train<span class="sc">$</span>xs)</span>
+<span id="cb370-10"><a href="intro-to-predictive-modeling.html#cb370-10" tabindex="-1"></a>  errors <span class="ot">&lt;-</span> coeffs_1 <span class="sc">+</span> test<span class="sc">$</span>xs <span class="sc">*</span> coeffs_2 <span class="sc">-</span> test<span class="sc">$</span>ys</span>
+<span id="cb370-11"><a href="intro-to-predictive-modeling.html#cb370-11" tabindex="-1"></a>  <span class="fu">mean</span>(errors<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb370-12"><a href="intro-to-predictive-modeling.html#cb370-12" tabindex="-1"></a>}) <span class="sc">%&gt;%</span> <span class="fu">mean</span>()</span>
+<span id="cb370-13"><a href="intro-to-predictive-modeling.html#cb370-13" tabindex="-1"></a>})</span>
+<span id="cb370-14"><a href="intro-to-predictive-modeling.html#cb370-14" tabindex="-1"></a><span class="fu">mean</span>(sim_data)</span></code></pre></div>
+<pre><code>## [1] 9.363476</code></pre>
+<div class="sourceCode" id="cb372"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb372-1"><a href="intro-to-predictive-modeling.html#cb372-1" tabindex="-1"></a><span class="fu">sd</span>(sim_data)</span></code></pre></div>
+<pre><code>## [1] 0.4378268</code></pre>
+<div class="sourceCode" id="cb374"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb374-1"><a href="intro-to-predictive-modeling.html#cb374-1" tabindex="-1"></a><span class="fu">t.test</span>(sim_data, <span class="at">mu =</span> true_mse)</span></code></pre></div>
+<pre><code>## 
+##  One Sample t-test
+## 
+## data:  sim_data
+## t = 14.974, df = 999, p-value &lt; 2.2e-16
+## alternative hypothesis: true mean is not equal to 9.156163
+## 95 percent confidence interval:
+##  9.336307 9.390645
+## sample estimates:
+## mean of x 
+##  9.363476</code></pre>
+<p>We see that bootstrapping significantly <strong>overestimates</strong> the MSE in this scenario.</p>
+<p>Now, let’s look at repeated <span class="math inline">\(10\)</span>-fold CV using the <code>caret</code> package. As a reminder, here is how we do it.</p>
+<div class="sourceCode" id="cb376"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb376-1"><a href="intro-to-predictive-modeling.html#cb376-1" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb376-2"><a href="intro-to-predictive-modeling.html#cb376-2" tabindex="-1"></a>tt <span class="ot">&lt;-</span> caret<span class="sc">::</span><span class="fu">train</span>(ys <span class="sc">~</span> xs, </span>
+<span id="cb376-3"><a href="intro-to-predictive-modeling.html#cb376-3" tabindex="-1"></a>                   <span class="at">data =</span> dd, </span>
+<span id="cb376-4"><a href="intro-to-predictive-modeling.html#cb376-4" tabindex="-1"></a>                   <span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, </span>
+<span id="cb376-5"><a href="intro-to-predictive-modeling.html#cb376-5" tabindex="-1"></a>                   <span class="at">trControl =</span> <span class="fu">trainControl</span>(<span class="at">method =</span> <span class="st">&quot;repeatedcv&quot;</span>,</span>
+<span id="cb376-6"><a href="intro-to-predictive-modeling.html#cb376-6" tabindex="-1"></a>                                            <span class="at">repeats =</span> <span class="dv">5</span>))</span>
+<span id="cb376-7"><a href="intro-to-predictive-modeling.html#cb376-7" tabindex="-1"></a>tt<span class="sc">$</span>results<span class="sc">$</span>RMSE<span class="sc">^</span><span class="dv">2</span></span></code></pre></div>
+<pre><code>## [1] 9.086599</code></pre>
+<p>Let’s replicate this and see what the mean is.</p>
+<div class="sourceCode" id="cb378"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb378-1"><a href="intro-to-predictive-modeling.html#cb378-1" tabindex="-1"></a>cv_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">50</span>, {</span>
+<span id="cb378-2"><a href="intro-to-predictive-modeling.html#cb378-2" tabindex="-1"></a>  ys <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> xs <span class="sc">+</span> <span class="fu">rnorm</span>(N, <span class="dv">0</span>, sigma)</span>
+<span id="cb378-3"><a href="intro-to-predictive-modeling.html#cb378-3" tabindex="-1"></a>  dd<span class="sc">$</span>ys <span class="ot">&lt;-</span> ys</span>
+<span id="cb378-4"><a href="intro-to-predictive-modeling.html#cb378-4" tabindex="-1"></a>  tt <span class="ot">&lt;-</span> caret<span class="sc">::</span><span class="fu">train</span>(ys <span class="sc">~</span> xs, </span>
+<span id="cb378-5"><a href="intro-to-predictive-modeling.html#cb378-5" tabindex="-1"></a>                   <span class="at">data =</span> dd, </span>
+<span id="cb378-6"><a href="intro-to-predictive-modeling.html#cb378-6" tabindex="-1"></a>                   <span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, </span>
+<span id="cb378-7"><a href="intro-to-predictive-modeling.html#cb378-7" tabindex="-1"></a>                   <span class="at">trControl =</span> <span class="fu">trainControl</span>(<span class="at">method =</span> <span class="st">&quot;repeatedcv&quot;</span>,</span>
+<span id="cb378-8"><a href="intro-to-predictive-modeling.html#cb378-8" tabindex="-1"></a>                                            <span class="at">repeats =</span> <span class="dv">5</span>))</span>
+<span id="cb378-9"><a href="intro-to-predictive-modeling.html#cb378-9" tabindex="-1"></a>  tt<span class="sc">$</span>results<span class="sc">$</span>RMSE<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb378-10"><a href="intro-to-predictive-modeling.html#cb378-10" tabindex="-1"></a>})</span>
+<span id="cb378-11"><a href="intro-to-predictive-modeling.html#cb378-11" tabindex="-1"></a><span class="fu">mean</span>(cv_data)</span></code></pre></div>
+<pre><code>## [1] 8.648354</code></pre>
+<div class="sourceCode" id="cb380"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb380-1"><a href="intro-to-predictive-modeling.html#cb380-1" tabindex="-1"></a><span class="fu">sd</span>(cv_data)</span></code></pre></div>
+<pre><code>## [1] 1.089583</code></pre>
+<div class="sourceCode" id="cb382"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb382-1"><a href="intro-to-predictive-modeling.html#cb382-1" tabindex="-1"></a>mse_real</span></code></pre></div>
+<pre><code>## [1] 9.178218</code></pre>
+<div class="sourceCode" id="cb384"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb384-1"><a href="intro-to-predictive-modeling.html#cb384-1" tabindex="-1"></a><span class="fu">t.test</span>(cv_data, <span class="at">mu =</span> mse_real)</span></code></pre></div>
+<pre><code>## 
+##  One Sample t-test
+## 
+## data:  cv_data
+## t = -3.4387, df = 49, p-value = 0.001202
+## alternative hypothesis: true mean is not equal to 9.178218
+## 95 percent confidence interval:
+##  8.338698 8.958010
+## sample estimates:
+## mean of x 
+##  8.648354</code></pre>
+<p>Here, we see that 10-fold repeated CV tends to underestimate the true MSE, and the standard deviation of the estimator is quite high to boot. This indicates that, for this particular problem, bootstrapping seems to be the better way to go. Again, the above code is <strong>really</strong> slow, and only does 50 different data sets. Here is a speed-up. The other advantage of doing it this way is that we can estimate MSE directly, rather than estimating RMSE and squaring, which introduces bias (as seen above).</p>
+<div class="sourceCode" id="cb386"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb386-1"><a href="intro-to-predictive-modeling.html#cb386-1" tabindex="-1"></a>sim_data_2 <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">200</span>, {</span>
+<span id="cb386-2"><a href="intro-to-predictive-modeling.html#cb386-2" tabindex="-1"></a>  dd<span class="sc">$</span>ys <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> dd<span class="sc">$</span>xs <span class="sc">+</span> <span class="fu">rnorm</span>(N, <span class="dv">0</span>, <span class="dv">3</span>)</span>
+<span id="cb386-3"><a href="intro-to-predictive-modeling.html#cb386-3" tabindex="-1"></a>  <span class="fu">replicate</span>(<span class="dv">5</span>, {</span>
+<span id="cb386-4"><a href="intro-to-predictive-modeling.html#cb386-4" tabindex="-1"></a>    folds <span class="ot">&lt;-</span> caret<span class="sc">::</span><span class="fu">createFolds</span>(dd<span class="sc">$</span>ys)</span>
+<span id="cb386-5"><a href="intro-to-predictive-modeling.html#cb386-5" tabindex="-1"></a>    <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="cf">function</span>(x) {</span>
+<span id="cb386-6"><a href="intro-to-predictive-modeling.html#cb386-6" tabindex="-1"></a>      test_indices <span class="ot">&lt;-</span> folds[[x]]</span>
+<span id="cb386-7"><a href="intro-to-predictive-modeling.html#cb386-7" tabindex="-1"></a>      test <span class="ot">&lt;-</span> dd[test_indices,]</span>
+<span id="cb386-8"><a href="intro-to-predictive-modeling.html#cb386-8" tabindex="-1"></a>      train <span class="ot">&lt;-</span> dd[<span class="sc">-</span>test_indices,]</span>
+<span id="cb386-9"><a href="intro-to-predictive-modeling.html#cb386-9" tabindex="-1"></a>      sxx <span class="ot">&lt;-</span> <span class="fu">sum</span>((train<span class="sc">$</span>xs <span class="sc">-</span> <span class="fu">mean</span>(train<span class="sc">$</span>xs))<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb386-10"><a href="intro-to-predictive-modeling.html#cb386-10" tabindex="-1"></a>      sxy <span class="ot">&lt;-</span> <span class="fu">sum</span>((train<span class="sc">$</span>xs <span class="sc">-</span> <span class="fu">mean</span>(train<span class="sc">$</span>xs)) <span class="sc">*</span> train<span class="sc">$</span>ys)</span>
+<span id="cb386-11"><a href="intro-to-predictive-modeling.html#cb386-11" tabindex="-1"></a>      coeffs_2 <span class="ot">&lt;-</span> sxy<span class="sc">/</span>sxx</span>
+<span id="cb386-12"><a href="intro-to-predictive-modeling.html#cb386-12" tabindex="-1"></a>      coeffs_1 <span class="ot">&lt;-</span> <span class="fu">mean</span>(train<span class="sc">$</span>ys) <span class="sc">-</span> coeffs_2 <span class="sc">*</span> <span class="fu">mean</span>(train<span class="sc">$</span>xs)</span>
+<span id="cb386-13"><a href="intro-to-predictive-modeling.html#cb386-13" tabindex="-1"></a>      errors <span class="ot">&lt;-</span> coeffs_1 <span class="sc">+</span> test<span class="sc">$</span>xs <span class="sc">*</span> coeffs_2 <span class="sc">-</span> test<span class="sc">$</span>ys</span>
+<span id="cb386-14"><a href="intro-to-predictive-modeling.html#cb386-14" tabindex="-1"></a>      <span class="fu">mean</span>(errors<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb386-15"><a href="intro-to-predictive-modeling.html#cb386-15" tabindex="-1"></a>    })</span>
+<span id="cb386-16"><a href="intro-to-predictive-modeling.html#cb386-16" tabindex="-1"></a>  }) <span class="sc">%&gt;%</span> <span class="fu">mean</span>() <span class="co">#estimate of MSE via 5 repeated 10-fold CV</span></span>
+<span id="cb386-17"><a href="intro-to-predictive-modeling.html#cb386-17" tabindex="-1"></a>})</span>
+<span id="cb386-18"><a href="intro-to-predictive-modeling.html#cb386-18" tabindex="-1"></a><span class="fu">mean</span>(sim_data_2)</span></code></pre></div>
+<pre><code>## [1] 9.157331</code></pre>
+<div class="sourceCode" id="cb388"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb388-1"><a href="intro-to-predictive-modeling.html#cb388-1" tabindex="-1"></a><span class="fu">sd</span>(sim_data_2)</span></code></pre></div>
+<pre><code>## [1] 1.287705</code></pre>
+<div class="sourceCode" id="cb390"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb390-1"><a href="intro-to-predictive-modeling.html#cb390-1" tabindex="-1"></a><span class="fu">t.test</span>(sim_data_2, <span class="at">mu =</span> mse_real)</span></code></pre></div>
+<pre><code>## 
+##  One Sample t-test
+## 
+## data:  sim_data_2
+## t = -0.22939, df = 199, p-value = 0.8188
+## alternative hypothesis: true mean is not equal to 9.178218
+## 95 percent confidence interval:
+##  8.977776 9.336887
+## sample estimates:
+## mean of x 
+##  9.157331</code></pre>
+<p>For this example, repeated CV seems considerably less biased than bootstrapping. Bootstrapping has a lower standard deviation.</p>
+<div class="exercise">
+<span class="divhead-definition exercise-before"> 4.3</span>
+<p><span id="exr:exercise-4-3" class="exercise"><strong>Exercise 4.3  </strong></span>Use simulation to compute the expected value and standard deviation of the estimator for MSE when using LGOCV with 70% in group and 30% out of group in the above scenarios. (That is, assume that we have a sample size of 100 from data that follows the pattern <span class="math inline">\(y = 1 + 2x + \epsilon\)</span>, where <span class="math inline">\(\epsilon \sim N(0, \sigma = 3)\)</span>. Assume the <span class="math inline">\(x\)</span> values in the data are uniformly spaced between 0 and 1, and the additional <span class="math inline">\(x\)</span> value is chosen randomly between 0 and 1, so we know the true MSE is 9.178218.) How does the estimate compare to bootstrapping and repeated 10-fold CV in terms of <strong>bias</strong> and <strong>standard deviation</strong>?</p>
+</div>
+</div>
+</div>
+<div id="bias-variance-trade-off" class="section level2 hasAnchor" number="4.4">
+<h2><span class="header-section-number">4.4</span> Bias Variance Trade-off<a href="intro-to-predictive-modeling.html#bias-variance-trade-off" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Let’s imagine that we take a sample of size 10 and we connect those points with line segments as our model. We imagine that the 10 <span class="math inline">\(x\)</span> values are <strong>fixed</strong> and do not change with subsequent data collection (which would change things up).</p>
+<div class="sourceCode" id="cb392"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb392-1"><a href="intro-to-predictive-modeling.html#cb392-1" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
+<span id="cb392-2"><a href="intro-to-predictive-modeling.html#cb392-2" tabindex="-1"></a>ys <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">10</span>, <span class="dv">0</span>, <span class="dv">2</span>)</span>
+<span id="cb392-3"><a href="intro-to-predictive-modeling.html#cb392-3" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(xs, ys)</span>
+<span id="cb392-4"><a href="intro-to-predictive-modeling.html#cb392-4" tabindex="-1"></a><span class="fu">ggplot</span>(dd, <span class="fu">aes</span>(xs, ys)) <span class="sc">+</span> </span>
+<span id="cb392-5"><a href="intro-to-predictive-modeling.html#cb392-5" tabindex="-1"></a>  <span class="fu">geom_line</span>()</span></code></pre></div>
+<p><img src="03-predictive-modeling_files/figure-html/unnamed-chunk-43-1.png" width="672" />
+This is our model. In order to compute the expected mean-squared error, we will need to sample data, build our model, create a new data point and compute the error squared, then find the expected value of that. For simplicity sake, we assume that the new data point falls on the <span class="math inline">\(x\)</span> value of 5. In that case, we don’t need to compute anything else, the error is simply the difference between consecutive draws of normal random variables, which has variance <span class="math inline">\(2^2 + 2^2 = 8\)</span>. However, we include the full code of the full simulation below.</p>
+<div class="sourceCode" id="cb393"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb393-1"><a href="intro-to-predictive-modeling.html#cb393-1" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
+<span id="cb393-2"><a href="intro-to-predictive-modeling.html#cb393-2" tabindex="-1"></a>errs <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb393-3"><a href="intro-to-predictive-modeling.html#cb393-3" tabindex="-1"></a>  ys <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">10</span>, <span class="dv">0</span>, <span class="dv">2</span>)</span>
+<span id="cb393-4"><a href="intro-to-predictive-modeling.html#cb393-4" tabindex="-1"></a>  new_x <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="dv">1</span>)</span>
+<span id="cb393-5"><a href="intro-to-predictive-modeling.html#cb393-5" tabindex="-1"></a>  new_y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">2</span>)</span>
+<span id="cb393-6"><a href="intro-to-predictive-modeling.html#cb393-6" tabindex="-1"></a>  ys[new_x] <span class="sc">-</span> new_y</span>
+<span id="cb393-7"><a href="intro-to-predictive-modeling.html#cb393-7" tabindex="-1"></a>})</span>
+<span id="cb393-8"><a href="intro-to-predictive-modeling.html#cb393-8" tabindex="-1"></a><span class="fu">mean</span>(errs<span class="sc">^</span><span class="dv">2</span>) <span class="co">#this is our estimate of E[MSE]</span></span></code></pre></div>
+<pre><code>## [1] 7.807746</code></pre>
+<p>Next, we estimate the bias.</p>
+<div class="sourceCode" id="cb395"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb395-1"><a href="intro-to-predictive-modeling.html#cb395-1" tabindex="-1"></a><span class="fu">mean</span>(errs) <span class="co">#our estimate of the bias</span></span></code></pre></div>
+<pre><code>## [1] -0.0319085</code></pre>
+<p>Next, we estimate the variance of the model. Here, we only look at the variance of the <strong>estimated values</strong>.</p>
+<div class="sourceCode" id="cb397"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb397-1"><a href="intro-to-predictive-modeling.html#cb397-1" tabindex="-1"></a>est_values <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb397-2"><a href="intro-to-predictive-modeling.html#cb397-2" tabindex="-1"></a>    ys <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">10</span>, <span class="dv">0</span>, <span class="dv">2</span>)</span>
+<span id="cb397-3"><a href="intro-to-predictive-modeling.html#cb397-3" tabindex="-1"></a>    new_x <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="dv">1</span>)</span>
+<span id="cb397-4"><a href="intro-to-predictive-modeling.html#cb397-4" tabindex="-1"></a>    ys[new_x]</span>
+<span id="cb397-5"><a href="intro-to-predictive-modeling.html#cb397-5" tabindex="-1"></a>})</span>
+<span id="cb397-6"><a href="intro-to-predictive-modeling.html#cb397-6" tabindex="-1"></a><span class="fu">var</span>(est_values)</span></code></pre></div>
+<pre><code>## [1] 3.98105</code></pre>
+<p>And we see that the MSE, which we estimate to be about 8, is the sum of the variance <span class="math inline">\(\sigma^2 = 4\)</span>, the bias squared = 0, and the variance of the model itself, which is about 4. Hmmm, that one was maybe <em>too</em> easy in that it didn’t illustrate all of the ideas. Let’s try the one from the textbook, where they model <span class="math inline">\(y = \sin(2\pi x) + \epsilon\)</span> by splitting the x-values into two groups and approximating with a line. That’ll be fun!</p>
+<p>This time, we also assume that our <span class="math inline">\(x\)</span>’s are chosen randomly. We also plot our estimate.</p>
+<div class="sourceCode" id="cb399"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb399-1"><a href="intro-to-predictive-modeling.html#cb399-1" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">40</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb399-2"><a href="intro-to-predictive-modeling.html#cb399-2" tabindex="-1"></a>ys <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> xs) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">40</span>, <span class="dv">0</span>, .<span class="dv">4</span>)</span>
+<span id="cb399-3"><a href="intro-to-predictive-modeling.html#cb399-3" tabindex="-1"></a><span class="fu">plot</span>(xs, ys)</span>
+<span id="cb399-4"><a href="intro-to-predictive-modeling.html#cb399-4" tabindex="-1"></a>new_f <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb399-5"><a href="intro-to-predictive-modeling.html#cb399-5" tabindex="-1"></a>  <span class="fu">ifelse</span>(x <span class="sc">&lt;</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>, <span class="fu">mean</span>(ys[xs <span class="sc">&lt;</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>]), <span class="fu">mean</span>(ys[xs <span class="sc">&gt;=</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>]))</span>
+<span id="cb399-6"><a href="intro-to-predictive-modeling.html#cb399-6" tabindex="-1"></a>}</span>
+<span id="cb399-7"><a href="intro-to-predictive-modeling.html#cb399-7" tabindex="-1"></a><span class="fu">curve</span>(new_f, <span class="at">add =</span> T, <span class="at">col =</span> <span class="dv">2</span>)</span></code></pre></div>
+<p><img src="03-predictive-modeling_files/figure-html/unnamed-chunk-47-1.png" width="672" /></p>
+<p>OK, the variance that we can’t remove from this model is <span class="math inline">\(.4^2 = 0.16\)</span>. Now, we estimate the expected value of the MSE by picking a bunch of <span class="math inline">\(x\)</span> values, estimating the expected MSE for that <span class="math inline">\(x\)</span> value, and integrating over all of the <span class="math inline">\(x\)</span> values. This yields the same result as the method we used in the previous section. The reason we are doing this more complicated thing is that when we have to estimate the <strong>Variance</strong> of the model, we will need to do it this way, so we may as well get used to doing it like that now…</p>
+<div class="sourceCode" id="cb400"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb400-1"><a href="intro-to-predictive-modeling.html#cb400-1" tabindex="-1"></a>x_vals <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">300</span>)</span>
+<span id="cb400-2"><a href="intro-to-predictive-modeling.html#cb400-2" tabindex="-1"></a>for_mse <span class="ot">&lt;-</span> <span class="fu">sapply</span>(x_vals, <span class="cf">function</span>(x1) {</span>
+<span id="cb400-3"><a href="intro-to-predictive-modeling.html#cb400-3" tabindex="-1"></a>  errors <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">1000</span>, {</span>
+<span id="cb400-4"><a href="intro-to-predictive-modeling.html#cb400-4" tabindex="-1"></a>    xs <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">40</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb400-5"><a href="intro-to-predictive-modeling.html#cb400-5" tabindex="-1"></a>    ys <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> xs) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">40</span>, <span class="dv">0</span>, .<span class="dv">4</span>)</span>
+<span id="cb400-6"><a href="intro-to-predictive-modeling.html#cb400-6" tabindex="-1"></a>    y1 <span class="ot">&lt;-</span> <span class="fu">mean</span>(ys[xs <span class="sc">&lt;</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>])</span>
+<span id="cb400-7"><a href="intro-to-predictive-modeling.html#cb400-7" tabindex="-1"></a>    y2 <span class="ot">&lt;-</span> <span class="fu">mean</span>(ys[xs <span class="sc">&gt;=</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>])</span>
+<span id="cb400-8"><a href="intro-to-predictive-modeling.html#cb400-8" tabindex="-1"></a>    new_x <span class="ot">&lt;-</span>  x1</span>
+<span id="cb400-9"><a href="intro-to-predictive-modeling.html#cb400-9" tabindex="-1"></a>    new_y <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="dv">2</span><span class="sc">*</span>pi<span class="sc">*</span>new_x) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">40</span>, <span class="dv">0</span>, .<span class="dv">4</span>)</span>
+<span id="cb400-10"><a href="intro-to-predictive-modeling.html#cb400-10" tabindex="-1"></a>    <span class="fu">ifelse</span>(new_x <span class="sc">&lt;</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>, new_y <span class="sc">-</span> y1, new_y <span class="sc">-</span> y2)</span>
+<span id="cb400-11"><a href="intro-to-predictive-modeling.html#cb400-11" tabindex="-1"></a>  })</span>
+<span id="cb400-12"><a href="intro-to-predictive-modeling.html#cb400-12" tabindex="-1"></a>  <span class="fu">mean</span>(errors<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb400-13"><a href="intro-to-predictive-modeling.html#cb400-13" tabindex="-1"></a>})</span>
+<span id="cb400-14"><a href="intro-to-predictive-modeling.html#cb400-14" tabindex="-1"></a><span class="fu">head</span>(for_mse)</span></code></pre></div>
+<pre><code>## [1] 0.5542528 0.5936515 0.5308057 0.4794944 0.4450884 0.4590626</code></pre>
+<p>We see that the expected MSE is larger when the value of <span class="math inline">\(sin(2 \pi x)\)</span> is close to 0; that is, when <span class="math inline">\(x\)</span> is close to 0. Now, we just take the average MSE, and that is our estimate for the overall expected MSE of the model.</p>
+<div class="sourceCode" id="cb402"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb402-1"><a href="intro-to-predictive-modeling.html#cb402-1" tabindex="-1"></a><span class="fu">mean</span>(for_mse)</span></code></pre></div>
+<pre><code>## [1] 0.2684277</code></pre>
+<p>Cool. That is our estimate of the MSE associated with the model. Now we estimate the <strong>variance</strong> using the same technique.</p>
+<div class="sourceCode" id="cb404"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb404-1"><a href="intro-to-predictive-modeling.html#cb404-1" tabindex="-1"></a>for_variance <span class="ot">&lt;-</span> <span class="fu">sapply</span>(x_vals, <span class="cf">function</span>(x1) {</span>
+<span id="cb404-2"><a href="intro-to-predictive-modeling.html#cb404-2" tabindex="-1"></a>  errors <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">1000</span>, {</span>
+<span id="cb404-3"><a href="intro-to-predictive-modeling.html#cb404-3" tabindex="-1"></a>    xs <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">40</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb404-4"><a href="intro-to-predictive-modeling.html#cb404-4" tabindex="-1"></a>    ys <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> xs) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">40</span>, <span class="dv">0</span>, .<span class="dv">4</span>)</span>
+<span id="cb404-5"><a href="intro-to-predictive-modeling.html#cb404-5" tabindex="-1"></a>    y1 <span class="ot">&lt;-</span> <span class="fu">mean</span>(ys[xs <span class="sc">&lt;</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>])</span>
+<span id="cb404-6"><a href="intro-to-predictive-modeling.html#cb404-6" tabindex="-1"></a>    y2 <span class="ot">&lt;-</span> <span class="fu">mean</span>(ys[xs <span class="sc">&gt;=</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>])</span>
+<span id="cb404-7"><a href="intro-to-predictive-modeling.html#cb404-7" tabindex="-1"></a>    new_x <span class="ot">&lt;-</span>  x1</span>
+<span id="cb404-8"><a href="intro-to-predictive-modeling.html#cb404-8" tabindex="-1"></a>    <span class="fu">ifelse</span>(new_x <span class="sc">&lt;</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>, y1, y2)</span>
+<span id="cb404-9"><a href="intro-to-predictive-modeling.html#cb404-9" tabindex="-1"></a>  })</span>
+<span id="cb404-10"><a href="intro-to-predictive-modeling.html#cb404-10" tabindex="-1"></a>  <span class="fu">var</span>(errors)</span>
+<span id="cb404-11"><a href="intro-to-predictive-modeling.html#cb404-11" tabindex="-1"></a>})</span>
+<span id="cb404-12"><a href="intro-to-predictive-modeling.html#cb404-12" tabindex="-1"></a><span class="fu">head</span>(for_variance)</span></code></pre></div>
+<pre><code>## [1] 0.01179742 0.01395319 0.01399668 0.01267560 0.01211769 0.01325521</code></pre>
+<p>These seem not to depend nearly as much on <span class="math inline">\(x\)</span>, which is what should be expected! Our integral of this is about</p>
+<div class="sourceCode" id="cb406"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb406-1"><a href="intro-to-predictive-modeling.html#cb406-1" tabindex="-1"></a><span class="fu">mean</span>(for_variance)</span></code></pre></div>
+<pre><code>## [1] 0.01306</code></pre>
+<p>Let’s look at the bias squared.</p>
+<div class="sourceCode" id="cb408"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb408-1"><a href="intro-to-predictive-modeling.html#cb408-1" tabindex="-1"></a>biases <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">300</span>), <span class="cf">function</span>(x1) {</span>
+<span id="cb408-2"><a href="intro-to-predictive-modeling.html#cb408-2" tabindex="-1"></a>  errors <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">1000</span>, {</span>
+<span id="cb408-3"><a href="intro-to-predictive-modeling.html#cb408-3" tabindex="-1"></a>    xs <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">40</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb408-4"><a href="intro-to-predictive-modeling.html#cb408-4" tabindex="-1"></a>    ys <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> xs) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">40</span>, <span class="dv">0</span>, .<span class="dv">4</span>)</span>
+<span id="cb408-5"><a href="intro-to-predictive-modeling.html#cb408-5" tabindex="-1"></a>    y1 <span class="ot">&lt;-</span> <span class="fu">mean</span>(ys[xs <span class="sc">&lt;</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>])</span>
+<span id="cb408-6"><a href="intro-to-predictive-modeling.html#cb408-6" tabindex="-1"></a>    y2 <span class="ot">&lt;-</span> <span class="fu">mean</span>(ys[xs <span class="sc">&gt;=</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>])</span>
+<span id="cb408-7"><a href="intro-to-predictive-modeling.html#cb408-7" tabindex="-1"></a>    new_x <span class="ot">&lt;-</span>  x1</span>
+<span id="cb408-8"><a href="intro-to-predictive-modeling.html#cb408-8" tabindex="-1"></a>    new_y <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> new_x) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, .<span class="dv">4</span>)</span>
+<span id="cb408-9"><a href="intro-to-predictive-modeling.html#cb408-9" tabindex="-1"></a>    <span class="fu">ifelse</span>(new_x <span class="sc">&lt;</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>, y1 <span class="sc">-</span> new_y, y2 <span class="sc">-</span> new_y)</span>
+<span id="cb408-10"><a href="intro-to-predictive-modeling.html#cb408-10" tabindex="-1"></a>  })</span>
+<span id="cb408-11"><a href="intro-to-predictive-modeling.html#cb408-11" tabindex="-1"></a>  <span class="fu">mean</span>(errors)</span>
+<span id="cb408-12"><a href="intro-to-predictive-modeling.html#cb408-12" tabindex="-1"></a>})</span>
+<span id="cb408-13"><a href="intro-to-predictive-modeling.html#cb408-13" tabindex="-1"></a><span class="fu">head</span>(biases)</span></code></pre></div>
+<pre><code>## [1] 0.6356824 0.6091229 0.6023423 0.5673420 0.5573952 0.5305369</code></pre>
+<p>OK, and the integral of the biases squared is about</p>
+<div class="sourceCode" id="cb410"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb410-1"><a href="intro-to-predictive-modeling.html#cb410-1" tabindex="-1"></a><span class="fu">sum</span>(biases<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span><span class="dv">100</span>)</span></code></pre></div>
+<pre><code>## [1] 0.2897972</code></pre>
+<p>Here is the moment of truth!</p>
+<div class="sourceCode" id="cb412"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb412-1"><a href="intro-to-predictive-modeling.html#cb412-1" tabindex="-1"></a><span class="fu">mean</span>(for_mse)</span></code></pre></div>
+<pre><code>## [1] 0.2684277</code></pre>
+<div class="sourceCode" id="cb414"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb414-1"><a href="intro-to-predictive-modeling.html#cb414-1" tabindex="-1"></a>.<span class="dv">4</span><span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="fu">mean</span>(for_variance) <span class="sc">+</span> <span class="fu">mean</span>(biases<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div>
+<pre><code>## [1] 0.2696591</code></pre>
+<p>Woo-hoo! Those seem to match! I wasn’t sure when I was doing the simulations with smaller samples, so I kept making them bigger and now I am convinced. This also helps me understand what the <em>model variance</em> and <em>model bias</em> refer to, though in this case the model variance is constant across all of the values of <span class="math inline">\(x\)</span>.</p>
+<div class="exercise">
+<span class="divhead-definition exercise-before"> 4.4</span>
+<p><span id="exr:exercise-4-4" class="exercise"><strong>Exercise 4.4  </strong></span>Verify the bias-variance trade-off formula through simulations when the signal is <span class="math inline">\(y = \sin(2 \pi x) + \epsilon\)</span>, where <span class="math inline">\(\epsilon \sim N(0, \sigma = .4)\)</span>, and the model is obtained by the following procedure. (Note that this is the same procedure as above, but we have replaced 1/2 by 3/4).</p>
+<ol style="list-style-type: lower-alpha">
+<li><p>If <span class="math inline">\(x &lt; 3/4\)</span>, then <span class="math inline">\(y\)</span> is the mean of all of the <span class="math inline">\(y\)</span> values associated with <span class="math inline">\(x\)</span> values that are less than 3/4.</p></li>
+<li><p>If <span class="math inline">\(x \ge 3/4\)</span>, then <span class="math inline">\(y\)</span> is the mean of all of the <span class="math inline">\(y\)</span> values associated with <span class="math inline">\(x\)</span> values that are greater than or equal to 3/4.</p></li>
+</ol>
+</div>
+</div>
+<div id="exercises-2" class="section level2 hasAnchor" number="4.5">
+<h2><span class="header-section-number">4.5</span> Exercises<a href="intro-to-predictive-modeling.html#exercises-2" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ol style="list-style-type: decimal">
+<li><p>Exercise <a href="intro-to-predictive-modeling.html#exr:exercise-4-1">4.1</a></p></li>
+<li><p>Exercise <a href="intro-to-predictive-modeling.html#exr:exercise-4-2">4.2</a></p></li>
+<li><p>Exercise <a href="intro-to-predictive-modeling.html#exr:exercise-4-3">4.3</a></p></li>
+<li><p>Exercise <a href="intro-to-predictive-modeling.html#exr:exercise-4-4">4.4</a></p></li>
+</ol>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="multiple-linear-regression.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="regression-predictive-models.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": {
+    "github": false,
+    "facebook": true,
+    "twitter": true,
+    "linkedin": false,
+    "weibo": false,
+    "instapaper": false,
+    "vk": false,
+    "whatsapp": false,
+    "all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+  },
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": null,
+    "text": null
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": null,
+    "text": null
+  },
+  "download": null,
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "subsection"
+  }
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
