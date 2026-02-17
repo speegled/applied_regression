@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 9 Solutions | Applied Regression with R</title>
+  <meta name="description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  <meta name="generator" content="bookdown 0.22 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 9 Solutions | Applied Regression with R" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 9 Solutions | Applied Regression with R" />
+  
+  <meta name="twitter:description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  
+
+<meta name="author" content="Darrin Speegle" />
+
+
+<meta name="date" content="2022-01-19" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon" />
+<link rel="prev" href="tree-regression-models.html"/>
+
+<script src="libs/header-attrs-2.8/header-attrs.js"></script>
+<script src="libs/jquery-3.5.1/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+<script src="libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
+<script src="libs/plotly-binding-4.9.3/plotly.js"></script>
+<script src="libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="libs/crosstalk-1.1.1/css/crosstalk.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.1.1/js/crosstalk.min.js"></script>
+<link href="libs/plotly-htmlwidgets-css-1.57.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="libs/plotly-main-1.57.1/plotly-latest.min.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Applied Regression With R</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Preface</a></li>
+<li class="chapter" data-level="2" data-path="classicaltheory.html"><a href="classicaltheory.html"><i class="fa fa-check"></i><b>2</b> Classical Theory of Simple Linear Regression</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="classicaltheory.html"><a href="classicaltheory.html#review"><i class="fa fa-check"></i><b>2.1</b> Review</a>
+<ul>
+<li class="chapter" data-level="2.1.1" data-path="classicaltheory.html"><a href="classicaltheory.html#estimating-means-and-standard-deviations"><i class="fa fa-check"></i><b>2.1.1</b> Estimating Means and standard deviations</a></li>
+<li class="chapter" data-level="2.1.2" data-path="classicaltheory.html"><a href="classicaltheory.html#estimating-the-density-of-an-rv"><i class="fa fa-check"></i><b>2.1.2</b> Estimating the density of an rv</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="classicaltheory.html"><a href="classicaltheory.html#linear-regression-overview"><i class="fa fa-check"></i><b>2.2</b> Linear Regression Overview</a></li>
+<li class="chapter" data-level="2.3" data-path="classicaltheory.html"><a href="classicaltheory.html#linear-regression-with-no-intercept"><i class="fa fa-check"></i><b>2.3</b> Linear Regression with no intercept</a></li>
+<li class="chapter" data-level="2.4" data-path="classicaltheory.html"><a href="classicaltheory.html#the-full-model"><i class="fa fa-check"></i><b>2.4</b> The full model</a>
+<ul>
+<li class="chapter" data-level="2.4.1" data-path="classicaltheory.html"><a href="classicaltheory.html#hypothesis-test-interlude"><i class="fa fa-check"></i><b>2.4.1</b> Hypothesis Test Interlude</a></li>
+</ul></li>
+<li class="chapter" data-level="2.5" data-path="classicaltheory.html"><a href="classicaltheory.html#using-different-loss-functions"><i class="fa fa-check"></i><b>2.5</b> Using different loss functions</a></li>
+<li class="chapter" data-level="" data-path="classicaltheory.html"><a href="classicaltheory.html#vignette-a-dplyr-primer"><i class="fa fa-check"></i>Vignette: A dplyr primer</a></li>
+<li class="chapter" data-level="2.6" data-path="classicaltheory.html"><a href="classicaltheory.html#exercises"><i class="fa fa-check"></i><b>2.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html"><i class="fa fa-check"></i><b>3</b> Multiple Linear Regression</a>
+<ul>
+<li class="chapter" data-level="3.0.1" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#anova"><i class="fa fa-check"></i><b>3.0.1</b> Aside on multiple R squared and ANOVA</a></li>
+<li class="chapter" data-level="3.1" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#more-variable-selection-anova"><i class="fa fa-check"></i><b>3.1</b> More Variable Selection: ANOVA</a></li>
+<li class="chapter" data-level="3.2" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#predictions"><i class="fa fa-check"></i><b>3.2</b> Predictions</a></li>
+<li class="chapter" data-level="3.3" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#exercises-1"><i class="fa fa-check"></i><b>3.3</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html"><i class="fa fa-check"></i><b>4</b> Intro to Predictive Modeling</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#comparing-two-models"><i class="fa fa-check"></i><b>4.1</b> Comparing Two Models</a></li>
+<li class="chapter" data-level="4.2" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#simulations-of-expected-mse"><i class="fa fa-check"></i><b>4.2</b> Simulations of Expected MSE</a>
+<ul>
+<li class="chapter" data-level="4.2.1" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#estimating-mse-and-bias-variance-tradeoff"><i class="fa fa-check"></i><b>4.2.1</b> Estimating MSE and Bias-Variance Tradeoff</a></li>
+<li class="chapter" data-level="4.2.2" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#estimating-mse-for-new-predictors-uniformly-sampled"><i class="fa fa-check"></i><b>4.2.2</b> Estimating MSE for new predictors uniformly sampled</a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#bias-variance-trade-off"><i class="fa fa-check"></i><b>4.3</b> Bias Variance Trade-off</a></li>
+<li class="chapter" data-level="4.4" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#exercises-2"><i class="fa fa-check"></i><b>4.4</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html"><i class="fa fa-check"></i><b>5</b> Regression Predictive Models</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#preprocessing"><i class="fa fa-check"></i><b>5.1</b> Preprocessing</a></li>
+<li class="chapter" data-level="5.2" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#missing-data"><i class="fa fa-check"></i><b>5.2</b> Missing Data</a>
+<ul>
+<li class="chapter" data-level="5.2.1" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#predicting-when-a-level-is-missing-from-the-training-set"><i class="fa fa-check"></i><b>5.2.1</b> Predicting when a level is missing from the training set</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#correlated-predictors"><i class="fa fa-check"></i><b>5.3</b> Correlated Predictors</a></li>
+<li class="chapter" data-level="5.4" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#aside-on-pca"><i class="fa fa-check"></i><b>5.4</b> Aside on PCA</a></li>
+<li class="chapter" data-level="5.5" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#johnson-lindenstrauss-dimension-reduction"><i class="fa fa-check"></i><b>5.5</b> Johnson-Lindenstrauss Dimension Reduction</a></li>
+<li class="chapter" data-level="5.6" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#exercises-3"><i class="fa fa-check"></i><b>5.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="variable-selection.html"><a href="variable-selection.html"><i class="fa fa-check"></i><b>6</b> Variable Selection</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="variable-selection.html"><a href="variable-selection.html#partial-least-squares"><i class="fa fa-check"></i><b>6.1</b> Partial Least Squares</a>
+<ul>
+<li class="chapter" data-level="6.1.1" data-path="variable-selection.html"><a href="variable-selection.html#optional-pls-stuff"><i class="fa fa-check"></i><b>6.1.1</b> Optional PLS Stuff</a></li>
+</ul></li>
+<li class="chapter" data-level="6.2" data-path="variable-selection.html"><a href="variable-selection.html#ridgelasso-and-elastic-net"><i class="fa fa-check"></i><b>6.2</b> Ridge/Lasso and Elastic Net</a>
+<ul>
+<li class="chapter" data-level="6.2.1" data-path="variable-selection.html"><a href="variable-selection.html#ridge-regression"><i class="fa fa-check"></i><b>6.2.1</b> Ridge Regression</a></li>
+<li class="chapter" data-level="6.2.2" data-path="variable-selection.html"><a href="variable-selection.html#lasso"><i class="fa fa-check"></i><b>6.2.2</b> LASSO</a></li>
+</ul></li>
+<li class="chapter" data-level="6.3" data-path="variable-selection.html"><a href="variable-selection.html#step-aic"><i class="fa fa-check"></i><b>6.3</b> Step AIC</a>
+<ul>
+<li class="chapter" data-level="6.3.1" data-path="variable-selection.html"><a href="variable-selection.html#doing-lgocv-with-preprocessing"><i class="fa fa-check"></i><b>6.3.1</b> Doing LGOCV with preprocessing</a></li>
+</ul></li>
+<li class="chapter" data-level="6.4" data-path="variable-selection.html"><a href="variable-selection.html#interactions"><i class="fa fa-check"></i><b>6.4</b> Interactions</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html"><i class="fa fa-check"></i><b>7</b> Non-Linear Regression Models</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#support-vector-regression"><i class="fa fa-check"></i><b>7.1</b> Support Vector Regression</a>
+<ul>
+<li class="chapter" data-level="7.1.1" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#plot-twist"><i class="fa fa-check"></i><b>7.1.1</b> PLOT TWIST</a></li>
+</ul></li>
+<li class="chapter" data-level="7.2" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#k-nearest-neighbors"><i class="fa fa-check"></i><b>7.2</b> K Nearest Neighbors</a></li>
+<li class="chapter" data-level="7.3" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#exercises-4"><i class="fa fa-check"></i><b>7.3</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="tree-regression-models.html"><a href="tree-regression-models.html"><i class="fa fa-check"></i><b>8</b> Tree Regression Models</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="tree-regression-models.html"><a href="tree-regression-models.html#basic-regression-trees"><i class="fa fa-check"></i><b>8.1</b> Basic Regression Trees</a></li>
+<li class="chapter" data-level="8.2" data-path="tree-regression-models.html"><a href="tree-regression-models.html#regression-model-trees"><i class="fa fa-check"></i><b>8.2</b> Regression Model Trees</a>
+<ul>
+<li class="chapter" data-level="8.2.1" data-path="tree-regression-models.html"><a href="tree-regression-models.html#choosing-variable-to-split"><i class="fa fa-check"></i><b>8.2.1</b> Choosing Variable to Split</a></li>
+<li class="chapter" data-level="8.2.2" data-path="tree-regression-models.html"><a href="tree-regression-models.html#choosing-split-value"><i class="fa fa-check"></i><b>8.2.2</b> Choosing Split Value</a></li>
+<li class="chapter" data-level="8.2.3" data-path="tree-regression-models.html"><a href="tree-regression-models.html#predicting-values-smoothing"><i class="fa fa-check"></i><b>8.2.3</b> Predicting values (Smoothing)</a></li>
+<li class="chapter" data-level="8.2.4" data-path="tree-regression-models.html"><a href="tree-regression-models.html#using-r-functions"><i class="fa fa-check"></i><b>8.2.4</b> Using R functions</a></li>
+</ul></li>
+<li class="chapter" data-level="8.3" data-path="tree-regression-models.html"><a href="tree-regression-models.html#bagging"><i class="fa fa-check"></i><b>8.3</b> Bagging</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="solutions.html"><a href="solutions.html"><i class="fa fa-check"></i><b>9</b> Solutions</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="solutions.html"><a href="solutions.html#chapter-2-solutions"><i class="fa fa-check"></i><b>9.1</b> Chapter 2 Solutions</a></li>
+<li class="chapter" data-level="9.2" data-path="solutions.html"><a href="solutions.html#chapter-3-solutions"><i class="fa fa-check"></i><b>9.2</b> Chapter 3 Solutions</a></li>
+<li class="chapter" data-level="9.3" data-path="solutions.html"><a href="solutions.html#chapter-5"><i class="fa fa-check"></i><b>9.3</b> Chapter 5</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Applied Regression with R</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="solutions" class="section level1" number="9">
+<h1><span class="header-section-number">Chapter 9</span> Solutions</h1>
+<div id="chapter-2-solutions" class="section level2" number="9.1">
+<h2><span class="header-section-number">9.1</span> Chapter 2 Solutions</h2>
+<p><strong>Exercise 2.1</strong></p>
+<ol style="list-style-type: lower-alpha">
+<li><p>We have that <span class="math inline">\(\overline{X}\)</span> is normal with mean <span class="math inline">\(\overline{\mu}\)</span> and variance <span class="math inline">\(\frac 1{25}\sum \sigma_i^2\)</span>, i.e. <span class="math inline">\(\overline{X} \sim N(3, \sigma^2 = 2.2)\)</span>.</p></li>
+<li><p>To confirm this via simulations:</p></li>
+</ol>
+<div class="sourceCode" id="cb817"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb817-1"><a href="solutions.html#cb817-1" aria-hidden="true" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb817-2"><a href="solutions.html#cb817-2" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="fu">sqrt</span>((<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb817-3"><a href="solutions.html#cb817-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(x)</span>
+<span id="cb817-4"><a href="solutions.html#cb817-4" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb817-5"><a href="solutions.html#cb817-5" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(sim_data) <span class="co">#cf 3</span></span></code></pre></div>
+<pre><code>## [1] 2.994382</code></pre>
+<div class="sourceCode" id="cb819"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb819-1"><a href="solutions.html#cb819-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(sim_data) <span class="co">#cf 2.2</span></span></code></pre></div>
+<pre><code>## [1] 2.222065</code></pre>
+<div class="sourceCode" id="cb821"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb821-1"><a href="solutions.html#cb821-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(sim_data))</span>
+<span id="cb821-2"><a href="solutions.html#cb821-2" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="dv">3</span>, <span class="fu">sqrt</span>(<span class="fl">2.2</span>)), <span class="at">add =</span> T, <span class="at">col =</span> <span class="dv">2</span>)</span></code></pre></div>
+<p><img src="solutions_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><strong>Exercise 2.2</strong></p>
+<div class="sourceCode" id="cb822"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb822-1"><a href="solutions.html#cb822-1" aria-hidden="true" tabindex="-1"></a>bp.obese <span class="ot">&lt;-</span> ISwR<span class="sc">::</span>bp.obese</span>
+<span id="cb822-2"><a href="solutions.html#cb822-2" aria-hidden="true" tabindex="-1"></a>sse <span class="ot">&lt;-</span> <span class="cf">function</span>(beta) {</span>
+<span id="cb822-3"><a href="solutions.html#cb822-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>((bp.obese<span class="sc">$</span>bp <span class="sc">-</span> (beta[<span class="dv">1</span>] <span class="sc">+</span> beta[<span class="dv">2</span>] <span class="sc">*</span> bp.obese<span class="sc">$</span>obese))<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb822-4"><a href="solutions.html#cb822-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb822-5"><a href="solutions.html#cb822-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb822-6"><a href="solutions.html#cb822-6" aria-hidden="true" tabindex="-1"></a><span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">fn =</span> sse)</span></code></pre></div>
+<pre><code>## $par
+## [1] 96.80371 23.01824
+## 
+## $value
+## [1] 29845.55
+## 
+## $counts
+## function gradient 
+##      109       NA 
+## 
+## $convergence
+## [1] 0
+## 
+## $message
+## NULL</code></pre>
+<p>Our line of best fit is <span class="math inline">\(y = 96.8 + 23 x\)</span>. Confirm with <code>lm</code>:</p>
+<div class="sourceCode" id="cb824"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb824-1"><a href="solutions.html#cb824-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(bp <span class="sc">~</span> obese, <span class="at">data =</span> bp.obese)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = bp ~ obese, data = bp.obese)
+## 
+## Coefficients:
+## (Intercept)        obese  
+##       96.82        23.00</code></pre>
+<p>For part (b), either answer is OK. The data seems pretty good to me, but I can see where some people didn’t think so. As long as you say why.</p>
+<p><strong>Exercise 2.3</strong></p>
+<ol style="list-style-type: lower-alpha">
+<li><p>Note that <span class="math inline">\(\sum_{i = 1}^n \beta_0 = n\beta_0\)</span>. The solution is <span class="math inline">\(\hat \beta_0 = \overline{y} - \overline{x}\)</span>.</p></li>
+<li><p><span class="math inline">\(\hat \beta_0\)</span> is normal with mean <span class="math inline">\(\beta_0\)</span> and variance <span class="math inline">\(\sigma^2/n\)</span>.</p></li>
+<li><p>Let’s simulate.</p></li>
+</ol>
+<div class="sourceCode" id="cb826"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb826-1"><a href="solutions.html#cb826-1" aria-hidden="true" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">20</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb826-2"><a href="solutions.html#cb826-2" aria-hidden="true" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb826-3"><a href="solutions.html#cb826-3" aria-hidden="true" tabindex="-1"></a>  ys <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">+</span> xs <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">0</span>, <span class="dv">1</span>)  </span>
+<span id="cb826-4"><a href="solutions.html#cb826-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(ys) <span class="sc">-</span> <span class="fu">mean</span>(xs)</span>
+<span id="cb826-5"><a href="solutions.html#cb826-5" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb826-6"><a href="solutions.html#cb826-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(sim_data))</span>
+<span id="cb826-7"><a href="solutions.html#cb826-7" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="dv">2</span>, <span class="dv">1</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">20</span>)), <span class="at">add =</span> T, <span class="at">col =</span> <span class="dv">2</span>)</span></code></pre></div>
+<p><img src="solutions_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><strong>Exercise 2.4</strong></p>
+<p>We have that
+<span class="math display">\[
+\frac{\hat \beta_1 - \beta_1}{\sqrt{nS^2/(n\sum x_i^2 - (\sum x_i)^2)}} \sim t_{n -2}
+\]</span>
+So we compute.</p>
+<div class="sourceCode" id="cb827"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb827-1"><a href="solutions.html#cb827-1" aria-hidden="true" tabindex="-1"></a>dd <span class="ot">&lt;-</span> HistData<span class="sc">::</span>Galton</span>
+<span id="cb827-2"><a href="solutions.html#cb827-2" aria-hidden="true" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(child <span class="sc">~</span> parent, <span class="at">data =</span> dd)</span>
+<span id="cb827-3"><a href="solutions.html#cb827-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = child ~ parent, data = dd)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -7.8050 -1.3661  0.0487  1.6339  5.9264 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 23.94153    2.81088   8.517   &lt;2e-16 ***
+## parent       0.64629    0.04114  15.711   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 2.239 on 926 degrees of freedom
+## Multiple R-squared:  0.2105, Adjusted R-squared:  0.2096 
+## F-statistic: 246.8 on 1 and 926 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>The estimate for <span class="math inline">\(S\)</span> is given as 2.239, which we use. We compute the test statistic:</p>
+<div class="sourceCode" id="cb829"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb829-1"><a href="solutions.html#cb829-1" aria-hidden="true" tabindex="-1"></a>(<span class="fl">0.64629</span> <span class="sc">-</span> <span class="dv">1</span>)<span class="sc">/</span><span class="fu">sqrt</span>(<span class="fl">2.239</span><span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>(<span class="fu">sum</span>(dd<span class="sc">$</span>parent<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">928</span> <span class="sc">*</span> <span class="fu">sum</span>(dd<span class="sc">$</span>parent)<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div>
+<pre><code>## [1] -8.596837</code></pre>
+<p>The test statistic is -8.596837. We need to compute the likelihood of obtaining something that unlikely given that <span class="math inline">\(H_0\)</span> is true.</p>
+<div class="sourceCode" id="cb831"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb831-1"><a href="solutions.html#cb831-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pt</span>(<span class="sc">-</span><span class="fl">8.596837</span>, <span class="dv">926</span>) <span class="sc">*</span> <span class="dv">2</span></span></code></pre></div>
+<pre><code>## [1] 3.454205e-17</code></pre>
+<p>With this <span class="math inline">\(p\)</span>-value, we reject the null hypothesis. We conlcude that the slope is not 1. With more work, we can see that this means (roughly) that parents who are short or tall will tend to have children that are again short or tall, but less so than the parents. Does that mean that eventually there will be little variation among heights of humans. Why or why not?</p>
+<p><strong>Exercise 2.5</strong></p>
+<ol style="list-style-type: lower-alpha">
+<li><p>An unbiased estimator for <span class="math inline">\(S^2\)</span> is
+<span class="math display">\[
+\frac{1}{n-1} \sum_{ i = 1}^n \bigl(y_i - \hat\beta_0 - x_i\bigr)^2
+\]</span></p></li>
+<li><p>Standard normal.</p></li>
+<li><p><span class="math inline">\(t\)</span> with <span class="math inline">\(n-1\)</span> degrees of freedom.</p></li>
+<li></li>
+</ol>
+<div class="sourceCode" id="cb833"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb833-1"><a href="solutions.html#cb833-1" aria-hidden="true" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;https://stat.slu.edu/~speegle/Spring2020/4870/data/problem_2_5.csv&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb834"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb834-1"><a href="solutions.html#cb834-1" aria-hidden="true" tabindex="-1"></a>beta_0 <span class="ot">&lt;-</span> <span class="fu">mean</span>(dd<span class="sc">$</span>ys) <span class="sc">-</span> <span class="fu">mean</span>(dd<span class="sc">$</span>xs)</span>
+<span id="cb834-2"><a href="solutions.html#cb834-2" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="dv">1</span><span class="sc">/</span>(<span class="fu">nrow</span>(dd) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="fu">sum</span>((dd<span class="sc">$</span>ys <span class="sc">-</span> beta_0 <span class="sc">-</span> dd<span class="sc">$</span>xs)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb834-3"><a href="solutions.html#cb834-3" aria-hidden="true" tabindex="-1"></a>test_stat <span class="ot">&lt;-</span> (beta_0 <span class="sc">-</span> <span class="dv">2</span>)<span class="sc">/</span>(s<span class="sc">/</span><span class="fu">sqrt</span>(<span class="fu">nrow</span>(dd)))</span>
+<span id="cb834-4"><a href="solutions.html#cb834-4" aria-hidden="true" tabindex="-1"></a>test_stat</span></code></pre></div>
+<pre><code>## [1] 2.386556</code></pre>
+<div class="sourceCode" id="cb836"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb836-1"><a href="solutions.html#cb836-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pt</span>(test_stat, <span class="fu">nrow</span>(dd) <span class="sc">-</span> <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>) <span class="sc">*</span> <span class="dv">2</span></span></code></pre></div>
+<pre><code>## [1] 0.03167356</code></pre>
+<p>Note that this is the same as a paired <span class="math inline">\(t\)</span>-test, where we have as our null hypothesis that <span class="math inline">\(y_i - x_i\)</span> is normal with mean 2 and unknown standard deviation.</p>
+<div class="sourceCode" id="cb838"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb838-1"><a href="solutions.html#cb838-1" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(dd<span class="sc">$</span>ys, dd<span class="sc">$</span>xs, <span class="at">mu =</span> <span class="dv">2</span>, <span class="at">paired =</span> T)</span></code></pre></div>
+<pre><code>## 
+##  Paired t-test
+## 
+## data:  dd$ys and dd$xs
+## t = 2.3866, df = 14, p-value = 0.03167
+## alternative hypothesis: true difference in means is not equal to 2
+## 95 percent confidence interval:
+##  2.121984 4.286277
+## sample estimates:
+## mean of the differences 
+##                3.204131</code></pre>
+<p><strong>Exercise 2.6</strong></p>
+<ol style="list-style-type: lower-alpha">
+<li></li>
+</ol>
+<div class="sourceCode" id="cb840"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb840-1"><a href="solutions.html#cb840-1" aria-hidden="true" tabindex="-1"></a>dd <span class="ot">&lt;-</span> carData<span class="sc">::</span>Davis</span>
+<span id="cb840-2"><a href="solutions.html#cb840-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dd<span class="sc">$</span>repwt, dd<span class="sc">$</span>weight)</span></code></pre></div>
+<p><img src="solutions_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<ol start="2" style="list-style-type: lower-alpha">
+<li></li>
+</ol>
+<div class="sourceCode" id="cb841"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb841-1"><a href="solutions.html#cb841-1" aria-hidden="true" tabindex="-1"></a>mod_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(weight <span class="sc">~</span> repwt, <span class="at">data =</span> dd)</span>
+<span id="cb841-2"><a href="solutions.html#cb841-2" aria-hidden="true" tabindex="-1"></a>mod_huber <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">rlm</span>(weight <span class="sc">~</span> repwt, <span class="at">data =</span> dd, <span class="at">psi =</span> MASS<span class="sc">::</span>psi.huber)</span>
+<span id="cb841-3"><a href="solutions.html#cb841-3" aria-hidden="true" tabindex="-1"></a>mod_tukey <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">rlm</span>(weight <span class="sc">~</span> repwt, <span class="at">data =</span> dd, <span class="at">psi =</span> MASS<span class="sc">::</span>psi.bisquare)</span>
+<span id="cb841-4"><a href="solutions.html#cb841-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dd<span class="sc">$</span>repwt, dd<span class="sc">$</span>weight)</span>
+<span id="cb841-5"><a href="solutions.html#cb841-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(mod_lm, <span class="at">col =</span> <span class="dv">2</span>) <span class="co">#red</span></span>
+<span id="cb841-6"><a href="solutions.html#cb841-6" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(mod_huber, <span class="at">col =</span> <span class="dv">3</span>) <span class="co">#green</span></span>
+<span id="cb841-7"><a href="solutions.html#cb841-7" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(mod_tukey, <span class="at">col =</span> <span class="dv">4</span>) <span class="co">#blue</span></span></code></pre></div>
+<p><img src="solutions_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+</div>
+<div id="chapter-3-solutions" class="section level2" number="9.2">
+<h2><span class="header-section-number">9.2</span> Chapter 3 Solutions</h2>
+<ol style="list-style-type: decimal">
+<li>Let’s load the data.</li>
+</ol>
+<div class="sourceCode" id="cb842"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb842-1"><a href="solutions.html#cb842-1" aria-hidden="true" tabindex="-1"></a>secher <span class="ot">&lt;-</span> ISwR<span class="sc">::</span>secher</span>
+<span id="cb842-2"><a href="solutions.html#cb842-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(secher[,<span class="sc">-</span><span class="dv">4</span>])</span></code></pre></div>
+<p><img src="solutions_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<div class="sourceCode" id="cb843"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb843-1"><a href="solutions.html#cb843-1" aria-hidden="true" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(bwt <span class="sc">~</span> bpd <span class="sc">+</span> ad, <span class="at">data =</span> secher)</span>
+<span id="cb843-2"><a href="solutions.html#cb843-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = bwt ~ bpd + ad, data = secher)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -607.44 -202.27  -34.89  150.80 1258.45 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -4628.118    455.990 -10.150  &lt; 2e-16 ***
+## bpd            37.133      7.615   4.876 3.90e-06 ***
+## ad             39.763      4.164   9.549 6.84e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 306.6 on 104 degrees of freedom
+## Multiple R-squared:  0.8065, Adjusted R-squared:  0.8028 
+## F-statistic: 216.7 on 2 and 104 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Looks like a pretty good model already. Let’s check the diagnostics.</p>
+<div class="sourceCode" id="cb845"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb845-1"><a href="solutions.html#cb845-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mod)</span></code></pre></div>
+<p><img src="solutions_files/figure-html/unnamed-chunk-16-1.png" width="672" /><img src="solutions_files/figure-html/unnamed-chunk-16-2.png" width="672" /><img src="solutions_files/figure-html/unnamed-chunk-16-3.png" width="672" /><img src="solutions_files/figure-html/unnamed-chunk-16-4.png" width="672" /></p>
+<p>Could be some skewness there. Let’s see if a transformation might help the normality of the residuals.</p>
+<div class="sourceCode" id="cb846"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb846-1"><a href="solutions.html#cb846-1" aria-hidden="true" tabindex="-1"></a>MASS<span class="sc">::</span><span class="fu">boxcox</span>(mod)</span></code></pre></div>
+<p><img src="solutions_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p>This suggests a log transform of the response would improve the normality of the residuals. Finally, let’s put <code>no</code> back in to the model. We hope that it is not strongly significant, as that might be an indicator of some sort of experimental flaw.</p>
+<div class="sourceCode" id="cb847"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb847-1"><a href="solutions.html#cb847-1" aria-hidden="true" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(bwt <span class="sc">~</span>., <span class="at">data =</span> secher)</span>
+<span id="cb847-2"><a href="solutions.html#cb847-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = bwt ~ ., data = secher)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -640.21 -191.24  -44.58  151.67 1241.13 
+## 
+## Coefficients:
+##               Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -4473.1332   488.7640  -9.152 5.67e-15 ***
+## bpd            35.5178     7.8374   4.532 1.58e-05 ***
+## ad             40.1286     4.1885   9.581 6.34e-16 ***
+## no             -0.8824     0.9949  -0.887    0.377    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 306.9 on 103 degrees of freedom
+## Multiple R-squared:  0.808,  Adjusted R-squared:  0.8024 
+## F-statistic: 144.4 on 3 and 103 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Note that <code>no</code> is not significant, and the Adjusted R-squared decreased. Both of these are what we would like to see.</p>
+</div>
+<div id="chapter-5" class="section level2" number="9.3">
+<h2><span class="header-section-number">9.3</span> Chapter 5</h2>
+<ol start="3" style="list-style-type: decimal">
+<li>Let’s load the data.</li>
+</ol>
+<div class="sourceCode" id="cb849"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb849-1"><a href="solutions.html#cb849-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2252020</span>)</span>
+<span id="cb849-2"><a href="solutions.html#cb849-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(AppliedPredictiveModeling)</span>
+<span id="cb849-3"><a href="solutions.html#cb849-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;ChemicalManufacturingProcess&quot;</span>)</span></code></pre></div>
+<p>The problem asks us to do an initial test/train split and work with the train data from there on out. I’ll pull out the test data and leave the train data with the same variable name.</p>
+<div class="sourceCode" id="cb850"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb850-1"><a href="solutions.html#cb850-1" aria-hidden="true" tabindex="-1"></a>test_indices <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">176</span>, <span class="dv">46</span>)</span>
+<span id="cb850-2"><a href="solutions.html#cb850-2" aria-hidden="true" tabindex="-1"></a>test_dat <span class="ot">&lt;-</span> ChemicalManufacturingProcess[test_indices,]</span>
+<span id="cb850-3"><a href="solutions.html#cb850-3" aria-hidden="true" tabindex="-1"></a>ChemicalManufacturingProcess <span class="ot">&lt;-</span> ChemicalManufacturingProcess[<span class="sc">-</span>test_indices,]</span></code></pre></div>
+<p>The data isn’t in the format that the book said it would be in. Let’s create a matrix of predictors and a vector response, in addition to the data frame with both.</p>
+<div class="sourceCode" id="cb851"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb851-1"><a href="solutions.html#cb851-1" aria-hidden="true" tabindex="-1"></a>predictors <span class="ot">&lt;-</span> ChemicalManufacturingProcess[,<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb851-2"><a href="solutions.html#cb851-2" aria-hidden="true" tabindex="-1"></a>response <span class="ot">&lt;-</span> ChemicalManufacturingProcess[,<span class="dv">1</span>]</span></code></pre></div>
+<p>Now let’s see about missing data.</p>
+<div class="sourceCode" id="cb852"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb852-1"><a href="solutions.html#cb852-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(predictors))</span></code></pre></div>
+<pre><code>## [1] 88</code></pre>
+<p>We do have missing data, so we will need to preprocess. The first part of the problem asks us to do Principle Component Regression. Let’s do it using the <code>caret</code> package.</p>
+<div class="sourceCode" id="cb854"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb854-1"><a href="solutions.html#cb854-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code></pre></div>
+<pre><code>## Loading required package: lattice</code></pre>
+<pre><code>## Loading required package: ggplot2</code></pre>
+<pre><code>## Warning: replacing previous import &#39;lifecycle::last_warnings&#39; by
+## &#39;rlang::last_warnings&#39; when loading &#39;tibble&#39;</code></pre>
+<pre><code>## Warning: replacing previous import &#39;lifecycle::last_warnings&#39; by
+## &#39;rlang::last_warnings&#39; when loading &#39;pillar&#39;</code></pre>
+<div class="sourceCode" id="cb859"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb859-1"><a href="solutions.html#cb859-1" aria-hidden="true" tabindex="-1"></a><span class="fu">train</span>(<span class="at">x =</span> predictors, </span>
+<span id="cb859-2"><a href="solutions.html#cb859-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> response, </span>
+<span id="cb859-3"><a href="solutions.html#cb859-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">method =</span> <span class="st">&quot;pcr&quot;</span>, </span>
+<span id="cb859-4"><a href="solutions.html#cb859-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">preProcess =</span> <span class="fu">c</span>(<span class="st">&quot;center&quot;</span>, <span class="st">&quot;scale&quot;</span>, <span class="st">&quot;medianImpute&quot;</span>, <span class="st">&quot;nzv&quot;</span>))</span></code></pre></div>
+<pre><code>## Principal Component Analysis 
+## 
+## 130 samples
+##  57 predictor
+## 
+## Pre-processing: centered (56), scaled (56), median imputation (56), remove (1) 
+## Resampling: Bootstrapped (25 reps) 
+## Summary of sample sizes: 130, 130, 130, 130, 130, 130, ... 
+## Resampling results across tuning parameters:
+## 
+##   ncomp  RMSE      Rsquared   MAE     
+##   1      1.923932  0.2143977  1.453886
+##   2      1.931708  0.2811579  1.376702
+##   3      2.100334  0.2650185  1.393008
+## 
+## RMSE was used to select the optimal model using the smallest value.
+## The final value used for the model was ncomp = 1.</code></pre>
+<p>I think we need to expand our tune grid a bit.</p>
+<div class="sourceCode" id="cb861"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb861-1"><a href="solutions.html#cb861-1" aria-hidden="true" tabindex="-1"></a>tuneGrid <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">ncomp =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>)</span>
+<span id="cb861-2"><a href="solutions.html#cb861-2" aria-hidden="true" tabindex="-1"></a>pca_mod <span class="ot">&lt;-</span> <span class="fu">train</span>(<span class="at">x =</span> predictors, </span>
+<span id="cb861-3"><a href="solutions.html#cb861-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> response, </span>
+<span id="cb861-4"><a href="solutions.html#cb861-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">method =</span> <span class="st">&quot;pcr&quot;</span>, </span>
+<span id="cb861-5"><a href="solutions.html#cb861-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">tuneGrid =</span> tuneGrid,</span>
+<span id="cb861-6"><a href="solutions.html#cb861-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">preProcess =</span> <span class="fu">c</span>(<span class="st">&quot;center&quot;</span>, <span class="st">&quot;scale&quot;</span>, <span class="st">&quot;medianImpute&quot;</span>, <span class="st">&quot;nzv&quot;</span>))</span>
+<span id="cb861-7"><a href="solutions.html#cb861-7" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(pca_mod<span class="sc">$</span>results[,<span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">5</span>)], <span class="dv">1</span>, sum)</span></code></pre></div>
+<pre><code>##        1        2        3        4        5        6        7        8 
+## 2.538925 2.217215 2.620412 2.848612 3.369809 3.308128 3.522237 3.580313 
+##        9       10       11       12       13       14       15       16 
+## 3.180316 3.338443 3.340587 3.059151 3.000264 2.828649 2.497024 2.321957 
+##       17       18       19       20 
+## 2.285783 2.486719 2.498090 2.882467</code></pre>
+<p>The smallest value 1 se away from the estimated MSE is 2.2172154. So, by our one se rule of them, we will choose</p>
+<div class="sourceCode" id="cb863"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb863-1"><a href="solutions.html#cb863-1" aria-hidden="true" tabindex="-1"></a>ncomp <span class="ot">&lt;-</span> <span class="fu">which</span>(pca_mod<span class="sc">$</span>results[,<span class="dv">2</span>] <span class="sc">&lt;</span> <span class="fu">min</span>(<span class="fu">apply</span>(pca_mod<span class="sc">$</span>results[,<span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">5</span>)], <span class="dv">1</span>, sum)))</span>
+<span id="cb863-2"><a href="solutions.html#cb863-2" aria-hidden="true" tabindex="-1"></a>ncomp <span class="ot">&lt;-</span> <span class="fu">min</span>(ncomp)</span>
+<span id="cb863-3"><a href="solutions.html#cb863-3" aria-hidden="true" tabindex="-1"></a>ncomp</span></code></pre></div>
+<pre><code>## [1] 1</code></pre>
+<p>This says that we need one component, and our estimate for the MSE is roughly <span class="math inline">\(2.1 \pm .92\)</span>.</p>
+<div class="sourceCode" id="cb865"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb865-1"><a href="solutions.html#cb865-1" aria-hidden="true" tabindex="-1"></a>pca_mod<span class="sc">$</span>results[<span class="dv">1</span>,<span class="dv">2</span>]</span></code></pre></div>
+<pre><code>## [1] 2.07493</code></pre>
+<div class="sourceCode" id="cb867"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb867-1"><a href="solutions.html#cb867-1" aria-hidden="true" tabindex="-1"></a>pca_mod<span class="sc">$</span>results[<span class="dv">1</span>,<span class="dv">5</span>]</span></code></pre></div>
+<pre><code>## [1] 0.4639948</code></pre>
+<p>Let’s check it out on our test set that we haven’t touched yet. We first have to apply the same pre-processing steps to the test data as we did to the train data.</p>
+<div class="sourceCode" id="cb869"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb869-1"><a href="solutions.html#cb869-1" aria-hidden="true" tabindex="-1"></a>preprocess_mod <span class="ot">&lt;-</span> <span class="fu">preProcess</span>(predictors, </span>
+<span id="cb869-2"><a href="solutions.html#cb869-2" aria-hidden="true" tabindex="-1"></a>                             <span class="at">method =</span> <span class="fu">c</span>(<span class="st">&quot;scale&quot;</span>, <span class="st">&quot;center&quot;</span>, <span class="st">&quot;medianImpute&quot;</span>, <span class="st">&quot;nzv&quot;</span>))</span>
+<span id="cb869-3"><a href="solutions.html#cb869-3" aria-hidden="true" tabindex="-1"></a>test_predictors <span class="ot">&lt;-</span> test_dat[,<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb869-4"><a href="solutions.html#cb869-4" aria-hidden="true" tabindex="-1"></a>test_response <span class="ot">&lt;-</span> test_dat[,<span class="dv">1</span>]</span>
+<span id="cb869-5"><a href="solutions.html#cb869-5" aria-hidden="true" tabindex="-1"></a>test_processed <span class="ot">&lt;-</span> <span class="fu">predict</span>(preprocess_mod, <span class="at">newdata =</span> test_predictors)</span></code></pre></div>
+<p>Now we can predict the outcomes on the test set.</p>
+<div class="sourceCode" id="cb870"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb870-1"><a href="solutions.html#cb870-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(pca_mod<span class="sc">$</span>finalModel, <span class="at">newdata =</span> test_processed, <span class="at">ncomp =</span> <span class="dv">1</span>)[,,<span class="dv">1</span>]</span></code></pre></div>
+<pre><code>##      117      133       96      102      169       20       55      146 
+## 39.93165 39.74174 40.10136 39.30054 41.14235 41.81163 40.79884 39.44937 
+##       37      110       94       73       88      115      123      157 
+## 40.45314 39.15261 40.59883 40.08035 39.65718 39.45967 39.87382 39.39827 
+##       35       57      176       49      164      158       70      138 
+## 40.92926 40.33136 41.02257 41.98764 39.31417 39.31910 40.22380 38.95523 
+##       80      132       95      121      153       11       98      105 
+## 40.32705 40.15179 40.18415 38.89349 39.57619 41.29336 40.03982 39.59950 
+##      114       23       26       77      118       76       66       51 
+## 39.88256 40.17518 40.30996 40.18995 39.22107 40.53561 40.15405 40.77907 
+##       54       68       60      100       17      109 
+## 40.39532 40.30252 40.63361 39.44431 41.76909 39.70861</code></pre>
+<div class="sourceCode" id="cb872"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb872-1"><a href="solutions.html#cb872-1" aria-hidden="true" tabindex="-1"></a>errors <span class="ot">&lt;-</span> <span class="fu">predict</span>(pca_mod<span class="sc">$</span>finalModel, <span class="at">newdata =</span> test_processed, <span class="at">ncomp =</span> <span class="dv">1</span>)[,,<span class="dv">1</span>] <span class="sc">-</span> test_response</span>
+<span id="cb872-2"><a href="solutions.html#cb872-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(errors<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div>
+<pre><code>## [1] 2.621208</code></pre>
+<p>This value is within 2 se of the predicted value based on CV.</p>
+
+</div>
+</div>
+
+
+
+
+
+
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="tree-regression-models.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["_main.pdf", "_main.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

@@ -1,0 +1,17 @@
+thm:variancefacts
+exr:unnamed-chunk-12
+exr:unnamed-chunk-35
+thm:betazerodist
+exm:unnamed-chunk-50
+exr:unnamed-chunk-55
+preface
+classicaltheory
+review
+estimating-means-and-standard-deviations
+estimating-the-density-of-an-rv
+linear-regression-overview
+linear-regression-with-no-intercept
+the-full-model
+hypothesis-test-interlude
+using-different-loss-functions
+exercises

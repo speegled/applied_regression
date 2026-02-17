@@ -814,7 +814,7 @@ summary(mod)
    summary()
 ```
 
-### Random intercepts with continunous predictor
+### Random intercepts with continuous predictor
 
 Let's consider the `sleepstudy` data set in the `lme4` package. This data set contains reaction times for 18 subjects who were sleep deprived for 10 days. We will model the reaction time as a function of the number of days of sleep deprivation, with random intercepts for each subject. Let's look at the data.
 
@@ -889,22 +889,18 @@ ggplot(pred, aes(x = days, y = .fitted, color = subject)) +
 
 We see that the random effects lines (which are lighter) have intercepts which are closer to the overall mean of all of the intercepts than the fixed effect line is. 
 
-### Heading towards mixed models
-
-Now, we return to linear models with interactions. We imagine a scenario where we have several (perhaps more than several^[How many is several? I am not sure, but it is definitely more than a few! [source](https://www.cambridge.org/core/journals/language-and-cognition/article/few-or-several-construal-quantity-and-argumentativity/C371FD195F4461E4C7711E75C46C1458)]) groups of data, and we have a few observations in each group. Let's consider the `sleepstudy` data set in the `lme4` package.
+### Adding random slopes
+ 
+We continue with the `sleepstudy` data set in the `lme4` package. Let's look once more at a scatterplot with lines of best fit for each subject.
 
 ```{r}
-library(lme4)
-data("sleepstudy")
-ss <- sleepstudy |> 
-  janitor::clean_names()
-summary(ss)
-length(unique(ss$subject)) #18 groups, 10 observations per group
-
-
+ggplot(ss, aes(x = days, y = reaction, color = subject)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = F)
 ```
 
-Based on this data, it seems that we have potentially different **intercepts** and **slopes** for each subject. Let's fit a linear model with an interaction between `days` and `subject`. We will have 18 intercepts and 18 slopes, which is a lot of parameters to estimate with only 180 observations. (It is five observations per parameter estimated - how much confidence would you have in an estimated mean based off of 5 observations? Mathematically, it is fine. But in practice, it is not ideal.)
+
+Based on this plot, it seems that we have potentially different **intercepts** and **slopes** for each subject. Let's fit a linear model with an interaction between `days` and `subject`. We will have 18 intercepts and 18 slopes, which is a lot of parameters to estimate with only 180 observations. (It is five observations per parameter estimated - how much confidence would you have in an estimated mean based off of 5 observations? Mathematically, it is fine. But in practice, it is not ideal.)
 
 ```{r}
 mod <- lm(reaction ~ days * subject, data = ss)
@@ -926,6 +922,175 @@ summary(mod_wrong)
 ```
 
 This model is not accounting for the fact that we have repeated measurements for each subject. It is treating each observation as independent, which is not the case. This can lead to underestimated standard errors and inflated type I error rates. We need a way to account for the fact that we have repeated measurements for each subject, and that the intercepts and slopes may vary by subject. This is where mixed models come in, which we will cover in the next lecture.
+
+## February 19
+
+### Random Slopes
+
+When we have one predictor with random intercepts and slopes, the model can be written like this:
+
+\[
+y_{ij} = \beta_0 + \beta_1 x_{ij} + b_{0i} + b_{1i} x_{ij} + \epsilon_{ij}
+\]
+where $b_{0i}$ is the random intercept for group $i$, and $b_{1i}$ is the random slope for predictor $x$ in group $i$. We assume that the random effects $(b_{0i}, b_{1i})$ are jointly normally distributed with mean 0 and covariance matrix $\Sigma$, and that the errors $\epsilon_{ij}$ are normally distributed with mean 0 and variance $\sigma^2$. The random effects and errors are assumed to be independent of each other. Note that we could also combine the fixed effects with the random effects to say that the intercept has mean $\beta_0$ and the slope has mean $\beta_1$, together with the covariance informarion.
+
+We can fit the data by using `lmer` as follows:
+
+```{r}
+mod <- lme4::lmer(reaction ~ days + (1 + days|subject), data = ss)
+summary(mod)
+```
+
+We obtain the following estimates for the parameters of the model:
+
+- $\hat \beta_0 = 251.405$ (mean intercept across subjects)
+- $\hat \beta_1 = 10.467$ (mean slope across subjects)
+- $\hat \tau_0^2 = 612.1$ (variance of random intercepts)
+- $\hat \tau_1^2 = 35$ (variance of random slopes)
+- $\hat \sigma^2 = 654.94$ (variance of residuals)
+- $\hat \rho = 0.07$ (correlation between random intercepts and slopes)
+
+Note that this model has one additional parameter which we didn't specify in our mathematical model above, which is the correlation between random intercepts and slopes. A positive value for this correlation indicates that subjects with higher baseline reaction times (higher random intercepts) tend to have steeper increases in reaction time with more days of sleep deprivation (higher random slopes), while a negative value would indicate the opposite. In this case, the correlation is close to zero, suggesting that there is little relationship between the random intercepts and slopes in this data set. If we want to fit a model that does not include the correlation, we can use the following:
+
+```{r}
+mod <- lme4::lmer(reaction ~ days + (1 + days||subject), data = ss) #the || syntax forces the correlation to be zero
+summary(mod)
+```
+
+There is very little change in the estimated parameter values.
+
+One interesting question that can be asked with a model with random slopes is: what proportion of subjects have a positive slope? In other words, what proportion of subjects have reaction times that increase with more days of sleep deprivation? We can answer this question by looking at the distribution of the random slopes.
+
+```{r}
+random_slopes <- ranef(mod)$subject$days #this gives us the random slope for each subject
+mean_slope <- fixef(mod)["days"] #this gives us the fixed effect slope
+#the total slope for each subject is the fixed effect slope plus the random slope for that subject
+total_slopes <- mean_slope + random_slopes
+total_slopes
+```
+
+What is our estimate of the total percentage of the total population that has a negative slope? We can use the normal distribution to answer this question, because the random slopes are assumed to be normally distributed.
+
+```{r}
+pnorm(0, mean = mean_slope, sd = sqrt(35)) #35 is the variance of the random slopes, so we take the square root to get the standard deviation
+```
+
+We see that about 4 percent of the population is estimated to have a negative slope, which means that their reaction times decrease with more days of sleep deprivation. This is an interesting finding, and it highlights the importance of looking at the random effects in a mixed model, rather than just the fixed effects. The fixed effect tells us about the average effect across all subjects, but the random effects tell us about the variability in the effect across subjects. In this case, while the average effect of days of sleep deprivation on reaction time is positive, there is a small proportion of subjects for whom the effect is negative.
+
+What is a confidence interval for the main slope effect? We can use the standard error of the fixed effect slope to construct a confidence interval. The standard error is given in the summary output of the model, or we can use `emmeans` or `lmerTest` to get it. Let's use `lmerTest` to get the confidence interval.
+
+```{r}
+library(lmerTest)
+mod2 <- lmerTest::lmer(reaction ~ days + (1 + days||subject), data = ss)
+summary(mod2)
+confint(mod2, parm = "days", method = "Wald") #assumes normality
+confint(mod2, parm = "days", method = "boot", nsim = 1000) #doesn't work as well when we have a small number of groups, 18 is borderline but it is more robust to non-normality and heteroskedasticity than the Wald confidence interval
+confint(mod2, parm = "days", method = "profile")
+```
+
+### Comparing models
+
+We can use ANOVA to compare nested models. For example, we can compare the model with random slopes to the model without random slopes, or we can compare the model with random slopes and random intercepts to the model with only random intercepts. We can also compare the model with correlated random effects to the model with uncorrelated random effects. Let's see how to do this in R.
+
+```{r}
+mod_random_slopes <- lmer(reaction ~ days + (1 + days|subject), data = ss)
+mod_random_intercepts <- lmer(reaction ~ days + (1|subject), data = ss)
+anova(mod_random_intercepts, mod_random_slopes)
+```
+
+In general, the null hypothesis being tested is that all of the extra parameters in the larger model are zero versus at least one of the parameters is not zero. So, a $p$-value less than 0.05 is evidence that the larger model is a significantly better fit to the data than the smaller model, which suggests that at least one of the extra parameters in the larger model is not zero. In this case, we are testing whether the variance of the random slopes is zero, which is equivalent to testing whether the random slopes are necessary to explain the variability in the data. If we reject the null hypothesis, we can conclude that there is significant variability in the slopes across subjects, and that the model with random slopes fits significantly better than the model with only random intercepts. If we fail to reject the null hypothesis, we can conclude that there is not enough evidence to suggest that there is significant variability in the slopes across subjects, and that the model with only random intercepts may be sufficient to explain the variability in the data. We can also look at the AIC or BIC values for the two models, which are measures of model fit that penalize for the number of parameters in the model. The model with the lower AIC or BIC value is generally considered to be the better fitting model. In this case, we would expect the model with random slopes to have a lower AIC and BIC value than the model with only random intercepts, which would further support the conclusion that the model with random slopes fits significantly better than the model with only random intercepts.
+
+We conclude that the model with random slopes fits significantly better than the model with only random intercepts, which suggests that there is significant variability in the slopes across subjects. We can also compare the model with correlated random effects to the model with uncorrelated random effects. 
+
+Now let's compare the model with correlated random effects to the model with uncorrelated random effects.
+
+```{r}
+mod_correlated <- lmer(reaction ~ days + (1 + days|subject), data = ss, REML = F)
+mod_uncorrelated <- lmer(reaction ~ days + (1 + days||subject), data = ss, REML = F)
+anova(mod_uncorrelated, mod_correlated)
+```
+
+The model with *uncorrelated* random effects fits significantly better than the model with *correlated* random effects, which suggests that there is not a significant correlation between the random intercepts and random slopes in this data set. This is consistent with the estimate of the correlation that we obtained from the model with correlated random effects, which was close to zero. When we have different fixed effects, we should not use `REML = T` to compare the models, because the fixed effects are different. Note that `anova` will fix this for us if we forget.
+
+```{r}
+mod <- lmer(reaction ~ days + (1|subject), data = ss, REML = F)
+mod2 <- lmer(reaction ~ 1 + (1|subject), data = ss, REML = F)
+anova(mod2, mod)
+```
+
+The model with the fixed effect of days fits significantly better than the model with only a random intercept. We can re-run this with `REML = T` and see we get the same answer, with a message.
+
+```{r}
+mod <- lmer(reaction ~ days + (1|subject), data = ss, REML = T)
+mod2 <- lmer(reaction ~ 1 + (1|subject), data = ss, REML = T)
+anova(mod2, mod)
+```
+
+
+
+**Aside: Multivariate Normal Distribution**
+
+When we have random slopes, we need to consider the joint distribution of the random intercepts and slopes. This is typically assumed to be a multivariate normal distribution. The multivariate normal distribution is a generalization of the univariate normal distribution to multiple dimensions. It is defined by a mean vector and a covariance matrix. The mean vector gives the expected value of each variable, while the covariance matrix gives the variance of each variable and the covariance between each pair of variables. Let's look at an example:
+
+```{r}
+Sigma <- matrix(c(3, 2, 2, 5), nrow = 2)
+eigen(Sigma) #this is a positive definite matrix, so it is a valid covariance matrix
+dd <- data.frame(MASS::mvrnorm(n = 1000, mu = c(1, 4), Sigma = Sigma))
+
+ggplot(dd, aes(x = X1, y = X2)) + 
+  geom_point() + 
+  coord_equal() 
+```
+
+To force independence of the coordinates, we set the covariances equal to zero. Note that for general rvs, uncorrelated does not imply independent, but for multivariate normal rvs, uncorrelated does imply independent.
+
+**End Aside**
+
+Let's see how to simulate the data from a model with random slopes as described above. We assume for simplicity that the random effects are independent, so that the covariance matrix $\Sigma$ is $2 \times 2$ diagonal. 
+
+```{r}
+g <- 10 #number of groups
+n <- 5 # observations per group
+groups <- factor(letters[1:g]) #this only works if g <= 26!
+x <- runif(g * n, 0, 10) #these are the predictors
+sigma_b <- 1.5
+sigma_c <- 2
+b0 <- rnorm(g, 0, sigma_b) #these are the random intercepts for each group
+b1 <- rnorm(g, 0, sigma_c) #these are the random slopes for each group
+beta0 <- 3
+beta1 <- 2
+sigma <- 1
+y <- beta0 + beta1 * x + rep(b0, each = n) + rep(b1, each = n) * x +  rnorm(g * n, 0, sigma) #these are the responses, note that sigma^2 = 1, beta_0 = 3, and beta_1 = 0.5
+dd <- data.frame(x = x,
+                 y = y,
+                 g = rep(groups, each = n))
+ggplot(dd, aes(x = x, y = y, color = g)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = F)
+```
+
+In order to estimate the parameters of our model, we use `lme4::lmer`. 
+
+```{r}
+mod <- lmer(y ~ x + (1 + x||g), data = dd) #We use || to force there to be no covariance between beta_0 and beta_1
+summary(mod)
+```
+
+Let's apply this now to the `sleepstudy` data from before. 
+
+```{r}
+mod_sleep <- lmer(reaction ~ days + (1 + days || subject), data = ss) #assuming uncorrelated random effects
+summary(mod_sleep)
+```
+
+Note that we can see from the estimates that the slope has mean 10.467 and standard deviation 6. This says that about 4 percent of people will have reaction times that **decrease** over time when this experiment is run, based on our model. 
+
+```{r}
+pnorm(0, 10.467, 6)
+```
+
+While this may not be compelling, imagine a drug trial where we are trying to show that the fixed effect of a drug is positive. If the standard deviation of the random slope is large, then it is possible that a non-trivial proportion of people will have a negative effect of the drug, even if the average effect is positive. This is an important consideration when interpreting the results of a mixed effect model, and it highlights the importance of looking at both the fixed effects and the random effects when making inferences from the model.
+
 
 ### Intro to Random Effects and Mixed Effect Models - Terminology and First Examples
 
@@ -1021,77 +1186,6 @@ summary(mod_mixed)
 
 This model includes a random intercept for each group, but assumes that the slope is the same across groups. The output gives us estimates for the fixed effects (the overall intercept and slope) as well as the variance components (the variance of the random intercepts and the variance of the errors).
 
-### Random Slopes
-
-When we have one predictor with random intercepts and slopes, the model can be written like this:
-
-\[
-y_{ij} = \beta_0 + \beta_1 x_{ij} + b_{0i} + b_{1i} x_{ij} + \epsilon_{ij
-\]
-where $b_{0i}$ is the random intercept for group $i$, and $b_{1i}$ is the random slope for predictor $x$ in group $i$. We assume that the random effects $(b_{0i}, b_{1i})$ are jointly normally distributed with mean 0 and covariance matrix $\Sigma$, and that the errors $\epsilon_{ij}$ are normally distributed with mean 0 and variance $\sigma^2$. The random effects and errors are assumed to be independent of each other. Note that we could also combine the fixed effects with the random effects to say that the intercept has mean $\beta_0$ and the slope has mean $\beta_1$, together with the covariance informarion.
-
-**Aside: Multivariate Normal Distribution**
-
-When we have random slopes, we need to consider the joint distribution of the random intercepts and slopes. This is typically assumed to be a multivariate normal distribution. The multivariate normal distribution is a generalization of the univariate normal distribution to multiple dimensions. It is defined by a mean vector and a covariance matrix. The mean vector gives the expected value of each variable, while the covariance matrix gives the variance of each variable and the covariance between each pair of variables. Let's look at an example:
-
-```{r}
-Sigma <- matrix(c(3, 2, 2, 5), nrow = 2)
-eigen(Sigma) #this is a positive definite matrix, so it is a valid covariance matrix
-dd <- data.frame(MASS::mvrnorm(n = 1000, mu = c(1, 4), Sigma = Sigma))
-
-ggplot(dd, aes(x = X1, y = X2)) + 
-  geom_point() + 
-  coord_equal() 
-```
-
-To force independence of the coordinates, we set the covariances equal to zero. Note that for general rvs, uncorrelated does not imply independent, but for multivariate normal rvs, uncorrelated does imply independent.
-
-**End Aside**
-
-Let's see how to simulate the data from a model with random slopes as described above. We assume for simplicity that the random effects are independent, so that the covariance matrix $\Sigma$ is $2 \times 2$ diagonal. 
-
-```{r}
-g <- 10 #number of groups
-n <- 5 # observations per group
-groups <- factor(letters[1:g]) #this only works if g <= 26!
-x <- runif(g * n, 0, 10) #these are the predictors
-sigma_b <- 1.5
-sigma_c <- 2
-b0 <- rnorm(g, 0, sigma_b) #these are the random intercepts for each group
-b1 <- rnorm(g, 0, sigma_c) #these are the random slopes for each group
-beta0 <- 3
-beta1 <- 2
-sigma <- 1
-y <- beta0 + beta1 * x + rep(b0, each = n) + rep(b1, each = n) * x +  rnorm(g * n, 0, sigma) #these are the responses, note that sigma^2 = 1, beta_0 = 3, and beta_1 = 0.5
-dd <- data.frame(x = x,
-                 y = y,
-                 g = rep(groups, each = n))
-ggplot(dd, aes(x = x, y = y, color = g)) + 
-  geom_point() + 
-  geom_smooth(method = "lm", se = F)
-```
-
-In order to estimate the parameters of our model, we use `lme4::lmer`. 
-
-```{r}
-mod <- lmer(y ~ x + (1 + x||g), data = dd) #We use || to force there to be no covariance between beta_0 and beta_1
-summary(mod)
-```
-
-Let's apply this now to the `sleepstudy` data from before. 
-
-```{r}
-mod_sleep <- lmer(reaction ~ days + (1 + days || subject), data = ss) #assuming uncorrelated random effects
-summary(mod_sleep)
-```
-
-Note that we can see from the estimates that the slope has mean 10.467 and standard deviation 6. This says that about 4 percent of people will have reaction times that **decrease** over time when this experiment is run, based on our model. 
-
-```{r}
-pnorm(0, 10.467, 6)
-```
-
-While this may not be compelling, imagine a drug trial where we are trying to show that the fixed effect of a drug is positive. If the standard deviation of the random slope is large, then it is possible that a non-trivial proportion of people will have a negative effect of the drug, even if the average effect is positive. This is an important consideration when interpreting the results of a mixed effect model, and it highlights the importance of looking at both the fixed effects and the random effects when making inferences from the model.
 
 ### Comparison of Models
 

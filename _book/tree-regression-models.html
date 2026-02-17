@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 8 Tree Regression Models | Applied Regression with R</title>
+  <meta name="description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  <meta name="generator" content="bookdown 0.22 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 8 Tree Regression Models | Applied Regression with R" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 8 Tree Regression Models | Applied Regression with R" />
+  
+  <meta name="twitter:description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  
+
+<meta name="author" content="Darrin Speegle" />
+
+
+<meta name="date" content="2022-01-19" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon" />
+<link rel="prev" href="non-linear-regression-models.html"/>
+<link rel="next" href="solutions.html"/>
+<script src="libs/header-attrs-2.8/header-attrs.js"></script>
+<script src="libs/jquery-3.5.1/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+<script src="libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
+<script src="libs/plotly-binding-4.9.3/plotly.js"></script>
+<script src="libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="libs/crosstalk-1.1.1/css/crosstalk.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.1.1/js/crosstalk.min.js"></script>
+<link href="libs/plotly-htmlwidgets-css-1.57.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="libs/plotly-main-1.57.1/plotly-latest.min.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Applied Regression With R</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Preface</a></li>
+<li class="chapter" data-level="2" data-path="classicaltheory.html"><a href="classicaltheory.html"><i class="fa fa-check"></i><b>2</b> Classical Theory of Simple Linear Regression</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="classicaltheory.html"><a href="classicaltheory.html#review"><i class="fa fa-check"></i><b>2.1</b> Review</a>
+<ul>
+<li class="chapter" data-level="2.1.1" data-path="classicaltheory.html"><a href="classicaltheory.html#estimating-means-and-standard-deviations"><i class="fa fa-check"></i><b>2.1.1</b> Estimating Means and standard deviations</a></li>
+<li class="chapter" data-level="2.1.2" data-path="classicaltheory.html"><a href="classicaltheory.html#estimating-the-density-of-an-rv"><i class="fa fa-check"></i><b>2.1.2</b> Estimating the density of an rv</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="classicaltheory.html"><a href="classicaltheory.html#linear-regression-overview"><i class="fa fa-check"></i><b>2.2</b> Linear Regression Overview</a></li>
+<li class="chapter" data-level="2.3" data-path="classicaltheory.html"><a href="classicaltheory.html#linear-regression-with-no-intercept"><i class="fa fa-check"></i><b>2.3</b> Linear Regression with no intercept</a></li>
+<li class="chapter" data-level="2.4" data-path="classicaltheory.html"><a href="classicaltheory.html#the-full-model"><i class="fa fa-check"></i><b>2.4</b> The full model</a>
+<ul>
+<li class="chapter" data-level="2.4.1" data-path="classicaltheory.html"><a href="classicaltheory.html#hypothesis-test-interlude"><i class="fa fa-check"></i><b>2.4.1</b> Hypothesis Test Interlude</a></li>
+</ul></li>
+<li class="chapter" data-level="2.5" data-path="classicaltheory.html"><a href="classicaltheory.html#using-different-loss-functions"><i class="fa fa-check"></i><b>2.5</b> Using different loss functions</a></li>
+<li class="chapter" data-level="" data-path="classicaltheory.html"><a href="classicaltheory.html#vignette-a-dplyr-primer"><i class="fa fa-check"></i>Vignette: A dplyr primer</a></li>
+<li class="chapter" data-level="2.6" data-path="classicaltheory.html"><a href="classicaltheory.html#exercises"><i class="fa fa-check"></i><b>2.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html"><i class="fa fa-check"></i><b>3</b> Multiple Linear Regression</a>
+<ul>
+<li class="chapter" data-level="3.0.1" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#anova"><i class="fa fa-check"></i><b>3.0.1</b> Aside on multiple R squared and ANOVA</a></li>
+<li class="chapter" data-level="3.1" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#more-variable-selection-anova"><i class="fa fa-check"></i><b>3.1</b> More Variable Selection: ANOVA</a></li>
+<li class="chapter" data-level="3.2" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#predictions"><i class="fa fa-check"></i><b>3.2</b> Predictions</a></li>
+<li class="chapter" data-level="3.3" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#exercises-1"><i class="fa fa-check"></i><b>3.3</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html"><i class="fa fa-check"></i><b>4</b> Intro to Predictive Modeling</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#comparing-two-models"><i class="fa fa-check"></i><b>4.1</b> Comparing Two Models</a></li>
+<li class="chapter" data-level="4.2" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#simulations-of-expected-mse"><i class="fa fa-check"></i><b>4.2</b> Simulations of Expected MSE</a>
+<ul>
+<li class="chapter" data-level="4.2.1" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#estimating-mse-and-bias-variance-tradeoff"><i class="fa fa-check"></i><b>4.2.1</b> Estimating MSE and Bias-Variance Tradeoff</a></li>
+<li class="chapter" data-level="4.2.2" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#estimating-mse-for-new-predictors-uniformly-sampled"><i class="fa fa-check"></i><b>4.2.2</b> Estimating MSE for new predictors uniformly sampled</a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#bias-variance-trade-off"><i class="fa fa-check"></i><b>4.3</b> Bias Variance Trade-off</a></li>
+<li class="chapter" data-level="4.4" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#exercises-2"><i class="fa fa-check"></i><b>4.4</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html"><i class="fa fa-check"></i><b>5</b> Regression Predictive Models</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#preprocessing"><i class="fa fa-check"></i><b>5.1</b> Preprocessing</a></li>
+<li class="chapter" data-level="5.2" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#missing-data"><i class="fa fa-check"></i><b>5.2</b> Missing Data</a>
+<ul>
+<li class="chapter" data-level="5.2.1" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#predicting-when-a-level-is-missing-from-the-training-set"><i class="fa fa-check"></i><b>5.2.1</b> Predicting when a level is missing from the training set</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#correlated-predictors"><i class="fa fa-check"></i><b>5.3</b> Correlated Predictors</a></li>
+<li class="chapter" data-level="5.4" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#aside-on-pca"><i class="fa fa-check"></i><b>5.4</b> Aside on PCA</a></li>
+<li class="chapter" data-level="5.5" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#johnson-lindenstrauss-dimension-reduction"><i class="fa fa-check"></i><b>5.5</b> Johnson-Lindenstrauss Dimension Reduction</a></li>
+<li class="chapter" data-level="5.6" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#exercises-3"><i class="fa fa-check"></i><b>5.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="variable-selection.html"><a href="variable-selection.html"><i class="fa fa-check"></i><b>6</b> Variable Selection</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="variable-selection.html"><a href="variable-selection.html#partial-least-squares"><i class="fa fa-check"></i><b>6.1</b> Partial Least Squares</a>
+<ul>
+<li class="chapter" data-level="6.1.1" data-path="variable-selection.html"><a href="variable-selection.html#optional-pls-stuff"><i class="fa fa-check"></i><b>6.1.1</b> Optional PLS Stuff</a></li>
+</ul></li>
+<li class="chapter" data-level="6.2" data-path="variable-selection.html"><a href="variable-selection.html#ridgelasso-and-elastic-net"><i class="fa fa-check"></i><b>6.2</b> Ridge/Lasso and Elastic Net</a>
+<ul>
+<li class="chapter" data-level="6.2.1" data-path="variable-selection.html"><a href="variable-selection.html#ridge-regression"><i class="fa fa-check"></i><b>6.2.1</b> Ridge Regression</a></li>
+<li class="chapter" data-level="6.2.2" data-path="variable-selection.html"><a href="variable-selection.html#lasso"><i class="fa fa-check"></i><b>6.2.2</b> LASSO</a></li>
+</ul></li>
+<li class="chapter" data-level="6.3" data-path="variable-selection.html"><a href="variable-selection.html#step-aic"><i class="fa fa-check"></i><b>6.3</b> Step AIC</a>
+<ul>
+<li class="chapter" data-level="6.3.1" data-path="variable-selection.html"><a href="variable-selection.html#doing-lgocv-with-preprocessing"><i class="fa fa-check"></i><b>6.3.1</b> Doing LGOCV with preprocessing</a></li>
+</ul></li>
+<li class="chapter" data-level="6.4" data-path="variable-selection.html"><a href="variable-selection.html#interactions"><i class="fa fa-check"></i><b>6.4</b> Interactions</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html"><i class="fa fa-check"></i><b>7</b> Non-Linear Regression Models</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#support-vector-regression"><i class="fa fa-check"></i><b>7.1</b> Support Vector Regression</a>
+<ul>
+<li class="chapter" data-level="7.1.1" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#plot-twist"><i class="fa fa-check"></i><b>7.1.1</b> PLOT TWIST</a></li>
+</ul></li>
+<li class="chapter" data-level="7.2" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#k-nearest-neighbors"><i class="fa fa-check"></i><b>7.2</b> K Nearest Neighbors</a></li>
+<li class="chapter" data-level="7.3" data-path="non-linear-regression-models.html"><a href="non-linear-regression-models.html#exercises-4"><i class="fa fa-check"></i><b>7.3</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="tree-regression-models.html"><a href="tree-regression-models.html"><i class="fa fa-check"></i><b>8</b> Tree Regression Models</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="tree-regression-models.html"><a href="tree-regression-models.html#basic-regression-trees"><i class="fa fa-check"></i><b>8.1</b> Basic Regression Trees</a></li>
+<li class="chapter" data-level="8.2" data-path="tree-regression-models.html"><a href="tree-regression-models.html#regression-model-trees"><i class="fa fa-check"></i><b>8.2</b> Regression Model Trees</a>
+<ul>
+<li class="chapter" data-level="8.2.1" data-path="tree-regression-models.html"><a href="tree-regression-models.html#choosing-variable-to-split"><i class="fa fa-check"></i><b>8.2.1</b> Choosing Variable to Split</a></li>
+<li class="chapter" data-level="8.2.2" data-path="tree-regression-models.html"><a href="tree-regression-models.html#choosing-split-value"><i class="fa fa-check"></i><b>8.2.2</b> Choosing Split Value</a></li>
+<li class="chapter" data-level="8.2.3" data-path="tree-regression-models.html"><a href="tree-regression-models.html#predicting-values-smoothing"><i class="fa fa-check"></i><b>8.2.3</b> Predicting values (Smoothing)</a></li>
+<li class="chapter" data-level="8.2.4" data-path="tree-regression-models.html"><a href="tree-regression-models.html#using-r-functions"><i class="fa fa-check"></i><b>8.2.4</b> Using R functions</a></li>
+</ul></li>
+<li class="chapter" data-level="8.3" data-path="tree-regression-models.html"><a href="tree-regression-models.html#bagging"><i class="fa fa-check"></i><b>8.3</b> Bagging</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="solutions.html"><a href="solutions.html"><i class="fa fa-check"></i><b>9</b> Solutions</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="solutions.html"><a href="solutions.html#chapter-2-solutions"><i class="fa fa-check"></i><b>9.1</b> Chapter 2 Solutions</a></li>
+<li class="chapter" data-level="9.2" data-path="solutions.html"><a href="solutions.html#chapter-3-solutions"><i class="fa fa-check"></i><b>9.2</b> Chapter 3 Solutions</a></li>
+<li class="chapter" data-level="9.3" data-path="solutions.html"><a href="solutions.html#chapter-5"><i class="fa fa-check"></i><b>9.3</b> Chapter 5</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Applied Regression with R</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="tree-regression-models" class="section level1" number="8">
+<h1><span class="header-section-number">Chapter 8</span> Tree Regression Models</h1>
+<p>In this chapter, we will discuss predicting a continuous response via tree based methods.</p>
+<div class="sourceCode" id="cb699"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb699-1"><a href="tree-regression-models.html#cb699-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb699-2"><a href="tree-regression-models.html#cb699-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rpart)</span>
+<span id="cb699-3"><a href="tree-regression-models.html#cb699-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code></pre></div>
+<div id="basic-regression-trees" class="section level2" number="8.1">
+<h2><span class="header-section-number">8.1</span> Basic Regression Trees</h2>
+<p>In a basic regression tree, we build a tree which determines our prediction for new data. For example, suppose we have the tree pictured below.</p>
+<div class="sourceCode" id="cb700"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb700-1"><a href="tree-regression-models.html#cb700-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(igraph)</span>
+<span id="cb700-2"><a href="tree-regression-models.html#cb700-2" aria-hidden="true" tabindex="-1"></a>my_tree <span class="ot">&lt;-</span> igraph<span class="sc">::</span><span class="fu">make_tree</span>(<span class="dv">5</span>)</span>
+<span id="cb700-3"><a href="tree-regression-models.html#cb700-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(my_tree, </span>
+<span id="cb700-4"><a href="tree-regression-models.html#cb700-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">layout =</span> layout_as_tree, </span>
+<span id="cb700-5"><a href="tree-regression-models.html#cb700-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">edge.label =</span> <span class="fu">c</span>(<span class="st">&quot;x &gt; 1&quot;</span>,<span class="st">&quot;x &lt;= 1&quot;</span>,<span class="st">&quot;y &gt; 2&quot;</span>, <span class="st">&quot;y &lt;= 2&quot;</span>), </span>
+<span id="cb700-6"><a href="tree-regression-models.html#cb700-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">vertex.label =</span> <span class="fu">c</span>(<span class="st">&quot;&quot;</span>,<span class="st">&quot;&quot;</span>, <span class="dv">12</span>, <span class="dv">17</span>, <span class="dv">22</span>))</span></code></pre></div>
+<p><img src="07-regression-trees_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>Here I am imagining that I have at least two predictors, which are named <code>x</code> and <code>y</code>, and I have a response. If new data comes in with <span class="math inline">\(x = 1.5\)</span> and <span class="math inline">\(y = 1.5\)</span>, then we first look to see whether <span class="math inline">\(x &gt; 1\)</span> or <span class="math inline">\(x \le 1\)</span>. Since it is bigger than 1, we go to the left. Now, we check whether <span class="math inline">\(y &gt; 2\)</span> or <span class="math inline">\(y \le 2\)</span>. Since it is less than or equal to 2, we go to the right. We then predict the response based on the leaf that we arrive at. In this case, our prediction would be 22.</p>
+<p>The million dollar question is, though, how do we come up with a good tree? Well, what we are going to do is go through every single predictor, and split the data into every possible set of two groups based on a simple rule like <span class="math inline">\(x &gt; a\)</span> versus <span class="math inline">\(x \le a\)</span>. Since our predictions are going to be <strong>constants</strong> (for now) on each split, we hope that the split will make the sum-squared error of the responses in the two groups as small as possible. There are other possible techniques that one could use. Let’s see it in action with simulated data.</p>
+<div class="sourceCode" id="cb701"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb701-1"><a href="tree-regression-models.html#cb701-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">32120</span>)</span>
+<span id="cb701-2"><a href="tree-regression-models.html#cb701-2" aria-hidden="true" tabindex="-1"></a>for_tree <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">100</span>, <span class="dv">0</span>, <span class="dv">10</span>),</span>
+<span id="cb701-3"><a href="tree-regression-models.html#cb701-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">y =</span> <span class="fu">rexp</span>(<span class="dv">100</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">5</span>))</span>
+<span id="cb701-4"><a href="tree-regression-models.html#cb701-4" aria-hidden="true" tabindex="-1"></a>for_tree<span class="sc">$</span>response <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(for_tree<span class="sc">$</span>x <span class="sc">&gt;</span> <span class="dv">7</span>, <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="dv">1</span>,<span class="dv">1</span>), <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="dv">5</span>,<span class="dv">1</span>))</span>
+<span id="cb701-5"><a href="tree-regression-models.html#cb701-5" aria-hidden="true" tabindex="-1"></a>for_tree<span class="sc">$</span>response <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(for_tree<span class="sc">$</span>x <span class="sc">&lt;</span> <span class="dv">7</span> <span class="sc">&amp;</span> for_tree<span class="sc">$</span>y <span class="sc">&lt;</span> <span class="dv">4</span>, for_tree<span class="sc">$</span>response <span class="sc">+</span> <span class="dv">7</span>, for_tree<span class="sc">$</span>response)</span></code></pre></div>
+<p>This simulated data will have response values centered about 5 if <span class="math inline">\(x &lt; 7\)</span> and <span class="math inline">\(y \ge 4\)</span>, and it will have response values centered about 1 when <span class="math inline">\(x &gt; 7\)</span>.</p>
+<p>Now, let’s start building our tree. We will need to loop through all possible splits based on the <span class="math inline">\(x\)</span> variable and the <span class="math inline">\(y\)</span> variable separately, and compute the sum of the sample variances of the two.</p>
+<div class="sourceCode" id="cb702"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb702-1"><a href="tree-regression-models.html#cb702-1" aria-hidden="true" tabindex="-1"></a>xs <span class="ot">&lt;-</span> for_tree<span class="sc">$</span>x</span>
+<span id="cb702-2"><a href="tree-regression-models.html#cb702-2" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> xs[<span class="dv">1</span>]</span>
+<span id="cb702-3"><a href="tree-regression-models.html#cb702-3" aria-hidden="true" tabindex="-1"></a>for_tree <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(x <span class="sc">&gt;</span> x1) <span class="sc">%&gt;%</span> </span>
+<span id="cb702-4"><a href="tree-regression-models.html#cb702-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">sse =</span> <span class="fu">sum</span>((response <span class="sc">-</span> <span class="fu">mean</span>(response))<span class="sc">^</span><span class="dv">2</span>),</span>
+<span id="cb702-5"><a href="tree-regression-models.html#cb702-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">n =</span> <span class="fu">n</span>()) </span></code></pre></div>
+<pre><code>## # A tibble: 2 × 3
+##   `x &gt; x1`   sse     n
+##   &lt;lgl&gt;    &lt;dbl&gt; &lt;int&gt;
+## 1 FALSE     349.    30
+## 2 TRUE     1610.    70</code></pre>
+<p>We start by splitting into bigger than <span class="math inline">\(x1\)</span> and less then or equal to <span class="math inline">\(x1\)</span>. We see that the SSE associated with being less than <span class="math inline">\(x1\)</span> is smaller than the other, but there are also a lot fewer values associated with <span class="math inline">\(x \le x1\)</span>.</p>
+<p>Now, we need to sum the SSE:</p>
+<div class="sourceCode" id="cb704"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb704-1"><a href="tree-regression-models.html#cb704-1" aria-hidden="true" tabindex="-1"></a>for_tree <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(x <span class="sc">&gt;</span> x1) <span class="sc">%&gt;%</span> </span>
+<span id="cb704-2"><a href="tree-regression-models.html#cb704-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">sse =</span> <span class="fu">sum</span>((response <span class="sc">-</span> <span class="fu">mean</span>(response))<span class="sc">^</span><span class="dv">2</span>),</span>
+<span id="cb704-3"><a href="tree-regression-models.html#cb704-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb704-4"><a href="tree-regression-models.html#cb704-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(sse) <span class="sc">%&gt;%</span> </span>
+<span id="cb704-5"><a href="tree-regression-models.html#cb704-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>()</span></code></pre></div>
+<pre><code>## [1] 1959.031</code></pre>
+<p>Then, we repeat for all values of <span class="math inline">\(x\)</span>.</p>
+<div class="sourceCode" id="cb706"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb706-1"><a href="tree-regression-models.html#cb706-1" aria-hidden="true" tabindex="-1"></a>sse_x <span class="ot">&lt;-</span> <span class="fu">sapply</span>(xs, <span class="cf">function</span>(x1) {</span>
+<span id="cb706-2"><a href="tree-regression-models.html#cb706-2" aria-hidden="true" tabindex="-1"></a>  for_tree <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(x <span class="sc">&gt;</span> x1) <span class="sc">%&gt;%</span> </span>
+<span id="cb706-3"><a href="tree-regression-models.html#cb706-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">sse =</span> <span class="fu">sum</span>((response <span class="sc">-</span> <span class="fu">mean</span>(response))<span class="sc">^</span><span class="dv">2</span>),</span>
+<span id="cb706-4"><a href="tree-regression-models.html#cb706-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb706-5"><a href="tree-regression-models.html#cb706-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(sse) <span class="sc">%&gt;%</span> </span>
+<span id="cb706-6"><a href="tree-regression-models.html#cb706-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>()</span>
+<span id="cb706-7"><a href="tree-regression-models.html#cb706-7" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb706-8"><a href="tree-regression-models.html#cb706-8" aria-hidden="true" tabindex="-1"></a><span class="fu">min</span>(sse_x)</span></code></pre></div>
+<pre><code>## [1] 846.4017</code></pre>
+<p>Then, we do the same thing for all values of <span class="math inline">\(y\)</span>, which is an exercise in the R Markdown sheet.</p>
+<pre><code>## [1] 1504.796</code></pre>
+<p>When you compute the SSE for the <span class="math inline">\(y\)</span> splits, you should get the smallest to be 1504.7955004, which is larger than the smallest <span class="math inline">\(x\)</span> split. Therefore, we would split on <span class="math inline">\(x\)</span>. Which one?</p>
+<div class="sourceCode" id="cb709"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb709-1"><a href="tree-regression-models.html#cb709-1" aria-hidden="true" tabindex="-1"></a><span class="fu">which.min</span>(sse_x)</span></code></pre></div>
+<pre><code>## [1] 26</code></pre>
+<div class="sourceCode" id="cb711"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb711-1"><a href="tree-regression-models.html#cb711-1" aria-hidden="true" tabindex="-1"></a>for_tree[<span class="dv">26</span>,]</span></code></pre></div>
+<pre><code>##           x        y response
+## 26 6.963177 2.305067 12.49659</code></pre>
+<p>So, we would split it into <span class="math inline">\(x &gt; 6.963177\)</span> and <span class="math inline">\(x \le 6.963177\)</span>. There would be 68 and 32 observations in the two groups after splitting. Let’s also plot the SSE for the various splits in the <span class="math inline">\(x\)</span> variable.</p>
+<div class="sourceCode" id="cb713"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb713-1"><a href="tree-regression-models.html#cb713-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(xs, sse_x)</span></code></pre></div>
+<p><img src="07-regression-trees_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>Based on this one split, our predictions for new data coming in would be as follows. If <span class="math inline">\(x &gt; 6.963177\)</span>, we would predict the response to be 1.07, and if <span class="math inline">\(x \le 6.963177\)</span>, we would predict the response to be 9.5. These values are the means of the responses after the split. Recall from above that response values are centered about 1 when <span class="math inline">\(x &gt; 7\)</span>, so this is a pretty good estimate already in that case!</p>
+<div class="sourceCode" id="cb714"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb714-1"><a href="tree-regression-models.html#cb714-1" aria-hidden="true" tabindex="-1"></a>for_tree <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(x <span class="sc">&gt;</span> <span class="fl">6.963177</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb714-2"><a href="tree-regression-models.html#cb714-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">prediction =</span> <span class="fu">mean</span>(response))</span></code></pre></div>
+<pre><code>## # A tibble: 2 × 2
+##   `x &gt; 6.963177` prediction
+##   &lt;lgl&gt;               &lt;dbl&gt;
+## 1 FALSE                9.51
+## 2 TRUE                 1.07</code></pre>
+<p>We know, based on how the data was created, that we should now <strong>stop</strong> creating the tree. However, the algorithm would continue splitting the data into data into two pieces until it reaches a minimum number of observations in a node. Typically, we require at least 20 observations in a leaf to consider splitting further, and we require the splits to have at least <span class="math inline">\(N/3\)</span> observations in each split. Once all of the leaves are built, we are done.</p>
+<p>It seems clear that the basic regression tree will often <strong>overfit</strong> the data. In order to combat that, we will add one more level of complexity to the situation. Namely, we will add a <em>penalty</em> for the number of leaves in the model. Formally, at each proposed split, we would compute</p>
+<p><span class="math display">\[
+SSE + c_p \times \#\{\text{leaves in model}\}
+\]</span></p>
+<p>We will only proceed with a split if the penalized measure of performance decreases. The value <span class="math inline">\(c_p\)</span> is called the <em>complexity parameter</em>, and is chosen via cross validation. As usual, you can choose the value of <span class="math inline">\(c_p\)</span> that minimizes the SSE, or you can choose the largest value of <span class="math inline">\(c_p\)</span> that yields an SSE within one standard error of the best <span class="math inline">\(c_p\)</span>. If you choose the one standard error version, then your model will be simpler and perhaps easier to interpret.</p>
+<p>We will not code this up by hand, but rather see how to use the package <code>rpart</code> to do this.</p>
+<div class="sourceCode" id="cb716"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb716-1"><a href="tree-regression-models.html#cb716-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rpart)</span>
+<span id="cb716-2"><a href="tree-regression-models.html#cb716-2" aria-hidden="true" tabindex="-1"></a>mod_Tree <span class="ot">&lt;-</span> <span class="fu">rpart</span>(response <span class="sc">~</span> x <span class="sc">+</span> y, </span>
+<span id="cb716-3"><a href="tree-regression-models.html#cb716-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> for_tree, </span>
+<span id="cb716-4"><a href="tree-regression-models.html#cb716-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="dv">0</span>))</span>
+<span id="cb716-5"><a href="tree-regression-models.html#cb716-5" aria-hidden="true" tabindex="-1"></a>mod_Tree</span></code></pre></div>
+<pre><code>## n= 100 
+## 
+## node), split, n, deviance, yval
+##       * denotes terminal node
+## 
+##  1) root 100 2394.015000  6.8090490  
+##    2) x&gt;=7.001606 32   24.004220  1.0743490  
+##      4) x&gt;=9.439387 7    5.418916  0.6045054 *
+##      5) x&lt; 9.439387 25   16.607360  1.2059050  
+##       10) x&lt; 8.920044 18   10.381580  1.0838220 *
+##       11) x&gt;=8.920044 7    5.267642  1.5198330 *
+##    3) x&lt; 7.001606 68  822.397500  9.5077320  
+##      6) y&gt;=3.777924 24   16.070500  4.9400120  
+##       12) y&lt; 8.772627 14   10.086350  4.7490080 *
+##       13) y&gt;=8.772627 10    4.758340  5.2074170 *
+##      7) y&lt; 3.777924 44   32.459780 11.9992200  
+##       14) y&lt; 1.24562 19    8.858175 11.6249900 *
+##       15) y&gt;=1.24562 25   18.918450 12.2836300  
+##         30) y&gt;=2.308866 8    2.342445 11.8080800 *
+##         31) y&lt; 2.308866 17   13.915520 12.5074100 *</code></pre>
+<div class="sourceCode" id="cb718"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb718-1"><a href="tree-regression-models.html#cb718-1" aria-hidden="true" tabindex="-1"></a>mod_Tree<span class="sc">$</span>variable.importance</span></code></pre></div>
+<pre><code>##         x         y 
+## 1552.2841  879.2994</code></pre>
+<div class="sourceCode" id="cb720"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb720-1"><a href="tree-regression-models.html#cb720-1" aria-hidden="true" tabindex="-1"></a>mod_Tree<span class="sc">$</span>cptable</span></code></pre></div>
+<pre><code>##             CP nsplit  rel error     xerror       xstd
+## 1 0.6464509968      0 1.00000000 1.01904205 0.05955977
+## 2 0.3232507416      1 0.35354900 0.41892657 0.06377887
+## 3 0.0019561889      2 0.03029826 0.08769604 0.05333872
+## 4 0.0011113084      3 0.02834207 0.08985749 0.05332416
+## 5 0.0008262048      4 0.02723076 0.08700286 0.05177234
+## 6 0.0005120325      5 0.02640456 0.09115297 0.05177279
+## 7 0.0004002201      6 0.02589253 0.09300489 0.05175867
+## 8 0.0000000000      7 0.02549231 0.09229197 0.05058935</code></pre>
+<div class="sourceCode" id="cb722"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb722-1"><a href="tree-regression-models.html#cb722-1" aria-hidden="true" tabindex="-1"></a>mod_Tree</span></code></pre></div>
+<pre><code>## n= 100 
+## 
+## node), split, n, deviance, yval
+##       * denotes terminal node
+## 
+##  1) root 100 2394.015000  6.8090490  
+##    2) x&gt;=7.001606 32   24.004220  1.0743490  
+##      4) x&gt;=9.439387 7    5.418916  0.6045054 *
+##      5) x&lt; 9.439387 25   16.607360  1.2059050  
+##       10) x&lt; 8.920044 18   10.381580  1.0838220 *
+##       11) x&gt;=8.920044 7    5.267642  1.5198330 *
+##    3) x&lt; 7.001606 68  822.397500  9.5077320  
+##      6) y&gt;=3.777924 24   16.070500  4.9400120  
+##       12) y&lt; 8.772627 14   10.086350  4.7490080 *
+##       13) y&gt;=8.772627 10    4.758340  5.2074170 *
+##      7) y&lt; 3.777924 44   32.459780 11.9992200  
+##       14) y&lt; 1.24562 19    8.858175 11.6249900 *
+##       15) y&gt;=1.24562 25   18.918450 12.2836300  
+##         30) y&gt;=2.308866 8    2.342445 11.8080800 *
+##         31) y&lt; 2.308866 17   13.915520 12.5074100 *</code></pre>
+<p>Now, let’s do Cross Validation to determine the best regression tree for minimizing SSE. We’ll again use repeated 10-fold CV.</p>
+<div class="sourceCode" id="cb724"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb724-1"><a href="tree-regression-models.html#cb724-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb724-2"><a href="tree-regression-models.html#cb724-2" aria-hidden="true" tabindex="-1"></a>tuneGrid <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">cp =</span> mod_Tree<span class="sc">$</span>cptable[,<span class="dv">1</span>])</span>
+<span id="cb724-3"><a href="tree-regression-models.html#cb724-3" aria-hidden="true" tabindex="-1"></a>basic_tree_cv <span class="ot">&lt;-</span> <span class="fu">train</span>(response <span class="sc">~</span> x <span class="sc">+</span> y, </span>
+<span id="cb724-4"><a href="tree-regression-models.html#cb724-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> for_tree,</span>
+<span id="cb724-5"><a href="tree-regression-models.html#cb724-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">method =</span> <span class="st">&quot;rpart&quot;</span>,</span>
+<span id="cb724-6"><a href="tree-regression-models.html#cb724-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">tuneGrid =</span> tuneGrid,</span>
+<span id="cb724-7"><a href="tree-regression-models.html#cb724-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">trControl =</span> <span class="fu">trainControl</span>(<span class="at">method =</span> <span class="st">&quot;repeatedcv&quot;</span>, </span>
+<span id="cb724-8"><a href="tree-regression-models.html#cb724-8" aria-hidden="true" tabindex="-1"></a>                               <span class="at">repeats =</span> <span class="dv">5</span>)</span>
+<span id="cb724-9"><a href="tree-regression-models.html#cb724-9" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb724-10"><a href="tree-regression-models.html#cb724-10" aria-hidden="true" tabindex="-1"></a>basic_tree_cv<span class="sc">$</span>results</span></code></pre></div>
+<pre><code>##             cp     RMSE  Rsquared       MAE    RMSESD RsquaredSD     MAESD
+## 1 0.0000000000 1.213430 0.9217543 0.8953456 0.8754000  0.1415938 0.3646342
+## 2 0.0004002201 1.205608 0.9221461 0.8892738 0.8725662  0.1414442 0.3597052
+## 3 0.0005120325 1.200718 0.9221940 0.8860438 0.8810468  0.1425634 0.3644045
+## 4 0.0008262048 1.184050 0.9231787 0.8669791 0.8861990  0.1432461 0.3616212
+## 5 0.0011113084 1.173554 0.9242115 0.8550895 0.8942595  0.1436001 0.3584810
+## 6 0.0019561889 1.172340 0.9246957 0.8505300 0.8909070  0.1432200 0.3594802
+## 7 0.3232507416 2.283368 0.7218413 1.8284694 1.3209655  0.2468263 1.0313152
+## 8 0.6464509968 4.151103 0.5268897 3.7052617 0.9997554  0.1431459 1.1084478</code></pre>
+<p>The smallest RMSE was when <code>cp = 0.0019561889</code>, and there is a simpler model just barely within one standard error of our estimate for the RMSE with that value of <code>cp = 0.3232507416</code>. The previous statement depends on which run of the cross-validation that we do! If you re-run, sometimes the simpler model is within one sd, and sometimes it is not. Let’s re-run <code>rpart</code> with both values.</p>
+<div class="sourceCode" id="cb726"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb726-1"><a href="tree-regression-models.html#cb726-1" aria-hidden="true" tabindex="-1"></a>mod_Tree <span class="ot">&lt;-</span> <span class="fu">rpart</span>(response <span class="sc">~</span> x <span class="sc">+</span> y, </span>
+<span id="cb726-2"><a href="tree-regression-models.html#cb726-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> for_tree, </span>
+<span id="cb726-3"><a href="tree-regression-models.html#cb726-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="fl">0.0019561889</span>))</span>
+<span id="cb726-4"><a href="tree-regression-models.html#cb726-4" aria-hidden="true" tabindex="-1"></a>mod_Tree</span></code></pre></div>
+<pre><code>## n= 100 
+## 
+## node), split, n, deviance, yval
+##       * denotes terminal node
+## 
+##  1) root 100 2394.015000  6.809049  
+##    2) x&gt;=7.001606 32   24.004220  1.074349 *
+##    3) x&lt; 7.001606 68  822.397500  9.507732  
+##      6) y&gt;=3.777924 24   16.070500  4.940012 *
+##      7) y&lt; 3.777924 44   32.459780 11.999220  
+##       14) y&lt; 1.24562 19    8.858175 11.624990 *
+##       15) y&gt;=1.24562 25   18.918450 12.283630 *</code></pre>
+<p>We see that this model overfits the true model a bit, by adding one additional split than what we know the true model had. The simpler model that is the one within one sd of the best one fits almost exactly how we created the data.</p>
+<div class="sourceCode" id="cb728"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb728-1"><a href="tree-regression-models.html#cb728-1" aria-hidden="true" tabindex="-1"></a>mod_Tree <span class="ot">&lt;-</span> <span class="fu">rpart</span>(response <span class="sc">~</span> x <span class="sc">+</span> y, </span>
+<span id="cb728-2"><a href="tree-regression-models.html#cb728-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> for_tree, </span>
+<span id="cb728-3"><a href="tree-regression-models.html#cb728-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="fl">0.3232507416</span>))</span>
+<span id="cb728-4"><a href="tree-regression-models.html#cb728-4" aria-hidden="true" tabindex="-1"></a>mod_Tree</span></code></pre></div>
+<pre><code>## n= 100 
+## 
+## node), split, n, deviance, yval
+##       * denotes terminal node
+## 
+## 1) root 100 2394.01500 6.809049  
+##   2) x&gt;=7.001606 32   24.00422 1.074349 *
+##   3) x&lt; 7.001606 68  822.39750 9.507732 *</code></pre>
+<p>Huh, this one actually is too small. The automated picking of <code>cp</code> isn’t working quite right, so if we add a complexity parameter of 0.03 into the training mix, we see that it works better than any of the other complexity parameters.</p>
+<div class="sourceCode" id="cb730"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb730-1"><a href="tree-regression-models.html#cb730-1" aria-hidden="true" tabindex="-1"></a>tuneGrid <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">cp =</span> <span class="fu">c</span>(tuneGrid<span class="sc">$</span>cp, .<span class="dv">03</span>)) </span>
+<span id="cb730-2"><a href="tree-regression-models.html#cb730-2" aria-hidden="true" tabindex="-1"></a>basic_tree_cv <span class="ot">&lt;-</span> <span class="fu">train</span>(response <span class="sc">~</span> x <span class="sc">+</span> y, </span>
+<span id="cb730-3"><a href="tree-regression-models.html#cb730-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> for_tree,</span>
+<span id="cb730-4"><a href="tree-regression-models.html#cb730-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">method =</span> <span class="st">&quot;rpart&quot;</span>,</span>
+<span id="cb730-5"><a href="tree-regression-models.html#cb730-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">tuneGrid =</span> tuneGrid,</span>
+<span id="cb730-6"><a href="tree-regression-models.html#cb730-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">trControl =</span> <span class="fu">trainControl</span>(<span class="at">method =</span> <span class="st">&quot;repeatedcv&quot;</span>,</span>
+<span id="cb730-7"><a href="tree-regression-models.html#cb730-7" aria-hidden="true" tabindex="-1"></a>                               <span class="at">repeats =</span> <span class="dv">5</span>)</span>
+<span id="cb730-8"><a href="tree-regression-models.html#cb730-8" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb730-9"><a href="tree-regression-models.html#cb730-9" aria-hidden="true" tabindex="-1"></a>basic_tree_cv<span class="sc">$</span>results</span></code></pre></div>
+<pre><code>##             cp     RMSE  Rsquared       MAE    RMSESD RsquaredSD     MAESD
+## 1 0.0000000000 1.215654 0.9210948 0.8940887 0.8467115  0.1433475 0.3505427
+## 2 0.0004002201 1.209871 0.9212856 0.8889472 0.8444461  0.1432304 0.3452945
+## 3 0.0005120325 1.199602 0.9220114 0.8806105 0.8443763  0.1431928 0.3458358
+## 4 0.0008262048 1.184323 0.9233355 0.8681736 0.8475409  0.1425037 0.3450186
+## 5 0.0011113084 1.176890 0.9243609 0.8580574 0.8522202  0.1412287 0.3330814
+## 6 0.0019561889 1.163948 0.9249228 0.8507167 0.8587779  0.1411014 0.3397056
+## 7 0.0300000000 1.142665 0.9265220 0.8243669 0.8607087  0.1406256 0.3293990
+## 8 0.3232507416 2.161433 0.7412805 1.7634824 1.3601114  0.2570871 1.0739951
+## 9 0.6464509968 4.243271 0.5092443 3.8054918 0.9147815  0.1566346 1.0194488</code></pre>
+<p>And we see that <code>cp = .03</code> is the best, and it also leads to the correct model.</p>
+<div class="sourceCode" id="cb732"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb732-1"><a href="tree-regression-models.html#cb732-1" aria-hidden="true" tabindex="-1"></a>mod_Tree <span class="ot">&lt;-</span> <span class="fu">rpart</span>(response <span class="sc">~</span> x <span class="sc">+</span> y, </span>
+<span id="cb732-2"><a href="tree-regression-models.html#cb732-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> for_tree, </span>
+<span id="cb732-3"><a href="tree-regression-models.html#cb732-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> .<span class="dv">03</span>))</span>
+<span id="cb732-4"><a href="tree-regression-models.html#cb732-4" aria-hidden="true" tabindex="-1"></a>mod_Tree</span></code></pre></div>
+<pre><code>## n= 100 
+## 
+## node), split, n, deviance, yval
+##       * denotes terminal node
+## 
+## 1) root 100 2394.01500  6.809049  
+##   2) x&gt;=7.001606 32   24.00422  1.074349 *
+##   3) x&lt; 7.001606 68  822.39750  9.507732  
+##     6) y&gt;=3.777924 24   16.07050  4.940012 *
+##     7) y&lt; 3.777924 44   32.45978 11.999220 *</code></pre>
+</div>
+<div id="regression-model-trees" class="section level2" number="8.2">
+<h2><span class="header-section-number">8.2</span> Regression Model Trees</h2>
+<p>In the previous section, we split the data into pieces and approximated each piece by a single constant. One downside to this is that, within a leaf, it is likely that the response is not constant with respect to the predictors, but in fact depends on the predictors. In this section, we will see one way to better approximate data of this type. The basic idea is that we will use a linear model to predict the response at each node (not just each leaf), where the model is built on all of the variables that we used to split to get down to that node. Then, we will predict the response based on a weighted average of each node that the new data visits to get to the leaf! That’s a lot to take in.</p>
+<p>Let’s break things down into component pieces. We’ll create a synthetic data set so that we know what the true model is.</p>
+<div class="sourceCode" id="cb734"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb734-1"><a href="tree-regression-models.html#cb734-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3312020</span>)</span>
+<span id="cb734-2"><a href="tree-regression-models.html#cb734-2" aria-hidden="true" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">1000</span>, <span class="dv">0</span>, <span class="dv">10</span>),</span>
+<span id="cb734-3"><a href="tree-regression-models.html#cb734-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">y =</span> <span class="fu">rexp</span>(<span class="dv">1000</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">5</span>))</span>
+<span id="cb734-4"><a href="tree-regression-models.html#cb734-4" aria-hidden="true" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">mutate</span>(dd, <span class="at">response =</span> <span class="fu">case_when</span>(</span>
+<span id="cb734-5"><a href="tree-regression-models.html#cb734-5" aria-hidden="true" tabindex="-1"></a>  x <span class="sc">&gt;</span> <span class="dv">5</span> <span class="sc">&amp;</span> y <span class="sc">&gt;</span> <span class="dv">5</span> <span class="sc">~</span> x <span class="sc">+</span> y <span class="sc">+</span> <span class="dv">1</span>,</span>
+<span id="cb734-6"><a href="tree-regression-models.html#cb734-6" aria-hidden="true" tabindex="-1"></a>  x <span class="sc">&gt;</span> <span class="dv">5</span> <span class="sc">&amp;</span> y <span class="sc">&lt;=</span> <span class="dv">5</span> <span class="sc">~</span> <span class="dv">2</span> <span class="sc">*</span> x <span class="sc">+</span> <span class="dv">1</span>,</span>
+<span id="cb734-7"><a href="tree-regression-models.html#cb734-7" aria-hidden="true" tabindex="-1"></a>  x <span class="sc">&lt;=</span> <span class="dv">5</span> <span class="sc">&amp;</span> y <span class="sc">&gt;</span> <span class="dv">7</span> <span class="sc">~</span> <span class="dv">10</span> <span class="sc">*</span> x <span class="sc">+</span> <span class="dv">20</span> <span class="sc">*</span> y,</span>
+<span id="cb734-8"><a href="tree-regression-models.html#cb734-8" aria-hidden="true" tabindex="-1"></a>  <span class="cn">TRUE</span> <span class="sc">~</span> <span class="dv">7</span></span>
+<span id="cb734-9"><a href="tree-regression-models.html#cb734-9" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>))</span></code></pre></div>
+<p>We’ll plot this to see what it looks like:</p>
+<div class="sourceCode" id="cb735"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb735-1"><a href="tree-regression-models.html#cb735-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dd)</span></code></pre></div>
+<p><img src="07-regression-trees_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p>We can see that there are several things going on! Let’s see what the relationship looks like when <span class="math inline">\(x &gt; 5\)</span> and <span class="math inline">\(y &gt; 5\)</span>.</p>
+<div class="sourceCode" id="cb736"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb736-1"><a href="tree-regression-models.html#cb736-1" aria-hidden="true" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(response <span class="sc">~</span> ., <span class="at">data =</span> <span class="fu">filter</span>(dd, x <span class="sc">&gt;</span> <span class="dv">5</span>, y <span class="sc">&gt;</span> <span class="dv">5</span>))</span>
+<span id="cb736-2"><a href="tree-regression-models.html#cb736-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = response ~ ., data = filter(dd, x &gt; 5, y &gt; 5))
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -3.06037 -0.65030 -0.02971  0.69403  2.13172 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  1.12573    0.41936   2.684  0.00796 ** 
+## x            1.05156    0.05198  20.231  &lt; 2e-16 ***
+## y            0.97552    0.01692  57.658  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.9595 on 177 degrees of freedom
+## Multiple R-squared:  0.9574, Adjusted R-squared:  0.9569 
+## F-statistic:  1988 on 2 and 177 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>We see that when <span class="math inline">\(x &gt; 5\)</span> and <span class="math inline">\(y &gt; 5\)</span>, we get estimates for the coefficients for <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> to be <span class="math inline">\(1.05\)</span> and <span class="math inline">\(0.98\)</span> respecitvely. These are approximately equal to the true values for the generative process of the data, which are 1 and 1. Of course, in general, we won’t know what the generative process of the data is, and we won’t even know that the data was created by a process of this type at all.</p>
+<p>The overview of the algorithm for splitting is:</p>
+<ol style="list-style-type: decimal">
+<li>We start by building a model on all of the predictors and all of the observations.</li>
+<li>We determine which, if any, of the variables is the most likely candidate to split on. This is a major difference between this algorithm and the basic regression tree algorithm.</li>
+<li>We test every split on the determined variable (into two nodes of sufficient size), to see which one has the smallest total sum squared error after refitting the OLS on each node separately.</li>
+<li>We split the data into the sets determined in 3, and repeat for each current leaf in the tree.</li>
+</ol>
+<div id="choosing-variable-to-split" class="section level3" number="8.2.1">
+<h3><span class="header-section-number">8.2.1</span> Choosing Variable to Split</h3>
+<p>The basic idea for splitting the data set (i.e., items 1 and 2 in the algorithm presented above) is the same as for the basic regression tree. However, we will need to modify the criterion we are using to choose the <em>best</em> split. A natrual choice would be to build a linear model at each split and compute the total residual squared error. We will use a technique similar to one described by <a href="https://eeecon.uibk.ac.at/~zeileis/papers/Zeileis+Hothorn+Hornik-2008.pdf">Zeileis, Hothorn, and Hornik</a> that tries to accomplish this goal in an efficient fashion.</p>
+<p>We assume for simplicity that we are using all of the predictors for both the <strong>splitting</strong> of the data and for the <strong>model building</strong> at each node.</p>
+<p>We start by building an OLS model on the full data. I’m also going to change the names of the predictors in <code>dd</code>, because it may be confusing that <code>y</code> is a predictor. Sorry about that.</p>
+<div class="sourceCode" id="cb738"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb738-1"><a href="tree-regression-models.html#cb738-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(dd) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;V1&quot;</span>, <span class="st">&quot;V2&quot;</span>, <span class="st">&quot;response&quot;</span>)</span>
+<span id="cb738-2"><a href="tree-regression-models.html#cb738-2" aria-hidden="true" tabindex="-1"></a>mod_full <span class="ot">&lt;-</span> <span class="fu">lm</span>(response <span class="sc">~</span> .,<span class="at">data =</span> dd)</span>
+<span id="cb738-3"><a href="tree-regression-models.html#cb738-3" aria-hidden="true" tabindex="-1"></a>dd_full <span class="ot">&lt;-</span> <span class="fu">mutate</span>(dd, </span>
+<span id="cb738-4"><a href="tree-regression-models.html#cb738-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">residuals =</span> mod_full<span class="sc">$</span>residuals)</span></code></pre></div>
+<p>Now, we need to decide which of the two variables, if either, is more suitable for splitting. The idea proposed by Zeileis, et al, is to check for <em>parameter instability</em> in each variable, and to choose the variable that has the highest parameter instability. They also provide a method for determining parameter instability, but it would be a bit of a detour from the main thrust of this section. So, we will use a simpler method based on the residuals of the full OLS model.</p>
+<p>First, note that the mean of the residuals in the full OLS model is zero.</p>
+<div class="sourceCode" id="cb739"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb739-1"><a href="tree-regression-models.html#cb739-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(dd_full<span class="sc">$</span>residuals)</span></code></pre></div>
+<pre><code>## [1] 3.880576e-17</code></pre>
+<p>Now, if there is not a natural split in the variable <code>x</code>, say, then if we sort the residuals according to the values of <code>x</code>, then they should look more or less like random fluctuations about 0. Let’s separately look at a data set for which there is <strong>not</strong> a split to see what that looks like.</p>
+<div class="sourceCode" id="cb741"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb741-1"><a href="tree-regression-models.html#cb741-1" aria-hidden="true" tabindex="-1"></a>dd_no_split <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">V1 =</span> <span class="fu">runif</span>(<span class="dv">1000</span>, <span class="dv">0</span>, <span class="dv">10</span>),</span>
+<span id="cb741-2"><a href="tree-regression-models.html#cb741-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">V2 =</span> <span class="fu">rexp</span>(<span class="dv">1000</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">5</span>))</span>
+<span id="cb741-3"><a href="tree-regression-models.html#cb741-3" aria-hidden="true" tabindex="-1"></a>dd_no_split <span class="ot">&lt;-</span> <span class="fu">mutate</span>(dd_no_split, <span class="at">response =</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> V1 <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> V2 <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>))</span>
+<span id="cb741-4"><a href="tree-regression-models.html#cb741-4" aria-hidden="true" tabindex="-1"></a>mod_no_split <span class="ot">&lt;-</span> <span class="fu">lm</span>(response <span class="sc">~</span> ., <span class="at">data =</span> dd_no_split)</span>
+<span id="cb741-5"><a href="tree-regression-models.html#cb741-5" aria-hidden="true" tabindex="-1"></a>dd_no_split <span class="ot">&lt;-</span> <span class="fu">mutate</span>(dd_no_split, </span>
+<span id="cb741-6"><a href="tree-regression-models.html#cb741-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">residuals =</span> mod_no_split<span class="sc">$</span>residuals)</span></code></pre></div>
+<p>So, to be clear, <code>dd_no_split</code> <strong>should not</strong> be further split, while <code>dd</code> <strong>should</strong> be split.</p>
+<p>Let’s plot the residuals of the data that needs splitting, after ordering by <code>V1</code>.</p>
+<div class="sourceCode" id="cb742"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb742-1"><a href="tree-regression-models.html#cb742-1" aria-hidden="true" tabindex="-1"></a><span class="fu">arrange</span>(dd_full, V1) <span class="sc">%&gt;%</span> </span>
+<span id="cb742-2"><a href="tree-regression-models.html#cb742-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(residuals) <span class="sc">%&gt;%</span> </span>
+<span id="cb742-3"><a href="tree-regression-models.html#cb742-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(<span class="at">ylab =</span> <span class="st">&quot;residual&quot;</span>, <span class="at">main =</span> <span class="st">&quot;Tree needs splitting&quot;</span>)</span></code></pre></div>
+<p><img src="07-regression-trees_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<div class="sourceCode" id="cb743"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb743-1"><a href="tree-regression-models.html#cb743-1" aria-hidden="true" tabindex="-1"></a><span class="fu">arrange</span>(dd_no_split, V1) <span class="sc">%&gt;%</span> </span>
+<span id="cb743-2"><a href="tree-regression-models.html#cb743-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(residuals) <span class="sc">%&gt;%</span> </span>
+<span id="cb743-3"><a href="tree-regression-models.html#cb743-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(<span class="at">ylab =</span> <span class="st">&quot;residual&quot;</span>, <span class="at">main =</span> <span class="st">&quot;Tree does not need splitting&quot;</span>)</span></code></pre></div>
+<p><img src="07-regression-trees_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+<p>We can see that after ordering the residuals by <code>V1</code>, that there is a definite difference in the residuals. But what makes the one more amenable to splitting than the other? And how can we automate the procedure to find if and which variable to choose?</p>
+<p>We will take the <strong>cumulative sum</strong> of the residuals, after they have been standardized. We will first do this multiple times for the data that does <strong>not</strong> need to be split further so that you can see what types of results to expect.</p>
+<div class="sourceCode" id="cb744"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb744-1"><a href="tree-regression-models.html#cb744-1" aria-hidden="true" tabindex="-1"></a>sdev <span class="ot">&lt;-</span> <span class="fu">sd</span>(dd_no_split<span class="sc">$</span>residuals)</span>
+<span id="cb744-2"><a href="tree-regression-models.html#cb744-2" aria-hidden="true" tabindex="-1"></a>dd_no_split<span class="sc">$</span>cumulative_sum <span class="ot">&lt;-</span> <span class="fu">arrange</span>(dd_no_split, V1) <span class="sc">%&gt;%</span></span>
+<span id="cb744-3"><a href="tree-regression-models.html#cb744-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(residuals) <span class="sc">%&gt;%</span> </span>
+<span id="cb744-4"><a href="tree-regression-models.html#cb744-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cumsum</span>()</span>
+<span id="cb744-5"><a href="tree-regression-models.html#cb744-5" aria-hidden="true" tabindex="-1"></a>dd_no_split<span class="sc">$</span>cumulative_sum <span class="ot">&lt;-</span> dd_no_split<span class="sc">$</span>cumulative_sum<span class="sc">/</span>(sdev <span class="sc">*</span> <span class="fu">sqrt</span>(<span class="fu">nrow</span>(dd_no_split)))  </span></code></pre></div>
+<p>As you can see in the above code, we computed the cumulative sum of the residuals, after ordering the data by <code>V1</code>. We then normalized the cumulative sum by dividing by the standard deviation of the residuals and dividing by the square root of the number of observations. Now, we plot:</p>
+<div class="sourceCode" id="cb745"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb745-1"><a href="tree-regression-models.html#cb745-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dd_no_split<span class="sc">$</span>cumulative_sum, <span class="at">type =</span> <span class="st">&quot;l&quot;</span>,</span>
+<span id="cb745-2"><a href="tree-regression-models.html#cb745-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">&quot;cumulative sum&quot;</span>,</span>
+<span id="cb745-3"><a href="tree-regression-models.html#cb745-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">&quot;no split needed&quot;</span>)</span></code></pre></div>
+<p><img src="07-regression-trees_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
+<p>In this plot, we see that the largest value of the normalized cumulative sum is about 0.6, and the smallest value is about -0.6.</p>
+<div class="sourceCode" id="cb746"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb746-1"><a href="tree-regression-models.html#cb746-1" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(dd_no_split<span class="sc">$</span>cumulative_sum)</span></code></pre></div>
+<pre><code>## [1] 0.6306199</code></pre>
+<div class="sourceCode" id="cb748"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb748-1"><a href="tree-regression-models.html#cb748-1" aria-hidden="true" tabindex="-1"></a><span class="fu">min</span>(dd_no_split<span class="sc">$</span>cumulative_sum)</span></code></pre></div>
+<pre><code>## [1] -0.6121042</code></pre>
+<p>Now, let’s see what happens when we do the data that needs further splitting.</p>
+<div class="sourceCode" id="cb750"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb750-1"><a href="tree-regression-models.html#cb750-1" aria-hidden="true" tabindex="-1"></a>sdev <span class="ot">&lt;-</span> <span class="fu">sd</span>(dd_full<span class="sc">$</span>residuals)</span>
+<span id="cb750-2"><a href="tree-regression-models.html#cb750-2" aria-hidden="true" tabindex="-1"></a>dd_full<span class="sc">$</span>cumulative_sum <span class="ot">&lt;-</span> <span class="fu">arrange</span>(dd_full, V1) <span class="sc">%&gt;%</span></span>
+<span id="cb750-3"><a href="tree-regression-models.html#cb750-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(residuals) <span class="sc">%&gt;%</span> </span>
+<span id="cb750-4"><a href="tree-regression-models.html#cb750-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cumsum</span>()</span>
+<span id="cb750-5"><a href="tree-regression-models.html#cb750-5" aria-hidden="true" tabindex="-1"></a>dd_full<span class="sc">$</span>cumulative_sum <span class="ot">&lt;-</span> dd_full<span class="sc">$</span>cumulative_sum<span class="sc">/</span>(sdev <span class="sc">*</span> <span class="fu">sqrt</span>(<span class="fu">nrow</span>(dd_full)))  </span>
+<span id="cb750-6"><a href="tree-regression-models.html#cb750-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb750-7"><a href="tree-regression-models.html#cb750-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dd_full<span class="sc">$</span>cumulative_sum, <span class="at">type =</span> <span class="st">&quot;l&quot;</span>,</span>
+<span id="cb750-8"><a href="tree-regression-models.html#cb750-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">&quot;cumulative sum&quot;</span>,</span>
+<span id="cb750-9"><a href="tree-regression-models.html#cb750-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">&quot;yes split needed&quot;</span>,</span>
+<span id="cb750-10"><a href="tree-regression-models.html#cb750-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">sub =</span> <span class="st">&quot;ordered by V1&quot;</span>)</span></code></pre></div>
+<p><img src="07-regression-trees_files/figure-html/unnamed-chunk-29-1.png" width="672" /></p>
+<p>We see in this case that the cumulative sum has a maximum value of
+1.858, which is highly unlikely to happen if the model is already fully specified.</p>
+<p>This procedure is automated in R in the package <code>strucchange</code>. In order to use this, we will need to sort the data by the separate variables first, and then apply the function <code>efp</code>.</p>
+<div class="sourceCode" id="cb751"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb751-1"><a href="tree-regression-models.html#cb751-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(strucchange)</span>
+<span id="cb751-2"><a href="tree-regression-models.html#cb751-2" aria-hidden="true" tabindex="-1"></a>dd_v1 <span class="ot">&lt;-</span> <span class="fu">arrange</span>(dd, V1)</span>
+<span id="cb751-3"><a href="tree-regression-models.html#cb751-3" aria-hidden="true" tabindex="-1"></a>qcc_test <span class="ot">&lt;-</span> <span class="fu">efp</span>(response <span class="sc">~</span> ., <span class="at">data =</span> dd_v1, <span class="at">type =</span> <span class="st">&quot;OLS-CUSUM&quot;</span>)</span>
+<span id="cb751-4"><a href="tree-regression-models.html#cb751-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(qcc_test)</span></code></pre></div>
+<p><img src="07-regression-trees_files/figure-html/unnamed-chunk-30-1.png" width="672" /></p>
+<div class="sourceCode" id="cb752"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb752-1"><a href="tree-regression-models.html#cb752-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sctest</span>(qcc_test)</span></code></pre></div>
+<pre><code>## 
+##  OLS-based CUSUM test
+## 
+## data:  qcc_test
+## S0 = 1.8563, p-value = 0.002033</code></pre>
+<p>We see that we would reject the null hypothesis that the residuals are centered around zero after arranging them according to <code>V1</code> with <span class="math inline">\(p = .002\)</span>. In particular, since this value is less than <span class="math inline">\(\alpha = .05\)</span>, we conculde that we <strong>do</strong> need to continue splitting. We will continue splitting as long as <strong>any</strong> of the <span class="math inline">\(p\)</span>-values that we compute are below the threshold <span class="math inline">\(\alpha\)</span> that we choose.</p>
+<p>The test statistic is the largest absolute deviation away from zero in the cumulative sum or residuals.</p>
+<div class="sourceCode" id="cb754"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb754-1"><a href="tree-regression-models.html#cb754-1" aria-hidden="true" tabindex="-1"></a>dd_v2 <span class="ot">&lt;-</span> <span class="fu">arrange</span>(dd, V2)</span>
+<span id="cb754-2"><a href="tree-regression-models.html#cb754-2" aria-hidden="true" tabindex="-1"></a>qcc_test_2 <span class="ot">&lt;-</span> <span class="fu">efp</span>(response <span class="sc">~</span> ., <span class="at">data =</span> dd_v2, <span class="at">type =</span> <span class="st">&quot;OLS-CUSUM&quot;</span>)</span>
+<span id="cb754-3"><a href="tree-regression-models.html#cb754-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(qcc_test_2)</span></code></pre></div>
+<p><img src="07-regression-trees_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+<div class="sourceCode" id="cb755"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb755-1"><a href="tree-regression-models.html#cb755-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sctest</span>(qcc_test_2)</span></code></pre></div>
+<pre><code>## 
+##  OLS-based CUSUM test
+## 
+## data:  qcc_test_2
+## S0 = 3.2267, p-value = 1.809e-09</code></pre>
+<p>We see that the model is more unstable with respect to the parameter <code>V2</code> than it was to the parameter <code>V1</code>, and it also has a much lower <span class="math inline">\(p\)</span>-value. Based on this, we would first split on <code>V2</code>. One final note, if we have a many predictors, it is a good idea to apply a correction factor to the <span class="math inline">\(p\)</span>-values that you get. A typical choice would be to multiply each <span class="math inline">\(p\)</span>-value by the number of predictors that are in the model, which is called a <em>Bonferroni correction</em>. Alternatively, and probably preferably, we could use the <span class="math inline">\(\alpha\)</span> level of the test as a tuning parameter to be determined by cross validation.</p>
+<div id="how-does-efp-work" class="section level4" number="8.2.1.1">
+<h4><span class="header-section-number">8.2.1.1</span> How does efp work?</h4>
+<p>In this section, we briefly describe how the <code>efp</code> function works, and how the <span class="math inline">\(p\)</span>-values in <code>sctest</code> are computed. Assume the data is generated by <span class="math inline">\(y = \beta_0 + \sum \beta_i x_i + \epsilon\)</span>, where <span class="math inline">\(\epsilon\)</span> is normal with mean 0 and standard deviation <span class="math inline">\(\sigma\)</span>. In this case, as we have seen before, the residuals will be normal, with mean 0 and estimated standard deviation
+<span class="math display">\[
+\frac{1}{n - k - 1}\sum_{i = 1}^n \hat \epsilon_i ^2
+\]</span>
+where <span class="math inline">\(k\)</span> is the number of predictors, <span class="math inline">\(n\)</span> is the number of observations, and <span class="math inline">\(\hat \epsilon_i\)</span> is the observed residual.</p>
+<p>Just a quick check:</p>
+<div class="sourceCode" id="cb757"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb757-1"><a href="tree-regression-models.html#cb757-1" aria-hidden="true" tabindex="-1"></a>dd_efp <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">v1 =</span> <span class="fu">runif</span>(<span class="dv">10</span>),</span>
+<span id="cb757-2"><a href="tree-regression-models.html#cb757-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">v2 =</span> <span class="fu">runif</span>(<span class="dv">10</span>))</span>
+<span id="cb757-3"><a href="tree-regression-models.html#cb757-3" aria-hidden="true" tabindex="-1"></a>dd_efp <span class="ot">&lt;-</span> <span class="fu">mutate</span>(dd_efp, </span>
+<span id="cb757-4"><a href="tree-regression-models.html#cb757-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">response =</span> <span class="dv">1</span> <span class="sc">*</span> v1 <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> v2 <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">10</span>, <span class="dv">0</span>, <span class="dv">3</span>))</span>
+<span id="cb757-5"><a href="tree-regression-models.html#cb757-5" aria-hidden="true" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(response <span class="sc">~</span> ., <span class="at">data =</span> dd_efp)</span>
+<span id="cb757-6"><a href="tree-regression-models.html#cb757-6" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">sum</span>(mod<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span><span class="dv">7</span>)</span></code></pre></div>
+<pre><code>## [1] 1.802707</code></pre>
+<div class="sourceCode" id="cb759"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb759-1"><a href="tree-regression-models.html#cb759-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = response ~ ., data = dd_efp)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -2.5966 -0.7937  0.1819  0.8283  2.8906 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept)   6.4821     2.6531   2.443   0.0445 *
+## v1           -9.4338     3.4395  -2.743   0.0288 *
+## v2            0.8207     2.1210   0.387   0.7103  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1.803 on 7 degrees of freedom
+## Multiple R-squared:  0.6696, Adjusted R-squared:  0.5752 
+## F-statistic: 7.094 on 2 and 7 DF,  p-value: 0.02073</code></pre>
+<p>Note that our computation matches the residual standard error. And to see that they are normal:</p>
+<div class="sourceCode" id="cb761"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb761-1"><a href="tree-regression-models.html#cb761-1" aria-hidden="true" tabindex="-1"></a>dd_efp <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">v1 =</span> <span class="fu">runif</span>(<span class="dv">1000</span>),</span>
+<span id="cb761-2"><a href="tree-regression-models.html#cb761-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">v2 =</span> <span class="fu">runif</span>(<span class="dv">1000</span>))</span>
+<span id="cb761-3"><a href="tree-regression-models.html#cb761-3" aria-hidden="true" tabindex="-1"></a>ddd_efp <span class="ot">&lt;-</span> <span class="fu">mutate</span>(dd_efp, </span>
+<span id="cb761-4"><a href="tree-regression-models.html#cb761-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">response =</span> <span class="dv">1</span> <span class="sc">*</span> v1 <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> v2 <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="dv">0</span>, <span class="dv">3</span>))</span>
+<span id="cb761-5"><a href="tree-regression-models.html#cb761-5" aria-hidden="true" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(response <span class="sc">~</span> ., <span class="at">data =</span> ddd_efp)</span>
+<span id="cb761-6"><a href="tree-regression-models.html#cb761-6" aria-hidden="true" tabindex="-1"></a><span class="fu">shapiro.test</span>(mod<span class="sc">$</span>residuals)</span></code></pre></div>
+<pre><code>## 
+##  Shapiro-Wilk normality test
+## 
+## data:  mod$residuals
+## W = 0.99814, p-value = 0.3475</code></pre>
+<div class="sourceCode" id="cb763"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb763-1"><a href="tree-regression-models.html#cb763-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(mod<span class="sc">$</span>residuals, <span class="at">probability =</span> T)</span>
+<span id="cb763-2"><a href="tree-regression-models.html#cb763-2" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="dv">0</span>, <span class="fu">sqrt</span>(<span class="fu">sum</span>(mod<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span><span class="dv">997</span>)), <span class="at">add =</span> T)</span></code></pre></div>
+<p><img src="07-regression-trees_files/figure-html/unnamed-chunk-33-1.png" width="672" /></p>
+<p>So, under the assumption of our model, the residuals are independent normal rv’s with mean 0 and standard deviation estimated as above. Now, we <strong>also</strong> assume that they are independent of the predictors.
+After re-ordering the data in terms of one of the predictors, we compute the cumulative sum of the residuals, which are normal. The residuals are not a random sample from normals, however, because they by necessity sum to zero. So, we are interested in is understanding the behaviour of the <strong>cumulative sum</strong> of normal random variables <strong>that sum to zero</strong> as their only dependence. In particular, we are interested in knowing how big of a deviation away from zero would we normally expect. For googling purposes, note that this sort of process is known as a Brownian bridge when the number of observations goes to infinity.</p>
+<p>In order to sample from a Brownian bridge, we will use our own implementation of the <code>rbridge</code> function from the <code>e1071</code> library.</p>
+<p>Here is an example:</p>
+<div class="sourceCode" id="cb764"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb764-1"><a href="tree-regression-models.html#cb764-1" aria-hidden="true" tabindex="-1"></a>csum <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">cumsum</span>(<span class="fu">rnorm</span>(<span class="dv">1000</span>)))</span>
+<span id="cb764-2"><a href="tree-regression-models.html#cb764-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(csum <span class="sc">-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">1001</span><span class="sc">/</span><span class="dv">1001</span> <span class="sc">*</span> csum[<span class="dv">1001</span>], <span class="at">type =</span> <span class="st">&quot;l&quot;</span>)</span></code></pre></div>
+<p><img src="07-regression-trees_files/figure-html/unnamed-chunk-34-1.png" width="672" /></p>
+<p>Now, we examine the dependence of the <strong>maximum</strong> value of the absolute value of the cumulative sum of the residuals on the <strong>number of observations</strong>.</p>
+<div class="sourceCode" id="cb765"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb765-1"><a href="tree-regression-models.html#cb765-1" aria-hidden="true" tabindex="-1"></a>Ns <span class="ot">&lt;-</span> <span class="fu">ceiling</span>(<span class="fu">seq</span>(<span class="dv">10</span>, <span class="dv">10000</span>, <span class="at">length.out =</span> <span class="dv">50</span>))</span>
+<span id="cb765-2"><a href="tree-regression-models.html#cb765-2" aria-hidden="true" tabindex="-1"></a>maxs <span class="ot">&lt;-</span> <span class="fu">sapply</span>(Ns, </span>
+<span id="cb765-3"><a href="tree-regression-models.html#cb765-3" aria-hidden="true" tabindex="-1"></a>       <span class="cf">function</span>(N) {sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">500</span>, {</span>
+<span id="cb765-4"><a href="tree-regression-models.html#cb765-4" aria-hidden="true" tabindex="-1"></a>         csum <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">cumsum</span>(<span class="fu">rnorm</span>(N)))</span>
+<span id="cb765-5"><a href="tree-regression-models.html#cb765-5" aria-hidden="true" tabindex="-1"></a>         <span class="fu">max</span>(<span class="fu">abs</span>(csum <span class="sc">-</span> <span class="dv">1</span><span class="sc">:</span>(N<span class="sc">+</span><span class="dv">1</span>)<span class="sc">/</span>(N<span class="sc">+</span><span class="dv">1</span>) <span class="sc">*</span> csum[N<span class="sc">+</span><span class="dv">1</span>]))</span>
+<span id="cb765-6"><a href="tree-regression-models.html#cb765-6" aria-hidden="true" tabindex="-1"></a>         })</span>
+<span id="cb765-7"><a href="tree-regression-models.html#cb765-7" aria-hidden="true" tabindex="-1"></a>       <span class="fu">quantile</span>(sim_data, .<span class="dv">975</span>)</span>
+<span id="cb765-8"><a href="tree-regression-models.html#cb765-8" aria-hidden="true" tabindex="-1"></a>       })</span>
+<span id="cb765-9"><a href="tree-regression-models.html#cb765-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb765-10"><a href="tree-regression-models.html#cb765-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Ns, maxs)</span>
+<span id="cb765-11"><a href="tree-regression-models.html#cb765-11" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fl">1.5</span> <span class="sc">*</span> <span class="fu">sqrt</span>(x), <span class="at">add =</span> T)</span></code></pre></div>
+<p><img src="07-regression-trees_files/figure-html/unnamed-chunk-35-1.png" width="672" /></p>
+<p>As we can see, the 97.5 percentile of the maximum of the absolute value of the cumulative sum of <span class="math inline">\(N\)</span> normal rvs that sum to zero is proportional to <span class="math inline">\(\sqrt{N}\)</span>, where the constant of proportionality is about 1.5, which was discovered via trial and error. If we change it to the 95th percentile, then it is still proportional to <span class="math inline">\(\sqrt{N}\)</span>, but the constant changes to 1.35.</p>
+<div class="sourceCode" id="cb766"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb766-1"><a href="tree-regression-models.html#cb766-1" aria-hidden="true" tabindex="-1"></a>maxs <span class="ot">&lt;-</span> <span class="fu">sapply</span>(Ns, </span>
+<span id="cb766-2"><a href="tree-regression-models.html#cb766-2" aria-hidden="true" tabindex="-1"></a>       <span class="cf">function</span>(N) {sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">500</span>, {</span>
+<span id="cb766-3"><a href="tree-regression-models.html#cb766-3" aria-hidden="true" tabindex="-1"></a>         csum <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">cumsum</span>(<span class="fu">rnorm</span>(N)))</span>
+<span id="cb766-4"><a href="tree-regression-models.html#cb766-4" aria-hidden="true" tabindex="-1"></a>         <span class="fu">max</span>(<span class="fu">abs</span>(csum <span class="sc">-</span> <span class="dv">1</span><span class="sc">:</span>(N<span class="sc">+</span><span class="dv">1</span>)<span class="sc">/</span>(N<span class="sc">+</span><span class="dv">1</span>) <span class="sc">*</span> csum[N<span class="sc">+</span><span class="dv">1</span>]))</span>
+<span id="cb766-5"><a href="tree-regression-models.html#cb766-5" aria-hidden="true" tabindex="-1"></a>         })</span>
+<span id="cb766-6"><a href="tree-regression-models.html#cb766-6" aria-hidden="true" tabindex="-1"></a>       <span class="fu">quantile</span>(sim_data, .<span class="dv">95</span>)</span>
+<span id="cb766-7"><a href="tree-regression-models.html#cb766-7" aria-hidden="true" tabindex="-1"></a>       })</span>
+<span id="cb766-8"><a href="tree-regression-models.html#cb766-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb766-9"><a href="tree-regression-models.html#cb766-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Ns, maxs)</span>
+<span id="cb766-10"><a href="tree-regression-models.html#cb766-10" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fl">1.35</span> <span class="sc">*</span> <span class="fu">sqrt</span>(x), <span class="at">add =</span> T)</span></code></pre></div>
+<p><img src="07-regression-trees_files/figure-html/unnamed-chunk-36-1.png" width="672" /></p>
+<p>If the standard deviation of the random variables that we are summing is changed, then we would start by dividing everything by that standard deviation, and get the same plot.</p>
+<p>Therefore, we can see why the <code>strucchange::efp</code> takes the residuals and divides by the square root of the number of observations and the estimated standard deviation. The distribution of the <strong>maximum</strong> of the resulting values does not depend on the number of observations or the underlying standard deviation, so we would need to do a one-time estimate of the quantiles of this distribution in order to compute <span class="math inline">\(p\)</span>-values and do hypothesis testing. For example, to estimate the value of the test statistic (that is, the maximum of the absolute value of the cumulative sums), we could simulate the maximu values when <span class="math inline">\(N = 100\)</span> and the rest will be the same.</p>
+<div class="sourceCode" id="cb767"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb767-1"><a href="tree-regression-models.html#cb767-1" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb767-2"><a href="tree-regression-models.html#cb767-2" aria-hidden="true" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">30000</span>, {</span>
+<span id="cb767-3"><a href="tree-regression-models.html#cb767-3" aria-hidden="true" tabindex="-1"></a>  csum <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">cumsum</span>(<span class="fu">rnorm</span>(N))<span class="sc">/</span><span class="fu">sqrt</span>(N))</span>
+<span id="cb767-4"><a href="tree-regression-models.html#cb767-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">max</span>(<span class="fu">abs</span>(csum <span class="sc">-</span> <span class="dv">1</span><span class="sc">:</span>(N<span class="sc">+</span><span class="dv">1</span>)<span class="sc">/</span>(N<span class="sc">+</span><span class="dv">1</span>) <span class="sc">*</span> csum[N<span class="sc">+</span><span class="dv">1</span>]))</span>
+<span id="cb767-5"><a href="tree-regression-models.html#cb767-5" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb767-6"><a href="tree-regression-models.html#cb767-6" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(sim_data, .<span class="dv">95</span>)</span></code></pre></div>
+<pre><code>##      95% 
+## 1.330189</code></pre>
+<p>Since this is a one-sided test, the critical value for the test statistic at the <span class="math inline">\(\alpha = .05\)</span> level is about 1.3. The critical value at the <span class="math inline">\(\alpha = .002\)</span> level is about 1.8. Note that the actual value of the test statistic when <span class="math inline">\(p = .002033\)</span> in the example above was 1.856, which matches this simulation pretty well, though not exactly. I will point out that as <span class="math inline">\(N\)</span> grows, our estimate below seems to get closer to the correct value, but it still has quite a bit of variation.</p>
+<div class="sourceCode" id="cb769"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb769-1"><a href="tree-regression-models.html#cb769-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(sim_data, .<span class="dv">998</span>)</span></code></pre></div>
+<pre><code>##    99.8% 
+## 1.817034</code></pre>
+</div>
+</div>
+<div id="choosing-split-value" class="section level3" number="8.2.2">
+<h3><span class="header-section-number">8.2.2</span> Choosing Split Value</h3>
+<p>Now that we have decided that we want to split on <code>V2</code>, we want to figure out the level of the split. We will want to make sure that there are at least 20 observations in each node (that shouldn’t be hard, since there are 1000 observations total!). Our plan is to split on each possible value of <code>V2</code>, build a new model for each of the split data sets, find the residual SSE for each of the residual sets separately and then add them together.</p>
+<div class="sourceCode" id="cb771"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb771-1"><a href="tree-regression-models.html#cb771-1" aria-hidden="true" tabindex="-1"></a>sse_splits <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">21</span><span class="sc">:</span><span class="dv">979</span>, <span class="cf">function</span>(x) {</span>
+<span id="cb771-2"><a href="tree-regression-models.html#cb771-2" aria-hidden="true" tabindex="-1"></a>  ds1 <span class="ot">&lt;-</span> dd_v2[<span class="dv">1</span><span class="sc">:</span>x,]</span>
+<span id="cb771-3"><a href="tree-regression-models.html#cb771-3" aria-hidden="true" tabindex="-1"></a>  ds2 <span class="ot">&lt;-</span> dd_v2[(x <span class="sc">+</span> <span class="dv">1</span>)<span class="sc">:</span><span class="dv">1000</span>,]</span>
+<span id="cb771-4"><a href="tree-regression-models.html#cb771-4" aria-hidden="true" tabindex="-1"></a>  mod1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(response <span class="sc">~</span> ., <span class="at">data =</span> ds1)</span>
+<span id="cb771-5"><a href="tree-regression-models.html#cb771-5" aria-hidden="true" tabindex="-1"></a>  sse1 <span class="ot">&lt;-</span> <span class="fu">sum</span>(mod1<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb771-6"><a href="tree-regression-models.html#cb771-6" aria-hidden="true" tabindex="-1"></a>  mod2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(response <span class="sc">~</span> ., <span class="at">data =</span> ds2)</span>
+<span id="cb771-7"><a href="tree-regression-models.html#cb771-7" aria-hidden="true" tabindex="-1"></a>  sse2 <span class="ot">&lt;-</span> <span class="fu">sum</span>(mod2<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb771-8"><a href="tree-regression-models.html#cb771-8" aria-hidden="true" tabindex="-1"></a>  sse1 <span class="sc">+</span> sse2</span>
+<span id="cb771-9"><a href="tree-regression-models.html#cb771-9" aria-hidden="true" tabindex="-1"></a>}) </span>
+<span id="cb771-10"><a href="tree-regression-models.html#cb771-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sse_splits, <span class="at">type =</span> <span class="st">&quot;l&quot;</span>)</span></code></pre></div>
+<p><img src="07-regression-trees_files/figure-html/unnamed-chunk-39-1.png" width="672" /></p>
+<p>We see that there is a pretty clear winner where we should be splitting thigs. Let’s find the value.</p>
+<div class="sourceCode" id="cb772"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb772-1"><a href="tree-regression-models.html#cb772-1" aria-hidden="true" tabindex="-1"></a>dd_v2<span class="sc">$</span>V2[<span class="fu">which.min</span>(sse_splits) <span class="sc">+</span> <span class="dv">20</span>]</span></code></pre></div>
+<pre><code>## [1] 6.945864</code></pre>
+<p>We see that the split should be <span class="math inline">\(V2 \le 6.945864\)</span> versus <span class="math inline">\(V2 &gt; 6.945864\)</span>. Note that this is the largest value of <span class="math inline">\(V2\)</span> which is less than 7, and we know that 7 is a correct value to split on, because of how the data was generated! Yay!</p>
+<p>Now, we have a tree with two leaves. One leaf corresponds to <span class="math inline">\(V2 &lt; 7\)</span> and the other leaf corresponds to <span class="math inline">\(V2 \ge 7\)</span>. We would then need to build linear models of the response on the predictors on both of those leaves, and that would be our model after one split.</p>
+<div class="sourceCode" id="cb774"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb774-1"><a href="tree-regression-models.html#cb774-1" aria-hidden="true" tabindex="-1"></a>left_dd <span class="ot">&lt;-</span> <span class="fu">filter</span>(dd, V2 <span class="sc">&lt;</span> <span class="dv">7</span>)</span>
+<span id="cb774-2"><a href="tree-regression-models.html#cb774-2" aria-hidden="true" tabindex="-1"></a>right_dd <span class="ot">&lt;-</span> <span class="fu">filter</span>(dd, V2 <span class="sc">&gt;</span> <span class="dv">7</span>)</span>
+<span id="cb774-3"><a href="tree-regression-models.html#cb774-3" aria-hidden="true" tabindex="-1"></a>lef_mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(response <span class="sc">~</span> V2, <span class="at">data =</span> left_dd)</span>
+<span id="cb774-4"><a href="tree-regression-models.html#cb774-4" aria-hidden="true" tabindex="-1"></a>lef_mod</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = response ~ V2, data = left_dd)
+## 
+## Coefficients:
+## (Intercept)           V2  
+##      11.649       -0.131</code></pre>
+<div class="sourceCode" id="cb776"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb776-1"><a href="tree-regression-models.html#cb776-1" aria-hidden="true" tabindex="-1"></a>right_mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(response <span class="sc">~</span> V2, <span class="at">data =</span> right_dd)</span>
+<span id="cb776-2"><a href="tree-regression-models.html#cb776-2" aria-hidden="true" tabindex="-1"></a>right_mod</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = response ~ V2, data = right_dd)
+## 
+## Coefficients:
+## (Intercept)           V2  
+##      -25.60        14.07</code></pre>
+<p>This is our current model. Note that it is not correct for either leaf, because when <span class="math inline">\(V2 &gt; 7\)</span> and <span class="math inline">\(V1 &gt; 5\)</span>, the response is just 7, while when <span class="math inline">\(V2 &gt; 7\)</span> and <span class="math inline">\(V1 \le 5\)</span>, the response is <span class="math inline">\(10V1 + 20V2\)</span>. When <span class="math inline">\(V2 &lt; 7\)</span>, we will need to further split as well. If new data came in with <span class="math inline">\(V1 = 4\)</span> and <span class="math inline">\(V2 = 8\)</span>, our prediction for the response would be</p>
+<div class="sourceCode" id="cb778"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb778-1"><a href="tree-regression-models.html#cb778-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(right_mod, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">V1 =</span> <span class="dv">4</span>, <span class="at">V2 =</span> <span class="dv">8</span>))</span></code></pre></div>
+<pre><code>##        1 
+## 86.93444</code></pre>
+<div class="sourceCode" id="cb780"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb780-1"><a href="tree-regression-models.html#cb780-1" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span><span class="fl">25.6</span> <span class="sc">+</span> <span class="fl">14.07</span> <span class="sc">*</span> <span class="dv">8</span> <span class="co">#double check </span></span></code></pre></div>
+<pre><code>## [1] 86.96</code></pre>
+<p>As an exercise, you are asked to repeat the variable selection, split, and model building on the left node; that is, when <span class="math inline">\(V2 &lt; 7\)</span>.</p>
+</div>
+<div id="predicting-values-smoothing" class="section level3" number="8.2.3">
+<h3><span class="header-section-number">8.2.3</span> Predicting values (Smoothing)</h3>
+<p>In this last section, we show how to make predictions using smoothing, combining the predictions that were made in the nodes up to this point. Once you have built your tree so that all of the leaves either</p>
+<ol style="list-style-type: decimal">
+<li>have a number of observations small enough that you do not want to further split or</li>
+<li>don’t meet the <span class="math inline">\(\alpha\)</span> level required to reject the null that the parameters are stable</li>
+</ol>
+<p>then you are ready to make your predictions! First, for each node in the tree (not just the leaves), we have a model associated with that node that is based on all of the variables used to split to get down to that node. We create a prediction of the response for each node in the path that the data takes to get to a leaf. Then, we take a weighted average of the predictions to get our final prediction.</p>
+<p>For example, suppose we have the following tree.</p>
+<div class="sourceCode" id="cb782"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb782-1"><a href="tree-regression-models.html#cb782-1" aria-hidden="true" tabindex="-1"></a>my_tree <span class="ot">&lt;-</span> igraph<span class="sc">::</span><span class="fu">make_tree</span>(<span class="dv">5</span>)</span>
+<span id="cb782-2"><a href="tree-regression-models.html#cb782-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(my_tree, </span>
+<span id="cb782-3"><a href="tree-regression-models.html#cb782-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">layout =</span> layout_as_tree, </span>
+<span id="cb782-4"><a href="tree-regression-models.html#cb782-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">edge.label =</span> <span class="fu">c</span>(<span class="st">&quot;V1 &lt; 1&quot;</span>,<span class="st">&quot;V1 &gt;= 1&quot;</span>,<span class="st">&quot;V2 &lt; 2&quot;</span>, <span class="st">&quot;V2 &gt;= 2&quot;</span>), </span>
+<span id="cb782-5"><a href="tree-regression-models.html#cb782-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">vertex.label =</span> <span class="fu">c</span>(<span class="st">&quot;1&quot;</span>,<span class="st">&quot;2&quot;</span>, <span class="st">&quot;3&quot;</span>, <span class="st">&quot;4&quot;</span>, <span class="st">&quot;5&quot;</span>))</span></code></pre></div>
+<p><img src="07-regression-trees_files/figure-html/unnamed-chunk-43-1.png" width="672" /></p>
+<p>We suppose that the model associated with node 2 is <span class="math inline">\(y = 2 + V1\)</span>, and the model associated with node 5 is <span class="math inline">\(y = -1 + 2 V1 - V2\)</span>. We also assume that we have 60 observations in node 2, and 25 observations in node 5.</p>
+<p>Let’s suppose we get new data in with values <span class="math inline">\(V1 = -1\)</span> and <span class="math inline">\(V2 = 3\)</span>. Our prediction in node 5 (the leaf) would be <span class="math inline">\(-1 + 2(-1) - 3 = -6\)</span>.</p>
+<p>To get our prediction in node 2 would use the formula</p>
+<p><span class="math display">\[
+\hat y = \frac{n \hat y_{child} + c \hat y_{parent}}{n + c}
+\]</span></p>
+<p>where <span class="math inline">\(n\)</span> is the number of observations in the child node, <span class="math inline">\(c\)</span> is a tuning parameter often chosen to be 15, <span class="math inline">\(\hat y_{child}\)</span> is the prediction in the child node, and <span class="math inline">\(\hat y_{parent}\)</span> is the prediction from the model in the parent node.</p>
+<p>In this case, our prediction would be</p>
+<p><span class="math display">\[
+\frac{25 \times (-6) + 15 \times 1}{25 + 15} = -1.625
+\]</span></p>
+<p>If there were further nodes above, we would continue with our prediction here as <span class="math inline">\(\hat y_{child}\)</span> and <span class="math inline">\(n = 50\)</span>, while keeping <span class="math inline">\(c = 15\)</span>. As you see, as the number of observations increases, the relative weight of the leaf is increased.</p>
+</div>
+<div id="using-r-functions" class="section level3" number="8.2.4">
+<h3><span class="header-section-number">8.2.4</span> Using R functions</h3>
+<p>As you can imagine, there are packages that do this for us! Different packages implement different aspects of what was described above. The one suggested in our textbook is <code>RWeka</code>, which you are free to use, but I am going to <code>party</code> with the <code>mob</code> because we could all use a good mob party right now. Actually, I use it because the algorithm they use is more straightforward, and <code>RWeka</code> requires <code>rJava</code>, which is notoriously hard to get installed correctly. I will point out that <code>party</code> does not seem to incorporate smoothing, but rather uses the predictions from the final leaf. This improves the interpretability of the model, which would realistically be the primary reason for doing a model of this type.</p>
+<p>More specifically, here is how <code>mob</code> works, and how it incorporates the various pieces discussed above.</p>
+<ol style="list-style-type: decimal">
+<li>You specify which variables to allow splits on, and which variables to build the model on. The model at each leaf is built using all of the variables that you have chosen for modelling variables.</li>
+<li><code>mob</code> uses parameter instability <span class="math inline">\(p\)</span>-values to decide which variable to split on, and whether to split further. This performs the same function as a pruning step; it keeps the trees from getting too big.</li>
+<li><code>mob</code> does <em>not</em> use smoothing, but uses the model at the final leaf to predict values.</li>
+</ol>
+<p>Recall that we were working with this data earlier.</p>
+<div class="sourceCode" id="cb783"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb783-1"><a href="tree-regression-models.html#cb783-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3312020</span>)</span>
+<span id="cb783-2"><a href="tree-regression-models.html#cb783-2" aria-hidden="true" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">1000</span>, <span class="dv">0</span>, <span class="dv">10</span>),</span>
+<span id="cb783-3"><a href="tree-regression-models.html#cb783-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">y =</span> <span class="fu">rexp</span>(<span class="dv">1000</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">5</span>))</span>
+<span id="cb783-4"><a href="tree-regression-models.html#cb783-4" aria-hidden="true" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">mutate</span>(dd, <span class="at">response =</span> <span class="fu">case_when</span>(</span>
+<span id="cb783-5"><a href="tree-regression-models.html#cb783-5" aria-hidden="true" tabindex="-1"></a>  x <span class="sc">&gt;</span> <span class="dv">5</span> <span class="sc">&amp;</span> y <span class="sc">&gt;</span> <span class="dv">5</span> <span class="sc">~</span> x <span class="sc">+</span> y <span class="sc">+</span> <span class="dv">1</span>,</span>
+<span id="cb783-6"><a href="tree-regression-models.html#cb783-6" aria-hidden="true" tabindex="-1"></a>  x <span class="sc">&gt;</span> <span class="dv">5</span> <span class="sc">&amp;</span> y <span class="sc">&lt;=</span> <span class="dv">5</span> <span class="sc">~</span> <span class="dv">2</span> <span class="sc">*</span> x <span class="sc">+</span> <span class="dv">1</span>,</span>
+<span id="cb783-7"><a href="tree-regression-models.html#cb783-7" aria-hidden="true" tabindex="-1"></a>  x <span class="sc">&lt;=</span> <span class="dv">5</span> <span class="sc">&amp;</span> y <span class="sc">&gt;</span> <span class="dv">7</span> <span class="sc">~</span> <span class="dv">10</span> <span class="sc">*</span> x <span class="sc">+</span> <span class="dv">20</span> <span class="sc">*</span> y,</span>
+<span id="cb783-8"><a href="tree-regression-models.html#cb783-8" aria-hidden="true" tabindex="-1"></a>  <span class="cn">TRUE</span> <span class="sc">~</span> <span class="dv">7</span></span>
+<span id="cb783-9"><a href="tree-regression-models.html#cb783-9" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>))</span>
+<span id="cb783-10"><a href="tree-regression-models.html#cb783-10" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(dd) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;V1&quot;</span>, <span class="st">&quot;V2&quot;</span> ,<span class="st">&quot;response&quot;</span>)</span></code></pre></div>
+<p>We let the <code>mob</code> rule. There are a lot of options that we will not be using. The formula interface has the response on the left, then the predictors that are used for modeling, then the variables that are used for splitting. For our purposes, they will all be the same, and all of the variables.</p>
+<p>Then, we have control over the <span class="math inline">\(\alpha\)</span> level of the test for parameter instability, which we explicitly set to <span class="math inline">\(\alpha = .05\)</span> for now.</p>
+<div class="sourceCode" id="cb784"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb784-1"><a href="tree-regression-models.html#cb784-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(party)</span>
+<span id="cb784-2"><a href="tree-regression-models.html#cb784-2" aria-hidden="true" tabindex="-1"></a>mob_mod <span class="ot">&lt;-</span> <span class="fu">mob</span>(response <span class="sc">~</span> V1 <span class="sc">+</span> V2<span class="sc">|</span>V1 <span class="sc">+</span> V2, </span>
+<span id="cb784-3"><a href="tree-regression-models.html#cb784-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> dd, </span>
+<span id="cb784-4"><a href="tree-regression-models.html#cb784-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">control =</span> <span class="fu">mob_control</span>(<span class="at">alpha =</span> .<span class="dv">05</span>))</span></code></pre></div>
+<p>We see that we have</p>
+<ol style="list-style-type: decimal">
+<li>when <span class="math inline">\(V2 &lt; 7\)</span> and <span class="math inline">\(V1 &lt; 5\)</span> that the model is to predict approximately 7, which matches the generative process.</li>
+<li>when <span class="math inline">\(V2 &lt; 7\)</span> and <span class="math inline">\(V1 &gt; 5\)</span> and <span class="math inline">\(V2 &lt; 5\)</span>, then the model is about .5 + 2 V1, which is close to the true generative process of 1 + V2.</li>
+<li>when <span class="math inline">\(V2 &lt; 7\)</span> and <span class="math inline">\(V1 &gt; 5\)</span> and <span class="math inline">\(V2 &gt; 5\)</span>, then the model is approximately 2.4 + 1.1 V1 + .7 V2, close to 1 + V1 + V2.</li>
+<li>when <span class="math inline">\(V2 &gt; 7\)</span> and <span class="math inline">\(V1 &lt; 5\)</span>, we approximate 0.3 + 10.047 V1 + 20 V2, which is close to 10V1 + 20V2.</li>
+<li>when <span class="math inline">\(V2 &gt; 7\)</span> and <span class="math inline">\(V1 \ge 5\)</span>, we approximate 1.4 + 1 V1 + 1 V2, which is close to 1 + V1 + V2.</li>
+</ol>
+<p>Notice that even though the data is only split into 4 groups in reality, the tree model splits it into 5 groups. This because it split first on <span class="math inline">\(V2\)</span>, which forced it to have an extra split than formally necessary. The generative process is the same in items 3 and 5 above, but the models are not the same (and both models suffer from accuracy for not having as much data as they could).</p>
+<div class="sourceCode" id="cb785"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb785-1"><a href="tree-regression-models.html#cb785-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(mob_mod, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">V1 =</span> <span class="dv">8</span>, <span class="at">V2 =</span> <span class="dv">1</span>))</span></code></pre></div>
+<pre><code>## [1] 17.15501</code></pre>
+<div class="sourceCode" id="cb787"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb787-1"><a href="tree-regression-models.html#cb787-1" aria-hidden="true" tabindex="-1"></a>.<span class="dv">59015</span> <span class="sc">+</span> <span class="fl">2.07455</span> <span class="sc">*</span> <span class="dv">8</span> <span class="sc">+</span> <span class="sc">-</span>.<span class="dv">03156</span> <span class="sc">*</span> <span class="dv">1</span></span></code></pre></div>
+<pre><code>## [1] 17.15499</code></pre>
+</div>
+</div>
+<div id="bagging" class="section level2" number="8.3">
+<h2><span class="header-section-number">8.3</span> Bagging</h2>
+<p>Bagging is an ensemble technique that stands for <em>bootstrap aggregating</em>, and can be used with any regression model. We’ll start by seeing how you can use it with ordinary least squares regression, though this isn’t necessarily the most typical application area.</p>
+<p>Suppose we have data that wish to model, such as the machine learning benchmark data set that we have been working with.</p>
+<div class="sourceCode" id="cb789"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb789-1"><a href="tree-regression-models.html#cb789-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mlbench)</span>
+<span id="cb789-2"><a href="tree-regression-models.html#cb789-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">4022020</span>)</span>
+<span id="cb789-3"><a href="tree-regression-models.html#cb789-3" aria-hidden="true" tabindex="-1"></a>simulated <span class="ot">&lt;-</span> <span class="fu">mlbench.friedman1</span>(<span class="dv">200</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb789-4"><a href="tree-regression-models.html#cb789-4" aria-hidden="true" tabindex="-1"></a>simulated <span class="ot">&lt;-</span> <span class="fu">cbind</span>(simulated<span class="sc">$</span>x, simulated<span class="sc">$</span>y)</span>
+<span id="cb789-5"><a href="tree-regression-models.html#cb789-5" aria-hidden="true" tabindex="-1"></a>simulated <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(simulated)</span>
+<span id="cb789-6"><a href="tree-regression-models.html#cb789-6" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(simulated)[<span class="fu">ncol</span>(simulated)] <span class="ot">&lt;-</span> <span class="st">&quot;y&quot;</span></span></code></pre></div>
+<p>Using OLS on the entire set of predictors gives an estimated RMSE (via train) of 2.86:</p>
+<div class="sourceCode" id="cb790"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb790-1"><a href="tree-regression-models.html#cb790-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb790-2"><a href="tree-regression-models.html#cb790-2" aria-hidden="true" tabindex="-1"></a><span class="fu">train</span>(y <span class="sc">~</span> ., </span>
+<span id="cb790-3"><a href="tree-regression-models.html#cb790-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> simulated, </span>
+<span id="cb790-4"><a href="tree-regression-models.html#cb790-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, </span>
+<span id="cb790-5"><a href="tree-regression-models.html#cb790-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">trControl =</span> <span class="fu">trainControl</span>(<span class="at">method =</span> <span class="st">&quot;LGOCV&quot;</span>))</span></code></pre></div>
+<pre><code>## Linear Regression 
+## 
+## 200 samples
+##  10 predictor
+## 
+## No pre-processing
+## Resampling: Repeated Train/Test Splits Estimated (25 reps, 75%) 
+## Summary of sample sizes: 152, 152, 152, 152, 152, 152, ... 
+## Resampling results:
+## 
+##   RMSE      Rsquared  MAE     
+##   2.860485  0.687217  2.134448
+## 
+## Tuning parameter &#39;intercept&#39; was held constant at a value of TRUE</code></pre>
+<p>Now, let’s see what bagging would mean in this context. What we would do is resample from the data with replacement, and build a model on that new data set a bunch of times. Then, to get our predictions for new data, we would take the mean prediction from all of our bootstrapped models.</p>
+<p>This doesn’t seem to be supported via <code>caret</code> (I told you it wasn’t a typical usage of bagging!), so we will need to write our own RMSE CV estimators. Let’s re-do OLS.</p>
+<div class="sourceCode" id="cb792"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb792-1"><a href="tree-regression-models.html#cb792-1" aria-hidden="true" tabindex="-1"></a>nobs <span class="ot">&lt;-</span> <span class="fu">nrow</span>(simulated)</span>
+<span id="cb792-2"><a href="tree-regression-models.html#cb792-2" aria-hidden="true" tabindex="-1"></a>rmse_sim <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">100</span>, {</span>
+<span id="cb792-3"><a href="tree-regression-models.html#cb792-3" aria-hidden="true" tabindex="-1"></a>  train_indices <span class="ot">&lt;-</span> <span class="fu">sample</span>(nobs, <span class="fu">ceiling</span>(nobs <span class="sc">*</span> .<span class="dv">75</span>))</span>
+<span id="cb792-4"><a href="tree-regression-models.html#cb792-4" aria-hidden="true" tabindex="-1"></a>  test_indices <span class="ot">&lt;-</span> (<span class="dv">1</span><span class="sc">:</span>nobs)[<span class="sc">-</span>train_indices]</span>
+<span id="cb792-5"><a href="tree-regression-models.html#cb792-5" aria-hidden="true" tabindex="-1"></a>  train <span class="ot">&lt;-</span> simulated[train_indices,]</span>
+<span id="cb792-6"><a href="tree-regression-models.html#cb792-6" aria-hidden="true" tabindex="-1"></a>  test <span class="ot">&lt;-</span> simulated[test_indices,]</span>
+<span id="cb792-7"><a href="tree-regression-models.html#cb792-7" aria-hidden="true" tabindex="-1"></a>  mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> ., <span class="at">data =</span> train)</span>
+<span id="cb792-8"><a href="tree-regression-models.html#cb792-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sqrt</span>(<span class="fu">mean</span>((<span class="fu">predict</span>(mod, <span class="at">newdata =</span> test) <span class="sc">-</span> test<span class="sc">$</span>y)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb792-9"><a href="tree-regression-models.html#cb792-9" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb792-10"><a href="tree-regression-models.html#cb792-10" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(rmse_sim)</span></code></pre></div>
+<pre><code>## [1] 3.01174</code></pre>
+<div class="sourceCode" id="cb794"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb794-1"><a href="tree-regression-models.html#cb794-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(rmse_sim)</span></code></pre></div>
+<pre><code>## [1] 0.36247</code></pre>
+<p>Now, let’s repeat this with 2 bags. We first see how to do the two bags on the full data set. What we are going to do is to replicate building a prediction function!</p>
+<div class="sourceCode" id="cb796"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb796-1"><a href="tree-regression-models.html#cb796-1" aria-hidden="true" tabindex="-1"></a>bagged_predictions <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">2</span>, {</span>
+<span id="cb796-2"><a href="tree-regression-models.html#cb796-2" aria-hidden="true" tabindex="-1"></a>  bag_indices <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>nobs, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb796-3"><a href="tree-regression-models.html#cb796-3" aria-hidden="true" tabindex="-1"></a>  bag_data <span class="ot">&lt;-</span> simulated[bag_indices,]</span>
+<span id="cb796-4"><a href="tree-regression-models.html#cb796-4" aria-hidden="true" tabindex="-1"></a>  mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> ., <span class="at">data =</span> bag_data)</span>
+<span id="cb796-5"><a href="tree-regression-models.html#cb796-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(newdata) {</span>
+<span id="cb796-6"><a href="tree-regression-models.html#cb796-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(mod, <span class="at">newdata =</span> newdata)</span>
+<span id="cb796-7"><a href="tree-regression-models.html#cb796-7" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb796-8"><a href="tree-regression-models.html#cb796-8" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb796-9"><a href="tree-regression-models.html#cb796-9" aria-hidden="true" tabindex="-1"></a>bagged_predictions[[<span class="dv">1</span>]](<span class="at">newdata =</span> simulated[<span class="dv">1</span>,])</span></code></pre></div>
+<pre><code>##        1 
+## 6.957286</code></pre>
+<div class="sourceCode" id="cb798"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb798-1"><a href="tree-regression-models.html#cb798-1" aria-hidden="true" tabindex="-1"></a>bagged_predictions[[<span class="dv">2</span>]](<span class="at">newdata =</span> simulated[<span class="dv">1</span>,])</span></code></pre></div>
+<pre><code>##        1 
+## 8.964967</code></pre>
+<p>Then, when we get new data coming in, we will take the mean of the two predictions.</p>
+<div class="sourceCode" id="cb800"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb800-1"><a href="tree-regression-models.html#cb800-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">c</span>(bagged_predictions[[<span class="dv">1</span>]](simulated[<span class="dv">1</span>,]),</span>
+<span id="cb800-2"><a href="tree-regression-models.html#cb800-2" aria-hidden="true" tabindex="-1"></a>       bagged_predictions[[<span class="dv">2</span>]](simulated[<span class="dv">1</span>,])))</span></code></pre></div>
+<pre><code>## [1] 7.961127</code></pre>
+<p>To get a vector of predictions for a bunch of new observations, we could do the following:</p>
+<div class="sourceCode" id="cb802"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb802-1"><a href="tree-regression-models.html#cb802-1" aria-hidden="true" tabindex="-1"></a>prediction_indices <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
+<span id="cb802-2"><a href="tree-regression-models.html#cb802-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(prediction_indices, <span class="cf">function</span>(ind) {</span>
+<span id="cb802-3"><a href="tree-regression-models.html#cb802-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="fu">c</span>(bagged_predictions[[<span class="dv">1</span>]](simulated[ind,]),</span>
+<span id="cb802-4"><a href="tree-regression-models.html#cb802-4" aria-hidden="true" tabindex="-1"></a>       bagged_predictions[[<span class="dv">2</span>]](simulated[ind,])))</span>
+<span id="cb802-5"><a href="tree-regression-models.html#cb802-5" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<pre><code>##  [1]  7.961127 21.090536  3.053282 19.268432 15.497975 19.664046 12.948692
+##  [8] 16.573736 16.190218  8.202719</code></pre>
+<p>Now we are ready to see how bagging two OLS models compares to a single OLS model for prediction. We use the exact same setup as in the original cross validation case, but we just build our predictions differently.</p>
+<div class="sourceCode" id="cb804"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb804-1"><a href="tree-regression-models.html#cb804-1" aria-hidden="true" tabindex="-1"></a>rmse_sim <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10</span>, {</span>
+<span id="cb804-2"><a href="tree-regression-models.html#cb804-2" aria-hidden="true" tabindex="-1"></a>  train_indices <span class="ot">&lt;-</span> <span class="fu">sample</span>(nobs, <span class="fu">ceiling</span>(.<span class="dv">8</span> <span class="sc">*</span> nobs), <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb804-3"><a href="tree-regression-models.html#cb804-3" aria-hidden="true" tabindex="-1"></a>  test_indices <span class="ot">&lt;-</span> (<span class="dv">1</span><span class="sc">:</span>nobs)[<span class="sc">-</span>train_indices]</span>
+<span id="cb804-4"><a href="tree-regression-models.html#cb804-4" aria-hidden="true" tabindex="-1"></a>  train <span class="ot">&lt;-</span> simulated[train_indices,]</span>
+<span id="cb804-5"><a href="tree-regression-models.html#cb804-5" aria-hidden="true" tabindex="-1"></a>  test <span class="ot">&lt;-</span> simulated[test_indices,]</span>
+<span id="cb804-6"><a href="tree-regression-models.html#cb804-6" aria-hidden="true" tabindex="-1"></a>  bagged_predictions <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">2</span>, {  </span>
+<span id="cb804-7"><a href="tree-regression-models.html#cb804-7" aria-hidden="true" tabindex="-1"></a>    bag_indices <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(train), <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb804-8"><a href="tree-regression-models.html#cb804-8" aria-hidden="true" tabindex="-1"></a>    bag_data <span class="ot">&lt;-</span> train[bag_indices,]</span>
+<span id="cb804-9"><a href="tree-regression-models.html#cb804-9" aria-hidden="true" tabindex="-1"></a>    mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> ., <span class="at">data =</span> bag_data)</span>
+<span id="cb804-10"><a href="tree-regression-models.html#cb804-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">function</span>(newdata) {</span>
+<span id="cb804-11"><a href="tree-regression-models.html#cb804-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">predict</span>(mod, <span class="at">newdata =</span> newdata)</span>
+<span id="cb804-12"><a href="tree-regression-models.html#cb804-12" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb804-13"><a href="tree-regression-models.html#cb804-13" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb804-14"><a href="tree-regression-models.html#cb804-14" aria-hidden="true" tabindex="-1"></a>  prediction_indices <span class="ot">&lt;-</span> test_indices</span>
+<span id="cb804-15"><a href="tree-regression-models.html#cb804-15" aria-hidden="true" tabindex="-1"></a>  predictions <span class="ot">&lt;-</span> <span class="fu">sapply</span>(prediction_indices, <span class="cf">function</span>(ind) {</span>
+<span id="cb804-16"><a href="tree-regression-models.html#cb804-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mean</span>(<span class="fu">c</span>(bagged_predictions[[<span class="dv">1</span>]](simulated[ind,]),</span>
+<span id="cb804-17"><a href="tree-regression-models.html#cb804-17" aria-hidden="true" tabindex="-1"></a>           bagged_predictions[[<span class="dv">2</span>]](simulated[ind,])))</span>
+<span id="cb804-18"><a href="tree-regression-models.html#cb804-18" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb804-19"><a href="tree-regression-models.html#cb804-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sqrt</span>(<span class="fu">mean</span>((predictions <span class="sc">-</span> test<span class="sc">$</span>y)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb804-20"><a href="tree-regression-models.html#cb804-20" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb804-21"><a href="tree-regression-models.html#cb804-21" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(rmse_sim)</span></code></pre></div>
+<pre><code>## [1] 3.111256</code></pre>
+<div class="sourceCode" id="cb806"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb806-1"><a href="tree-regression-models.html#cb806-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(rmse_sim)</span></code></pre></div>
+<pre><code>## [1] 0.4085494</code></pre>
+<p>Based on this, there doesn’t seem to be a big difference between bagging two models and just doing OLS.</p>
+<p>Here are several improvements that we could consider (from the man page of the function we will be using):</p>
+<ol style="list-style-type: decimal">
+<li>(bagging): <code>nBags</code> bootstrapped data sets are being generated based on random sampling from the original training data set (x,y). If a bag contains less than <code>minInBagObs</code> unique observations or it contains all observations, it is discarded and re-sampled again.</li>
+<li>(random subspace): For each bag, <code>nFeaturesInBag</code> predictors are randomly selected (without replacement) from the columns of x. Optionally, interaction terms between the selected predictors can be formed (see the argument <code>maxInteractionOrder</code>).</li>
+<li>(feature ranking): In each bag, predictors are ranked according to their correlation with the outcome measure. Next the top <code>nCandidateCovariates</code> are being considered for forward selection in each model (and in each bag).</li>
+<li>(forward selection): Forward variable selection is employed to define a multivariate model of the outcome in each bag.</li>
+<li>(aggregating the predictions): Prediction from each bag are aggregated. In case, of a quantitative outcome, the predictions are simply averaged across the bags.</li>
+</ol>
+<p><strong>Note</strong> <code>randomGLM</code> was removed from CRAN in 2021.</p>
+<div class="sourceCode" id="cb808"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb808-1"><a href="tree-regression-models.html#cb808-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomGLM)</span>
+<span id="cb808-2"><a href="tree-regression-models.html#cb808-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> simulated[,<span class="sc">-</span><span class="dv">11</span>]</span>
+<span id="cb808-3"><a href="tree-regression-models.html#cb808-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> simulated<span class="sc">$</span>y</span>
+<span id="cb808-4"><a href="tree-regression-models.html#cb808-4" aria-hidden="true" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">randomGLM</span>(<span class="at">x =</span> x, </span>
+<span id="cb808-5"><a href="tree-regression-models.html#cb808-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">y =</span> y, </span>
+<span id="cb808-6"><a href="tree-regression-models.html#cb808-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">nCandidateCovariates =</span> <span class="dv">10</span>)</span></code></pre></div>
+<p>To get an idea of the importance of the variables, we can use:</p>
+<div class="sourceCode" id="cb809"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb809-1"><a href="tree-regression-models.html#cb809-1" aria-hidden="true" tabindex="-1"></a>mod<span class="sc">$</span>timesSelectedByForwardRegression</span></code></pre></div>
+<p>We see that all of the variables were chosen at least once by forward regression, but variables 1, 2, 4 and 5 seem to be the most relevant.</p>
+<p>Now, let’s turn to applying these concepts to regression trees. Bagging is often useful when the model exhibits high variance. Basic regression trees that aren’t pruned definitely have high variance, because resampling from the same underlying distribution can lead to quite different trees and models.</p>
+<p>We will use the following algorithm:</p>
+<ol style="list-style-type: decimal">
+<li>bootstrap resample from the original data.</li>
+<li>at each node, we will sample from the predictors, and only consider splits on the random subset of predictors.</li>
+<li>build the tree down to some minimum node size.</li>
+<li>repeat many times to create many trees.</li>
+<li>predictions will be made by averaging the prediction over all the trees that are created.</li>
+</ol>
+<p>We are getting pretty far away from material normally taught in a regression course, so I am just going to show you some code for how to do this with cross validation and be done. We’ll use our good friend, the benchmark data set.</p>
+<div class="sourceCode" id="cb810"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb810-1"><a href="tree-regression-models.html#cb810-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
+<span id="cb810-2"><a href="tree-regression-models.html#cb810-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">4072020</span>)</span>
+<span id="cb810-3"><a href="tree-regression-models.html#cb810-3" aria-hidden="true" tabindex="-1"></a>simulated <span class="ot">&lt;-</span> <span class="fu">mlbench.friedman1</span>(<span class="dv">200</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb810-4"><a href="tree-regression-models.html#cb810-4" aria-hidden="true" tabindex="-1"></a>simulated <span class="ot">&lt;-</span> <span class="fu">cbind</span>(simulated<span class="sc">$</span>x, simulated<span class="sc">$</span>y)</span>
+<span id="cb810-5"><a href="tree-regression-models.html#cb810-5" aria-hidden="true" tabindex="-1"></a>simulated <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(simulated)</span>
+<span id="cb810-6"><a href="tree-regression-models.html#cb810-6" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(simulated)[<span class="fu">ncol</span>(simulated)] <span class="ot">&lt;-</span> <span class="st">&quot;y&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb811"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb811-1"><a href="tree-regression-models.html#cb811-1" aria-hidden="true" tabindex="-1"></a>rfModel <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(y <span class="sc">~</span> ., <span class="at">data =</span> simulated, <span class="at">ntree =</span> <span class="dv">1000</span>)</span>
+<span id="cb811-2"><a href="tree-regression-models.html#cb811-2" aria-hidden="true" tabindex="-1"></a>new_data <span class="ot">&lt;-</span> <span class="fu">mlbench.friedman1</span>(<span class="dv">50</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb811-3"><a href="tree-regression-models.html#cb811-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>((<span class="fu">predict</span>(rfModel, <span class="at">newdata =</span> new_data<span class="sc">$</span>x) <span class="sc">-</span> new_data<span class="sc">$</span>y)<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div>
+<pre><code>## [1] 2.991013</code></pre>
+<p>We can see that for this data, we had a RMSE of 2.67856 for a single train/test split of 200 in train and 50 in test. As with other techniques, we could try to improve this by cross validating over the number predictors chosen for each tree, which is in the <code>mtry</code> argument. The default is <span class="math inline">\(p/3\)</span>, where <span class="math inline">\(p\)</span> is the original number of predictors. Let’s run it again with <code>mtry</code> equal to 5.</p>
+<div class="sourceCode" id="cb813"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb813-1"><a href="tree-regression-models.html#cb813-1" aria-hidden="true" tabindex="-1"></a>rfModel <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(y <span class="sc">~</span> ., <span class="at">data =</span> simulated, <span class="at">ntree =</span> <span class="dv">1000</span>, <span class="at">mtry =</span> <span class="dv">5</span>)</span>
+<span id="cb813-2"><a href="tree-regression-models.html#cb813-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>((<span class="fu">predict</span>(rfModel, <span class="at">newdata =</span> new_data<span class="sc">$</span>x) <span class="sc">-</span> new_data<span class="sc">$</span>y)<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div>
+<pre><code>## [1] 2.879816</code></pre>
+<p>The RMSE for the same train/test is slightly lower, but we would want to do proper CV to determine whether this is by chance, or a real improvement. For that, we could use <code>caret::train</code>.</p>
+<div class="sourceCode" id="cb815"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb815-1"><a href="tree-regression-models.html#cb815-1" aria-hidden="true" tabindex="-1"></a>caret<span class="sc">::</span><span class="fu">train</span>(y <span class="sc">~</span> ., </span>
+<span id="cb815-2"><a href="tree-regression-models.html#cb815-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">data =</span> simulated, </span>
+<span id="cb815-3"><a href="tree-regression-models.html#cb815-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">method =</span> <span class="st">&quot;rf&quot;</span>, </span>
+<span id="cb815-4"><a href="tree-regression-models.html#cb815-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">trControl =</span> <span class="fu">trainControl</span>(<span class="at">method =</span> <span class="st">&quot;repeatedcv&quot;</span>))</span></code></pre></div>
+<pre><code>## Random Forest 
+## 
+## 200 samples
+##  10 predictor
+## 
+## No pre-processing
+## Resampling: Cross-Validated (10 fold, repeated 1 times) 
+## Summary of sample sizes: 180, 180, 180, 180, 180, 180, ... 
+## Resampling results across tuning parameters:
+## 
+##   mtry  RMSE      Rsquared   MAE     
+##    2    2.805157  0.7921191  2.280659
+##    6    2.436966  0.7615922  1.999486
+##   10    2.486054  0.7350817  2.058854
+## 
+## RMSE was used to select the optimal model using the smallest value.
+## The final value used for the model was mtry = 6.</code></pre>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="non-linear-regression-models.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="solutions.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["_main.pdf", "_main.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
