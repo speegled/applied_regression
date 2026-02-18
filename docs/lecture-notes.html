@@ -23,7 +23,7 @@
 <meta name="author" content="Darrin Speegle" />
 
 
-<meta name="date" content="2026-02-16" />
+<meta name="date" content="2026-02-18" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -285,11 +285,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="10.6" data-path="lecture-notes.html"><a href="lecture-notes.html#february-17"><i class="fa fa-check"></i><b>10.6</b> February 17</a>
 <ul>
 <li class="chapter" data-level="10.6.1" data-path="lecture-notes.html"><a href="lecture-notes.html#adding-random-speaker-and-sentence-effects"><i class="fa fa-check"></i><b>10.6.1</b> Adding random speaker and sentence effects</a></li>
-<li class="chapter" data-level="10.6.2" data-path="lecture-notes.html"><a href="lecture-notes.html#random-intercepts-with-continunous-predictor"><i class="fa fa-check"></i><b>10.6.2</b> Random intercepts with continunous predictor</a></li>
-<li class="chapter" data-level="10.6.3" data-path="lecture-notes.html"><a href="lecture-notes.html#heading-towards-mixed-models"><i class="fa fa-check"></i><b>10.6.3</b> Heading towards mixed models</a></li>
-<li class="chapter" data-level="10.6.4" data-path="lecture-notes.html"><a href="lecture-notes.html#intro-to-random-effects-and-mixed-effect-models---terminology-and-first-examples"><i class="fa fa-check"></i><b>10.6.4</b> Intro to Random Effects and Mixed Effect Models - Terminology and First Examples</a></li>
-<li class="chapter" data-level="10.6.5" data-path="lecture-notes.html"><a href="lecture-notes.html#random-slopes"><i class="fa fa-check"></i><b>10.6.5</b> Random Slopes</a></li>
-<li class="chapter" data-level="10.6.6" data-path="lecture-notes.html"><a href="lecture-notes.html#comparison-of-models"><i class="fa fa-check"></i><b>10.6.6</b> Comparison of Models</a></li>
+<li class="chapter" data-level="10.6.2" data-path="lecture-notes.html"><a href="lecture-notes.html#random-intercepts-with-continuous-predictor"><i class="fa fa-check"></i><b>10.6.2</b> Random intercepts with continuous predictor</a></li>
+<li class="chapter" data-level="10.6.3" data-path="lecture-notes.html"><a href="lecture-notes.html#adding-random-slopes"><i class="fa fa-check"></i><b>10.6.3</b> Adding random slopes</a></li>
+</ul></li>
+<li class="chapter" data-level="10.7" data-path="lecture-notes.html"><a href="lecture-notes.html#february-19"><i class="fa fa-check"></i><b>10.7</b> February 19</a>
+<ul>
+<li class="chapter" data-level="10.7.1" data-path="lecture-notes.html"><a href="lecture-notes.html#random-slopes"><i class="fa fa-check"></i><b>10.7.1</b> Random Slopes</a></li>
+<li class="chapter" data-level="10.7.2" data-path="lecture-notes.html"><a href="lecture-notes.html#comparing-models"><i class="fa fa-check"></i><b>10.7.2</b> Comparing models</a></li>
+<li class="chapter" data-level="10.7.3" data-path="lecture-notes.html"><a href="lecture-notes.html#some-theory"><i class="fa fa-check"></i><b>10.7.3</b> Some Theory</a></li>
+<li class="chapter" data-level="10.7.4" data-path="lecture-notes.html"><a href="lecture-notes.html#intro-to-random-effects-and-mixed-effect-models---terminology-and-first-examples"><i class="fa fa-check"></i><b>10.7.4</b> Intro to Random Effects and Mixed Effect Models - Terminology and First Examples</a></li>
+<li class="chapter" data-level="10.7.5" data-path="lecture-notes.html"><a href="lecture-notes.html#comparison-of-models"><i class="fa fa-check"></i><b>10.7.5</b> Comparison of Models</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="11" data-path="solutions.html"><a href="solutions.html"><i class="fa fa-check"></i><b>11</b> Solutions</a>
@@ -1765,8 +1770,8 @@ where</p>
 ##           (Intr)
 ## voiceself -0.063</code></pre>
 </div>
-<div id="random-intercepts-with-continunous-predictor" class="section level3 hasAnchor" number="10.6.2">
-<h3><span class="header-section-number">10.6.2</span> Random intercepts with continunous predictor<a href="lecture-notes.html#random-intercepts-with-continunous-predictor" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="random-intercepts-with-continuous-predictor" class="section level3 hasAnchor" number="10.6.2">
+<h3><span class="header-section-number">10.6.2</span> Random intercepts with continuous predictor<a href="lecture-notes.html#random-intercepts-with-continuous-predictor" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>Let’s consider the <code>sleepstudy</code> data set in the <code>lme4</code> package. This data set contains reaction times for 18 subjects who were sleep deprived for 10 days. We will model the reaction time as a function of the number of days of sleep deprivation, with random intercepts for each subject. Let’s look at the data.</p>
 <p>We can fit a regression line to the data, using the same slope but a different intercept for each subject. How do we do that? Try to do it yourself before looking at the code below. This is a good refresher for what we were doing earlier in the class.</p>
 <div class="sourceCode" id="cb1164"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1164-1"><a href="lecture-notes.html#cb1164-1" tabindex="-1"></a>ss <span class="ot">&lt;-</span> lme4<span class="sc">::</span>sleepstudy <span class="sc">|&gt;</span> </span>
@@ -1844,27 +1849,17 @@ where</p>
 <p><img src="10-lecture-notes_files/figure-html/unnamed-chunk-52-1.png" width="672" /></p>
 <p>We see that the random effects lines (which are lighter) have intercepts which are closer to the overall mean of all of the intercepts than the fixed effect line is.</p>
 </div>
-<div id="heading-towards-mixed-models" class="section level3 hasAnchor" number="10.6.3">
-<h3><span class="header-section-number">10.6.3</span> Heading towards mixed models<a href="lecture-notes.html#heading-towards-mixed-models" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>Now, we return to linear models with interactions. We imagine a scenario where we have several (perhaps more than several<a href="#fn7" class="footnote-ref" id="fnref7"><sup>7</sup></a>) groups of data, and we have a few observations in each group. Let’s consider the <code>sleepstudy</code> data set in the <code>lme4</code> package.</p>
-<div class="sourceCode" id="cb1170"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1170-1"><a href="lecture-notes.html#cb1170-1" tabindex="-1"></a><span class="fu">library</span>(lme4)</span>
-<span id="cb1170-2"><a href="lecture-notes.html#cb1170-2" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;sleepstudy&quot;</span>)</span>
-<span id="cb1170-3"><a href="lecture-notes.html#cb1170-3" tabindex="-1"></a>ss <span class="ot">&lt;-</span> sleepstudy <span class="sc">|&gt;</span> </span>
-<span id="cb1170-4"><a href="lecture-notes.html#cb1170-4" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>()</span>
-<span id="cb1170-5"><a href="lecture-notes.html#cb1170-5" tabindex="-1"></a><span class="fu">summary</span>(ss)</span></code></pre></div>
-<pre><code>##     reaction          days        subject   
-##  Min.   :194.3   Min.   :0.0   308    : 10  
-##  1st Qu.:255.4   1st Qu.:2.0   309    : 10  
-##  Median :288.7   Median :4.5   310    : 10  
-##  Mean   :298.5   Mean   :4.5   330    : 10  
-##  3rd Qu.:336.8   3rd Qu.:7.0   331    : 10  
-##  Max.   :466.4   Max.   :9.0   332    : 10  
-##                                (Other):120</code></pre>
-<div class="sourceCode" id="cb1172"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1172-1"><a href="lecture-notes.html#cb1172-1" tabindex="-1"></a><span class="fu">length</span>(<span class="fu">unique</span>(ss<span class="sc">$</span>subject)) <span class="co">#18 groups, 10 observations per group</span></span></code></pre></div>
-<pre><code>## [1] 18</code></pre>
-<p>Based on this data, it seems that we have potentially different <strong>intercepts</strong> and <strong>slopes</strong> for each subject. Let’s fit a linear model with an interaction between <code>days</code> and <code>subject</code>. We will have 18 intercepts and 18 slopes, which is a lot of parameters to estimate with only 180 observations. (It is five observations per parameter estimated - how much confidence would you have in an estimated mean based off of 5 observations? Mathematically, it is fine. But in practice, it is not ideal.)</p>
-<div class="sourceCode" id="cb1174"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1174-1"><a href="lecture-notes.html#cb1174-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(reaction <span class="sc">~</span> days <span class="sc">*</span> subject, <span class="at">data =</span> ss)</span>
-<span id="cb1174-2"><a href="lecture-notes.html#cb1174-2" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
+<div id="adding-random-slopes" class="section level3 hasAnchor" number="10.6.3">
+<h3><span class="header-section-number">10.6.3</span> Adding random slopes<a href="lecture-notes.html#adding-random-slopes" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>We continue with the <code>sleepstudy</code> data set in the <code>lme4</code> package. Let’s look once more at a scatterplot with lines of best fit for each subject.</p>
+<div class="sourceCode" id="cb1170"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1170-1"><a href="lecture-notes.html#cb1170-1" tabindex="-1"></a><span class="fu">ggplot</span>(ss, <span class="fu">aes</span>(<span class="at">x =</span> days, <span class="at">y =</span> reaction, <span class="at">color =</span> subject)) <span class="sc">+</span> </span>
+<span id="cb1170-2"><a href="lecture-notes.html#cb1170-2" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb1170-3"><a href="lecture-notes.html#cb1170-3" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se =</span> F)</span></code></pre></div>
+<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
+<p><img src="10-lecture-notes_files/figure-html/unnamed-chunk-53-1.png" width="672" /></p>
+<p>Based on this plot, it seems that we have potentially different <strong>intercepts</strong> and <strong>slopes</strong> for each subject. Let’s fit a linear model with an interaction between <code>days</code> and <code>subject</code>. We will have 18 intercepts and 18 slopes, which is a lot of parameters to estimate with only 180 observations. (It is five observations per parameter estimated - how much confidence would you have in an estimated mean based off of 5 observations? Mathematically, it is fine. But in practice, it is not ideal.)</p>
+<div class="sourceCode" id="cb1172"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1172-1"><a href="lecture-notes.html#cb1172-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(reaction <span class="sc">~</span> days <span class="sc">*</span> subject, <span class="at">data =</span> ss)</span>
+<span id="cb1172-2"><a href="lecture-notes.html#cb1172-2" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## lm(formula = reaction ~ days * subject, data = ss)
@@ -1924,9 +1919,9 @@ where</p>
 <li>We have a lot of parameters in this model, which can lead to overfitting. We haven’t really talked much about overfitting in this class yet. But, when we are looking for a parsimonious model by variable selection, we are trying to avoid overfitting. In this case, we have a lot of parameters, and we are not really interested in the individual intercepts and slopes for each subject. We are more interested in the overall association between reaction time and days of sleep deprivation, while accounting for the fact that we have (possibly) different intercepts and slopes for each subject.</li>
 </ol>
 <p>What is wrong with forgetting that we have the same subjects, and running the following regression?</p>
-<div class="sourceCode" id="cb1176"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1176-1"><a href="lecture-notes.html#cb1176-1" tabindex="-1"></a><span class="co">#THIS IS NOT ADVISED</span></span>
-<span id="cb1176-2"><a href="lecture-notes.html#cb1176-2" tabindex="-1"></a>mod_wrong <span class="ot">&lt;-</span> <span class="fu">lm</span>(reaction <span class="sc">~</span> days, <span class="at">data =</span> ss)</span>
-<span id="cb1176-3"><a href="lecture-notes.html#cb1176-3" tabindex="-1"></a><span class="fu">summary</span>(mod_wrong)</span></code></pre></div>
+<div class="sourceCode" id="cb1174"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1174-1"><a href="lecture-notes.html#cb1174-1" tabindex="-1"></a><span class="co">#THIS IS NOT ADVISED</span></span>
+<span id="cb1174-2"><a href="lecture-notes.html#cb1174-2" tabindex="-1"></a>mod_wrong <span class="ot">&lt;-</span> <span class="fu">lm</span>(reaction <span class="sc">~</span> days, <span class="at">data =</span> ss)</span>
+<span id="cb1174-3"><a href="lecture-notes.html#cb1174-3" tabindex="-1"></a><span class="fu">summary</span>(mod_wrong)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## lm(formula = reaction ~ days, data = ss)
@@ -1947,155 +1942,318 @@ where</p>
 ## F-statistic: 71.46 on 1 and 178 DF,  p-value: 9.894e-15</code></pre>
 <p>This model is not accounting for the fact that we have repeated measurements for each subject. It is treating each observation as independent, which is not the case. This can lead to underestimated standard errors and inflated type I error rates. We need a way to account for the fact that we have repeated measurements for each subject, and that the intercepts and slopes may vary by subject. This is where mixed models come in, which we will cover in the next lecture.</p>
 </div>
-<div id="intro-to-random-effects-and-mixed-effect-models---terminology-and-first-examples" class="section level3 hasAnchor" number="10.6.4">
-<h3><span class="header-section-number">10.6.4</span> Intro to Random Effects and Mixed Effect Models - Terminology and First Examples<a href="lecture-notes.html#intro-to-random-effects-and-mixed-effect-models---terminology-and-first-examples" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>First off, let’s get some terminology down. A <strong>fixed effect</strong> is an effect that is constant across individuals or groups. For example, the effect of a treatment in a clinical trial is often considered a fixed effect, because we are interested in the average effect of the treatment across all individuals. This is a modeling decision that we make based on our research question and the structure of our data. In the <code>sleepstudy</code> data set, the effect of <code>days</code> on <code>reaction</code> could be considered a fixed effect, because we are interested in the overall association between days of sleep deprivation and reaction time across all subjects.</p>
-<p>A <strong>random effect</strong> is an effect that varies across individuals or groups. For example, the intercepts and slopes for each subject in the <code>sleepstudy</code> data set can be considered random effects, because they vary across subjects. A <strong>mixed effect model</strong> is a model that contains both fixed effects and random effects. In the <code>sleepstudy</code> data set, a mixed effect model would include the fixed effect of <code>days</code> and the random effects of the intercepts and slopes for each subject.</p>
-<p>Mixed effect models go by many different names in different disciplines. If you hear these words, the person may be talking about mixed effect models or something very similar:</p>
-<ul>
-<li>multilevel models</li>
-<li>hierarchical linear models</li>
-<li>random effects models</li>
-<li>linear mixed models</li>
-<li>Variance components models</li>
-<li>BLUP models (genetics)</li>
-<li>Penalized least squares (numerical analysis - these are more general than mixed models, but they include mixed models as a special case)</li>
-<li>Probably many more</li>
-</ul>
-<p>Let’s start by fully specifying a mixed effect model which includes a random intercept and a fixed effect slope of one variable. The model can be written as
-<span class="math display">\[
-y_{ij} = \beta_0 + \beta_1 x_{ij} + b_{0i} + \epsilon_{ij}
+</div>
+<div id="february-19" class="section level2 hasAnchor" number="10.7">
+<h2><span class="header-section-number">10.7</span> February 19<a href="lecture-notes.html#february-19" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="random-slopes" class="section level3 hasAnchor" number="10.7.1">
+<h3><span class="header-section-number">10.7.1</span> Random Slopes<a href="lecture-notes.html#random-slopes" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>When we have one predictor with random intercepts and slopes, the model can be written like this:</p>
+<p><span class="math display">\[
+y_{ij} = \beta_0 + \beta_1 x_{ij} + b_{0i} + b_{1i} x_{ij} + \epsilon_{ij}
 \]</span>
-where <span class="math inline">\(y_{ij}\)</span> is the response variable for the <span class="math inline">\(j\)</span>th observation in group <span class="math inline">\(i\)</span>, <span class="math inline">\(\beta_0\)</span> is the overall intercept, <span class="math inline">\(\beta_1\)</span> is the fixed effect slope for predictor <span class="math inline">\(x\)</span>, <span class="math inline">\(b_{0i}\)</span> is the random intercept for group <span class="math inline">\(i\)</span>, and <span class="math inline">\(\epsilon_{ij}\)</span> is the random error term. We assume that the random effects <span class="math inline">\(b_{0i}\)</span> are normally distributed with mean 0 and variance <span class="math inline">\(\sigma_b^2\)</span>, and that the errors <span class="math inline">\(\epsilon_{ij}\)</span> are normally distributed with mean 0 and variance <span class="math inline">\(\sigma^2\)</span>. The random effects and errors are assumed to be independent of each other.</p>
-<p>Note that we are splitting the <strong>mean</strong> of the intercept and the <strong>variance</strong> of the intercept into two components. We could also have said the <span class="math inline">\(b_{0i}\)</span> are normal with mean <span class="math inline">\(\beta_0\)</span> and variance <span class="math inline">\(\sigma_b^2\)</span>.</p>
-<p>The fixed effect <span class="math inline">\(\beta_1\)</span> represents the average effect of predictor <span class="math inline">\(x\)</span> on the response variable across all groups, while the random effects <span class="math inline">\(b_{0i}\)</span> represent the deviation of each group’s intercept from the overall intercept <span class="math inline">\(\beta_0\)</span>. The variance <span class="math inline">\(\sigma_b^2\)</span> captures the variability in the intercepts across groups, while <span class="math inline">\(\sigma^2\)</span> captures the variability within groups.</p>
-<p>Here is how we can <strong>simulate</strong> data like this:</p>
-<div class="sourceCode" id="cb1178"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1178-1"><a href="lecture-notes.html#cb1178-1" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="dv">10</span> <span class="co">#number of groups</span></span>
-<span id="cb1178-2"><a href="lecture-notes.html#cb1178-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">5</span> <span class="co"># observations per group</span></span>
-<span id="cb1178-3"><a href="lecture-notes.html#cb1178-3" tabindex="-1"></a>groups <span class="ot">&lt;-</span> <span class="fu">factor</span>(letters[<span class="dv">1</span><span class="sc">:</span>g]) <span class="co">#this only works if g &lt;= 26!</span></span>
-<span id="cb1178-4"><a href="lecture-notes.html#cb1178-4" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
-<span id="cb1178-5"><a href="lecture-notes.html#cb1178-5" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(g <span class="sc">*</span> n, <span class="dv">0</span>, <span class="dv">10</span>) <span class="co">#these are the predictors</span></span>
-<span id="cb1178-6"><a href="lecture-notes.html#cb1178-6" tabindex="-1"></a>sigma_b <span class="ot">&lt;-</span> <span class="dv">2</span></span>
-<span id="cb1178-7"><a href="lecture-notes.html#cb1178-7" tabindex="-1"></a>b0 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(g, <span class="dv">0</span>, sigma_b) <span class="co">#these are the random intercepts for each group</span></span>
-<span id="cb1178-8"><a href="lecture-notes.html#cb1178-8" tabindex="-1"></a>beta0 <span class="ot">&lt;-</span> <span class="dv">3</span></span>
-<span id="cb1178-9"><a href="lecture-notes.html#cb1178-9" tabindex="-1"></a>beta1 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
-<span id="cb1178-10"><a href="lecture-notes.html#cb1178-10" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb1178-11"><a href="lecture-notes.html#cb1178-11" tabindex="-1"></a>y <span class="ot">&lt;-</span> beta0 <span class="sc">+</span> beta1 <span class="sc">*</span> x <span class="sc">+</span> <span class="fu">rep</span>(b0, <span class="at">each =</span> n) <span class="sc">+</span> <span class="fu">rnorm</span>(g <span class="sc">*</span> n, <span class="dv">0</span>, sigma) <span class="co">#these are the responses, note that sigma^2 = 1, beta_0 = 3, and beta_1 = 0.5</span></span>
-<span id="cb1178-12"><a href="lecture-notes.html#cb1178-12" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> x,</span>
-<span id="cb1178-13"><a href="lecture-notes.html#cb1178-13" tabindex="-1"></a>                 <span class="at">y =</span> y,</span>
-<span id="cb1178-14"><a href="lecture-notes.html#cb1178-14" tabindex="-1"></a>                 <span class="at">g =</span> <span class="fu">rep</span>(groups, <span class="at">each =</span> n))</span>
-<span id="cb1178-15"><a href="lecture-notes.html#cb1178-15" tabindex="-1"></a><span class="fu">ggplot</span>(dd, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">color =</span> g)) <span class="sc">+</span> </span>
-<span id="cb1178-16"><a href="lecture-notes.html#cb1178-16" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
-<span id="cb1178-17"><a href="lecture-notes.html#cb1178-17" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se =</span> F)</span></code></pre></div>
-<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
-<p><img src="10-lecture-notes_files/figure-html/unnamed-chunk-56-1.png" width="672" /></p>
-<p>Here we can see that the slopes all look more or less the same, but the intercepts are probably different. Let’s see how we could estimate the parameters in our model. This is not exactly how the programs that we use will do it, but it gives a flavor of the ideas.</p>
-<p>First, we could estimate the fixed effect slope <span class="math inline">\(\beta_1\)</span> and the mean of the random intercept <span class="math inline">\(\beta_0\)</span> by fitting a linear model that ignores the grouping structure of the data. This is not ideal, but it gives us a starting point. We should definitely not use the <span class="math inline">\(p\)</span>-values.</p>
-<div class="sourceCode" id="cb1180"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1180-1"><a href="lecture-notes.html#cb1180-1" tabindex="-1"></a>mod_fixed <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x, <span class="at">data =</span> dd)</span>
-<span id="cb1180-2"><a href="lecture-notes.html#cb1180-2" tabindex="-1"></a><span class="fu">summary</span>(mod_fixed)</span></code></pre></div>
-<pre><code>## 
-## Call:
-## lm(formula = y ~ x, data = dd)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -4.0639 -1.2257  0.0424  0.8666  5.3072 
-## 
-## Coefficients:
-##             Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)  2.84025    0.59583   4.767 1.77e-05 ***
-## x            0.49262    0.09982   4.935 1.01e-05 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 1.902 on 48 degrees of freedom
-## Multiple R-squared:  0.3366, Adjusted R-squared:  0.3228 
-## F-statistic: 24.35 on 1 and 48 DF,  p-value: 1.005e-05</code></pre>
-<p>Next, we could estimate the random effects <span class="math inline">\(b_{0i}\)</span> by fitting a linear model that includes the group as a fixed effect. This will give us estimates of the intercepts for each group, which we can then use to estimate the variance of the random effects.</p>
-<div class="sourceCode" id="cb1182"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1182-1"><a href="lecture-notes.html#cb1182-1" tabindex="-1"></a>mod_full <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x <span class="sc">+</span> g, <span class="at">data =</span> dd)</span>
-<span id="cb1182-2"><a href="lecture-notes.html#cb1182-2" tabindex="-1"></a><span class="fu">summary</span>(mod_full)</span></code></pre></div>
-<pre><code>## 
-## Call:
-## lm(formula = y ~ x + g, data = dd)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -2.2982 -0.5209 -0.1299  0.5674  1.9430 
-## 
-## Coefficients:
-##             Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)  2.75627    0.49259   5.596 1.89e-06 ***
-## x            0.57119    0.05334  10.709 3.55e-13 ***
-## gb          -0.49336    0.60947  -0.809   0.4231    
-## gc          -2.77550    0.60238  -4.608 4.28e-05 ***
-## gd          -1.10549    0.61250  -1.805   0.0788 .  
-## ge           0.96834    0.60245   1.607   0.1160    
-## gf           3.14483    0.60331   5.213 6.39e-06 ***
-## gg           0.10459    0.60297   0.173   0.8632    
-## gh           0.27154    0.60369   0.450   0.6553    
-## gi          -0.47174    0.61191  -0.771   0.4454    
-## gj          -2.98804    0.60376  -4.949 1.47e-05 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.9523 on 39 degrees of freedom
-## Multiple R-squared:  0.8649, Adjusted R-squared:  0.8303 
-## F-statistic: 24.97 on 10 and 39 DF,  p-value: 6.241e-14</code></pre>
-<p>Finally, we could use the estimates from the previous two models to estimate the variance components <span class="math inline">\(\sigma_b^2\)</span> and <span class="math inline">\(\sigma^2\)</span>. This is typically done using restricted maximum likelihood (REML) or maximum likelihood (ML) estimation, which are more efficient than the method of moments that we are using here.</p>
-<div class="sourceCode" id="cb1184"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1184-1"><a href="lecture-notes.html#cb1184-1" tabindex="-1"></a><span class="co">#Not recommended - just for illustration</span></span>
-<span id="cb1184-2"><a href="lecture-notes.html#cb1184-2" tabindex="-1"></a>broom<span class="sc">::</span><span class="fu">tidy</span>(mod_full) <span class="sc">|&gt;</span>  </span>
-<span id="cb1184-3"><a href="lecture-notes.html#cb1184-3" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">str_detect</span>(term, <span class="st">&quot;g|tercept&quot;</span>)) <span class="sc">|&gt;</span>  </span>
-<span id="cb1184-4"><a href="lecture-notes.html#cb1184-4" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">estimate =</span> <span class="fu">ifelse</span>(<span class="fu">str_detect</span>(term, <span class="st">&quot;Inter&quot;</span>), <span class="dv">0</span>, estimate)) <span class="sc">|&gt;</span> </span>
-<span id="cb1184-5"><a href="lecture-notes.html#cb1184-5" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">var_b =</span> <span class="fu">var</span>(estimate)) <span class="co">#this is an estimate of sigma_b^2ilt</span></span></code></pre></div>
-<pre><code>## # A tibble: 1 × 1
-##   var_b
-##   &lt;dbl&gt;
-## 1  3.12</code></pre>
-<p>This is an estimate for the variance of the random intercepts, <span class="math inline">\(\sigma_b^2\)</span>. Recall that the true value was 4. Finally, we can estimate <span class="math inline">\(\sigma^2\)</span> by looking at the residuals from the full model.</p>
-<div class="sourceCode" id="cb1186"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1186-1"><a href="lecture-notes.html#cb1186-1" tabindex="-1"></a><span class="co">#just for illustration</span></span>
-<span id="cb1186-2"><a href="lecture-notes.html#cb1186-2" tabindex="-1"></a><span class="fu">var</span>(<span class="fu">resid</span>(mod_full))</span></code></pre></div>
-<pre><code>## [1] 0.7218008</code></pre>
-<p>This is an estimate for the variance of the errors, <span class="math inline">\(\sigma^2\)</span>. Recall that the true value was 1. <strong>Note that there are definitely issues with doing it this way</strong>, but in this simple case the estimates that we get are not too far off.</p>
-<p>To use more sophisticated tools, we use the package <code>lme4</code>.</p>
-<div class="sourceCode" id="cb1188"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1188-1"><a href="lecture-notes.html#cb1188-1" tabindex="-1"></a>mod_mixed <span class="ot">&lt;-</span> lme4<span class="sc">::</span><span class="fu">lmer</span>(y <span class="sc">~</span> x <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> g), <span class="at">data =</span> dd) <span class="co">#the (1|g) indicates that we have a random intercept. The fixed effects are entered just like before</span></span>
-<span id="cb1188-2"><a href="lecture-notes.html#cb1188-2" tabindex="-1"></a><span class="fu">summary</span>(mod_mixed)</span></code></pre></div>
+where <span class="math inline">\(b_{0i}\)</span> is the random intercept for group <span class="math inline">\(i\)</span>, and <span class="math inline">\(b_{1i}\)</span> is the random slope for predictor <span class="math inline">\(x\)</span> in group <span class="math inline">\(i\)</span>. We assume that the random effects <span class="math inline">\((b_{0i}, b_{1i})\)</span> are jointly normally distributed with mean 0 and covariance matrix <span class="math inline">\(\Sigma\)</span>, and that the errors <span class="math inline">\(\epsilon_{ij}\)</span> are normally distributed with mean 0 and variance <span class="math inline">\(\sigma^2\)</span>. The random effects and errors are assumed to be independent of each other. Note that we could also combine the fixed effects with the random effects to say that the intercept has mean <span class="math inline">\(\beta_0\)</span> and the slope has mean <span class="math inline">\(\beta_1\)</span>, together with the covariance informarion.</p>
+<p>We can fit the data by using <code>lmer</code> as follows:</p>
+<div class="sourceCode" id="cb1176"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1176-1"><a href="lecture-notes.html#cb1176-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> lme4<span class="sc">::</span><span class="fu">lmer</span>(reaction <span class="sc">~</span> days <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> days<span class="sc">|</span>subject), <span class="at">data =</span> ss)</span>
+<span id="cb1176-2"><a href="lecture-notes.html#cb1176-2" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
 <pre><code>## Linear mixed model fit by REML [&#39;lmerMod&#39;]
-## Formula: y ~ x + (1 | g)
-##    Data: dd
+## Formula: reaction ~ days + (1 + days | subject)
+##    Data: ss
 ## 
-## REML criterion at convergence: 166.8
+## REML criterion at convergence: 1743.6
 ## 
 ## Scaled residuals: 
-##      Min       1Q   Median       3Q      Max 
-## -2.38213 -0.51459 -0.04616  0.52749  2.25158 
+##     Min      1Q  Median      3Q     Max 
+## -3.9536 -0.4634  0.0231  0.4634  5.1793 
 ## 
 ## Random effects:
-##  Groups   Name        Variance Std.Dev.
-##  g        (Intercept) 2.9386   1.7142  
-##  Residual             0.9069   0.9523  
-## Number of obs: 50, groups:  g, 10
+##  Groups   Name        Variance Std.Dev. Corr
+##  subject  (Intercept) 612.10   24.741       
+##           days         35.07    5.922   0.07
+##  Residual             654.94   25.592       
+## Number of obs: 180, groups:  subject, 18
 ## 
 ## Fixed effects:
 ##             Estimate Std. Error t value
-## (Intercept)  2.44928    0.62613   3.912
-## x            0.56603    0.05312  10.655
+## (Intercept)  251.405      6.825  36.838
+## days          10.467      1.546   6.771
 ## 
 ## Correlation of Fixed Effects:
-##   (Intr)
-## x -0.452</code></pre>
-<p>This model includes a random intercept for each group, but assumes that the slope is the same across groups. The output gives us estimates for the fixed effects (the overall intercept and slope) as well as the variance components (the variance of the random intercepts and the variance of the errors).</p>
+##      (Intr)
+## days -0.138</code></pre>
+<p>We obtain the following estimates for the parameters of the model:</p>
+<ul>
+<li><span class="math inline">\(\hat \beta_0 = 251.405\)</span> (mean intercept across subjects)</li>
+<li><span class="math inline">\(\hat \beta_1 = 10.467\)</span> (mean slope across subjects)</li>
+<li><span class="math inline">\(\hat \tau_0^2 = 612.1\)</span> (variance of random intercepts)</li>
+<li><span class="math inline">\(\hat \tau_1^2 = 35\)</span> (variance of random slopes)</li>
+<li><span class="math inline">\(\hat \sigma^2 = 654.94\)</span> (variance of residuals)</li>
+<li><span class="math inline">\(\hat \rho = 0.07\)</span> (correlation between random intercepts and slopes)</li>
+</ul>
+<p>Note that this model has one additional parameter which we didn’t specify in our mathematical model above, which is the correlation between random intercepts and slopes. A positive value for this correlation indicates that subjects with higher baseline reaction times (higher random intercepts) tend to have steeper increases in reaction time with more days of sleep deprivation (higher random slopes), while a negative value would indicate the opposite. In this case, the correlation is close to zero, suggesting that there is little relationship between the random intercepts and slopes in this data set. If we want to fit a model that does not include the correlation, we can use the following:</p>
+<div class="sourceCode" id="cb1178"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1178-1"><a href="lecture-notes.html#cb1178-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> lme4<span class="sc">::</span><span class="fu">lmer</span>(reaction <span class="sc">~</span> days <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> days<span class="sc">||</span>subject), <span class="at">data =</span> ss) <span class="co">#the || syntax forces the correlation to be zero</span></span>
+<span id="cb1178-2"><a href="lecture-notes.html#cb1178-2" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
+<pre><code>## Linear mixed model fit by REML [&#39;lmerMod&#39;]
+## Formula: reaction ~ days + ((1 | subject) + (0 + days | subject))
+##    Data: ss
+## 
+## REML criterion at convergence: 1743.7
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -3.9626 -0.4625  0.0204  0.4653  5.1860 
+## 
+## Random effects:
+##  Groups    Name        Variance Std.Dev.
+##  subject   (Intercept) 627.57   25.051  
+##  subject.1 days         35.86    5.988  
+##  Residual              653.58   25.565  
+## Number of obs: 180, groups:  subject, 18
+## 
+## Fixed effects:
+##             Estimate Std. Error t value
+## (Intercept)  251.405      6.885  36.513
+## days          10.467      1.560   6.712
+## 
+## Correlation of Fixed Effects:
+##      (Intr)
+## days -0.184</code></pre>
+<p>There is very little change in the estimated parameter values.</p>
+<p>One interesting question that can be asked with a model with random slopes is: what proportion of subjects have a positive slope? In other words, what proportion of subjects have reaction times that increase with more days of sleep deprivation? We can answer this question by looking at the distribution of the random slopes.</p>
+<div class="sourceCode" id="cb1180"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1180-1"><a href="lecture-notes.html#cb1180-1" tabindex="-1"></a>random_slopes <span class="ot">&lt;-</span> <span class="fu">ranef</span>(mod)<span class="sc">$</span>subject<span class="sc">$</span>days <span class="co">#this gives us the random slope for each subject</span></span>
+<span id="cb1180-2"><a href="lecture-notes.html#cb1180-2" tabindex="-1"></a>mean_slope <span class="ot">&lt;-</span> <span class="fu">fixef</span>(mod)[<span class="st">&quot;days&quot;</span>] <span class="co">#this gives us the fixed effect slope</span></span>
+<span id="cb1180-3"><a href="lecture-notes.html#cb1180-3" tabindex="-1"></a><span class="co">#the total slope for each subject is the fixed effect slope plus the random slope for that subject</span></span>
+<span id="cb1180-4"><a href="lecture-notes.html#cb1180-4" tabindex="-1"></a>total_slopes <span class="ot">&lt;-</span> mean_slope <span class="sc">+</span> random_slopes</span>
+<span id="cb1180-5"><a href="lecture-notes.html#cb1180-5" tabindex="-1"></a>total_slopes</span></code></pre></div>
+<pre><code>##  [1] 19.7907830  1.8681102  5.0794915  5.4986357  7.2733482 10.1587920
+##  [7] 10.1800781 11.5832770 -0.4386895 19.0949087 11.7479752 17.2236923
+## [13]  7.3921504 13.9794982 11.3403373 15.4510769  9.4619922 11.7256896</code></pre>
+<p>What is our estimate of the total percentage of the total population that has a negative slope? We can use the normal distribution to answer this question, because the random slopes are assumed to be normally distributed.</p>
+<div class="sourceCode" id="cb1182"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1182-1"><a href="lecture-notes.html#cb1182-1" tabindex="-1"></a><span class="fu">pnorm</span>(<span class="dv">0</span>, <span class="at">mean =</span> mean_slope, <span class="at">sd =</span> <span class="fu">sqrt</span>(<span class="dv">35</span>)) <span class="co">#35 is the variance of the random slopes, so we take the square root to get the standard deviation</span></span></code></pre></div>
+<pre><code>## [1] 0.03842239</code></pre>
+<p>We see that about 4 percent of the population is estimated to have a negative slope, which means that their reaction times decrease with more days of sleep deprivation. This is an interesting finding, and it highlights the importance of looking at the random effects in a mixed model, rather than just the fixed effects. The fixed effect tells us about the average effect across all subjects, but the random effects tell us about the variability in the effect across subjects. In this case, while the average effect of days of sleep deprivation on reaction time is positive, there is a small proportion of subjects for whom the effect is negative.</p>
+<p>What is a confidence interval for the main slope effect? We can use the standard error of the fixed effect slope to construct a confidence interval. The standard error is given in the summary output of the model, or we can use <code>emmeans</code> or <code>lmerTest</code> to get it. Let’s use <code>lmerTest</code> to get the confidence interval.</p>
+<div class="sourceCode" id="cb1184"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1184-1"><a href="lecture-notes.html#cb1184-1" tabindex="-1"></a><span class="fu">library</span>(lmerTest)</span>
+<span id="cb1184-2"><a href="lecture-notes.html#cb1184-2" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> lmerTest<span class="sc">::</span><span class="fu">lmer</span>(reaction <span class="sc">~</span> days <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> days<span class="sc">||</span>subject), <span class="at">data =</span> ss)</span>
+<span id="cb1184-3"><a href="lecture-notes.html#cb1184-3" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
+<pre><code>## Linear mixed model fit by REML. t-tests use Satterthwaite&#39;s method [
+## lmerModLmerTest]
+## Formula: reaction ~ days + (1 + days || subject)
+##    Data: ss
+## 
+## REML criterion at convergence: 1743.7
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -3.9626 -0.4625  0.0204  0.4653  5.1860 
+## 
+## Random effects:
+##  Groups    Name        Variance Std.Dev.
+##  subject   (Intercept) 627.57   25.051  
+##  subject.1 days         35.86    5.988  
+##  Residual              653.58   25.565  
+## Number of obs: 180, groups:  subject, 18
+## 
+## Fixed effects:
+##             Estimate Std. Error      df t value Pr(&gt;|t|)    
+## (Intercept)  251.405      6.885  18.156  36.513  &lt; 2e-16 ***
+## days          10.467      1.560  18.156   6.712 2.59e-06 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Correlation of Fixed Effects:
+##      (Intr)
+## days -0.184</code></pre>
+<div class="sourceCode" id="cb1186"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1186-1"><a href="lecture-notes.html#cb1186-1" tabindex="-1"></a><span class="fu">confint</span>(mod2, <span class="at">parm =</span> <span class="st">&quot;days&quot;</span>, <span class="at">method =</span> <span class="st">&quot;Wald&quot;</span>) <span class="co">#assumes normality</span></span></code></pre></div>
+<pre><code>##         2.5 %   97.5 %
+## days 7.410587 13.52399</code></pre>
+<div class="sourceCode" id="cb1188"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1188-1"><a href="lecture-notes.html#cb1188-1" tabindex="-1"></a><span class="fu">confint</span>(mod2, <span class="at">parm =</span> <span class="st">&quot;days&quot;</span>, <span class="at">method =</span> <span class="st">&quot;boot&quot;</span>, <span class="at">nsim =</span> <span class="dv">1000</span>) <span class="co">#doesn&#39;t work as well when we have a small number of groups, 18 is borderline but it is more robust to non-normality and heteroskedasticity than the Wald confidence interval</span></span></code></pre></div>
+<pre><code>## Computing bootstrap confidence intervals ...</code></pre>
+<pre><code>## 
+## 3 message(s): boundary (singular) fit: see help(&#39;isSingular&#39;)</code></pre>
+<pre><code>##         2.5 %   97.5 %
+## days 7.473151 13.46046</code></pre>
+<div class="sourceCode" id="cb1192"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1192-1"><a href="lecture-notes.html#cb1192-1" tabindex="-1"></a><span class="fu">confint</span>(mod2, <span class="at">parm =</span> <span class="st">&quot;days&quot;</span>, <span class="at">method =</span> <span class="st">&quot;profile&quot;</span>)</span></code></pre></div>
+<pre><code>## Computing profile confidence intervals ...</code></pre>
+<pre><code>##         2.5 %   97.5 %
+## days 7.334067 13.60051</code></pre>
 </div>
-<div id="random-slopes" class="section level3 hasAnchor" number="10.6.5">
-<h3><span class="header-section-number">10.6.5</span> Random Slopes<a href="lecture-notes.html#random-slopes" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>When we have one predictor with random intercepts and slopes, the model can be written like this:</p>
+<div id="comparing-models" class="section level3 hasAnchor" number="10.7.2">
+<h3><span class="header-section-number">10.7.2</span> Comparing models<a href="lecture-notes.html#comparing-models" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>We can use ANOVA to compare nested models. For example, we can compare the model with random slopes to the model without random slopes, or we can compare the model with random slopes and random intercepts to the model with only random intercepts. We can also compare the model with correlated random effects to the model with uncorrelated random effects. Let’s see how to do this in R.</p>
+<div class="sourceCode" id="cb1195"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1195-1"><a href="lecture-notes.html#cb1195-1" tabindex="-1"></a>mod_random_slopes <span class="ot">&lt;-</span> <span class="fu">lmer</span>(reaction <span class="sc">~</span> days <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> days<span class="sc">|</span>subject), <span class="at">data =</span> ss)</span>
+<span id="cb1195-2"><a href="lecture-notes.html#cb1195-2" tabindex="-1"></a>mod_random_intercepts <span class="ot">&lt;-</span> <span class="fu">lmer</span>(reaction <span class="sc">~</span> days <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>subject), <span class="at">data =</span> ss)</span>
+<span id="cb1195-3"><a href="lecture-notes.html#cb1195-3" tabindex="-1"></a><span class="fu">anova</span>(mod_random_intercepts, mod_random_slopes)</span></code></pre></div>
+<pre><code>## refitting model(s) with ML (instead of REML)</code></pre>
+<pre><code>## Data: ss
+## Models:
+## mod_random_intercepts: reaction ~ days + (1 | subject)
+## mod_random_slopes: reaction ~ days + (1 + days | subject)
+##                       npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(&gt;Chisq)
+## mod_random_intercepts    4 1802.1 1814.8 -897.04    1794.1                     
+## mod_random_slopes        6 1763.9 1783.1 -875.97    1751.9 42.139  2  7.072e-10
+##                          
+## mod_random_intercepts    
+## mod_random_slopes     ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>In general, the null hypothesis being tested is that all of the extra parameters in the larger model are zero versus at least one of the parameters is not zero. So, a <span class="math inline">\(p\)</span>-value less than 0.05 is evidence that the larger model is a significantly better fit to the data than the smaller model, which suggests that at least one of the extra parameters in the larger model is not zero. In this case, we are testing whether the variance of the random slopes is zero, which is equivalent to testing whether the random slopes are necessary to explain the variability in the data. If we reject the null hypothesis, we can conclude that there is significant variability in the slopes across subjects, and that the model with random slopes fits significantly better than the model with only random intercepts. If we fail to reject the null hypothesis, we can conclude that there is not enough evidence to suggest that there is significant variability in the slopes across subjects, and that the model with only random intercepts may be sufficient to explain the variability in the data. We can also look at the AIC or BIC values for the two models, which are measures of model fit that penalize for the number of parameters in the model. The model with the lower AIC or BIC value is generally considered to be the better fitting model. In this case, we would expect the model with random slopes to have a lower AIC and BIC value than the model with only random intercepts, which would further support the conclusion that the model with random slopes fits significantly better than the model with only random intercepts.</p>
+<p>We conclude that the model with random slopes fits significantly better than the model with only random intercepts, which suggests that there is significant variability in the slopes across subjects. We can also compare the model with correlated random effects to the model with uncorrelated random effects.</p>
+<p>Now let’s compare the model with correlated random effects to the model with uncorrelated random effects.</p>
+<div class="sourceCode" id="cb1198"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1198-1"><a href="lecture-notes.html#cb1198-1" tabindex="-1"></a>mod_correlated <span class="ot">&lt;-</span> <span class="fu">lmer</span>(reaction <span class="sc">~</span> days <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> days<span class="sc">|</span>subject), <span class="at">data =</span> ss, <span class="at">REML =</span> F)</span>
+<span id="cb1198-2"><a href="lecture-notes.html#cb1198-2" tabindex="-1"></a>mod_uncorrelated <span class="ot">&lt;-</span> <span class="fu">lmer</span>(reaction <span class="sc">~</span> days <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> days<span class="sc">||</span>subject), <span class="at">data =</span> ss, <span class="at">REML =</span> F)</span>
+<span id="cb1198-3"><a href="lecture-notes.html#cb1198-3" tabindex="-1"></a><span class="fu">anova</span>(mod_uncorrelated, mod_correlated)</span></code></pre></div>
+<pre><code>## Data: ss
+## Models:
+## mod_uncorrelated: reaction ~ days + (1 + days || subject)
+## mod_correlated: reaction ~ days + (1 + days | subject)
+##                  npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(&gt;Chisq)
+## mod_uncorrelated    5 1762.0 1778.0 -876.00    1752.0                     
+## mod_correlated      6 1763.9 1783.1 -875.97    1751.9 0.0639  1     0.8004</code></pre>
+<p>The model with <em>uncorrelated</em> random effects fits significantly better than the model with <em>correlated</em> random effects, which suggests that there is not a significant correlation between the random intercepts and random slopes in this data set. This is consistent with the estimate of the correlation that we obtained from the model with correlated random effects, which was close to zero. When we have different fixed effects, we should not use <code>REML = T</code> to compare the models, because the fixed effects are different. Note that <code>anova</code> will fix this for us if we forget.</p>
+<div class="sourceCode" id="cb1200"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1200-1"><a href="lecture-notes.html#cb1200-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lmer</span>(reaction <span class="sc">~</span> days <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>subject), <span class="at">data =</span> ss, <span class="at">REML =</span> F)</span>
+<span id="cb1200-2"><a href="lecture-notes.html#cb1200-2" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(reaction <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>subject), <span class="at">data =</span> ss, <span class="at">REML =</span> F)</span>
+<span id="cb1200-3"><a href="lecture-notes.html#cb1200-3" tabindex="-1"></a><span class="fu">anova</span>(mod2, mod)</span></code></pre></div>
+<pre><code>## Data: ss
+## Models:
+## mod2: reaction ~ 1 + (1 | subject)
+## mod: reaction ~ days + (1 | subject)
+##      npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(&gt;Chisq)    
+## mod2    3 1916.5 1926.1 -955.27    1910.5                         
+## mod     4 1802.1 1814.8 -897.04    1794.1 116.46  1  &lt; 2.2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>The model with the fixed effect of days fits significantly better than the model with only a random intercept. We can re-run this with <code>REML = T</code> and see we get the same answer, with a message.</p>
+<div class="sourceCode" id="cb1202"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1202-1"><a href="lecture-notes.html#cb1202-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lmer</span>(reaction <span class="sc">~</span> days <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>subject), <span class="at">data =</span> ss, <span class="at">REML =</span> T)</span>
+<span id="cb1202-2"><a href="lecture-notes.html#cb1202-2" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(reaction <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>subject), <span class="at">data =</span> ss, <span class="at">REML =</span> T)</span>
+<span id="cb1202-3"><a href="lecture-notes.html#cb1202-3" tabindex="-1"></a><span class="fu">anova</span>(mod2, mod)</span></code></pre></div>
+<pre><code>## refitting model(s) with ML (instead of REML)</code></pre>
+<pre><code>## Data: ss
+## Models:
+## mod2: reaction ~ 1 + (1 | subject)
+## mod: reaction ~ days + (1 | subject)
+##      npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(&gt;Chisq)    
+## mod2    3 1916.5 1926.1 -955.27    1910.5                         
+## mod     4 1802.1 1814.8 -897.04    1794.1 116.46  1  &lt; 2.2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+</div>
+<div id="some-theory" class="section level3 hasAnchor" number="10.7.3">
+<h3><span class="header-section-number">10.7.3</span> Some Theory<a href="lecture-notes.html#some-theory" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>How does <code>lmer</code> estimate the parameters in our models? <code>lmer</code> uses maximum likelihood estimation (MLE) to estimate the parameters of the model. The likelihood function is based on the assumption that the random effects and the residuals are normally distributed. The MLE approach finds the parameter values that maximize the likelihood of observing the data given the model. In practice, <code>lmer</code> uses an optimization algorithm to find the parameter values that maximize the likelihood function, which can be computationally intensive for complex models with many parameters. The estimation process involves iteratively updating the parameter estimates until convergence is achieved, meaning that further updates do not significantly change the parameter estimates.</p>
+<p>Let’s look at an example.</p>
+<div class="sourceCode" id="cb1205"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1205-1"><a href="lecture-notes.html#cb1205-1" tabindex="-1"></a>ss <span class="ot">&lt;-</span> lme4<span class="sc">::</span>sleepstudy <span class="sc">|&gt;</span> </span>
+<span id="cb1205-2"><a href="lecture-notes.html#cb1205-2" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb1205-3"><a href="lecture-notes.html#cb1205-3" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span></code></pre></div>
+<p>We estimate the parameters involved with a <strong>random intercepts</strong> model. To set notation, the mathematical formulation of this model is</p>
 <p><span class="math display">\[
-y_{ij} = \beta_0 + \beta_1 x_{ij} + b_{0i} + b_{1i} x_{ij} + \epsilon_{ij
-\]</span>
-where <span class="math inline">\(b_{0i}\)</span> is the random intercept for group <span class="math inline">\(i\)</span>, and <span class="math inline">\(b_{1i}\)</span> is the random slope for predictor <span class="math inline">\(x\)</span> in group <span class="math inline">\(i\)</span>. We assume that the random effects <span class="math inline">\((b_{0i}, b_{1i})\)</span> are jointly normally distributed with mean 0 and covariance matrix <span class="math inline">\(\Sigma\)</span>, and that the errors <span class="math inline">\(\epsilon_{ij}\)</span> are normally distributed with mean 0 and variance <span class="math inline">\(\sigma^2\)</span>. The random effects and errors are assumed to be independent of each other. Note that we could also combine the fixed effects with the random effects to say that the intercept has mean <span class="math inline">\(\beta_0\)</span> and the slope has mean <span class="math inline">\(\beta_1\)</span>, together with the covariance informarion.</p>
+\text{reaction}_{ij} = \gamma_{00} + \beta_1 \text{days}_{ij} + u_{0i} + \epsilon_{ij}
+\]</span></p>
+<p>We can start by getting reasonable guesses for the values.</p>
+<div class="sourceCode" id="cb1206"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1206-1"><a href="lecture-notes.html#cb1206-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(reaction <span class="sc">~</span> days <span class="sc">+</span> subject, <span class="at">data =</span> ss)</span>
+<span id="cb1206-2"><a href="lecture-notes.html#cb1206-2" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = reaction ~ days + subject, data = ss)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -100.540  -16.389   -0.341   15.215  131.159 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  295.0310    10.4471  28.240  &lt; 2e-16 ***
+## days          10.4673     0.8042  13.015  &lt; 2e-16 ***
+## subject309  -126.9008    13.8597  -9.156 2.35e-16 ***
+## subject310  -111.1326    13.8597  -8.018 2.07e-13 ***
+## subject330   -38.9124    13.8597  -2.808 0.005609 ** 
+## subject331   -32.6978    13.8597  -2.359 0.019514 *  
+## subject332   -34.8318    13.8597  -2.513 0.012949 *  
+## subject333   -25.9755    13.8597  -1.874 0.062718 .  
+## subject334   -46.8318    13.8597  -3.379 0.000913 ***
+## subject335   -92.0638    13.8597  -6.643 4.51e-10 ***
+## subject337    33.5872    13.8597   2.423 0.016486 *  
+## subject349   -66.2994    13.8597  -4.784 3.87e-06 ***
+## subject350   -28.5312    13.8597  -2.059 0.041147 *  
+## subject351   -52.0361    13.8597  -3.754 0.000242 ***
+## subject352    -4.7123    13.8597  -0.340 0.734300    
+## subject369   -36.0992    13.8597  -2.605 0.010059 *  
+## subject370   -50.4321    13.8597  -3.639 0.000369 ***
+## subject371   -47.1498    13.8597  -3.402 0.000844 ***
+## subject372   -24.2477    13.8597  -1.750 0.082108 .  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 30.99 on 161 degrees of freedom
+## Multiple R-squared:  0.7277, Adjusted R-squared:  0.6973 
+## F-statistic: 23.91 on 18 and 161 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>We can guess that <span class="math inline">\(\gamma_{00} \approx 295\)</span> and <span class="math inline">\(\beta_1 \approx 10.5\)</span>. The variance of the residuals is approximately <span class="math inline">\(31^2\)</span> (it will likely be less, depending on how much variance is explained by the random intercept). Now we need to estimate the variance of the random intercepts. We can get a rough estimate of this by looking at the variance of the subject means.</p>
+<div class="sourceCode" id="cb1208"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1208-1"><a href="lecture-notes.html#cb1208-1" tabindex="-1"></a><span class="dv">295</span> <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">coef</span>(mod)[<span class="dv">3</span><span class="sc">:</span><span class="dv">19</span>]) <span class="co">#these are the intercepts</span></span></code></pre></div>
+<pre><code>##            subject309 subject310 subject330 subject331 subject332 subject333 
+##   295.0000   168.0992   183.8674   256.0876   262.3022   260.1682   269.0245 
+## subject334 subject335 subject337 subject349 subject350 subject351 subject352 
+##   248.1682   202.9362   328.5872   228.7006   266.4688   242.9639   290.2877 
+## subject369 subject370 subject371 subject372 
+##   258.9008   244.5679   247.8502   270.7523</code></pre>
+<div class="sourceCode" id="cb1210"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1210-1"><a href="lecture-notes.html#cb1210-1" tabindex="-1"></a><span class="fu">var</span>(<span class="dv">295</span> <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">coef</span>(mod)[<span class="dv">3</span><span class="sc">:</span><span class="dv">19</span>]))</span></code></pre></div>
+<pre><code>## [1] 1474.224</code></pre>
+<p>The variance of the intercepts is about <span class="math inline">\(1474\)</span>. The final estimated value will likely be smaller than this.</p>
+<p>Let’s see what <code>lmer</code> gives.</p>
+<div class="sourceCode" id="cb1212"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1212-1"><a href="lecture-notes.html#cb1212-1" tabindex="-1"></a>mod_lmer <span class="ot">&lt;-</span> lme4<span class="sc">::</span><span class="fu">lmer</span>(reaction <span class="sc">~</span> days <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>subject), <span class="at">data =</span> ss)</span>
+<span id="cb1212-2"><a href="lecture-notes.html#cb1212-2" tabindex="-1"></a><span class="fu">summary</span>(mod_lmer)</span></code></pre></div>
+<pre><code>## Linear mixed model fit by REML [&#39;lmerMod&#39;]
+## Formula: reaction ~ days + (1 | subject)
+##    Data: ss
+## 
+## REML criterion at convergence: 1786.5
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -3.2257 -0.5529  0.0109  0.5188  4.2506 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  subject  (Intercept) 1378.2   37.12   
+##  Residual              960.5   30.99   
+## Number of obs: 180, groups:  subject, 18
+## 
+## Fixed effects:
+##             Estimate Std. Error t value
+## (Intercept) 251.4051     9.7467   25.79
+## days         10.4673     0.8042   13.02
+## 
+## Correlation of Fixed Effects:
+##      (Intr)
+## days -0.371</code></pre>
+<p>Our values are pretty close.</p>
+<p>We can use these values as starting points for the optimization algorithm that <code>lmer</code> uses to find the MLE estimates. Using our mathematical model of <code>reaction</code>, we can see that each response is a function of the fixed effects, the random effects, and the residuals. The distribution of a single response is</p>
+<p><span class="math display">\[
+y_{ij} \sim N(\gamma_{00} + \beta_1 x_{ij}, \tau^2 + \sigma^2)
+\]</span></p>
+<p>where here we use the assumption that <span class="math inline">\(u_{0i} \sim N(0, \tau^2)\)</span> and <span class="math inline">\(\epsilon_{ij} \sim N(0, \sigma^2)\)</span> are independent. The likelihood function is the product of the probability density functions for each response, which is a function of the parameters <span class="math inline">\(\gamma_{00}\)</span>, <span class="math inline">\(\beta_1\)</span>, <span class="math inline">\(\tau^2\)</span>, and <span class="math inline">\(\sigma^2\)</span>. The MLE estimates are the values of these parameters that maximize the likelihood function.</p>
+<p>When we do this, we will maximize the <strong>log</strong> of the likelihood function, in order to keep values reasonably sized.</p>
+<div class="sourceCode" id="cb1214"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1214-1"><a href="lecture-notes.html#cb1214-1" tabindex="-1"></a>like <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
+<span id="cb1214-2"><a href="lecture-notes.html#cb1214-2" tabindex="-1"></a>  gamma <span class="ot">&lt;-</span> par[<span class="dv">1</span>]</span>
+<span id="cb1214-3"><a href="lecture-notes.html#cb1214-3" tabindex="-1"></a>  beta <span class="ot">&lt;-</span> par[<span class="dv">2</span>]</span>
+<span id="cb1214-4"><a href="lecture-notes.html#cb1214-4" tabindex="-1"></a>  tau2 <span class="ot">&lt;-</span> par[<span class="dv">3</span>]</span>
+<span id="cb1214-5"><a href="lecture-notes.html#cb1214-5" tabindex="-1"></a>  sigma2 <span class="ot">&lt;-</span> par[<span class="dv">4</span>]</span>
+<span id="cb1214-6"><a href="lecture-notes.html#cb1214-6" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> gamma <span class="sc">+</span> beta <span class="sc">*</span> ss<span class="sc">$</span>days</span>
+<span id="cb1214-7"><a href="lecture-notes.html#cb1214-7" tabindex="-1"></a>  var <span class="ot">&lt;-</span> tau2 <span class="sc">+</span> sigma2</span>
+<span id="cb1214-8"><a href="lecture-notes.html#cb1214-8" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">sum</span>(<span class="fu">dnorm</span>(ss<span class="sc">$</span>reaction, <span class="at">mean =</span> mu, <span class="at">sd =</span> <span class="fu">sqrt</span>(var), <span class="at">log =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb1214-9"><a href="lecture-notes.html#cb1214-9" tabindex="-1"></a>}</span>
+<span id="cb1214-10"><a href="lecture-notes.html#cb1214-10" tabindex="-1"></a></span>
+<span id="cb1214-11"><a href="lecture-notes.html#cb1214-11" tabindex="-1"></a><span class="fu">like</span>(<span class="fu">c</span>(<span class="dv">295</span>, <span class="fl">10.5</span>, <span class="dv">1474</span>, <span class="dv">961</span>))</span></code></pre></div>
+<pre><code>## [1] 1021.136</code></pre>
+<div class="sourceCode" id="cb1216"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1216-1"><a href="lecture-notes.html#cb1216-1" tabindex="-1"></a>oo <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">295</span>, <span class="fl">10.5</span>, <span class="dv">1474</span>, <span class="dv">961</span>), <span class="at">fn =</span> like, <span class="at">method =</span> <span class="st">&quot;L-BFGS-B&quot;</span>, <span class="at">lower =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="sc">-</span><span class="cn">Inf</span>, <span class="dv">0</span>, <span class="dv">0</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb1217"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1217-1"><a href="lecture-notes.html#cb1217-1" tabindex="-1"></a><span class="fu">like</span>(oo<span class="sc">$</span>par)</span></code></pre></div>
+<pre><code>## [1] 950.1465</code></pre>
+<div class="sourceCode" id="cb1219"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1219-1"><a href="lecture-notes.html#cb1219-1" tabindex="-1"></a>tidy_modlmer <span class="ot">&lt;-</span> broom.mixed<span class="sc">::</span><span class="fu">tidy</span>(mod_lmer)</span>
+<span id="cb1219-2"><a href="lecture-notes.html#cb1219-2" tabindex="-1"></a><span class="fu">like</span>(<span class="fu">c</span>(tidy_modlmer<span class="sc">$</span>estimate[<span class="dv">1</span>], tidy_modlmer<span class="sc">$</span>estimate[<span class="dv">2</span>], tidy_modlmer<span class="sc">$</span>estimate[<span class="dv">3</span>]<span class="sc">^</span><span class="dv">2</span>, tidy_modlmer<span class="sc">$</span>estimate[<span class="dv">4</span>]<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div>
+<pre><code>## [1] 950.2107</code></pre>
+<p>We can see that we don’t quite get the fully correct answer. This is because the optimization method that we are using doesn’t converge rapidly to the global maximum. It senses convergence and ends even though we are a bit away from the global maximum. The method that <code>lmer</code> uses is more sophisticated; if you are interested in learning details about how to find maxima and minima, we will be offering a course on optimization next year that you can take.</p>
 <p><strong>Aside: Multivariate Normal Distribution</strong></p>
 <p>When we have random slopes, we need to consider the joint distribution of the random intercepts and slopes. This is typically assumed to be a multivariate normal distribution. The multivariate normal distribution is a generalization of the univariate normal distribution to multiple dimensions. It is defined by a mean vector and a covariance matrix. The mean vector gives the expected value of each variable, while the covariance matrix gives the variance of each variable and the covariance between each pair of variables. Let’s look at an example:</p>
-<div class="sourceCode" id="cb1190"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1190-1"><a href="lecture-notes.html#cb1190-1" tabindex="-1"></a>Sigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">5</span>), <span class="at">nrow =</span> <span class="dv">2</span>)</span>
-<span id="cb1190-2"><a href="lecture-notes.html#cb1190-2" tabindex="-1"></a><span class="fu">eigen</span>(Sigma) <span class="co">#this is a positive definite matrix, so it is a valid covariance matrix</span></span></code></pre></div>
+<div class="sourceCode" id="cb1221"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1221-1"><a href="lecture-notes.html#cb1221-1" tabindex="-1"></a>Sigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">5</span>), <span class="at">nrow =</span> <span class="dv">2</span>)</span>
+<span id="cb1221-2"><a href="lecture-notes.html#cb1221-2" tabindex="-1"></a><span class="fu">eigen</span>(Sigma) <span class="co">#this is a positive definite matrix, so it is a valid covariance matrix</span></span></code></pre></div>
 <pre><code>## eigen() decomposition
 ## $values
 ## [1] 6.236068 1.763932
@@ -2104,69 +2262,72 @@ where <span class="math inline">\(b_{0i}\)</span> is the random intercept for gr
 ##           [,1]       [,2]
 ## [1,] 0.5257311 -0.8506508
 ## [2,] 0.8506508  0.5257311</code></pre>
-<div class="sourceCode" id="cb1192"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1192-1"><a href="lecture-notes.html#cb1192-1" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(<span class="at">n =</span> <span class="dv">1000</span>, <span class="at">mu =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>), <span class="at">Sigma =</span> Sigma))</span>
-<span id="cb1192-2"><a href="lecture-notes.html#cb1192-2" tabindex="-1"></a></span>
-<span id="cb1192-3"><a href="lecture-notes.html#cb1192-3" tabindex="-1"></a><span class="fu">ggplot</span>(dd, <span class="fu">aes</span>(<span class="at">x =</span> X1, <span class="at">y =</span> X2)) <span class="sc">+</span> </span>
-<span id="cb1192-4"><a href="lecture-notes.html#cb1192-4" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
-<span id="cb1192-5"><a href="lecture-notes.html#cb1192-5" tabindex="-1"></a>  <span class="fu">coord_equal</span>() </span></code></pre></div>
-<p><img src="10-lecture-notes_files/figure-html/unnamed-chunk-62-1.png" width="672" /></p>
+<div class="sourceCode" id="cb1223"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1223-1"><a href="lecture-notes.html#cb1223-1" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(<span class="at">n =</span> <span class="dv">1000</span>, <span class="at">mu =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>), <span class="at">Sigma =</span> Sigma))</span>
+<span id="cb1223-2"><a href="lecture-notes.html#cb1223-2" tabindex="-1"></a></span>
+<span id="cb1223-3"><a href="lecture-notes.html#cb1223-3" tabindex="-1"></a><span class="fu">ggplot</span>(dd, <span class="fu">aes</span>(<span class="at">x =</span> X1, <span class="at">y =</span> X2)) <span class="sc">+</span> </span>
+<span id="cb1223-4"><a href="lecture-notes.html#cb1223-4" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb1223-5"><a href="lecture-notes.html#cb1223-5" tabindex="-1"></a>  <span class="fu">coord_equal</span>() </span></code></pre></div>
+<p><img src="10-lecture-notes_files/figure-html/unnamed-chunk-71-1.png" width="672" /></p>
 <p>To force independence of the coordinates, we set the covariances equal to zero. Note that for general rvs, uncorrelated does not imply independent, but for multivariate normal rvs, uncorrelated does imply independent.</p>
 <p><strong>End Aside</strong></p>
 <p>Let’s see how to simulate the data from a model with random slopes as described above. We assume for simplicity that the random effects are independent, so that the covariance matrix <span class="math inline">\(\Sigma\)</span> is <span class="math inline">\(2 \times 2\)</span> diagonal.</p>
-<div class="sourceCode" id="cb1193"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1193-1"><a href="lecture-notes.html#cb1193-1" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="dv">10</span> <span class="co">#number of groups</span></span>
-<span id="cb1193-2"><a href="lecture-notes.html#cb1193-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">5</span> <span class="co"># observations per group</span></span>
-<span id="cb1193-3"><a href="lecture-notes.html#cb1193-3" tabindex="-1"></a>groups <span class="ot">&lt;-</span> <span class="fu">factor</span>(letters[<span class="dv">1</span><span class="sc">:</span>g]) <span class="co">#this only works if g &lt;= 26!</span></span>
-<span id="cb1193-4"><a href="lecture-notes.html#cb1193-4" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(g <span class="sc">*</span> n, <span class="dv">0</span>, <span class="dv">10</span>) <span class="co">#these are the predictors</span></span>
-<span id="cb1193-5"><a href="lecture-notes.html#cb1193-5" tabindex="-1"></a>sigma_b <span class="ot">&lt;-</span> <span class="fl">1.5</span></span>
-<span id="cb1193-6"><a href="lecture-notes.html#cb1193-6" tabindex="-1"></a>sigma_c <span class="ot">&lt;-</span> <span class="dv">2</span></span>
-<span id="cb1193-7"><a href="lecture-notes.html#cb1193-7" tabindex="-1"></a>b0 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(g, <span class="dv">0</span>, sigma_b) <span class="co">#these are the random intercepts for each group</span></span>
-<span id="cb1193-8"><a href="lecture-notes.html#cb1193-8" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(g, <span class="dv">0</span>, sigma_c) <span class="co">#these are the random slopes for each group</span></span>
-<span id="cb1193-9"><a href="lecture-notes.html#cb1193-9" tabindex="-1"></a>beta0 <span class="ot">&lt;-</span> <span class="dv">3</span></span>
-<span id="cb1193-10"><a href="lecture-notes.html#cb1193-10" tabindex="-1"></a>beta1 <span class="ot">&lt;-</span> <span class="dv">2</span></span>
-<span id="cb1193-11"><a href="lecture-notes.html#cb1193-11" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb1193-12"><a href="lecture-notes.html#cb1193-12" tabindex="-1"></a>y <span class="ot">&lt;-</span> beta0 <span class="sc">+</span> beta1 <span class="sc">*</span> x <span class="sc">+</span> <span class="fu">rep</span>(b0, <span class="at">each =</span> n) <span class="sc">+</span> <span class="fu">rep</span>(b1, <span class="at">each =</span> n) <span class="sc">*</span> x <span class="sc">+</span>  <span class="fu">rnorm</span>(g <span class="sc">*</span> n, <span class="dv">0</span>, sigma) <span class="co">#these are the responses, note that sigma^2 = 1, beta_0 = 3, and beta_1 = 0.5</span></span>
-<span id="cb1193-13"><a href="lecture-notes.html#cb1193-13" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> x,</span>
-<span id="cb1193-14"><a href="lecture-notes.html#cb1193-14" tabindex="-1"></a>                 <span class="at">y =</span> y,</span>
-<span id="cb1193-15"><a href="lecture-notes.html#cb1193-15" tabindex="-1"></a>                 <span class="at">g =</span> <span class="fu">rep</span>(groups, <span class="at">each =</span> n))</span>
-<span id="cb1193-16"><a href="lecture-notes.html#cb1193-16" tabindex="-1"></a><span class="fu">ggplot</span>(dd, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">color =</span> g)) <span class="sc">+</span> </span>
-<span id="cb1193-17"><a href="lecture-notes.html#cb1193-17" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
-<span id="cb1193-18"><a href="lecture-notes.html#cb1193-18" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se =</span> F)</span></code></pre></div>
+<div class="sourceCode" id="cb1224"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1224-1"><a href="lecture-notes.html#cb1224-1" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="dv">10</span> <span class="co">#number of groups</span></span>
+<span id="cb1224-2"><a href="lecture-notes.html#cb1224-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">5</span> <span class="co"># observations per group</span></span>
+<span id="cb1224-3"><a href="lecture-notes.html#cb1224-3" tabindex="-1"></a>groups <span class="ot">&lt;-</span> <span class="fu">factor</span>(letters[<span class="dv">1</span><span class="sc">:</span>g]) <span class="co">#this only works if g &lt;= 26!</span></span>
+<span id="cb1224-4"><a href="lecture-notes.html#cb1224-4" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(g <span class="sc">*</span> n, <span class="dv">0</span>, <span class="dv">10</span>) <span class="co">#these are the predictors</span></span>
+<span id="cb1224-5"><a href="lecture-notes.html#cb1224-5" tabindex="-1"></a>sigma_b <span class="ot">&lt;-</span> <span class="fl">1.5</span></span>
+<span id="cb1224-6"><a href="lecture-notes.html#cb1224-6" tabindex="-1"></a>sigma_c <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb1224-7"><a href="lecture-notes.html#cb1224-7" tabindex="-1"></a>b0 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(g, <span class="dv">0</span>, sigma_b) <span class="co">#these are the random intercepts for each group</span></span>
+<span id="cb1224-8"><a href="lecture-notes.html#cb1224-8" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(g, <span class="dv">0</span>, sigma_c) <span class="co">#these are the random slopes for each group</span></span>
+<span id="cb1224-9"><a href="lecture-notes.html#cb1224-9" tabindex="-1"></a>beta0 <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb1224-10"><a href="lecture-notes.html#cb1224-10" tabindex="-1"></a>beta1 <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb1224-11"><a href="lecture-notes.html#cb1224-11" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb1224-12"><a href="lecture-notes.html#cb1224-12" tabindex="-1"></a>y <span class="ot">&lt;-</span> beta0 <span class="sc">+</span> beta1 <span class="sc">*</span> x <span class="sc">+</span> <span class="fu">rep</span>(b0, <span class="at">each =</span> n) <span class="sc">+</span> <span class="fu">rep</span>(b1, <span class="at">each =</span> n) <span class="sc">*</span> x <span class="sc">+</span>  <span class="fu">rnorm</span>(g <span class="sc">*</span> n, <span class="dv">0</span>, sigma) <span class="co">#these are the responses, note that sigma^2 = 1, beta_0 = 3, and beta_1 = 0.5</span></span>
+<span id="cb1224-13"><a href="lecture-notes.html#cb1224-13" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> x,</span>
+<span id="cb1224-14"><a href="lecture-notes.html#cb1224-14" tabindex="-1"></a>                 <span class="at">y =</span> y,</span>
+<span id="cb1224-15"><a href="lecture-notes.html#cb1224-15" tabindex="-1"></a>                 <span class="at">g =</span> <span class="fu">rep</span>(groups, <span class="at">each =</span> n))</span>
+<span id="cb1224-16"><a href="lecture-notes.html#cb1224-16" tabindex="-1"></a><span class="fu">ggplot</span>(dd, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">color =</span> g)) <span class="sc">+</span> </span>
+<span id="cb1224-17"><a href="lecture-notes.html#cb1224-17" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb1224-18"><a href="lecture-notes.html#cb1224-18" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se =</span> F)</span></code></pre></div>
 <pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
-<p><img src="10-lecture-notes_files/figure-html/unnamed-chunk-63-1.png" width="672" /></p>
+<p><img src="10-lecture-notes_files/figure-html/unnamed-chunk-72-1.png" width="672" /></p>
 <p>In order to estimate the parameters of our model, we use <code>lme4::lmer</code>.</p>
-<div class="sourceCode" id="cb1195"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1195-1"><a href="lecture-notes.html#cb1195-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lmer</span>(y <span class="sc">~</span> x <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> x<span class="sc">||</span>g), <span class="at">data =</span> dd) <span class="co">#We use || to force there to be no covariance between beta_0 and beta_1</span></span>
-<span id="cb1195-2"><a href="lecture-notes.html#cb1195-2" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
+<div class="sourceCode" id="cb1226"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1226-1"><a href="lecture-notes.html#cb1226-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lmer</span>(y <span class="sc">~</span> x <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> x<span class="sc">||</span>g), <span class="at">data =</span> dd) <span class="co">#We use || to force there to be no covariance between beta_0 and beta_1</span></span></code></pre></div>
+<pre><code>## boundary (singular) fit: see help(&#39;isSingular&#39;)</code></pre>
+<div class="sourceCode" id="cb1228"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1228-1"><a href="lecture-notes.html#cb1228-1" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
 <pre><code>## Linear mixed model fit by REML. t-tests use Satterthwaite&#39;s method [
 ## lmerModLmerTest]
 ## Formula: y ~ x + (1 + x || g)
 ##    Data: dd
 ## 
-## REML criterion at convergence: 228.4
+## REML criterion at convergence: 208
 ## 
 ## Scaled residuals: 
-##      Min       1Q   Median       3Q      Max 
-## -1.96633 -0.44957 -0.02689  0.43947  2.06316 
+##     Min      1Q  Median      3Q     Max 
+## -1.4536 -0.7723  0.1211  0.5907  2.3635 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev.
-##  g        (Intercept) 1.272    1.128   
-##  g.1      x           5.452    2.335   
-##  Residual             1.562    1.250   
+##  g        (Intercept) 0.000    0.000   
+##  g.1      x           4.922    2.219   
+##  Residual             1.048    1.024   
 ## Number of obs: 50, groups:  g, 10
 ## 
 ## Fixed effects:
-##             Estimate Std. Error     df t value Pr(&gt;|t|)    
-## (Intercept)   2.7821     0.5020 8.9177   5.542 0.000372 ***
-## x             2.7664     0.7423 9.0767   3.727 0.004652 ** 
+##             Estimate Std. Error       df t value Pr(&gt;|t|)    
+## (Intercept)  2.88818    0.29672 39.00583   9.734 5.46e-12 ***
+## x           -0.06247    0.70353  9.07527  -0.089    0.931    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## Correlation of Fixed Effects:
 ##   (Intr)
-## x -0.060</code></pre>
+## x -0.064
+## optimizer (nloptwrap) convergence code: 0 (OK)
+## boundary (singular) fit: see help(&#39;isSingular&#39;)</code></pre>
 <p>Let’s apply this now to the <code>sleepstudy</code> data from before.</p>
-<div class="sourceCode" id="cb1197"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1197-1"><a href="lecture-notes.html#cb1197-1" tabindex="-1"></a>mod_sleep <span class="ot">&lt;-</span> <span class="fu">lmer</span>(reaction <span class="sc">~</span> days <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> days <span class="sc">||</span> subject), <span class="at">data =</span> ss) <span class="co">#assuming uncorrelated random effects</span></span>
-<span id="cb1197-2"><a href="lecture-notes.html#cb1197-2" tabindex="-1"></a><span class="fu">summary</span>(mod_sleep)</span></code></pre></div>
+<div class="sourceCode" id="cb1230"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1230-1"><a href="lecture-notes.html#cb1230-1" tabindex="-1"></a>mod_sleep <span class="ot">&lt;-</span> <span class="fu">lmer</span>(reaction <span class="sc">~</span> days <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> days <span class="sc">||</span> subject), <span class="at">data =</span> ss) <span class="co">#assuming uncorrelated random effects</span></span>
+<span id="cb1230-2"><a href="lecture-notes.html#cb1230-2" tabindex="-1"></a><span class="fu">summary</span>(mod_sleep)</span></code></pre></div>
 <pre><code>## Linear mixed model fit by REML. t-tests use Satterthwaite&#39;s method [
 ## lmerModLmerTest]
 ## Formula: reaction ~ days + (1 + days || subject)
@@ -2196,12 +2357,150 @@ where <span class="math inline">\(b_{0i}\)</span> is the random intercept for gr
 ##      (Intr)
 ## days -0.184</code></pre>
 <p>Note that we can see from the estimates that the slope has mean 10.467 and standard deviation 6. This says that about 4 percent of people will have reaction times that <strong>decrease</strong> over time when this experiment is run, based on our model.</p>
-<div class="sourceCode" id="cb1199"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1199-1"><a href="lecture-notes.html#cb1199-1" tabindex="-1"></a><span class="fu">pnorm</span>(<span class="dv">0</span>, <span class="fl">10.467</span>, <span class="dv">6</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1232"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1232-1"><a href="lecture-notes.html#cb1232-1" tabindex="-1"></a><span class="fu">pnorm</span>(<span class="dv">0</span>, <span class="fl">10.467</span>, <span class="dv">6</span>)</span></code></pre></div>
 <pre><code>## [1] 0.04053597</code></pre>
 <p>While this may not be compelling, imagine a drug trial where we are trying to show that the fixed effect of a drug is positive. If the standard deviation of the random slope is large, then it is possible that a non-trivial proportion of people will have a negative effect of the drug, even if the average effect is positive. This is an important consideration when interpreting the results of a mixed effect model, and it highlights the importance of looking at both the fixed effects and the random effects when making inferences from the model.</p>
 </div>
-<div id="comparison-of-models" class="section level3 hasAnchor" number="10.6.6">
-<h3><span class="header-section-number">10.6.6</span> Comparison of Models<a href="lecture-notes.html#comparison-of-models" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="intro-to-random-effects-and-mixed-effect-models---terminology-and-first-examples" class="section level3 hasAnchor" number="10.7.4">
+<h3><span class="header-section-number">10.7.4</span> Intro to Random Effects and Mixed Effect Models - Terminology and First Examples<a href="lecture-notes.html#intro-to-random-effects-and-mixed-effect-models---terminology-and-first-examples" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>First off, let’s get some terminology down. A <strong>fixed effect</strong> is an effect that is constant across individuals or groups. For example, the effect of a treatment in a clinical trial is often considered a fixed effect, because we are interested in the average effect of the treatment across all individuals. This is a modeling decision that we make based on our research question and the structure of our data. In the <code>sleepstudy</code> data set, the effect of <code>days</code> on <code>reaction</code> could be considered a fixed effect, because we are interested in the overall association between days of sleep deprivation and reaction time across all subjects.</p>
+<p>A <strong>random effect</strong> is an effect that varies across individuals or groups. For example, the intercepts and slopes for each subject in the <code>sleepstudy</code> data set can be considered random effects, because they vary across subjects. A <strong>mixed effect model</strong> is a model that contains both fixed effects and random effects. In the <code>sleepstudy</code> data set, a mixed effect model would include the fixed effect of <code>days</code> and the random effects of the intercepts and slopes for each subject.</p>
+<p>Mixed effect models go by many different names in different disciplines. If you hear these words, the person may be talking about mixed effect models or something very similar:</p>
+<ul>
+<li>multilevel models</li>
+<li>hierarchical linear models</li>
+<li>random effects models</li>
+<li>linear mixed models</li>
+<li>Variance components models</li>
+<li>BLUP models (genetics)</li>
+<li>Penalized least squares (numerical analysis - these are more general than mixed models, but they include mixed models as a special case)</li>
+<li>Probably many more</li>
+</ul>
+<p>Let’s start by fully specifying a mixed effect model which includes a random intercept and a fixed effect slope of one variable. The model can be written as
+<span class="math display">\[
+y_{ij} = \beta_0 + \beta_1 x_{ij} + b_{0i} + \epsilon_{ij}
+\]</span>
+where <span class="math inline">\(y_{ij}\)</span> is the response variable for the <span class="math inline">\(j\)</span>th observation in group <span class="math inline">\(i\)</span>, <span class="math inline">\(\beta_0\)</span> is the overall intercept, <span class="math inline">\(\beta_1\)</span> is the fixed effect slope for predictor <span class="math inline">\(x\)</span>, <span class="math inline">\(b_{0i}\)</span> is the random intercept for group <span class="math inline">\(i\)</span>, and <span class="math inline">\(\epsilon_{ij}\)</span> is the random error term. We assume that the random effects <span class="math inline">\(b_{0i}\)</span> are normally distributed with mean 0 and variance <span class="math inline">\(\sigma_b^2\)</span>, and that the errors <span class="math inline">\(\epsilon_{ij}\)</span> are normally distributed with mean 0 and variance <span class="math inline">\(\sigma^2\)</span>. The random effects and errors are assumed to be independent of each other.</p>
+<p>Note that we are splitting the <strong>mean</strong> of the intercept and the <strong>variance</strong> of the intercept into two components. We could also have said the <span class="math inline">\(b_{0i}\)</span> are normal with mean <span class="math inline">\(\beta_0\)</span> and variance <span class="math inline">\(\sigma_b^2\)</span>.</p>
+<p>The fixed effect <span class="math inline">\(\beta_1\)</span> represents the average effect of predictor <span class="math inline">\(x\)</span> on the response variable across all groups, while the random effects <span class="math inline">\(b_{0i}\)</span> represent the deviation of each group’s intercept from the overall intercept <span class="math inline">\(\beta_0\)</span>. The variance <span class="math inline">\(\sigma_b^2\)</span> captures the variability in the intercepts across groups, while <span class="math inline">\(\sigma^2\)</span> captures the variability within groups.</p>
+<p>Here is how we can <strong>simulate</strong> data like this:</p>
+<div class="sourceCode" id="cb1234"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1234-1"><a href="lecture-notes.html#cb1234-1" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="dv">10</span> <span class="co">#number of groups</span></span>
+<span id="cb1234-2"><a href="lecture-notes.html#cb1234-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">5</span> <span class="co"># observations per group</span></span>
+<span id="cb1234-3"><a href="lecture-notes.html#cb1234-3" tabindex="-1"></a>groups <span class="ot">&lt;-</span> <span class="fu">factor</span>(letters[<span class="dv">1</span><span class="sc">:</span>g]) <span class="co">#this only works if g &lt;= 26!</span></span>
+<span id="cb1234-4"><a href="lecture-notes.html#cb1234-4" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb1234-5"><a href="lecture-notes.html#cb1234-5" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(g <span class="sc">*</span> n, <span class="dv">0</span>, <span class="dv">10</span>) <span class="co">#these are the predictors</span></span>
+<span id="cb1234-6"><a href="lecture-notes.html#cb1234-6" tabindex="-1"></a>sigma_b <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb1234-7"><a href="lecture-notes.html#cb1234-7" tabindex="-1"></a>b0 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(g, <span class="dv">0</span>, sigma_b) <span class="co">#these are the random intercepts for each group</span></span>
+<span id="cb1234-8"><a href="lecture-notes.html#cb1234-8" tabindex="-1"></a>beta0 <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb1234-9"><a href="lecture-notes.html#cb1234-9" tabindex="-1"></a>beta1 <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb1234-10"><a href="lecture-notes.html#cb1234-10" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb1234-11"><a href="lecture-notes.html#cb1234-11" tabindex="-1"></a>y <span class="ot">&lt;-</span> beta0 <span class="sc">+</span> beta1 <span class="sc">*</span> x <span class="sc">+</span> <span class="fu">rep</span>(b0, <span class="at">each =</span> n) <span class="sc">+</span> <span class="fu">rnorm</span>(g <span class="sc">*</span> n, <span class="dv">0</span>, sigma) <span class="co">#these are the responses, note that sigma^2 = 1, beta_0 = 3, and beta_1 = 0.5</span></span>
+<span id="cb1234-12"><a href="lecture-notes.html#cb1234-12" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> x,</span>
+<span id="cb1234-13"><a href="lecture-notes.html#cb1234-13" tabindex="-1"></a>                 <span class="at">y =</span> y,</span>
+<span id="cb1234-14"><a href="lecture-notes.html#cb1234-14" tabindex="-1"></a>                 <span class="at">g =</span> <span class="fu">rep</span>(groups, <span class="at">each =</span> n))</span>
+<span id="cb1234-15"><a href="lecture-notes.html#cb1234-15" tabindex="-1"></a><span class="fu">ggplot</span>(dd, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">color =</span> g)) <span class="sc">+</span> </span>
+<span id="cb1234-16"><a href="lecture-notes.html#cb1234-16" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb1234-17"><a href="lecture-notes.html#cb1234-17" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se =</span> F)</span></code></pre></div>
+<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
+<p><img src="10-lecture-notes_files/figure-html/unnamed-chunk-76-1.png" width="672" /></p>
+<p>Here we can see that the slopes all look more or less the same, but the intercepts are probably different. Let’s see how we could estimate the parameters in our model. This is not exactly how the programs that we use will do it, but it gives a flavor of the ideas.</p>
+<p>First, we could estimate the fixed effect slope <span class="math inline">\(\beta_1\)</span> and the mean of the random intercept <span class="math inline">\(\beta_0\)</span> by fitting a linear model that ignores the grouping structure of the data. This is not ideal, but it gives us a starting point. We should definitely not use the <span class="math inline">\(p\)</span>-values.</p>
+<div class="sourceCode" id="cb1236"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1236-1"><a href="lecture-notes.html#cb1236-1" tabindex="-1"></a>mod_fixed <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x, <span class="at">data =</span> dd)</span>
+<span id="cb1236-2"><a href="lecture-notes.html#cb1236-2" tabindex="-1"></a><span class="fu">summary</span>(mod_fixed)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = y ~ x, data = dd)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -4.0639 -1.2257  0.0424  0.8666  5.3072 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  2.84025    0.59583   4.767 1.77e-05 ***
+## x            0.49262    0.09982   4.935 1.01e-05 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1.902 on 48 degrees of freedom
+## Multiple R-squared:  0.3366, Adjusted R-squared:  0.3228 
+## F-statistic: 24.35 on 1 and 48 DF,  p-value: 1.005e-05</code></pre>
+<p>Next, we could estimate the random effects <span class="math inline">\(b_{0i}\)</span> by fitting a linear model that includes the group as a fixed effect. This will give us estimates of the intercepts for each group, which we can then use to estimate the variance of the random effects.</p>
+<div class="sourceCode" id="cb1238"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1238-1"><a href="lecture-notes.html#cb1238-1" tabindex="-1"></a>mod_full <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x <span class="sc">+</span> g, <span class="at">data =</span> dd)</span>
+<span id="cb1238-2"><a href="lecture-notes.html#cb1238-2" tabindex="-1"></a><span class="fu">summary</span>(mod_full)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = y ~ x + g, data = dd)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -2.2982 -0.5209 -0.1299  0.5674  1.9430 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  2.75627    0.49259   5.596 1.89e-06 ***
+## x            0.57119    0.05334  10.709 3.55e-13 ***
+## gb          -0.49336    0.60947  -0.809   0.4231    
+## gc          -2.77550    0.60238  -4.608 4.28e-05 ***
+## gd          -1.10549    0.61250  -1.805   0.0788 .  
+## ge           0.96834    0.60245   1.607   0.1160    
+## gf           3.14483    0.60331   5.213 6.39e-06 ***
+## gg           0.10459    0.60297   0.173   0.8632    
+## gh           0.27154    0.60369   0.450   0.6553    
+## gi          -0.47174    0.61191  -0.771   0.4454    
+## gj          -2.98804    0.60376  -4.949 1.47e-05 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.9523 on 39 degrees of freedom
+## Multiple R-squared:  0.8649, Adjusted R-squared:  0.8303 
+## F-statistic: 24.97 on 10 and 39 DF,  p-value: 6.241e-14</code></pre>
+<p>Finally, we could use the estimates from the previous two models to estimate the variance components <span class="math inline">\(\sigma_b^2\)</span> and <span class="math inline">\(\sigma^2\)</span>. This is typically done using restricted maximum likelihood (REML) or maximum likelihood (ML) estimation, which are more efficient than the method of moments that we are using here.</p>
+<div class="sourceCode" id="cb1240"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1240-1"><a href="lecture-notes.html#cb1240-1" tabindex="-1"></a><span class="co">#Not recommended - just for illustration</span></span>
+<span id="cb1240-2"><a href="lecture-notes.html#cb1240-2" tabindex="-1"></a>broom<span class="sc">::</span><span class="fu">tidy</span>(mod_full) <span class="sc">|&gt;</span>  </span>
+<span id="cb1240-3"><a href="lecture-notes.html#cb1240-3" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">str_detect</span>(term, <span class="st">&quot;g|tercept&quot;</span>)) <span class="sc">|&gt;</span>  </span>
+<span id="cb1240-4"><a href="lecture-notes.html#cb1240-4" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">estimate =</span> <span class="fu">ifelse</span>(<span class="fu">str_detect</span>(term, <span class="st">&quot;Inter&quot;</span>), <span class="dv">0</span>, estimate)) <span class="sc">|&gt;</span> </span>
+<span id="cb1240-5"><a href="lecture-notes.html#cb1240-5" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">var_b =</span> <span class="fu">var</span>(estimate)) <span class="co">#this is an estimate of sigma_b^2ilt</span></span></code></pre></div>
+<pre><code>## # A tibble: 1 × 1
+##   var_b
+##   &lt;dbl&gt;
+## 1  3.12</code></pre>
+<p>This is an estimate for the variance of the random intercepts, <span class="math inline">\(\sigma_b^2\)</span>. Recall that the true value was 4. Finally, we can estimate <span class="math inline">\(\sigma^2\)</span> by looking at the residuals from the full model.</p>
+<div class="sourceCode" id="cb1242"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1242-1"><a href="lecture-notes.html#cb1242-1" tabindex="-1"></a><span class="co">#just for illustration</span></span>
+<span id="cb1242-2"><a href="lecture-notes.html#cb1242-2" tabindex="-1"></a><span class="fu">var</span>(<span class="fu">resid</span>(mod_full))</span></code></pre></div>
+<pre><code>## [1] 0.7218008</code></pre>
+<p>This is an estimate for the variance of the errors, <span class="math inline">\(\sigma^2\)</span>. Recall that the true value was 1. <strong>Note that there are definitely issues with doing it this way</strong>, but in this simple case the estimates that we get are not too far off.</p>
+<p>To use more sophisticated tools, we use the package <code>lme4</code>.</p>
+<div class="sourceCode" id="cb1244"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1244-1"><a href="lecture-notes.html#cb1244-1" tabindex="-1"></a>mod_mixed <span class="ot">&lt;-</span> lme4<span class="sc">::</span><span class="fu">lmer</span>(y <span class="sc">~</span> x <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> g), <span class="at">data =</span> dd) <span class="co">#the (1|g) indicates that we have a random intercept. The fixed effects are entered just like before</span></span>
+<span id="cb1244-2"><a href="lecture-notes.html#cb1244-2" tabindex="-1"></a><span class="fu">summary</span>(mod_mixed)</span></code></pre></div>
+<pre><code>## Linear mixed model fit by REML [&#39;lmerMod&#39;]
+## Formula: y ~ x + (1 | g)
+##    Data: dd
+## 
+## REML criterion at convergence: 166.8
+## 
+## Scaled residuals: 
+##      Min       1Q   Median       3Q      Max 
+## -2.38213 -0.51459 -0.04616  0.52749  2.25158 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  g        (Intercept) 2.9386   1.7142  
+##  Residual             0.9069   0.9523  
+## Number of obs: 50, groups:  g, 10
+## 
+## Fixed effects:
+##             Estimate Std. Error t value
+## (Intercept)  2.44928    0.62613   3.912
+## x            0.56603    0.05312  10.655
+## 
+## Correlation of Fixed Effects:
+##   (Intr)
+## x -0.452</code></pre>
+<p>This model includes a random intercept for each group, but assumes that the slope is the same across groups. The output gives us estimates for the fixed effects (the overall intercept and slope) as well as the variance components (the variance of the random intercepts and the variance of the errors).</p>
+</div>
+<div id="comparison-of-models" class="section level3 hasAnchor" number="10.7.5">
+<h3><span class="header-section-number">10.7.5</span> Comparison of Models<a href="lecture-notes.html#comparison-of-models" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 
 </div>
 </div>
@@ -2211,7 +2510,6 @@ where <span class="math inline">\(b_{0i}\)</span> is the random intercept for gr
 <ol start="5">
 <li id="fn5"><p>This section was written with RStudio Copilot turned on, so there may be some errors. Please let me know if you find any.<a href="lecture-notes.html#fnref5" class="footnote-back">↩︎</a></p></li>
 <li id="fn6"><p>Claude AI typset this through “The key feature”<a href="lecture-notes.html#fnref6" class="footnote-back">↩︎</a></p></li>
-<li id="fn7"><p>How many is several? I am not sure, but it is definitely more than a few! <a href="https://www.cambridge.org/core/journals/language-and-cognition/article/few-or-several-construal-quantity-and-argumentativity/C371FD195F4461E4C7711E75C46C1458">source</a><a href="lecture-notes.html#fnref7" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
             </section>

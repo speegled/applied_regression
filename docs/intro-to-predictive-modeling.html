@@ -23,7 +23,7 @@
 <meta name="author" content="Darrin Speegle" />
 
 
-<meta name="date" content="2026-02-16" />
+<meta name="date" content="2026-02-18" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -285,11 +285,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="10.6" data-path="lecture-notes.html"><a href="lecture-notes.html#february-17"><i class="fa fa-check"></i><b>10.6</b> February 17</a>
 <ul>
 <li class="chapter" data-level="10.6.1" data-path="lecture-notes.html"><a href="lecture-notes.html#adding-random-speaker-and-sentence-effects"><i class="fa fa-check"></i><b>10.6.1</b> Adding random speaker and sentence effects</a></li>
-<li class="chapter" data-level="10.6.2" data-path="lecture-notes.html"><a href="lecture-notes.html#random-intercepts-with-continunous-predictor"><i class="fa fa-check"></i><b>10.6.2</b> Random intercepts with continunous predictor</a></li>
-<li class="chapter" data-level="10.6.3" data-path="lecture-notes.html"><a href="lecture-notes.html#heading-towards-mixed-models"><i class="fa fa-check"></i><b>10.6.3</b> Heading towards mixed models</a></li>
-<li class="chapter" data-level="10.6.4" data-path="lecture-notes.html"><a href="lecture-notes.html#intro-to-random-effects-and-mixed-effect-models---terminology-and-first-examples"><i class="fa fa-check"></i><b>10.6.4</b> Intro to Random Effects and Mixed Effect Models - Terminology and First Examples</a></li>
-<li class="chapter" data-level="10.6.5" data-path="lecture-notes.html"><a href="lecture-notes.html#random-slopes"><i class="fa fa-check"></i><b>10.6.5</b> Random Slopes</a></li>
-<li class="chapter" data-level="10.6.6" data-path="lecture-notes.html"><a href="lecture-notes.html#comparison-of-models"><i class="fa fa-check"></i><b>10.6.6</b> Comparison of Models</a></li>
+<li class="chapter" data-level="10.6.2" data-path="lecture-notes.html"><a href="lecture-notes.html#random-intercepts-with-continuous-predictor"><i class="fa fa-check"></i><b>10.6.2</b> Random intercepts with continuous predictor</a></li>
+<li class="chapter" data-level="10.6.3" data-path="lecture-notes.html"><a href="lecture-notes.html#adding-random-slopes"><i class="fa fa-check"></i><b>10.6.3</b> Adding random slopes</a></li>
+</ul></li>
+<li class="chapter" data-level="10.7" data-path="lecture-notes.html"><a href="lecture-notes.html#february-19"><i class="fa fa-check"></i><b>10.7</b> February 19</a>
+<ul>
+<li class="chapter" data-level="10.7.1" data-path="lecture-notes.html"><a href="lecture-notes.html#random-slopes"><i class="fa fa-check"></i><b>10.7.1</b> Random Slopes</a></li>
+<li class="chapter" data-level="10.7.2" data-path="lecture-notes.html"><a href="lecture-notes.html#comparing-models"><i class="fa fa-check"></i><b>10.7.2</b> Comparing models</a></li>
+<li class="chapter" data-level="10.7.3" data-path="lecture-notes.html"><a href="lecture-notes.html#some-theory"><i class="fa fa-check"></i><b>10.7.3</b> Some Theory</a></li>
+<li class="chapter" data-level="10.7.4" data-path="lecture-notes.html"><a href="lecture-notes.html#intro-to-random-effects-and-mixed-effect-models---terminology-and-first-examples"><i class="fa fa-check"></i><b>10.7.4</b> Intro to Random Effects and Mixed Effect Models - Terminology and First Examples</a></li>
+<li class="chapter" data-level="10.7.5" data-path="lecture-notes.html"><a href="lecture-notes.html#comparison-of-models"><i class="fa fa-check"></i><b>10.7.5</b> Comparison of Models</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="11" data-path="solutions.html"><a href="solutions.html"><i class="fa fa-check"></i><b>11</b> Solutions</a>
@@ -438,8 +443,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb277-4"><a href="intro-to-predictive-modeling.html#cb277-4" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(expenses <span class="sc">~</span> ., <span class="at">data =</span> dd)</span>
 <span id="cb277-5"><a href="intro-to-predictive-modeling.html#cb277-5" tabindex="-1"></a>errors <span class="ot">&lt;-</span> <span class="fu">predict</span>(mod, <span class="at">newdata =</span> dd[test_indices,]) <span class="sc">-</span> dd<span class="sc">$</span>expenses[test_indices]</span>
 <span id="cb277-6"><a href="intro-to-predictive-modeling.html#cb277-6" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>(errors<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div>
-<pre><code>## [1] 6078.235</code></pre>
-<p>We see that with the first train/test split, we have an estimated RMSE of 6078. (For comparison purposes, if we simply took the mean value, then the RMSE would be about $12K).</p>
+<pre><code>## [1] 6685.962</code></pre>
+<p>We see that with the first train/test split, we have an estimated RMSE of 6686. (For comparison purposes, if we simply took the mean value, then the RMSE would be about $12K).</p>
 <p>Now, we can repeat the train/test split a bunch of times… say 50. If our model building procedure were slower than this, we might not be able to do 50.</p>
 <div class="sourceCode" id="cb279"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb279-1"><a href="intro-to-predictive-modeling.html#cb279-1" tabindex="-1"></a>rmse <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">50</span>, {</span>
 <span id="cb279-2"><a href="intro-to-predictive-modeling.html#cb279-2" tabindex="-1"></a>  train_indices <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>N,<span class="fu">ceiling</span>(N <span class="sc">*</span> .<span class="dv">7</span>))</span>
@@ -450,12 +455,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb279-7"><a href="intro-to-predictive-modeling.html#cb279-7" tabindex="-1"></a>})</span></code></pre></div>
 <p>Once we have these values, we can compute the mean and standard deviation to get a feeling for the <strong>range</strong> of MSE that we would expect to get with this model.</p>
 <div class="sourceCode" id="cb280"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb280-1"><a href="intro-to-predictive-modeling.html#cb280-1" tabindex="-1"></a><span class="fu">mean</span>(rmse)</span></code></pre></div>
-<pre><code>## [1] 6012.363</code></pre>
+<pre><code>## [1] 6014.296</code></pre>
 <div class="sourceCode" id="cb282"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb282-1"><a href="intro-to-predictive-modeling.html#cb282-1" tabindex="-1"></a><span class="fu">quantile</span>(rmse, <span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">975</span>))</span></code></pre></div>
 <pre><code>##     2.5%    97.5% 
-## 5493.653 6456.679</code></pre>
+## 5522.197 6546.178</code></pre>
 <div class="sourceCode" id="cb284"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb284-1"><a href="intro-to-predictive-modeling.html#cb284-1" tabindex="-1"></a><span class="fu">c</span>(<span class="fu">mean</span>(rmse) <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sd</span>(rmse), <span class="fu">mean</span>(rmse) <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sd</span>(rmse))</span></code></pre></div>
-<pre><code>## [1] 5483.693 6541.033</code></pre>
+<pre><code>## [1] 5500.420 6528.171</code></pre>
 <p>We can either compute the 95% confidence interval of the RMSE from the quantiles or by taking two times the standard deviation. This is saying that we would be surprised if the true RMSE of this model on unseen, future data is less than $5500 or more than $6500</p>
 <div class="exercise">
 <span class="divhead-definition exercise-before"> 4.2</span>
@@ -475,16 +480,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb290-4"><a href="intro-to-predictive-modeling.html#cb290-4" tabindex="-1"></a>      <span class="at">trControl =</span> <span class="fu">trainControl</span>(<span class="at">method =</span> <span class="st">&quot;repeatedcv&quot;</span>,</span>
 <span id="cb290-5"><a href="intro-to-predictive-modeling.html#cb290-5" tabindex="-1"></a>                               <span class="at">repeats =</span> <span class="dv">5</span>))</span>
 <span id="cb290-6"><a href="intro-to-predictive-modeling.html#cb290-6" tabindex="-1"></a>repeated_cv<span class="sc">$</span>results</span></code></pre></div>
-<pre><code>##   intercept     RMSE Rsquared      MAE   RMSESD RsquaredSD    MAESD
-## 1      TRUE 6075.715 0.749578 4204.284 468.2735 0.05094532 238.2151</code></pre>
-<p>From this table, we see that the repeated 10-fold CV estimated RMSE is 6073 with standard deviation 368. Recall that using repeated LGOCV, we got an estimated RMSE of 6012 and a standard deviation of 264.</p>
+<pre><code>##   intercept     RMSE  Rsquared      MAE   RMSESD RsquaredSD    MAESD
+## 1      TRUE 6067.833 0.7484496 4196.149 378.8413 0.04057819 218.4834</code></pre>
+<p>From this table, we see that the repeated 10-fold CV estimated RMSE is 6073 with standard deviation 368. Recall that using repeated LGOCV, we got an estimated RMSE of 6014 and a standard deviation of 257.</p>
 <p>Finally, let’s see what happens with the bootstrap, which is the default in <code>caret</code> for <code>lm</code>.</p>
 <div class="sourceCode" id="cb292"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb292-1"><a href="intro-to-predictive-modeling.html#cb292-1" tabindex="-1"></a>boot_rmse <span class="ot">&lt;-</span> <span class="fu">train</span>(<span class="at">x =</span> <span class="fu">select</span>(dd, <span class="sc">-</span>expenses), </span>
 <span id="cb292-2"><a href="intro-to-predictive-modeling.html#cb292-2" tabindex="-1"></a>      <span class="at">y =</span> dd<span class="sc">$</span>expenses,</span>
 <span id="cb292-3"><a href="intro-to-predictive-modeling.html#cb292-3" tabindex="-1"></a>      <span class="at">method =</span> <span class="st">&quot;lm&quot;</span>)</span>
 <span id="cb292-4"><a href="intro-to-predictive-modeling.html#cb292-4" tabindex="-1"></a>boot_rmse<span class="sc">$</span>results</span></code></pre></div>
 <pre><code>##   intercept    RMSE Rsquared      MAE   RMSESD RsquaredSD    MAESD
-## 1      TRUE 6100.99 0.744509 4195.662 186.2232 0.02058286 124.0694</code></pre>
+## 1      TRUE 6109.05 0.748421 4223.757 268.2623 0.01807712 156.3089</code></pre>
 <p>All three methods give relatively similar results in this case. We can guess that our RMSE on future, unseen data will be about <span class="math inline">\(\$6100 \pm \$600\)</span>.</p>
 </div>
 <div id="a-brief-return-to-inference" class="section level2 hasAnchor" number="4.2">
@@ -496,7 +501,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode" id="cb294"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb294-1"><a href="intro-to-predictive-modeling.html#cb294-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">20</span>) <span class="co">#true mean is 0</span></span>
 <span id="cb294-2"><a href="intro-to-predictive-modeling.html#cb294-2" tabindex="-1"></a>ttest <span class="ot">&lt;-</span> <span class="fu">t.test</span>(x)</span>
 <span id="cb294-3"><a href="intro-to-predictive-modeling.html#cb294-3" tabindex="-1"></a>ttest<span class="sc">$</span>conf.int</span></code></pre></div>
-<pre><code>## [1] -0.6640873  0.3546049
+<pre><code>## [1] -0.2707148  0.4850653
 ## attr(,&quot;conf.level&quot;)
 ## [1] 0.95</code></pre>
 <p>We can also compute a <strong>bootstrap</strong> confidence interval of the mean. We do so by resampling from the data (with replacement), and computing the mean each time. We then compute the appropriate quantiles of the means to get the bootstrap confidence interval.</p>
@@ -505,7 +510,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb296-3"><a href="intro-to-predictive-modeling.html#cb296-3" tabindex="-1"></a>})</span>
 <span id="cb296-4"><a href="intro-to-predictive-modeling.html#cb296-4" tabindex="-1"></a><span class="fu">quantile</span>(means, <span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">975</span>))</span></code></pre></div>
 <pre><code>##       2.5%      97.5% 
-## -0.5850437  0.3230967</code></pre>
+## -0.2356548  0.4519788</code></pre>
 <p>We see that the two methods give similar results. The booststrap method can sometimes be useful when the data does <strong>not</strong> meet the assumptions of <code>t.test</code>, but this is not a course in bootstrapping. The interested reader can consult <a href="https://www.amazon.com/Mathematical-Statistics-Resampling-Laura-Chihara-dp-111941654X/dp/111941654X">Mathematical Statistics with Resampling and R</a> for more information.</p>
 </div>
 <p>Next, we show how we can use resampling techniques to construct confidence intervals associated with regression. As an example, we show one way to use the bootstrap to create a confidence interval for the slope. We assume for simplicity that we have only one explanatory variable <span class="math inline">\(x\)</span>. We consider the observations <span class="math inline">\((x_1, y_1), \ldots, (x_n, y_n)\)</span> to be typical of all observations that we could have observed. To bootstrap, we choose <span class="math inline">\(n\)</span> of the observations with replacement and recompute the regression model. When doing so, we get a range of values that the slope could have been, and if we compute quantlies of those values, then that is a confidence interval for the slope.</p>
@@ -523,7 +528,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## 
 ## Coefficients:
 ## (Intercept)            x  
-##      -1.843        2.213</code></pre>
+##      -1.752        2.548</code></pre>
 <div class="sourceCode" id="cb301"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb301-1"><a href="intro-to-predictive-modeling.html#cb301-1" tabindex="-1"></a>slopes <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">2000</span>, {</span>
 <span id="cb301-2"><a href="intro-to-predictive-modeling.html#cb301-2" tabindex="-1"></a>  df2 <span class="ot">&lt;-</span> df[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df), <span class="at">replace =</span> T),] <span class="co">#boostrap</span></span>
 <span id="cb301-3"><a href="intro-to-predictive-modeling.html#cb301-3" tabindex="-1"></a>  mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x, <span class="at">data =</span> df2)</span>
@@ -531,10 +536,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb301-5"><a href="intro-to-predictive-modeling.html#cb301-5" tabindex="-1"></a>})</span>
 <span id="cb301-6"><a href="intro-to-predictive-modeling.html#cb301-6" tabindex="-1"></a><span class="fu">quantile</span>(slopes, <span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">975</span>))</span></code></pre></div>
 <pre><code>##     2.5%    97.5% 
-## 1.456506 2.985619</code></pre>
+## 1.870122 3.176481</code></pre>
 <div class="sourceCode" id="cb303"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb303-1"><a href="intro-to-predictive-modeling.html#cb303-1" tabindex="-1"></a><span class="fu">confint</span>(mod, <span class="at">parm =</span> <span class="st">&quot;x&quot;</span>)</span></code></pre></div>
 <pre><code>##      2.5 %   97.5 %
-## x 1.461876 2.964663</code></pre>
+## x 1.707237 3.389009</code></pre>
 <p>The confidence interval for slope is relatively robust to departures from assumptions, meaning that it often is approximately a 95 percent confidence interval even when normality, homoskedasticity, and few outliers for the model are not met. The next example shows one time where the coverage of the 95 percent confidence interval is not ideal, and compares the coverage to the bootstrap confidence interval.</p>
 <div class="example">
 <span class="divhead-definition example-before">Example 4.2</span>
@@ -553,7 +558,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb306-7"><a href="intro-to-predictive-modeling.html#cb306-7" tabindex="-1"></a>  ci <span class="ot">&lt;-</span> <span class="fu">confint</span>(mod, <span class="at">parm =</span> <span class="st">&quot;x&quot;</span>, <span class="at">level =</span> .<span class="dv">95</span>)</span>
 <span id="cb306-8"><a href="intro-to-predictive-modeling.html#cb306-8" tabindex="-1"></a>  ci[<span class="dv">1</span>] <span class="sc">&lt;</span> <span class="dv">2</span> <span class="sc">&amp;</span> ci[<span class="dv">2</span>] <span class="sc">&gt;</span> <span class="dv">2</span></span>
 <span id="cb306-9"><a href="intro-to-predictive-modeling.html#cb306-9" tabindex="-1"></a>})) <span class="co">#should be 0.95</span></span></code></pre></div>
-<pre><code>## [1] 0.897</code></pre>
+<pre><code>## [1] 0.888</code></pre>
 <p>Let’s see how the bootstrap confidence interval does. This takes a long time to run. We use the formula for the slope that we derived in Chapter 2 in order to speed it up, as well as running the loop in parallel. We see that the bootstrap confidence interval does better, but is still not perfect. It should have incorrectly rejected the null hypothesis 5 percent of the time.</p>
 <div class="sourceCode" id="cb308"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb308-1"><a href="intro-to-predictive-modeling.html#cb308-1" tabindex="-1"></a><span class="fu">library</span>(future.apply)</span></code></pre></div>
 <pre><code>## Loading required package: future</code></pre>

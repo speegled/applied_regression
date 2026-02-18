@@ -122,10 +122,13 @@ february-12
 an-example
 february-17
 adding-random-speaker-and-sentence-effects
-random-intercepts-with-continunous-predictor
-heading-towards-mixed-models
-intro-to-random-effects-and-mixed-effect-models---terminology-and-first-examples
+random-intercepts-with-continuous-predictor
+adding-random-slopes
+february-19
 random-slopes
+comparing-models
+some-theory
+intro-to-random-effects-and-mixed-effect-models---terminology-and-first-examples
 comparison-of-models
 solutions
 chapter-2-solutions
