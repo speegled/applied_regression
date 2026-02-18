@@ -1103,7 +1103,38 @@ tidy_modlmer <- broom.mixed::tidy(mod_lmer)
 like(c(tidy_modlmer$estimate[1], tidy_modlmer$estimate[2], tidy_modlmer$estimate[3]^2, tidy_modlmer$estimate[4]^2))
 ```
 
-We can see that we don't quite get the fully correct answer. This is because the optimization method that we are using doesn't converge rapidly to the global maximum. It senses convergence and ends even though we are a bit away from the global maximum. The method that `lmer` uses is more sophisticated; if you are interested in learning details about how to find maxima and minima, we will be offering a course on optimization next year that you can take.
+We can see that we don't quite get the fully correct answer. This is because we haven't correctly described the likelihood function for a mixed effect model. The likelihood function for a mixed effect model is more complicated than the one we wrote down above, because it allows correlation within subjects. The likelihood function for a mixed effect model is based on the joint distribution of the responses for each subject, which is a multivariate normal distribution with mean vector and covariance matrix that depend on the fixed effects and the random effects. The MLE estimates are the values of the parameters that maximize this likelihood function.
+
+Let's see how it works.
+
+```{r}
+par <- oo$par
+library(mvtnorm)
+nll <- function(par) {
+  gamma  <- par[1]
+  beta   <- par[2]
+  tau2   <- par[3]
+  sigma2 <- par[4]
+
+  if (tau2 < 0 || sigma2 <= 0) return(Inf)
+
+  response <- ss$reaction
+  pred_fixed_effect <- gamma + beta * ss$days #this is the same as mu, which is a good check
+    
+  g <- factor(ss$subject) #this is the grouping variable for the random intercepts)
+  Z <- model.matrix(~ 0 + g)   # columns correspond to groups (levels of g)
+
+  N <- length(response)
+  V <- tau2 * (Z %*% t(Z)) + sigma2 * diag(N)  # Marginal covariance: V = tau2 * Z Z' + sigma2 * I_N
+
+  
+  -dmvnorm(response, mean = pred_fixed_effect, sigma = V, log = TRUE)
+}
+nll(par)
+optim(par = par, fn = nll, method = "L-BFGS-B", lower = c(-Inf, -Inf, 0, 0))
+summary(mod_lmer)
+```
+
 
 
 
