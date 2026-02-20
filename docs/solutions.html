@@ -63,9 +63,8 @@
 
 
 <style type="text/css">
-html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -75,7 +74,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -272,7 +271,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <ul>
 <li class="chapter" data-level="9.7.1" data-path="lecture-notes.html"><a href="lecture-notes.html#random-slopes"><i class="fa fa-check"></i><b>9.7.1</b> Random Slopes</a></li>
 <li class="chapter" data-level="9.7.2" data-path="lecture-notes.html"><a href="lecture-notes.html#comparing-models"><i class="fa fa-check"></i><b>9.7.2</b> Comparing models</a></li>
-<li class="chapter" data-level="9.7.3" data-path="lecture-notes.html"><a href="lecture-notes.html#some-theory"><i class="fa fa-check"></i><b>9.7.3</b> Some Theory</a></li>
 </ul></li>
 <li class="chapter" data-level="9.8" data-path="lecture-notes.html"><a href="lecture-notes.html#february-24"><i class="fa fa-check"></i><b>9.8</b> February 24</a>
 <ul>
@@ -314,24 +312,24 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><p>We have that <span class="math inline">\(\overline{X}\)</span> is normal with mean <span class="math inline">\(\overline{\mu}\)</span> and variance <span class="math inline">\(\frac 1{25}\sum \sigma_i^2\)</span>, i.e. <span class="math inline">\(\overline{X} \sim N(3, \sigma^2 = 2.2)\)</span>.</p></li>
 <li><p>To confirm this via simulations:</p></li>
 </ol>
-<div class="sourceCode" id="cb1126"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1126-1"><a href="solutions.html#cb1126-1" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
-<span id="cb1126-2"><a href="solutions.html#cb1126-2" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="fu">sqrt</span>((<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)<span class="sc">^</span><span class="dv">2</span>))</span>
-<span id="cb1126-3"><a href="solutions.html#cb1126-3" tabindex="-1"></a>  <span class="fu">mean</span>(x)</span>
-<span id="cb1126-4"><a href="solutions.html#cb1126-4" tabindex="-1"></a>})</span>
-<span id="cb1126-5"><a href="solutions.html#cb1126-5" tabindex="-1"></a><span class="fu">mean</span>(sim_data) <span class="co">#cf 3</span></span></code></pre></div>
-<pre><code>## [1] 3.020358</code></pre>
-<div class="sourceCode" id="cb1128"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1128-1"><a href="solutions.html#cb1128-1" tabindex="-1"></a><span class="fu">var</span>(sim_data) <span class="co">#cf 2.2</span></span></code></pre></div>
-<pre><code>## [1] 2.200486</code></pre>
-<div class="sourceCode" id="cb1130"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1130-1"><a href="solutions.html#cb1130-1" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(sim_data))</span>
-<span id="cb1130-2"><a href="solutions.html#cb1130-2" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="dv">3</span>, <span class="fu">sqrt</span>(<span class="fl">2.2</span>)), <span class="at">add =</span> T, <span class="at">col =</span> <span class="dv">2</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1105"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1105-1"><a href="solutions.html#cb1105-1" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb1105-2"><a href="solutions.html#cb1105-2" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="fu">sqrt</span>((<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb1105-3"><a href="solutions.html#cb1105-3" tabindex="-1"></a>  <span class="fu">mean</span>(x)</span>
+<span id="cb1105-4"><a href="solutions.html#cb1105-4" tabindex="-1"></a>})</span>
+<span id="cb1105-5"><a href="solutions.html#cb1105-5" tabindex="-1"></a><span class="fu">mean</span>(sim_data) <span class="co">#cf 3</span></span></code></pre></div>
+<pre><code>## [1] 2.991294</code></pre>
+<div class="sourceCode" id="cb1107"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1107-1"><a href="solutions.html#cb1107-1" tabindex="-1"></a><span class="fu">var</span>(sim_data) <span class="co">#cf 2.2</span></span></code></pre></div>
+<pre><code>## [1] 2.207381</code></pre>
+<div class="sourceCode" id="cb1109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1109-1"><a href="solutions.html#cb1109-1" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(sim_data))</span>
+<span id="cb1109-2"><a href="solutions.html#cb1109-2" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="dv">3</span>, <span class="fu">sqrt</span>(<span class="fl">2.2</span>)), <span class="at">add =</span> T, <span class="at">col =</span> <span class="dv">2</span>)</span></code></pre></div>
 <p><img src="solutions_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <p><strong>Exercise 2.2</strong></p>
-<div class="sourceCode" id="cb1131"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1131-1"><a href="solutions.html#cb1131-1" tabindex="-1"></a>bp.obese <span class="ot">&lt;-</span> ISwR<span class="sc">::</span>bp.obese</span>
-<span id="cb1131-2"><a href="solutions.html#cb1131-2" tabindex="-1"></a>sse <span class="ot">&lt;-</span> <span class="cf">function</span>(beta) {</span>
-<span id="cb1131-3"><a href="solutions.html#cb1131-3" tabindex="-1"></a>  <span class="fu">sum</span>((bp.obese<span class="sc">$</span>bp <span class="sc">-</span> (beta[<span class="dv">1</span>] <span class="sc">+</span> beta[<span class="dv">2</span>] <span class="sc">*</span> bp.obese<span class="sc">$</span>obese))<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb1131-4"><a href="solutions.html#cb1131-4" tabindex="-1"></a>}</span>
-<span id="cb1131-5"><a href="solutions.html#cb1131-5" tabindex="-1"></a></span>
-<span id="cb1131-6"><a href="solutions.html#cb1131-6" tabindex="-1"></a><span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">fn =</span> sse)</span></code></pre></div>
+<div class="sourceCode" id="cb1110"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1110-1"><a href="solutions.html#cb1110-1" tabindex="-1"></a>bp.obese <span class="ot">&lt;-</span> ISwR<span class="sc">::</span>bp.obese</span>
+<span id="cb1110-2"><a href="solutions.html#cb1110-2" tabindex="-1"></a>sse <span class="ot">&lt;-</span> <span class="cf">function</span>(beta) {</span>
+<span id="cb1110-3"><a href="solutions.html#cb1110-3" tabindex="-1"></a>  <span class="fu">sum</span>((bp.obese<span class="sc">$</span>bp <span class="sc">-</span> (beta[<span class="dv">1</span>] <span class="sc">+</span> beta[<span class="dv">2</span>] <span class="sc">*</span> bp.obese<span class="sc">$</span>obese))<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb1110-4"><a href="solutions.html#cb1110-4" tabindex="-1"></a>}</span>
+<span id="cb1110-5"><a href="solutions.html#cb1110-5" tabindex="-1"></a></span>
+<span id="cb1110-6"><a href="solutions.html#cb1110-6" tabindex="-1"></a><span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">fn =</span> sse)</span></code></pre></div>
 <pre><code>## $par
 ## [1] 96.80371 23.01824
 ## 
@@ -348,7 +346,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## $message
 ## NULL</code></pre>
 <p>Our line of best fit is <span class="math inline">\(y = 96.8 + 23 x\)</span>. Confirm with <code>lm</code>:</p>
-<div class="sourceCode" id="cb1133"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1133-1"><a href="solutions.html#cb1133-1" tabindex="-1"></a><span class="fu">lm</span>(bp <span class="sc">~</span> obese, <span class="at">data =</span> bp.obese)</span></code></pre></div>
+<div class="sourceCode" id="cb1112"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1112-1"><a href="solutions.html#cb1112-1" tabindex="-1"></a><span class="fu">lm</span>(bp <span class="sc">~</span> obese, <span class="at">data =</span> bp.obese)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## lm(formula = bp ~ obese, data = bp.obese)
@@ -363,13 +361,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><p><span class="math inline">\(\hat \beta_0\)</span> is normal with mean <span class="math inline">\(\beta_0\)</span> and variance <span class="math inline">\(\sigma^2/n\)</span>.</p></li>
 <li><p>Let’s simulate.</p></li>
 </ol>
-<div class="sourceCode" id="cb1135"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1135-1"><a href="solutions.html#cb1135-1" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">20</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
-<span id="cb1135-2"><a href="solutions.html#cb1135-2" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
-<span id="cb1135-3"><a href="solutions.html#cb1135-3" tabindex="-1"></a>  ys <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">+</span> xs <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">0</span>, <span class="dv">1</span>)  </span>
-<span id="cb1135-4"><a href="solutions.html#cb1135-4" tabindex="-1"></a>  <span class="fu">mean</span>(ys) <span class="sc">-</span> <span class="fu">mean</span>(xs)</span>
-<span id="cb1135-5"><a href="solutions.html#cb1135-5" tabindex="-1"></a>})</span>
-<span id="cb1135-6"><a href="solutions.html#cb1135-6" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(sim_data))</span>
-<span id="cb1135-7"><a href="solutions.html#cb1135-7" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="dv">2</span>, <span class="dv">1</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">20</span>)), <span class="at">add =</span> T, <span class="at">col =</span> <span class="dv">2</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1114"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1114-1"><a href="solutions.html#cb1114-1" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">20</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
+<span id="cb1114-2"><a href="solutions.html#cb1114-2" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb1114-3"><a href="solutions.html#cb1114-3" tabindex="-1"></a>  ys <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">+</span> xs <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">0</span>, <span class="dv">1</span>)  </span>
+<span id="cb1114-4"><a href="solutions.html#cb1114-4" tabindex="-1"></a>  <span class="fu">mean</span>(ys) <span class="sc">-</span> <span class="fu">mean</span>(xs)</span>
+<span id="cb1114-5"><a href="solutions.html#cb1114-5" tabindex="-1"></a>})</span>
+<span id="cb1114-6"><a href="solutions.html#cb1114-6" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(sim_data))</span>
+<span id="cb1114-7"><a href="solutions.html#cb1114-7" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="dv">2</span>, <span class="dv">1</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">20</span>)), <span class="at">add =</span> T, <span class="at">col =</span> <span class="dv">2</span>)</span></code></pre></div>
 <p><img src="solutions_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <p><strong>Exercise 2.4</strong></p>
 <p>We have that
@@ -377,9 +375,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 \frac{\hat \beta_1 - \beta_1}{\sqrt{nS^2/(n\sum x_i^2 - (\sum x_i)^2)}} \sim t_{n -2}
 \]</span>
 So we compute.</p>
-<div class="sourceCode" id="cb1136"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1136-1"><a href="solutions.html#cb1136-1" tabindex="-1"></a>dd <span class="ot">&lt;-</span> HistData<span class="sc">::</span>Galton</span>
-<span id="cb1136-2"><a href="solutions.html#cb1136-2" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(child <span class="sc">~</span> parent, <span class="at">data =</span> dd)</span>
-<span id="cb1136-3"><a href="solutions.html#cb1136-3" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
+<div class="sourceCode" id="cb1115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1115-1"><a href="solutions.html#cb1115-1" tabindex="-1"></a>dd <span class="ot">&lt;-</span> HistData<span class="sc">::</span>Galton</span>
+<span id="cb1115-2"><a href="solutions.html#cb1115-2" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(child <span class="sc">~</span> parent, <span class="at">data =</span> dd)</span>
+<span id="cb1115-3"><a href="solutions.html#cb1115-3" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## lm(formula = child ~ parent, data = dd)
@@ -399,10 +397,10 @@ So we compute.</p>
 ## Multiple R-squared:  0.2105, Adjusted R-squared:  0.2096 
 ## F-statistic: 246.8 on 1 and 926 DF,  p-value: &lt; 2.2e-16</code></pre>
 <p>The estimate for <span class="math inline">\(S\)</span> is given as 2.239, which we use. We compute the test statistic:</p>
-<div class="sourceCode" id="cb1138"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1138-1"><a href="solutions.html#cb1138-1" tabindex="-1"></a>(<span class="fl">0.64629</span> <span class="sc">-</span> <span class="dv">1</span>)<span class="sc">/</span><span class="fu">sqrt</span>(<span class="fl">2.239</span><span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>(<span class="fu">sum</span>(dd<span class="sc">$</span>parent<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">928</span> <span class="sc">*</span> <span class="fu">sum</span>(dd<span class="sc">$</span>parent)<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb1117"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1117-1"><a href="solutions.html#cb1117-1" tabindex="-1"></a>(<span class="fl">0.64629</span> <span class="sc">-</span> <span class="dv">1</span>)<span class="sc">/</span><span class="fu">sqrt</span>(<span class="fl">2.239</span><span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>(<span class="fu">sum</span>(dd<span class="sc">$</span>parent<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">928</span> <span class="sc">*</span> <span class="fu">sum</span>(dd<span class="sc">$</span>parent)<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div>
 <pre><code>## [1] -8.596837</code></pre>
 <p>The test statistic is -8.596837. We need to compute the likelihood of obtaining something that unlikely given that <span class="math inline">\(H_0\)</span> is true.</p>
-<div class="sourceCode" id="cb1140"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1140-1"><a href="solutions.html#cb1140-1" tabindex="-1"></a><span class="fu">pt</span>(<span class="sc">-</span><span class="fl">8.596837</span>, <span class="dv">926</span>) <span class="sc">*</span> <span class="dv">2</span></span></code></pre></div>
+<div class="sourceCode" id="cb1119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1119-1"><a href="solutions.html#cb1119-1" tabindex="-1"></a><span class="fu">pt</span>(<span class="sc">-</span><span class="fl">8.596837</span>, <span class="dv">926</span>) <span class="sc">*</span> <span class="dv">2</span></span></code></pre></div>
 <pre><code>## [1] 3.454205e-17</code></pre>
 <p>With this <span class="math inline">\(p\)</span>-value, we reject the null hypothesis. We conlcude that the slope is not 1. With more work, we can see that this means (roughly) that parents who are short or tall will tend to have children that are again short or tall, but less so than the parents. Does that mean that eventually there will be little variation among heights of humans. Why or why not?</p>
 <p><strong>Exercise 2.5</strong></p>
@@ -415,16 +413,16 @@ So we compute.</p>
 <li><p><span class="math inline">\(t\)</span> with <span class="math inline">\(n-1\)</span> degrees of freedom.</p></li>
 <li></li>
 </ol>
-<div class="sourceCode" id="cb1142"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1142-1"><a href="solutions.html#cb1142-1" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;https://stat.slu.edu/~speegle/Spring2020/4870/data/problem_2_5.csv&quot;</span>)</span></code></pre></div>
-<div class="sourceCode" id="cb1143"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1143-1"><a href="solutions.html#cb1143-1" tabindex="-1"></a>beta_0 <span class="ot">&lt;-</span> <span class="fu">mean</span>(dd<span class="sc">$</span>ys) <span class="sc">-</span> <span class="fu">mean</span>(dd<span class="sc">$</span>xs)</span>
-<span id="cb1143-2"><a href="solutions.html#cb1143-2" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="dv">1</span><span class="sc">/</span>(<span class="fu">nrow</span>(dd) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="fu">sum</span>((dd<span class="sc">$</span>ys <span class="sc">-</span> beta_0 <span class="sc">-</span> dd<span class="sc">$</span>xs)<span class="sc">^</span><span class="dv">2</span>))</span>
-<span id="cb1143-3"><a href="solutions.html#cb1143-3" tabindex="-1"></a>test_stat <span class="ot">&lt;-</span> (beta_0 <span class="sc">-</span> <span class="dv">2</span>)<span class="sc">/</span>(s<span class="sc">/</span><span class="fu">sqrt</span>(<span class="fu">nrow</span>(dd)))</span>
-<span id="cb1143-4"><a href="solutions.html#cb1143-4" tabindex="-1"></a>test_stat</span></code></pre></div>
+<div class="sourceCode" id="cb1121"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1121-1"><a href="solutions.html#cb1121-1" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;https://stat.slu.edu/~speegle/Spring2020/4870/data/problem_2_5.csv&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1122"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1122-1"><a href="solutions.html#cb1122-1" tabindex="-1"></a>beta_0 <span class="ot">&lt;-</span> <span class="fu">mean</span>(dd<span class="sc">$</span>ys) <span class="sc">-</span> <span class="fu">mean</span>(dd<span class="sc">$</span>xs)</span>
+<span id="cb1122-2"><a href="solutions.html#cb1122-2" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="dv">1</span><span class="sc">/</span>(<span class="fu">nrow</span>(dd) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="fu">sum</span>((dd<span class="sc">$</span>ys <span class="sc">-</span> beta_0 <span class="sc">-</span> dd<span class="sc">$</span>xs)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb1122-3"><a href="solutions.html#cb1122-3" tabindex="-1"></a>test_stat <span class="ot">&lt;-</span> (beta_0 <span class="sc">-</span> <span class="dv">2</span>)<span class="sc">/</span>(s<span class="sc">/</span><span class="fu">sqrt</span>(<span class="fu">nrow</span>(dd)))</span>
+<span id="cb1122-4"><a href="solutions.html#cb1122-4" tabindex="-1"></a>test_stat</span></code></pre></div>
 <pre><code>## [1] 2.386556</code></pre>
-<div class="sourceCode" id="cb1145"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1145-1"><a href="solutions.html#cb1145-1" tabindex="-1"></a><span class="fu">pt</span>(test_stat, <span class="fu">nrow</span>(dd) <span class="sc">-</span> <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>) <span class="sc">*</span> <span class="dv">2</span></span></code></pre></div>
+<div class="sourceCode" id="cb1124"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1124-1"><a href="solutions.html#cb1124-1" tabindex="-1"></a><span class="fu">pt</span>(test_stat, <span class="fu">nrow</span>(dd) <span class="sc">-</span> <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>) <span class="sc">*</span> <span class="dv">2</span></span></code></pre></div>
 <pre><code>## [1] 0.03167356</code></pre>
 <p>Note that this is the same as a paired <span class="math inline">\(t\)</span>-test, where we have as our null hypothesis that <span class="math inline">\(y_i - x_i\)</span> is normal with mean 2 and unknown standard deviation.</p>
-<div class="sourceCode" id="cb1147"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1147-1"><a href="solutions.html#cb1147-1" tabindex="-1"></a><span class="fu">t.test</span>(dd<span class="sc">$</span>ys, dd<span class="sc">$</span>xs, <span class="at">mu =</span> <span class="dv">2</span>, <span class="at">paired =</span> T)</span></code></pre></div>
+<div class="sourceCode" id="cb1126"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1126-1"><a href="solutions.html#cb1126-1" tabindex="-1"></a><span class="fu">t.test</span>(dd<span class="sc">$</span>ys, dd<span class="sc">$</span>xs, <span class="at">mu =</span> <span class="dv">2</span>, <span class="at">paired =</span> T)</span></code></pre></div>
 <pre><code>## 
 ##  Paired t-test
 ## 
@@ -440,19 +438,19 @@ So we compute.</p>
 <ol style="list-style-type: lower-alpha">
 <li></li>
 </ol>
-<div class="sourceCode" id="cb1149"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1149-1"><a href="solutions.html#cb1149-1" tabindex="-1"></a>dd <span class="ot">&lt;-</span> carData<span class="sc">::</span>Davis</span>
-<span id="cb1149-2"><a href="solutions.html#cb1149-2" tabindex="-1"></a><span class="fu">plot</span>(dd<span class="sc">$</span>repwt, dd<span class="sc">$</span>weight)</span></code></pre></div>
+<div class="sourceCode" id="cb1128"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1128-1"><a href="solutions.html#cb1128-1" tabindex="-1"></a>dd <span class="ot">&lt;-</span> carData<span class="sc">::</span>Davis</span>
+<span id="cb1128-2"><a href="solutions.html#cb1128-2" tabindex="-1"></a><span class="fu">plot</span>(dd<span class="sc">$</span>repwt, dd<span class="sc">$</span>weight)</span></code></pre></div>
 <p><img src="solutions_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 <ol start="2" style="list-style-type: lower-alpha">
 <li></li>
 </ol>
-<div class="sourceCode" id="cb1150"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1150-1"><a href="solutions.html#cb1150-1" tabindex="-1"></a>mod_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(weight <span class="sc">~</span> repwt, <span class="at">data =</span> dd)</span>
-<span id="cb1150-2"><a href="solutions.html#cb1150-2" tabindex="-1"></a>mod_huber <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">rlm</span>(weight <span class="sc">~</span> repwt, <span class="at">data =</span> dd, <span class="at">psi =</span> MASS<span class="sc">::</span>psi.huber)</span>
-<span id="cb1150-3"><a href="solutions.html#cb1150-3" tabindex="-1"></a>mod_tukey <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">rlm</span>(weight <span class="sc">~</span> repwt, <span class="at">data =</span> dd, <span class="at">psi =</span> MASS<span class="sc">::</span>psi.bisquare)</span>
-<span id="cb1150-4"><a href="solutions.html#cb1150-4" tabindex="-1"></a><span class="fu">plot</span>(dd<span class="sc">$</span>repwt, dd<span class="sc">$</span>weight)</span>
-<span id="cb1150-5"><a href="solutions.html#cb1150-5" tabindex="-1"></a><span class="fu">abline</span>(mod_lm, <span class="at">col =</span> <span class="dv">2</span>) <span class="co">#red</span></span>
-<span id="cb1150-6"><a href="solutions.html#cb1150-6" tabindex="-1"></a><span class="fu">abline</span>(mod_huber, <span class="at">col =</span> <span class="dv">3</span>) <span class="co">#green</span></span>
-<span id="cb1150-7"><a href="solutions.html#cb1150-7" tabindex="-1"></a><span class="fu">abline</span>(mod_tukey, <span class="at">col =</span> <span class="dv">4</span>) <span class="co">#blue</span></span></code></pre></div>
+<div class="sourceCode" id="cb1129"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1129-1"><a href="solutions.html#cb1129-1" tabindex="-1"></a>mod_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(weight <span class="sc">~</span> repwt, <span class="at">data =</span> dd)</span>
+<span id="cb1129-2"><a href="solutions.html#cb1129-2" tabindex="-1"></a>mod_huber <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">rlm</span>(weight <span class="sc">~</span> repwt, <span class="at">data =</span> dd, <span class="at">psi =</span> MASS<span class="sc">::</span>psi.huber)</span>
+<span id="cb1129-3"><a href="solutions.html#cb1129-3" tabindex="-1"></a>mod_tukey <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">rlm</span>(weight <span class="sc">~</span> repwt, <span class="at">data =</span> dd, <span class="at">psi =</span> MASS<span class="sc">::</span>psi.bisquare)</span>
+<span id="cb1129-4"><a href="solutions.html#cb1129-4" tabindex="-1"></a><span class="fu">plot</span>(dd<span class="sc">$</span>repwt, dd<span class="sc">$</span>weight)</span>
+<span id="cb1129-5"><a href="solutions.html#cb1129-5" tabindex="-1"></a><span class="fu">abline</span>(mod_lm, <span class="at">col =</span> <span class="dv">2</span>) <span class="co">#red</span></span>
+<span id="cb1129-6"><a href="solutions.html#cb1129-6" tabindex="-1"></a><span class="fu">abline</span>(mod_huber, <span class="at">col =</span> <span class="dv">3</span>) <span class="co">#green</span></span>
+<span id="cb1129-7"><a href="solutions.html#cb1129-7" tabindex="-1"></a><span class="fu">abline</span>(mod_tukey, <span class="at">col =</span> <span class="dv">4</span>) <span class="co">#blue</span></span></code></pre></div>
 <p><img src="solutions_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
 </div>
 <div id="chapter-3-solutions" class="section level2 hasAnchor" number="10.2">
@@ -460,11 +458,11 @@ So we compute.</p>
 <ol style="list-style-type: decimal">
 <li>Let’s load the data.</li>
 </ol>
-<div class="sourceCode" id="cb1151"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1151-1"><a href="solutions.html#cb1151-1" tabindex="-1"></a>secher <span class="ot">&lt;-</span> ISwR<span class="sc">::</span>secher</span>
-<span id="cb1151-2"><a href="solutions.html#cb1151-2" tabindex="-1"></a><span class="fu">plot</span>(secher[,<span class="sc">-</span><span class="dv">4</span>])</span></code></pre></div>
+<div class="sourceCode" id="cb1130"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1130-1"><a href="solutions.html#cb1130-1" tabindex="-1"></a>secher <span class="ot">&lt;-</span> ISwR<span class="sc">::</span>secher</span>
+<span id="cb1130-2"><a href="solutions.html#cb1130-2" tabindex="-1"></a><span class="fu">plot</span>(secher[,<span class="sc">-</span><span class="dv">4</span>])</span></code></pre></div>
 <p><img src="solutions_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
-<div class="sourceCode" id="cb1152"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1152-1"><a href="solutions.html#cb1152-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(bwt <span class="sc">~</span> bpd <span class="sc">+</span> ad, <span class="at">data =</span> secher)</span>
-<span id="cb1152-2"><a href="solutions.html#cb1152-2" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
+<div class="sourceCode" id="cb1131"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1131-1"><a href="solutions.html#cb1131-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(bwt <span class="sc">~</span> bpd <span class="sc">+</span> ad, <span class="at">data =</span> secher)</span>
+<span id="cb1131-2"><a href="solutions.html#cb1131-2" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## lm(formula = bwt ~ bpd + ad, data = secher)
@@ -485,14 +483,14 @@ So we compute.</p>
 ## Multiple R-squared:  0.8065, Adjusted R-squared:  0.8028 
 ## F-statistic: 216.7 on 2 and 104 DF,  p-value: &lt; 2.2e-16</code></pre>
 <p>Looks like a pretty good model already. Let’s check the diagnostics.</p>
-<div class="sourceCode" id="cb1154"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1154-1"><a href="solutions.html#cb1154-1" tabindex="-1"></a><span class="fu">plot</span>(mod)</span></code></pre></div>
+<div class="sourceCode" id="cb1133"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1133-1"><a href="solutions.html#cb1133-1" tabindex="-1"></a><span class="fu">plot</span>(mod)</span></code></pre></div>
 <p><img src="solutions_files/figure-html/unnamed-chunk-16-1.png" width="672" /><img src="solutions_files/figure-html/unnamed-chunk-16-2.png" width="672" /><img src="solutions_files/figure-html/unnamed-chunk-16-3.png" width="672" /><img src="solutions_files/figure-html/unnamed-chunk-16-4.png" width="672" /></p>
 <p>Could be some skewness there. Let’s see if a transformation might help the normality of the residuals.</p>
-<div class="sourceCode" id="cb1155"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1155-1"><a href="solutions.html#cb1155-1" tabindex="-1"></a>MASS<span class="sc">::</span><span class="fu">boxcox</span>(mod)</span></code></pre></div>
+<div class="sourceCode" id="cb1134"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1134-1"><a href="solutions.html#cb1134-1" tabindex="-1"></a>MASS<span class="sc">::</span><span class="fu">boxcox</span>(mod)</span></code></pre></div>
 <p><img src="solutions_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
 <p>This suggests a log transform of the response would improve the normality of the residuals. Finally, let’s put <code>no</code> back in to the model. We hope that it is not strongly significant, as that might be an indicator of some sort of experimental flaw.</p>
-<div class="sourceCode" id="cb1156"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1156-1"><a href="solutions.html#cb1156-1" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(bwt <span class="sc">~</span>., <span class="at">data =</span> secher)</span>
-<span id="cb1156-2"><a href="solutions.html#cb1156-2" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
+<div class="sourceCode" id="cb1135"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1135-1"><a href="solutions.html#cb1135-1" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(bwt <span class="sc">~</span>., <span class="at">data =</span> secher)</span>
+<span id="cb1135-2"><a href="solutions.html#cb1135-2" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## lm(formula = bwt ~ ., data = secher)
@@ -520,27 +518,27 @@ So we compute.</p>
 <ol start="3" style="list-style-type: decimal">
 <li>Let’s load the data.</li>
 </ol>
-<div class="sourceCode" id="cb1158"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1158-1"><a href="solutions.html#cb1158-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2252020</span>)</span>
-<span id="cb1158-2"><a href="solutions.html#cb1158-2" tabindex="-1"></a><span class="fu">library</span>(AppliedPredictiveModeling)</span>
-<span id="cb1158-3"><a href="solutions.html#cb1158-3" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;ChemicalManufacturingProcess&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1137"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1137-1"><a href="solutions.html#cb1137-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2252020</span>)</span>
+<span id="cb1137-2"><a href="solutions.html#cb1137-2" tabindex="-1"></a><span class="fu">library</span>(AppliedPredictiveModeling)</span>
+<span id="cb1137-3"><a href="solutions.html#cb1137-3" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;ChemicalManufacturingProcess&quot;</span>)</span></code></pre></div>
 <p>The problem asks us to do an initial test/train split and work with the train data from there on out. I’ll pull out the test data and leave the train data with the same variable name.</p>
-<div class="sourceCode" id="cb1159"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1159-1"><a href="solutions.html#cb1159-1" tabindex="-1"></a>test_indices <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">176</span>, <span class="dv">46</span>)</span>
-<span id="cb1159-2"><a href="solutions.html#cb1159-2" tabindex="-1"></a>test_dat <span class="ot">&lt;-</span> ChemicalManufacturingProcess[test_indices,]</span>
-<span id="cb1159-3"><a href="solutions.html#cb1159-3" tabindex="-1"></a>ChemicalManufacturingProcess <span class="ot">&lt;-</span> ChemicalManufacturingProcess[<span class="sc">-</span>test_indices,]</span></code></pre></div>
+<div class="sourceCode" id="cb1138"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1138-1"><a href="solutions.html#cb1138-1" tabindex="-1"></a>test_indices <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">176</span>, <span class="dv">46</span>)</span>
+<span id="cb1138-2"><a href="solutions.html#cb1138-2" tabindex="-1"></a>test_dat <span class="ot">&lt;-</span> ChemicalManufacturingProcess[test_indices,]</span>
+<span id="cb1138-3"><a href="solutions.html#cb1138-3" tabindex="-1"></a>ChemicalManufacturingProcess <span class="ot">&lt;-</span> ChemicalManufacturingProcess[<span class="sc">-</span>test_indices,]</span></code></pre></div>
 <p>The data isn’t in the format that the book said it would be in. Let’s create a matrix of predictors and a vector response, in addition to the data frame with both.</p>
-<div class="sourceCode" id="cb1160"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1160-1"><a href="solutions.html#cb1160-1" tabindex="-1"></a>predictors <span class="ot">&lt;-</span> ChemicalManufacturingProcess[,<span class="sc">-</span><span class="dv">1</span>]</span>
-<span id="cb1160-2"><a href="solutions.html#cb1160-2" tabindex="-1"></a>response <span class="ot">&lt;-</span> ChemicalManufacturingProcess[,<span class="dv">1</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb1139"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1139-1"><a href="solutions.html#cb1139-1" tabindex="-1"></a>predictors <span class="ot">&lt;-</span> ChemicalManufacturingProcess[,<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb1139-2"><a href="solutions.html#cb1139-2" tabindex="-1"></a>response <span class="ot">&lt;-</span> ChemicalManufacturingProcess[,<span class="dv">1</span>]</span></code></pre></div>
 <p>Now let’s see about missing data.</p>
-<div class="sourceCode" id="cb1161"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1161-1"><a href="solutions.html#cb1161-1" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(predictors))</span></code></pre></div>
+<div class="sourceCode" id="cb1140"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1140-1"><a href="solutions.html#cb1140-1" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(predictors))</span></code></pre></div>
 <pre><code>## [1] 88</code></pre>
 <p>We do have missing data, so we will need to preprocess. The first part of the problem asks us to do Principle Component Regression. Let’s do it using the <code>caret</code> package.</p>
-<div class="sourceCode" id="cb1163"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1163-1"><a href="solutions.html#cb1163-1" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code></pre></div>
+<div class="sourceCode" id="cb1142"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1142-1"><a href="solutions.html#cb1142-1" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code></pre></div>
 <pre><code>## Loading required package: ggplot2</code></pre>
 <pre><code>## Loading required package: lattice</code></pre>
-<div class="sourceCode" id="cb1166"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1166-1"><a href="solutions.html#cb1166-1" tabindex="-1"></a><span class="fu">train</span>(<span class="at">x =</span> predictors, </span>
-<span id="cb1166-2"><a href="solutions.html#cb1166-2" tabindex="-1"></a>      <span class="at">y =</span> response, </span>
-<span id="cb1166-3"><a href="solutions.html#cb1166-3" tabindex="-1"></a>      <span class="at">method =</span> <span class="st">&quot;pcr&quot;</span>, </span>
-<span id="cb1166-4"><a href="solutions.html#cb1166-4" tabindex="-1"></a>      <span class="at">preProcess =</span> <span class="fu">c</span>(<span class="st">&quot;center&quot;</span>, <span class="st">&quot;scale&quot;</span>, <span class="st">&quot;medianImpute&quot;</span>, <span class="st">&quot;nzv&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb1145"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1145-1"><a href="solutions.html#cb1145-1" tabindex="-1"></a><span class="fu">train</span>(<span class="at">x =</span> predictors, </span>
+<span id="cb1145-2"><a href="solutions.html#cb1145-2" tabindex="-1"></a>      <span class="at">y =</span> response, </span>
+<span id="cb1145-3"><a href="solutions.html#cb1145-3" tabindex="-1"></a>      <span class="at">method =</span> <span class="st">&quot;pcr&quot;</span>, </span>
+<span id="cb1145-4"><a href="solutions.html#cb1145-4" tabindex="-1"></a>      <span class="at">preProcess =</span> <span class="fu">c</span>(<span class="st">&quot;center&quot;</span>, <span class="st">&quot;scale&quot;</span>, <span class="st">&quot;medianImpute&quot;</span>, <span class="st">&quot;nzv&quot;</span>))</span></code></pre></div>
 <pre><code>## Principal Component Analysis 
 ## 
 ## 130 samples
@@ -559,13 +557,13 @@ So we compute.</p>
 ## RMSE was used to select the optimal model using the smallest value.
 ## The final value used for the model was ncomp = 1.</code></pre>
 <p>I think we need to expand our tune grid a bit.</p>
-<div class="sourceCode" id="cb1168"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1168-1"><a href="solutions.html#cb1168-1" tabindex="-1"></a>tuneGrid <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">ncomp =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>)</span>
-<span id="cb1168-2"><a href="solutions.html#cb1168-2" tabindex="-1"></a>pca_mod <span class="ot">&lt;-</span> <span class="fu">train</span>(<span class="at">x =</span> predictors, </span>
-<span id="cb1168-3"><a href="solutions.html#cb1168-3" tabindex="-1"></a>      <span class="at">y =</span> response, </span>
-<span id="cb1168-4"><a href="solutions.html#cb1168-4" tabindex="-1"></a>      <span class="at">method =</span> <span class="st">&quot;pcr&quot;</span>, </span>
-<span id="cb1168-5"><a href="solutions.html#cb1168-5" tabindex="-1"></a>      <span class="at">tuneGrid =</span> tuneGrid,</span>
-<span id="cb1168-6"><a href="solutions.html#cb1168-6" tabindex="-1"></a>      <span class="at">preProcess =</span> <span class="fu">c</span>(<span class="st">&quot;center&quot;</span>, <span class="st">&quot;scale&quot;</span>, <span class="st">&quot;medianImpute&quot;</span>, <span class="st">&quot;nzv&quot;</span>))</span>
-<span id="cb1168-7"><a href="solutions.html#cb1168-7" tabindex="-1"></a><span class="fu">apply</span>(pca_mod<span class="sc">$</span>results[,<span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">5</span>)], <span class="dv">1</span>, sum)</span></code></pre></div>
+<div class="sourceCode" id="cb1147"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1147-1"><a href="solutions.html#cb1147-1" tabindex="-1"></a>tuneGrid <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">ncomp =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>)</span>
+<span id="cb1147-2"><a href="solutions.html#cb1147-2" tabindex="-1"></a>pca_mod <span class="ot">&lt;-</span> <span class="fu">train</span>(<span class="at">x =</span> predictors, </span>
+<span id="cb1147-3"><a href="solutions.html#cb1147-3" tabindex="-1"></a>      <span class="at">y =</span> response, </span>
+<span id="cb1147-4"><a href="solutions.html#cb1147-4" tabindex="-1"></a>      <span class="at">method =</span> <span class="st">&quot;pcr&quot;</span>, </span>
+<span id="cb1147-5"><a href="solutions.html#cb1147-5" tabindex="-1"></a>      <span class="at">tuneGrid =</span> tuneGrid,</span>
+<span id="cb1147-6"><a href="solutions.html#cb1147-6" tabindex="-1"></a>      <span class="at">preProcess =</span> <span class="fu">c</span>(<span class="st">&quot;center&quot;</span>, <span class="st">&quot;scale&quot;</span>, <span class="st">&quot;medianImpute&quot;</span>, <span class="st">&quot;nzv&quot;</span>))</span>
+<span id="cb1147-7"><a href="solutions.html#cb1147-7" tabindex="-1"></a><span class="fu">apply</span>(pca_mod<span class="sc">$</span>results[,<span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">5</span>)], <span class="dv">1</span>, sum)</span></code></pre></div>
 <pre><code>##        1        2        3        4        5        6        7        8 
 ## 2.538925 2.217215 2.620412 2.848612 3.369809 3.308128 3.522237 3.580313 
 ##        9       10       11       12       13       14       15       16 
@@ -573,23 +571,23 @@ So we compute.</p>
 ##       17       18       19       20 
 ## 2.285783 2.486719 2.498090 2.882467</code></pre>
 <p>The smallest value 1 se away from the estimated MSE is 2.2172154. So, by our one se rule of them, we will choose</p>
-<div class="sourceCode" id="cb1170"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1170-1"><a href="solutions.html#cb1170-1" tabindex="-1"></a>ncomp <span class="ot">&lt;-</span> <span class="fu">which</span>(pca_mod<span class="sc">$</span>results[,<span class="dv">2</span>] <span class="sc">&lt;</span> <span class="fu">min</span>(<span class="fu">apply</span>(pca_mod<span class="sc">$</span>results[,<span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">5</span>)], <span class="dv">1</span>, sum)))</span>
-<span id="cb1170-2"><a href="solutions.html#cb1170-2" tabindex="-1"></a>ncomp <span class="ot">&lt;-</span> <span class="fu">min</span>(ncomp)</span>
-<span id="cb1170-3"><a href="solutions.html#cb1170-3" tabindex="-1"></a>ncomp</span></code></pre></div>
+<div class="sourceCode" id="cb1149"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1149-1"><a href="solutions.html#cb1149-1" tabindex="-1"></a>ncomp <span class="ot">&lt;-</span> <span class="fu">which</span>(pca_mod<span class="sc">$</span>results[,<span class="dv">2</span>] <span class="sc">&lt;</span> <span class="fu">min</span>(<span class="fu">apply</span>(pca_mod<span class="sc">$</span>results[,<span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">5</span>)], <span class="dv">1</span>, sum)))</span>
+<span id="cb1149-2"><a href="solutions.html#cb1149-2" tabindex="-1"></a>ncomp <span class="ot">&lt;-</span> <span class="fu">min</span>(ncomp)</span>
+<span id="cb1149-3"><a href="solutions.html#cb1149-3" tabindex="-1"></a>ncomp</span></code></pre></div>
 <pre><code>## [1] 1</code></pre>
 <p>This says that we need one component, and our estimate for the MSE is roughly <span class="math inline">\(2.1 \pm  .92\)</span>.</p>
-<div class="sourceCode" id="cb1172"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1172-1"><a href="solutions.html#cb1172-1" tabindex="-1"></a>pca_mod<span class="sc">$</span>results[<span class="dv">1</span>,<span class="dv">2</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb1151"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1151-1"><a href="solutions.html#cb1151-1" tabindex="-1"></a>pca_mod<span class="sc">$</span>results[<span class="dv">1</span>,<span class="dv">2</span>]</span></code></pre></div>
 <pre><code>## [1] 2.07493</code></pre>
-<div class="sourceCode" id="cb1174"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1174-1"><a href="solutions.html#cb1174-1" tabindex="-1"></a>pca_mod<span class="sc">$</span>results[<span class="dv">1</span>,<span class="dv">5</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb1153"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1153-1"><a href="solutions.html#cb1153-1" tabindex="-1"></a>pca_mod<span class="sc">$</span>results[<span class="dv">1</span>,<span class="dv">5</span>]</span></code></pre></div>
 <pre><code>## [1] 0.4639948</code></pre>
 <p>Let’s check it out on our test set that we haven’t touched yet. We first have to apply the same pre-processing steps to the test data as we did to the train data.</p>
-<div class="sourceCode" id="cb1176"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1176-1"><a href="solutions.html#cb1176-1" tabindex="-1"></a>preprocess_mod <span class="ot">&lt;-</span> <span class="fu">preProcess</span>(predictors, </span>
-<span id="cb1176-2"><a href="solutions.html#cb1176-2" tabindex="-1"></a>                             <span class="at">method =</span> <span class="fu">c</span>(<span class="st">&quot;scale&quot;</span>, <span class="st">&quot;center&quot;</span>, <span class="st">&quot;medianImpute&quot;</span>, <span class="st">&quot;nzv&quot;</span>))</span>
-<span id="cb1176-3"><a href="solutions.html#cb1176-3" tabindex="-1"></a>test_predictors <span class="ot">&lt;-</span> test_dat[,<span class="sc">-</span><span class="dv">1</span>]</span>
-<span id="cb1176-4"><a href="solutions.html#cb1176-4" tabindex="-1"></a>test_response <span class="ot">&lt;-</span> test_dat[,<span class="dv">1</span>]</span>
-<span id="cb1176-5"><a href="solutions.html#cb1176-5" tabindex="-1"></a>test_processed <span class="ot">&lt;-</span> <span class="fu">predict</span>(preprocess_mod, <span class="at">newdata =</span> test_predictors)</span></code></pre></div>
+<div class="sourceCode" id="cb1155"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1155-1"><a href="solutions.html#cb1155-1" tabindex="-1"></a>preprocess_mod <span class="ot">&lt;-</span> <span class="fu">preProcess</span>(predictors, </span>
+<span id="cb1155-2"><a href="solutions.html#cb1155-2" tabindex="-1"></a>                             <span class="at">method =</span> <span class="fu">c</span>(<span class="st">&quot;scale&quot;</span>, <span class="st">&quot;center&quot;</span>, <span class="st">&quot;medianImpute&quot;</span>, <span class="st">&quot;nzv&quot;</span>))</span>
+<span id="cb1155-3"><a href="solutions.html#cb1155-3" tabindex="-1"></a>test_predictors <span class="ot">&lt;-</span> test_dat[,<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb1155-4"><a href="solutions.html#cb1155-4" tabindex="-1"></a>test_response <span class="ot">&lt;-</span> test_dat[,<span class="dv">1</span>]</span>
+<span id="cb1155-5"><a href="solutions.html#cb1155-5" tabindex="-1"></a>test_processed <span class="ot">&lt;-</span> <span class="fu">predict</span>(preprocess_mod, <span class="at">newdata =</span> test_predictors)</span></code></pre></div>
 <p>Now we can predict the outcomes on the test set.</p>
-<div class="sourceCode" id="cb1177"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1177-1"><a href="solutions.html#cb1177-1" tabindex="-1"></a><span class="fu">predict</span>(pca_mod<span class="sc">$</span>finalModel, <span class="at">newdata =</span> test_processed, <span class="at">ncomp =</span> <span class="dv">1</span>)[,,<span class="dv">1</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb1156"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1156-1"><a href="solutions.html#cb1156-1" tabindex="-1"></a><span class="fu">predict</span>(pca_mod<span class="sc">$</span>finalModel, <span class="at">newdata =</span> test_processed, <span class="at">ncomp =</span> <span class="dv">1</span>)[,,<span class="dv">1</span>]</span></code></pre></div>
 <pre><code>##      117      133       96      102      169       20       55      146 
 ## 39.93165 39.74174 40.10136 39.30054 41.14235 41.81163 40.79884 39.44937 
 ##       37      110       94       73       88      115      123      157 
@@ -602,8 +600,8 @@ So we compute.</p>
 ## 39.88256 40.17518 40.30996 40.18995 39.22107 40.53561 40.15405 40.77907 
 ##       54       68       60      100       17      109 
 ## 40.39532 40.30252 40.63361 39.44431 41.76909 39.70861</code></pre>
-<div class="sourceCode" id="cb1179"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1179-1"><a href="solutions.html#cb1179-1" tabindex="-1"></a>errors <span class="ot">&lt;-</span> <span class="fu">predict</span>(pca_mod<span class="sc">$</span>finalModel, <span class="at">newdata =</span> test_processed, <span class="at">ncomp =</span> <span class="dv">1</span>)[,,<span class="dv">1</span>] <span class="sc">-</span> test_response</span>
-<span id="cb1179-2"><a href="solutions.html#cb1179-2" tabindex="-1"></a><span class="fu">mean</span>(errors<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1158"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1158-1"><a href="solutions.html#cb1158-1" tabindex="-1"></a>errors <span class="ot">&lt;-</span> <span class="fu">predict</span>(pca_mod<span class="sc">$</span>finalModel, <span class="at">newdata =</span> test_processed, <span class="at">ncomp =</span> <span class="dv">1</span>)[,,<span class="dv">1</span>] <span class="sc">-</span> test_response</span>
+<span id="cb1158-2"><a href="solutions.html#cb1158-2" tabindex="-1"></a><span class="fu">mean</span>(errors<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div>
 <pre><code>## [1] 2.621208</code></pre>
 <p>This value is within 2 se of the predicted value based on CV.</p>
 

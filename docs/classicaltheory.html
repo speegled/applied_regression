@@ -63,9 +63,8 @@
 
 
 <style type="text/css">
-html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -75,7 +74,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -272,7 +271,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <ul>
 <li class="chapter" data-level="9.7.1" data-path="lecture-notes.html"><a href="lecture-notes.html#random-slopes"><i class="fa fa-check"></i><b>9.7.1</b> Random Slopes</a></li>
 <li class="chapter" data-level="9.7.2" data-path="lecture-notes.html"><a href="lecture-notes.html#comparing-models"><i class="fa fa-check"></i><b>9.7.2</b> Comparing models</a></li>
-<li class="chapter" data-level="9.7.3" data-path="lecture-notes.html"><a href="lecture-notes.html#some-theory"><i class="fa fa-check"></i><b>9.7.3</b> Some Theory</a></li>
 </ul></li>
 <li class="chapter" data-level="9.8" data-path="lecture-notes.html"><a href="lecture-notes.html#february-24"><i class="fa fa-check"></i><b>9.8</b> February 24</a>
 <ul>
@@ -365,7 +363,7 @@ We will not work much with the pdf directly, but rather use the built in R funct
 <p>We first get a single sample from the rv, then we put it inside <code>replicate</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="classicaltheory.html#cb2-1" tabindex="-1"></a>one_sample <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="at">mean =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">2</span>)</span>
 <span id="cb2-2"><a href="classicaltheory.html#cb2-2" tabindex="-1"></a>one_sample</span></code></pre></div>
-<pre><code>## [1] 3.221773</code></pre>
+<pre><code>## [1] 0.8332275</code></pre>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="classicaltheory.html#cb4-1" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
 <span id="cb4-2"><a href="classicaltheory.html#cb4-2" tabindex="-1"></a>  one_sample <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="at">mean =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">2</span>)</span>
 <span id="cb4-3"><a href="classicaltheory.html#cb4-3" tabindex="-1"></a>  one_sample</span>
@@ -373,12 +371,12 @@ We will not work much with the pdf directly, but rather use the built in R funct
 <p>This creates a vector of length 10000 that is a random sample from a normal rv with mean 1 and sd 2. For simple examples like this, it would be more natural to do <code>sim_data &lt;- rnorm(10000, 1, 2)</code>, but the above will be easier to keep track of when we get to more complicated things, imho.</p>
 <p>Next, we just take the mean (average) of the random sample.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="classicaltheory.html#cb5-1" tabindex="-1"></a><span class="fu">mean</span>(sim_data)</span></code></pre></div>
-<pre><code>## [1] 0.9657658</code></pre>
+<pre><code>## [1] 0.9768348</code></pre>
 <p>And we see that we get pretty close to 1. Let’s verify that <span class="math inline">\(2 *X + 3 * Y\)</span> has mean <span class="math inline">\(2\mu_X + 3 \mu_Y\)</span> in the case that <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are normal with means 2 and 5 respectively.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="classicaltheory.html#cb7-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>) <span class="co">#chose sd = 1</span></span>
 <span id="cb7-2"><a href="classicaltheory.html#cb7-2" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">3</span>) <span class="co">#chose different sd just to see if that matters</span></span>
 <span id="cb7-3"><a href="classicaltheory.html#cb7-3" tabindex="-1"></a><span class="dv">2</span> <span class="sc">*</span> x <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> y</span></code></pre></div>
-<pre><code>## [1] 26.46083</code></pre>
+<pre><code>## [1] 24.75204</code></pre>
 <p>That is one sample from <span class="math inline">\(2X + 3Y\)</span>. Let’s get a lot of samples.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="classicaltheory.html#cb9-1" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
 <span id="cb9-2"><a href="classicaltheory.html#cb9-2" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>) <span class="co">#chose sd = 1</span></span>
@@ -386,13 +384,13 @@ We will not work much with the pdf directly, but rather use the built in R funct
 <span id="cb9-4"><a href="classicaltheory.html#cb9-4" tabindex="-1"></a>  <span class="dv">2</span> <span class="sc">*</span> x <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> y</span>
 <span id="cb9-5"><a href="classicaltheory.html#cb9-5" tabindex="-1"></a>})</span>
 <span id="cb9-6"><a href="classicaltheory.html#cb9-6" tabindex="-1"></a><span class="fu">mean</span>(sim_data)</span></code></pre></div>
-<pre><code>## [1] 19.14832</code></pre>
+<pre><code>## [1] 19.0335</code></pre>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="classicaltheory.html#cb11-1" tabindex="-1"></a><span class="dv">2</span> <span class="sc">*</span> <span class="dv">2</span> <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> <span class="dv">5</span></span></code></pre></div>
 <pre><code>## [1] 19</code></pre>
 <p>We compare the estimated mean to the true mean of 19, and see that we are pretty close. To be sure, we might run the simulation a couple of times and see whether it looks like it is staying close to 19; sometimes larger, sometimes smaller.</p>
 <p>To estimate the variance of an rv, we take a large sample and use the R function <code>var</code>, which computes the sample variance. This is not as straightorward from a theoretical standpoint as taking the <code>mean</code>, but we will ignore the difficulties. We know from Theorem <a href="#thm:variancefacts"><strong>??</strong></a> that the variance of <span class="math inline">\(2X + 3Y\)</span> shoule be <span class="math inline">\(4 * 1 + 9 * 9 = 85\)</span>. Let’s check it out. We already have built our random sample, so we just use <code>var</code> on that.</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="classicaltheory.html#cb13-1" tabindex="-1"></a><span class="fu">var</span>(sim_data)</span></code></pre></div>
-<pre><code>## [1] 85.25933</code></pre>
+<pre><code>## [1] 85.03948</code></pre>
 <p>Let’s repeat a few times.</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="classicaltheory.html#cb15-1" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
 <span id="cb15-2"><a href="classicaltheory.html#cb15-2" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>) <span class="co">#chose sd = 1</span></span>
@@ -400,12 +398,12 @@ We will not work much with the pdf directly, but rather use the built in R funct
 <span id="cb15-4"><a href="classicaltheory.html#cb15-4" tabindex="-1"></a>  <span class="dv">2</span> <span class="sc">*</span> x <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> y</span>
 <span id="cb15-5"><a href="classicaltheory.html#cb15-5" tabindex="-1"></a>})</span>
 <span id="cb15-6"><a href="classicaltheory.html#cb15-6" tabindex="-1"></a><span class="fu">var</span>(sim_data)</span></code></pre></div>
-<pre><code>## [1] 84.31381</code></pre>
+<pre><code>## [1] 85.96071</code></pre>
 <p>Seems to be working. To estimate the standard deviation, we would take the square root, or use the <code>sd</code> R function.</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="classicaltheory.html#cb17-1" tabindex="-1"></a><span class="fu">sd</span>(sim_data)</span></code></pre></div>
-<pre><code>## [1] 9.182255</code></pre>
+<pre><code>## [1] 9.2715</code></pre>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="classicaltheory.html#cb19-1" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">var</span>(sim_data))</span></code></pre></div>
-<pre><code>## [1] 9.182255</code></pre>
+<pre><code>## [1] 9.2715</code></pre>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="classicaltheory.html#cb21-1" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="dv">85</span>)</span></code></pre></div>
 <pre><code>## [1] 9.219544</code></pre>
 <p>The reason it is tricky from a theoretical point of view to estimate the standard deviation is that, if you repeated the above a bunch of times, you would notice that <code>sd</code> is slighlty off on average. But, the variance is correct, on average.</p>
@@ -651,7 +649,7 @@ E[\hat \beta_1] &amp;= E\bigl[\frac {1}{\sum x_i^2}\sum x_i y_i\bigr]\\
 <p>Then we will create a data set and estimate the slope.</p>
 <div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="classicaltheory.html#cb50-1" tabindex="-1"></a>ys <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> xs <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">3</span>)</span>
 <span id="cb50-2"><a href="classicaltheory.html#cb50-2" tabindex="-1"></a><span class="fu">sum</span>(xs <span class="sc">*</span> ys)<span class="sc">/</span><span class="fu">sum</span>(xs<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div>
-<pre><code>## [1] 1.999866</code></pre>
+<pre><code>## [1] 2.03024</code></pre>
 <p>Next, we put that inside of <code>replicate</code> to get a large sample of possible estimates of slopes.</p>
 <div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="classicaltheory.html#cb52-1" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
 <span id="cb52-2"><a href="classicaltheory.html#cb52-2" tabindex="-1"></a>  ys <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> xs <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">3</span>)</span>
@@ -659,7 +657,7 @@ E[\hat \beta_1] &amp;= E\bigl[\frac {1}{\sum x_i^2}\sum x_i y_i\bigr]\\
 <span id="cb52-4"><a href="classicaltheory.html#cb52-4" tabindex="-1"></a>})</span></code></pre></div>
 <p>And we compute the mean. We should get something really close to 2, which is the true value of the slope.</p>
 <div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="classicaltheory.html#cb53-1" tabindex="-1"></a><span class="fu">mean</span>(sim_data)</span></code></pre></div>
-<pre><code>## [1] 1.999501</code></pre>
+<pre><code>## [1] 1.999147</code></pre>
 <p>To be safe, we should repeat that a few times to see if the estimated expected value of <span class="math inline">\(\hat \beta_1\)</span> is on both sides of 2, and doesn’t seem to be biased. More generally, we know that <span class="math inline">\(\hat \beta_1\)</span> is a <strong>normal random variable</strong> with mean 2. What is its variance? Well, since the <span class="math inline">\(y_i\)</span> are independent, we can compute the variance as follows.</p>
 <p><span class="math display">\[
 \begin{aligned}
@@ -671,7 +669,7 @@ V(\hat \beta_1) &amp;= V(\frac {1}{\sum x_i^2}\sum x_i y_i)\\
 \]</span></p>
 <p>Again, let’s check that is true via… simulations!</p>
 <div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="classicaltheory.html#cb55-1" tabindex="-1"></a><span class="fu">var</span>(sim_data)</span></code></pre></div>
-<pre><code>## [1] 0.008772052</code></pre>
+<pre><code>## [1] 0.008895249</code></pre>
 <div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="classicaltheory.html#cb57-1" tabindex="-1"></a><span class="dv">9</span><span class="sc">/</span>(<span class="fu">sum</span> (xs<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div>
 <pre><code>## [1] 0.008847458</code></pre>
 <p>Looks pretty good! Again, we would need to repeat a few times to be sure. Finally, let’s estimate the density function of <span class="math inline">\(\hat \beta_1\)</span> and compare it to that of a normal with the above mean and standard deviation.</p>
@@ -1317,12 +1315,8 @@ But, to be safe, we <strong>anchor</strong> the match at the front of the name u
 <div class="sourceCode" id="cb161"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb161-1"><a href="classicaltheory.html#cb161-1" tabindex="-1"></a>bb <span class="sc">%&gt;%</span> </span>
 <span id="cb161-2"><a href="classicaltheory.html#cb161-2" tabindex="-1"></a>  <span class="fu">group_by</span>(year, sex) <span class="sc">%&gt;%</span> </span>
 <span id="cb161-3"><a href="classicaltheory.html#cb161-3" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">tot =</span> <span class="fu">sum</span>(n))</span></code></pre></div>
-<pre><code>## `summarise()` has regrouped the output.
-## ℹ Summaries were computed grouped by year and sex.
-## ℹ Output is grouped by year.
-## ℹ Use `summarise(.groups = &quot;drop_last&quot;)` to silence this message.
-## ℹ Use `summarise(.by = c(year, sex))` for per-operation grouping
-##   (`?dplyr::dplyr_by`) instead.</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;year&#39;. You can override using the
+## `.groups` argument.</code></pre>
 <pre><code>## # A tibble: 276 × 3
 ## # Groups:   year [138]
 ##     year sex      tot

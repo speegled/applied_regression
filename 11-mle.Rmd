@@ -1,0 +1,252 @@
+# Maximum Likelihood Estimation
+
+Consider the problem of estimating a parameter in a model. For example, if we take a random sample from a normal distribution with unknown mean $\mu$ and variance 1, what is a good estimator for $\mu$? I hope you immediately think of the *sample mean* $\overline{x}$. How could we come to that decision systematically, though? And what if the parameter doesn't have quite the same obvious interpretation as $\mu$ from a normal distribution? 
+
+We will use the method of maximum likelihood. Realistically, I should have talked about this long ago in class, but we are going to do it now.
+
+Given a probability density function $f$ of a random variable $X$, we can associate the value of $f(x)$ with the relative likelihood that $x$ is an observed value from $X$. The values themselves don't mean much, but if $f(x) = 2f(y)$, then we can say that $x$ is twice as likely as $y$. If we have a single observation from $X$ which is normally distributed with mean $\mu$, the most likely outcome is the mean, $\mu$. 
+
+Now, we can turn the thought process upside down. Suppose we don't know the value of $\mu$, but we observe a single value $x$. The value of $\mu$ which makes $x$ most likely is $x$ itself^[citation needed]. Let's check that really is true.
+
+```{r}
+like_fun <- function(mu) {
+  dnorm(x, mean = mu, sd = 1)
+}
+x <- 2
+optimize(like_fun, interval = c(-8, 8), maximum = T)
+```
+
+If you try a few more values of $x$, you will see that indeed, this is the case.
+
+OK, but how would we do this if we have more than one value of $x$? We would then compute the likelihood function given all of the samples. If the samples are independent (a common assumption, but **not** the case in mixed models), then we can just multiply the separate pdfs together. Let's see how to do it if we have a sample of size $n = 4$ consisting of `c(1, 2, 3, 4)`. 
+
+```{r}
+like_fun <- function(mu) {
+  prod(dnorm(x, mean = mu, sd = 1))
+}
+x <- c(1, 2, 3, 4)
+optimize(like_fun, interval = c(-8, 8), maximum = T)
+```
+
+This works fine for small data sets, but when we have a lot of data, the product of the pdfs could get extermely small. It is better to minimze the negative of the log of the likelihood. We also have to change `prod` to `sum`.
+
+```{r}
+like_fun <- function(mu) {
+  sum(dnorm(x, mean = mu, sd = 1, log = T))
+}
+x <- c(1, 2, 3, 4)
+optimize(like_fun, interval = c(-8, 8), maximum = T)
+```
+
+
+
+OK, now what if we have two parameters that we need to estimate simultaneously? There are several things that need to change:
+
+   - We have to pass two parameters to our likelihood function instead of just one. 
+   - We have to use `optim` instead of `optimize`
+   - We have to provide `optim` with a starting estimate.
+   - `optim` will only minimize, so we need to minimize negative likelihood, which is the same as maximizing positive likelihood.
+
+It works like this in the case we are estimating the mean and the standard deviation.
+
+```{r}
+x <- c(1, 2, 3, 4)
+like_fun <- function(par) {
+  mu <- par[1]
+  sigma <- par[2]
+  -sum(dnorm(x, mu, sigma, log = T))
+}
+optim(par = c(1, 1), fn = like_fun, lower = c(-Inf, 0.001), method = "L-BFGS-B")
+```
+
+This works quite generally. If we have data between 0 and 1 and we wish to estimate the parameters associated with a beta distribution, we can do the following:
+
+```{r}
+set.seed(1)
+shapes <- sample(1:50, 2)
+data <- rbeta(30, shape1 = shapes[1], shape2 = shapes[2])
+like_fun <- function(par) {
+  shape1 <- par[1]
+  shape2 <- par[2]
+  -sum(dbeta(data, shape1, shape2, log = T))
+}
+oo <- optim(par = c(1, 1), fn = like_fun, lower = c(-0.01, 0.01), method = "L-BFGS-B")
+oo
+```
+
+Are estimates are `r oo$par[1]` for shape1 and `r oo$par[2]` for `shape2`.  If we have data that follows the model
+
+\[
+y_i = \beta_0 + \beta_1 x_i + \epsilon_i
+\]
+where $\epsilon_i$ are iid $N(0, \sigma)$ random variables, then it gets a little bit more complicated. We would do it like this. We suppose we want to estimate the parameters associated with modeling `imu_top_speed_ms` on `stride_length_m` in the data set `ardata::running_speed`. The main thing to notice is that the values of $y_i$ are independent, normally distributed with mean $\beta_0 + \beta_1 x_i$ and variance $\sigma^2$.
+
+```{r}
+rr <- ardata::running_speed
+like_fun <- function(par) {
+  beta0 <- par[1]
+  beta1 <- par[2]
+  sigma <- par[3]
+  -sum(dnorm(rr$imu_top_speed_ms, beta0 + beta1 * rr$stride_length_m, sigma, log = T))
+}
+oo <- optim(par = c(1, 1, 1), fn = like_fun, lower = c(-Inf, -Inf, 0.01), method = "L-BFGS-B")
+oo$par
+lm(imu_top_speed_ms ~ stride_length_m, data = rr)
+```
+
+
+## MLE for mixed models
+
+How does `lmer` estimate the parameters in our models? `lmer` uses maximum likelihood estimation (MLE) to estimate the parameters of the model. The likelihood function is based on the assumption that the random effects and the residuals are normally distributed. The MLE approach finds the parameter values that maximize the likelihood of observing the data given the model. In practice, `lmer` uses two different algorithms for estimating the parameters. The one we will discuss is MLE.
+
+Let's look at an example.
+
+```{r}
+ss <- lme4::sleepstudy |> 
+  janitor::clean_names() |> 
+  as_tibble()
+```
+
+We estimate the parameters involved with a **random intercepts** model. To set notation, the mathematical formulation of this model is 
+
+\[
+\text{reaction}_{ij} = \gamma_{00} + \beta_1 \text{days}_{ij} + u_{0i} + \epsilon_{ij}
+\]
+
+We can start by getting reasonable guesses for the values.
+
+```{r}
+mod <- lm(reaction ~ days + subject, data = ss)
+summary(mod)
+```
+
+We can guess that $\gamma_{00} \approx 295$ and $\beta_1 \approx 10.5$. The variance of the residuals is approximately $31^2$ (it will likely be less, depending on how much variance is explained by the random intercept). Now we need to estimate the variance of the random intercepts. We can get a rough estimate of this by looking at the variance of the subject means.
+
+```{r}
+295 + c(0, coef(mod)[3:19]) #these are the intercepts
+var(295 + c(0, coef(mod)[3:19]))
+```
+
+The variance of the intercepts is about $1474$. The final estimated value will likely be smaller than this.
+
+Let's see what `lmer` gives.
+
+```{r}
+mod_lmer <- lme4::lmer(reaction ~ days + (1|subject), data = ss)
+summary(mod_lmer)
+```
+
+Our values are pretty close.
+
+
+We can use these values as starting points for the optimization algorithm that `lmer` uses to find the MLE estimates. Using our mathematical model of `reaction`, we can see that each response is a function of the fixed effects, the random effects, and the residuals. The distribution of a single response is
+
+\[
+y_{ij} \sim N(\gamma_{00} + \beta_1 x_{ij}, \tau^2 + \sigma^2)
+\]
+
+where here we use the assumption that $u_{0i} \sim N(0, \tau^2)$ and $\epsilon_{ij} \sim N(0, \sigma^2)$ are independent. The likelihood function is the product of the probability density functions for each response, which is a function of the parameters $\gamma_{00}$, $\beta_1$, $\tau^2$, and $\sigma^2$. The MLE estimates are the values of these parameters that maximize the likelihood function.
+
+When we do this, we will maximize the **log** of the likelihood function, in order to keep values reasonably sized.
+
+```{r}
+#This isn't correct
+like <- function(par) {
+  gamma <- par[1]
+  beta <- par[2]
+  tau2 <- par[3]
+  sigma2 <- par[4]
+  mu <- gamma + beta * ss$days
+  var <- tau2 + sigma2
+  -sum(dnorm(ss$reaction, mean = mu, sd = sqrt(var), log = TRUE))
+}
+
+like(c(295, 10.5, 1474, 961))
+oo <- optim(par = c(295, 10.5, 1474, 961), fn = like, method = "L-BFGS-B", lower = c(-Inf, -Inf, 0, 0))
+```
+
+
+```{r}
+like(oo$par)
+tidy_modlmer <- broom.mixed::tidy(mod_lmer)
+like(c(tidy_modlmer$estimate[1], tidy_modlmer$estimate[2], tidy_modlmer$estimate[3]^2, tidy_modlmer$estimate[4]^2))
+```
+
+We can see that we don't quite get the fully correct answer. This is because we haven't correctly described the likelihood function for a mixed effect model. The likelihood function for a mixed effect model is more complicated than the one we wrote down above, because it allows correlation within subjects. The likelihood function for a mixed effect model is based on the joint distribution of the responses for each subject, which is a multivariate normal distribution with mean vector and covariance matrix that depend on the fixed effects and the random effects. While the **marginal** distribution of each response is normal, the **joint** distribution of the responses for each subject is multivariate normal with correlation between responses from the same subject. This is fundamentally different than what we were doing in the previous section, because now we have to compute the **joint likelihood** of the entire sample directly, rather than multiplying the likelihood of the samples together.
+
+**How would that work for linear regression**
+
+Let's return to the same example we did earlier with running speed. We have to understand multivariate normal distributions to some extent, so here we go. The multivariate normal distribution is a generalization of the univariate normal distribution to multiple dimensions. Its parameters are a *mean vector* and a *covariance matrix*. The mean vector gives the expected value of each variable, while the covariance matrix gives the variance of each variable and the covariance between each pair of variables. In the following example, we will look at the **joint** distribution of $(X_1, X_2)$, so the length of the mean vector will be 2 and the covariance matrix will be $2 \times 2$.
+
+```{r}
+Sigma <- matrix(c(3, 2, 2, 5), nrow = 2)
+eigen(Sigma) #this is a positive definite matrix, so it is a valid covariance matrix
+library(mvtnorm)
+dat <- mvtnorm::rmvnorm(n = 1000, mean = c(1, 4), sigma = Sigma)
+dd <- data.frame(dat)
+library(tidyverse)
+ggplot(dd, aes(x = X1, y = X2)) + 
+  geom_point() + 
+  coord_equal() 
+```
+
+To force independence of the coordinates, we set the covariances equal to zero. Note that for general rvs, uncorrelated does not imply independent, but for multivariate normal rvs, uncorrelated does imply independent.
+
+We can also re-estimate the mean vector and the covariance matrix using MLE as follows:
+
+```{r}
+like_fun <- function(par) {
+  mu <- c(par[1], par[2])
+  sigma <- matrix(c(par[3], par[4], par[4], par[5]), nrow = 2)
+  -sum(dmvnorm(dat, mean = mu, sigma = sigma, log = T))
+}
+purrr::safely(optim(par = c(1, 1, 3, 1, 5), fn = like_fun, lower = c(-Inf, -Inf, 0.1, 0.1, 0.1), method = "L-BFGS-B"))
+
+#if the matrix created isn't positive definite, then this will break
+```
+
+
+
+
+
+
+Let's see how it works.
+
+```{r}
+par <- oo$par
+library(mvtnorm)
+nll <- function(par) {
+  gamma  <- par[1]
+  beta   <- par[2]
+  tau2   <- par[3]
+  sigma2 <- par[4]
+
+  if (tau2 < 0 || sigma2 <= 0) return(Inf)
+
+  response <- ss$reaction
+  pred_fixed_effect <- gamma + beta * ss$days #this is the same as mu, which is a good check
+    
+  g <- factor(ss$subject) #this is the grouping variable for the random intercepts)
+  Z <- model.matrix(~ 0 + g)   # columns correspond to groups (levels of g)
+
+  N <- length(response)
+  V <- tau2 * (Z %*% t(Z)) + sigma2 * diag(N)  # Marginal covariance: V = tau2 * Z Z' + sigma2 * I_N
+
+  
+  -dmvnorm(response, mean = pred_fixed_effect, sigma = V, log = TRUE)
+}
+nll(par)
+optim(par = par, fn = nll, method = "L-BFGS-B", lower = c(-Inf, -Inf, 0, 0))
+summary(mod_lmer)
+```
+
+
+
+
+
+
+
+
+
+
+

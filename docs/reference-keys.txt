@@ -115,7 +115,6 @@ adding-random-slopes
 february-19
 random-slopes
 comparing-models
-some-theory
 february-24
 beethoven-tempo-example
 solutions
