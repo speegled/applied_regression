@@ -1081,7 +1081,7 @@ where here we use the assumption that $u_{0i} \sim N(0, \tau^2)$ and $\epsilon_{
 When we do this, we will maximize the **log** of the likelihood function, in order to keep values reasonably sized.
 
 ```{r}
-
+#This isn't correct
 like <- function(par) {
   gamma <- par[1]
   beta <- par[2]
@@ -1103,7 +1103,7 @@ tidy_modlmer <- broom.mixed::tidy(mod_lmer)
 like(c(tidy_modlmer$estimate[1], tidy_modlmer$estimate[2], tidy_modlmer$estimate[3]^2, tidy_modlmer$estimate[4]^2))
 ```
 
-We can see that we don't quite get the fully correct answer. This is because we haven't correctly described the likelihood function for a mixed effect model. The likelihood function for a mixed effect model is more complicated than the one we wrote down above, because it allows correlation within subjects. The likelihood function for a mixed effect model is based on the joint distribution of the responses for each subject, which is a multivariate normal distribution with mean vector and covariance matrix that depend on the fixed effects and the random effects. The MLE estimates are the values of the parameters that maximize this likelihood function.
+We can see that we don't quite get the fully correct answer. This is because we haven't correctly described the likelihood function for a mixed effect model. The likelihood function for a mixed effect model is more complicated than the one we wrote down above, because it allows correlation within subjects. The likelihood function for a mixed effect model is based on the joint distribution of the responses for each subject, which is a multivariate normal distribution with mean vector and covariance matrix that depend on the fixed effects and the random effects. While the **marginal** distribution of each response is normal, the **joint** distribution of the responses for each subject is multivariate normal with correlation between responses from the same subject.
 
 Let's see how it works.
 
@@ -1156,147 +1156,192 @@ To force independence of the coordinates, we set the covariances equal to zero. 
 
 **End Aside**
 
-Let's see how to simulate the data from a model with random slopes as described above. We assume for simplicity that the random effects are independent, so that the covariance matrix $\Sigma$ is $2 \times 2$ diagonal. 
+
+## February 24 
+
+### Beethoven Tempo Example
+
+In this example, we consider Beethoven symphony tempo data from a ppaer by Martin-Castro and Ucar^[Martin-Castro A, Ucar I (2020) Conductors' tempo choices shed light over Beethoven's metronome. PLoS ONE 15(12): e0243616]. This data is found in `ardata::beethoven_tempos`. Let's look at the data.
 
 ```{r}
-g <- 10 #number of groups
-n <- 5 # observations per group
-groups <- factor(letters[1:g]) #this only works if g <= 26!
-x <- runif(g * n, 0, 10) #these are the predictors
-sigma_b <- 1.5
-sigma_c <- 2
-b0 <- rnorm(g, 0, sigma_b) #these are the random intercepts for each group
-b1 <- rnorm(g, 0, sigma_c) #these are the random slopes for each group
-beta0 <- 3
-beta1 <- 2
-sigma <- 1
-y <- beta0 + beta1 * x + rep(b0, each = n) + rep(b1, each = n) * x +  rnorm(g * n, 0, sigma) #these are the responses, note that sigma^2 = 1, beta_0 = 3, and beta_1 = 0.5
-dd <- data.frame(x = x,
-                 y = y,
-                 g = rep(groups, each = n))
-ggplot(dd, aes(x = x, y = y, color = g)) + 
-  geom_point() + 
-  geom_smooth(method = "lm", se = F)
+ardata::beethoven_tempos
 ```
 
-In order to estimate the parameters of our model, we use `lme4::lmer`. 
+There are quite a few variables; you should spend some time looking at the documentation and understanding the variable names. We will start by averaging `tempo` over `symphony`, `movement`, and `mark` so that we get independent tempo data.
 
 ```{r}
-mod <- lmer(y ~ x + (1 + x||g), data = dd) #We use || to force there to be no covariance between beta_0 and beta_1
+bbsmall <- ardata::beethoven_tempos |> 
+  group_by(symphony, movement, mark, conductor, ptype) |> 
+  summarize(tempo = mean(tempo, na.rm = T),
+            sd = mean(sd, na.rm = T)) |> 
+  ungroup()
+```
+
+```{r}
+bbsmall
+```
+
+Let's compute the averge and standard deviation of the tempos for each mark.
+
+```{r}
+bbsmall |> 
+  group_by(mark) |> 
+  summarize(mean_tempo = mean(tempo, na.rm = T),
+            sd_tempo = sd(tempo, na.rm = T))
+```
+
+We see that all of the mean tempos are **lower** than the marks, except for the tempo marking of 72. We note that the tempo marking of 72 only occurs in movement 4 of symphony 7. 
+
+We also want to have `symphony` and `movement` as factors, so that we can use them as random effects in our model.
+
+```{r}
+bbsmall <- bbsmall |> 
+  mutate(symphony = factor(symphony),
+         movement = factor(movement)) 
+```
+
+Let's create a linear model of `tempo` on `mark` and `conductor` with their interaction.
+
+```{r}
+mod <- lm(tempo ~ mark * conductor, data = bbsmall)
+MASS::stepAIC(mod, trace= 0) |> 
+  broom::tidy()
+```
+
+This model has a slope of close to 1 for `mark`, which means that on average, the tempo increases by about 1 beat per minute for each increase in the tempo marking. The interaction terms between `mark` and `conductor` is not significant, which suggest that the relationship between `mark` and `tempo` does not differ across conductors. The intercept is hard to interpret; if we subtract a typical value from `mark` and `tempo`, then the intercept would be the expected tempo when `mark` is at that typical value, and the conductor is at the reference level (which is the first conductor in alphabetical order).
+
+```{r}
+median(bbsmall$mark, na.rm = T) #88
+bbsmall <- bbsmall |> 
+  mutate(mark = mark - median(mark, na.rm = T))
+lm(tempo ~ mark + conductor, data = bbsmall)
+```
+
+This says that the first conductor (Abbado) has an expected tempo that is about 16.5 beats per minute slower than the mark when `mark` is at its median value of 88. That is quite a difference. The slope is a little bit less than 1, which means that for each increase in the tempo marking, the tempo increases by about 0.95 beats per minute on average, after accounting for the conductor.
+
+This is fine, but a mixed effects model seems more useful. 
+
+```{r}
+modmixed <- lme4::lmer(tempo ~ mark * ptype + (1|conductor) + (1|symphony), data = bbsmall)
+summary(modmixed)
+mod2 <- lme4::lmer(tempo ~ mark + (1 + mark|conductor), data = bbsmall)
+anova(mod2, modmixed)
+mod3 <- lme4::lmer(tempo ~ mark + (1 | conductor), data = bbsmall)
+anova(mod3, mod2) #this says random slopes is a good idea
+
+mod4 <- lme4::lmer(tempo ~ mark * ptype + (1|conductor) + (1|symphony), data = bbsmall)
+
+mod5 <- lme4::lmer(tempo ~ mark + ptype + (1|conductor), data = bbsmall)
+anova(mod5, mod4) #this says the interaction is a good idea
+
+mod6 <- lme4::lmer(tempo ~ mark * ptype + (1 + mark|conductor) + (1|symphony), data = bbsmall)
+summary(mod6) #note that the variance of random effect of mark is near zero after accounting for ptype interaction
+
+anova(mod6, modmixed) #this says that the random slope is not a good idea after accounting for the interaction between mark and ptype
+```
+
+The models above are what I built in various orders to come up with the one I liked the best. 
+
+```{r}
+bbsmall <- broom.mixed::augment(modmixed)
+ggplot(aes(x = mark, y = .fitted, color = conductor), data = bbsmall) + 
+  geom_line() + 
+  geom_point(aes(y = tempo), alpha = .2) + 
+  theme_minimal()
+```
+
+That is an interesting plot. What is going on? The symphony effect is what is causing the slopes to vary so much between successive marks. If we remove the random symphony effect, then we get the following plot, which looks nicer, but doesn't fit the data as well. 
+
+```{r}
+mod7 <-  lme4::lmer(tempo ~ mark * ptype + (1|conductor), data = bbsmall)
+anova(mod7, modmixed)
+bb2 <- mod7 |> 
+  broom.mixed::augment()
+ggplot(aes(x = mark, y = .fitted, color = conductor), data = bb2) + 
+  geom_line() + 
+  geom_point(aes(y = tempo), alpha = .5) + 
+  theme_minimal()
+```
+
+This plot helps explain the dependence on symphony as well:
+
+```{r}
+ggplot(aes(x = mark, y = .fitted, group = conductor), data = bbsmall) + 
+  geom_line() + 
+  geom_point(aes(y = tempo, color = symphony), alpha = .7) + 
+  theme_minimal()
+```
+
+Now let's see the mean tempo for each mark and `ptype`. 
+
+```{r cache=T}
+mark_vals <- sort(unique(bbsmall$mark))
+library(emmeans)
+emm <- emmeans(mod4, ~ mark * ptype, at = list(mark = mark_vals))
+emm_df <- as.data.frame(emm)
+ggplot(emm_df, aes(x = mark + 88, y = emmean, color = ptype)) + 
+  geom_point ()+ 
+  geom_line() + 
+  geom_abline(slope = 1, intercept = 0) 
+```
+
+What are the differences in the slopes? 
+
+```{r cache = T}
+trends <- emmeans::emtrends(mod4, ~ ptype, var = "mark")
+pairs(trends)
+```
+
+Which slopes are significantly different than 1?
+
+```{r}
+confint(trends)
+test(trends, null = 1)
+```
+
+How would you do a t.test just on mark 84 as to whether the mean tempo is 84? Pretend like we don't
+have any other data.
+
+```{r}
+bb2 <- bbsmall |> 
+  filter(mark == -4) |> 
+  select(matches("^[a-z]"))
+bb2 |> 
+  with(t.test(tempo, mu = 84))#NOT VALID
+```
+
+This is not valid because different conductors appear multiple times.
+
+```{r}
+mod <- lmer(tempo ~ 1 + (1|conductor), data = bb2)
 summary(mod)
 ```
 
-Let's apply this now to the `sleepstudy` data from before. 
+Note that the conductor variance is zero. This could be because there is no conductor effect (though I doubt that seriously based on the
+work we did before) or because we don't have enough data to properly estimate things. Let's remind ourselves how we might estimate the variance of the random intercept.
 
 ```{r}
-mod_sleep <- lmer(reaction ~ days + (1 + days || subject), data = ss) #assuming uncorrelated random effects
-summary(mod_sleep)
+modlm <- lm(tempo ~ 1 + conductor, data = bb2)
+var(c(0, coef(modlm)[2:36]) + coef(modlm)[1])
+#alternative method
+bb2 |> 
+  group_by(conductor) |> 
+  summarize(mean_tempo = mean(tempo)) |>
+  summarize(between_var = var(mean_tempo)) #gives same result
 ```
 
-Note that we can see from the estimates that the slope has mean 10.467 and standard deviation 6. This says that about 4 percent of people will have reaction times that **decrease** over time when this experiment is run, based on our model. 
+This estimate gives us a variance of nearly 12, which is quite large. The estimate from `lmer` is zero, which suggests that we don't have enough data to properly estimate the variance of the random intercepts. This is a common issue when we have a small number of groups (in this case, conductors) and a small number of observations per group. In this case, we have 36 conductors and five observations per conductor for mark 84, which is not a lot of data to estimate the variance of the random intercepts. This is why we get a zero estimate for the variance of the random intercepts, which is likely not the true value, but rather an artifact of the limited data we have for this particular mark.
+
+In the end, we have little choice but to **average** the values of `tempo` across all observations.
 
 ```{r}
-pnorm(0, 10.467, 6)
+bb2 |> 
+  group_by(conductor) |> 
+  summarize(mu = mean(tempo)) |> 
+  with(t.test(mu, mu = 84))
 ```
 
-While this may not be compelling, imagine a drug trial where we are trying to show that the fixed effect of a drug is positive. If the standard deviation of the random slope is large, then it is possible that a non-trivial proportion of people will have a negative effect of the drug, even if the average effect is positive. This is an important consideration when interpreting the results of a mixed effect model, and it highlights the importance of looking at both the fixed effects and the random effects when making inferences from the model.
 
 
-### Intro to Random Effects and Mixed Effect Models - Terminology and First Examples
-
-First off, let's get some terminology down. A **fixed effect** is an effect that is constant across individuals or groups. For example, the effect of a treatment in a clinical trial is often considered a fixed effect, because we are interested in the average effect of the treatment across all individuals. This is a modeling decision that we make based on our research question and the structure of our data. In the `sleepstudy` data set, the effect of `days` on `reaction` could be considered a fixed effect, because we are interested in the overall association between days of sleep deprivation and reaction time across all subjects.
-
-A **random effect** is an effect that varies across individuals or groups. For example, the intercepts and slopes for each subject in the `sleepstudy` data set can be considered random effects, because they vary across subjects. A **mixed effect model** is a model that contains both fixed effects and random effects. In the `sleepstudy` data set, a mixed effect model would include the fixed effect of `days` and the random effects of the intercepts and slopes for each subject.
-
-Mixed effect models go by many different names in different disciplines. If you hear these words, the person may be talking about mixed effect models or something very similar:
-
-- multilevel models
-- hierarchical linear models
-- random effects models
-- linear mixed models
-- Variance components models
-- BLUP models (genetics)
-- Penalized least squares (numerical analysis - these are more general than mixed models, but they include mixed models as a special case)
-- Probably many more
-
-Let's start by fully specifying a mixed effect model which includes a random intercept and a fixed effect slope of one variable. The model can be written as
-\[
-y_{ij} = \beta_0 + \beta_1 x_{ij} + b_{0i} + \epsilon_{ij}
-\]
-where $y_{ij}$ is the response variable for the $j$th observation in group $i$, $\beta_0$ is the overall intercept, $\beta_1$ is the fixed effect slope for predictor $x$, $b_{0i}$ is the random intercept for group $i$, and $\epsilon_{ij}$ is the random error term. We assume that the random effects $b_{0i}$ are normally distributed with mean 0 and variance $\sigma_b^2$, and that the errors $\epsilon_{ij}$ are normally distributed with mean 0 and variance $\sigma^2$. The random effects and errors are assumed to be independent of each other.
-
-Note that we are splitting the **mean** of the intercept and the **variance** of the intercept into two components. We could also have said the $b_{0i}$ are normal with mean $\beta_0$ and variance $\sigma_b^2$.
-
-The fixed effect $\beta_1$ represents the average effect of predictor $x$ on the response variable across all groups, while the random effects $b_{0i}$ represent the deviation of each group's intercept from the overall intercept $\beta_0$. The variance $\sigma_b^2$ captures the variability in the intercepts across groups, while $\sigma^2$ captures the variability within groups.
-
-Here is how we can **simulate** data like this:
-
-```{r}
-g <- 10 #number of groups
-n <- 5 # observations per group
-groups <- factor(letters[1:g]) #this only works if g <= 26!
-set.seed(1)
-x <- runif(g * n, 0, 10) #these are the predictors
-sigma_b <- 2
-b0 <- rnorm(g, 0, sigma_b) #these are the random intercepts for each group
-beta0 <- 3
-beta1 <- 0.5
-sigma <- 1
-y <- beta0 + beta1 * x + rep(b0, each = n) + rnorm(g * n, 0, sigma) #these are the responses, note that sigma^2 = 1, beta_0 = 3, and beta_1 = 0.5
-dd <- data.frame(x = x,
-                 y = y,
-                 g = rep(groups, each = n))
-ggplot(dd, aes(x = x, y = y, color = g)) + 
-  geom_point() + 
-  geom_smooth(method = "lm", se = F)
-
-```
-
-Here we can see that the slopes all look more or less the same, but the intercepts are probably different. Let's see how we could estimate the parameters in our model. This is not exactly how the programs that we use will do it, but it gives a flavor of the ideas. 
-
-First, we could estimate the fixed effect slope $\beta_1$ and the mean of the random intercept $\beta_0$ by fitting a linear model that ignores the grouping structure of the data. This is not ideal, but it gives us a starting point. We should definitely not use the $p$-values.
-
-```{r}
-mod_fixed <- lm(y ~ x, data = dd)
-summary(mod_fixed)
-```
-
-Next, we could estimate the random effects $b_{0i}$ by fitting a linear model that includes the group as a fixed effect. This will give us estimates of the intercepts for each group, which we can then use to estimate the variance of the random effects.
-
-```{r}
-mod_full <- lm(y ~ x + g, data = dd)
-summary(mod_full)
-```
-
-Finally, we could use the estimates from the previous two models to estimate the variance components $\sigma_b^2$ and $\sigma^2$. This is typically done using restricted maximum likelihood (REML) or maximum likelihood (ML) estimation, which are more efficient than the method of moments that we are using here.
-
-```{r}
-#Not recommended - just for illustration
-broom::tidy(mod_full) |>  
-  filter(str_detect(term, "g|tercept")) |>  
-  mutate(estimate = ifelse(str_detect(term, "Inter"), 0, estimate)) |> 
-  summarize(var_b = var(estimate)) #this is an estimate of sigma_b^2ilt
-```
-
-This is an estimate for the variance of the random intercepts, $\sigma_b^2$. Recall that the true value was 4. Finally, we can estimate $\sigma^2$ by looking at the residuals from the full model.
-
-```{r}
-#just for illustration
-var(resid(mod_full))
-```
-
-This is an estimate for the variance of the errors, $\sigma^2$. Recall that the true value was 1. **Note that there are definitely issues with doing it this way**, but in this simple case the estimates that we get are not too far off.
-
-To use more sophisticated tools, we use the package `lme4`.
-
-```{r}
-mod_mixed <- lme4::lmer(y ~ x + (1 | g), data = dd) #the (1|g) indicates that we have a random intercept. The fixed effects are entered just like before
-summary(mod_mixed)
-```
-
-This model includes a random intercept for each group, but assumes that the slope is the same across groups. The output gives us estimates for the fixed effects (the overall intercept and slope) as well as the variance components (the variance of the random intercepts and the variance of the errors).
-
-
-### Comparison of Models
 
 
