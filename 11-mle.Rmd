@@ -102,6 +102,7 @@ How does `lmer` estimate the parameters in our models? `lmer` uses maximum likel
 Let's look at an example.
 
 ```{r}
+library(tidyverse)
 ss <- lme4::sleepstudy |> 
   janitor::clean_names() |> 
   as_tibble()
