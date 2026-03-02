@@ -1094,33 +1094,37 @@ This is fine, but a mixed effects model seems more useful.
 ```{r}
 modmixed <- lme4::lmer(tempo ~ mark * ptype + (1|conductor) + (1|symphony), data = bbsmall)
 summary(modmixed)
+modmixed2 <- lme4::lmer(tempo ~ mark * ptype + symphony + (1|conductor), data = bbsmall)
+summary(modmixed2)
+anova(modmixed2, modmixed)
+
 mod2 <- lme4::lmer(tempo ~ mark + (1 + mark|conductor), data = bbsmall)
-anova(mod2, modmixed)
+anova(mod2, modmixed2)
 mod3 <- lme4::lmer(tempo ~ mark + (1 | conductor), data = bbsmall)
 anova(mod3, mod2) #this says random slopes is a good idea
 
 mod4 <- lme4::lmer(tempo ~ mark * ptype + (1|conductor) + (1|symphony), data = bbsmall)
 
-mod5 <- lme4::lmer(tempo ~ mark + ptype + (1|conductor), data = bbsmall)
-anova(mod5, mod4) #this says the interaction is a good idea
+mod5 <- lme4::lmer(tempo ~ mark + ptype + symphony + (1|conductor), data = bbsmall)
+anova(mod5, modmixed2) #this says the interaction is a good idea
 
-mod6 <- lme4::lmer(tempo ~ mark * ptype + (1 + mark|conductor) + (1|symphony), data = bbsmall)
+mod6 <- lme4::lmer(tempo ~ mark * ptype + symphony + (1 + mark|conductor), data = bbsmall)
 summary(mod6) #note that the variance of random effect of mark is near zero after accounting for ptype interaction
 
-anova(mod6, modmixed) #this says that the random slope is not a good idea after accounting for the interaction between mark and ptype
+anova(mod6, modmixed2) #this says that the random slope is not a good idea after accounting for the interaction between mark and ptype
 ```
 
 The models above are what I built in various orders to come up with the one I liked the best. 
 
 ```{r}
-bbsmall <- broom.mixed::augment(modmixed)
+bbsmall <- broom.mixed::augment(modmixed2)
 ggplot(aes(x = mark, y = .fitted, color = conductor), data = bbsmall) + 
   geom_line() + 
   geom_point(aes(y = tempo), alpha = .2) + 
   theme_minimal()
 ```
 
-That is an interesting plot. What is going on? The symphony effect is what is causing the slopes to vary so much between successive marks. If we remove the random symphony effect, then we get the following plot, which looks nicer, but doesn't fit the data as well. 
+That is an interesting plot. What is going on? The symphony effect is what is causing the slopes to vary so much between successive marks. If we remove the symphony main effect, then we get the following plot, which looks nicer, but doesn't fit the data as well. 
 
 ```{r}
 mod7 <-  lme4::lmer(tempo ~ mark * ptype + (1|conductor), data = bbsmall)
@@ -1147,7 +1151,7 @@ Now let's see the mean tempo for each mark and `ptype`.
 ```{r cache=T}
 mark_vals <- sort(unique(bbsmall$mark))
 library(emmeans)
-emm <- emmeans(mod4, ~ mark * ptype, at = list(mark = mark_vals))
+emm <- emmeans(modmixed2, ~ mark * ptype, at = list(mark = mark_vals))
 emm_df <- as.data.frame(emm)
 ggplot(emm_df, aes(x = mark + 88, y = emmean, color = ptype)) + 
   geom_point ()+ 
@@ -1158,7 +1162,7 @@ ggplot(emm_df, aes(x = mark + 88, y = emmean, color = ptype)) +
 What are the differences in the slopes? 
 
 ```{r cache = T}
-trends <- emmeans::emtrends(mod4, ~ ptype, var = "mark")
+trends <- emmeans::emtrends(modmixed2, ~ ptype, var = "mark")
 pairs(trends)
 ```
 
@@ -1200,7 +1204,7 @@ bb2 |>
   summarize(between_var = var(mean_tempo)) #gives same result
 ```
 
-This estimate gives us a variance of nearly 12, which is quite large. The estimate from `lmer` is zero, which suggests that we don't have enough data to properly estimate the variance of the random intercepts. This is a common issue when we have a small number of groups (in this case, conductors) and a small number of observations per group. In this case, we have 36 conductors and five observations per conductor for mark 84, which is not a lot of data to estimate the variance of the random intercepts. This is why we get a zero estimate for the variance of the random intercepts, which is likely not the true value, but rather an artifact of the limited data we have for this particular mark.
+This estimate gives us a variance of nearly 12, which is quite large. The estimate from `lmer` is zero, which suggests that we don't have enough data to properly estimate the variance of the random intercepts. This is a common issue when we have a small number of groups (in this case, conductors) and/or a small number of observations per group. In this case, we have 36 conductors and five observations per conductor for mark 84, which is not a lot of data to estimate the variance of the random intercepts. This is why we get a zero estimate for the variance of the random intercepts, which is likely not the true value, but rather an artifact of the limited data we have for this particular mark.
 
 In the end, we have little choice but to **average** the values of `tempo` across all observations.
 
