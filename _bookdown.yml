@@ -9,6 +9,7 @@ rmd_files: [
   "03-predictive-modeling.Rmd",
   "04-practical-ols.Rmd",
   "05-variable-selection.Rmd",
+  "08-generalized-linear-models.Rmd",
   "10-lecture-notes.Rmd",
   "11-mle.Rmd",
   "solutions.Rmd"
