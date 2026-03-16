@@ -201,7 +201,8 @@ like_fun <- function(par) {
   sigma <- matrix(c(par[3], par[4], par[4], par[5]), nrow = 2)
   -sum(dmvnorm(dat, mean = mu, sigma = sigma, log = T))
 }
-purrr::safely(optim(par = c(1, 1, 3, 1, 5), fn = like_fun, lower = c(-Inf, -Inf, 0.1, 0.1, 0.1), method = "L-BFGS-B"))
+tryCatch(optim(par = c(1, 1, 3, 1, 5), fn = like_fun, lower = c(-Inf, -Inf, 0.1, 0.1, 0.1), method = "L-BFGS-B"), 
+         error = function(e) print("The covariance matrix is not positive definite"))
 
 #if the matrix created isn't positive definite, then this will break
 ```
@@ -211,7 +212,191 @@ purrr::safely(optim(par = c(1, 1, 3, 1, 5), fn = like_fun, lower = c(-Inf, -Inf,
 
 
 
-Let's see how it works.
+**Returning to mixed models**
+
+Suppose `optim()` gives us one specific set of parameter values:
+
+``` {r}
+par <- oo$par
+gamma  <- par[1]
+beta   <- par[2]
+tau2   <- par[3]
+sigma2 <- par[4]
+```
+
+Right now, we are **not optimizing**.
+
+We are simply asking:
+
+> If these were the true parameter values, how likely would our observed
+> data be?
+
+To answer that, we must compute the likelihood of the data under this
+model.
+
+**Step 1: Compute the Predicted Mean**
+
+The fixed-effects part of our model is
+
+``` {r}
+pred_fixed_effect <- gamma + beta * ss$days
+```
+
+This is exactly what we would compute in ordinary regression.
+
+So far, nothing new.
+
+This gives us the predicted mean reaction time for each observation.
+
+**Step 2: Why We Cannot Multiply Independent Densities**
+
+In ordinary regression, we assume the observations are independent.
+
+That means the likelihood is just:
+
+> Multiply one normal density for each observation.
+
+But in a random intercept model, observations from the same subject
+share the same random intercept.
+
+That means:
+
+-   Observations from the same subject are correlated.
+-   Observations from different subjects are independent.
+
+So we cannot multiply independent densities anymore.
+
+Instead, we must use a **multivariate normal distribution** that
+accounts for correlation.
+
+
+** Step 3: Build the Grouping Matrix**
+
+We create a factor indicating subject membership:
+
+``` {r}
+g <- factor(ss$subject)
+Z <- model.matrix(~ 0 + g)
+Z
+```
+
+What does `Z` do?
+
+-   Each row corresponds to one observation.
+-   Each column corresponds to one subject.
+-   Each row has a 1 in the column for that subject, and 0 elsewhere.
+
+So `Z` simply records which subject each observation belongs to.
+
+
+**Step 4: Construct the Covariance Matrix**
+
+Here is the key line:
+
+``` {r}
+N <- length(ss$reaction)
+(Z %*% t(Z))[1:20, 1:20] #this represents the dependence groupings
+V <- tau2 * (Z %*% t(Z)) + sigma2 * diag(N)
+V[1:20,1:20]
+```
+
+Let's unpack this slowly.
+
+### What does `Z %*% t(Z)` do?
+
+It creates an ( N `\times `{=tex}N ) matrix where:
+
+-   Entries are 1 if two observations belong to the same subject.
+-   Entries are 0 otherwise.
+
+So this matrix marks which observations share a random intercept.
+
+------------------------------------------------------------------------
+
+### What does multiplying by `tau2` do?
+
+It says:
+
+> If two observations belong to the same subject, their covariance is (
+> `\tau`{=tex}\^2 ).
+
+This creates correlation within each subject.
+
+------------------------------------------------------------------------
+
+### What does `sigma2 * diag(N)` do?
+
+This adds residual variance to the diagonal.
+
+That ensures that:
+
+-   Each observation has total variance ( `\tau`{=tex}\^2 +
+    `\sigma`{=tex}\^2 ).
+-   Only observations from the same subject share covariance.
+
+------------------------------------------------------------------------
+
+### What does the final matrix represent?
+
+The matrix `V` contains:
+
+-   Diagonal entries: total variance of each observation\
+-   Off-diagonal entries within a subject: shared variance (
+    `\tau`{=tex}\^2 )\
+-   Off-diagonal entries across subjects: 0
+
+So `V` encodes the entire correlation structure of the data.
+
+This is the key difference between regression and mixed models.
+
+------------------------------------------------------------------------
+
+**Step 5: Evaluate the Multivariate Normal Density**
+
+Finally, we compute:
+
+``` {r}
+dmvnorm(ss$reaction,
+        mean  = pred_fixed_effect,
+        sigma = V,
+        log   = TRUE)
+```
+
+This computes the log-likelihood of the entire response vector at once.
+
+Instead of multiplying many independent normal densities, we now
+evaluate **one multivariate normal density** that accounts for:
+
+-   The mean structure
+-   The within-subject correlation
+
+That single number is:
+
+> The log-likelihood of the data under this parameter choice.
+
+------------------------------------------------------------------------
+
+In ordinary regression:
+
+-   Build the mean.
+-   Assume constant variance.
+-   Multiply independent normal densities.
+
+In a mixed model:
+
+-   Build the mean.
+-   Carefully construct a covariance matrix that reflects the random
+    effects.
+-   Evaluate one multivariate normal density.
+
+The hardest part is building the covariance matrix correctly.
+
+Once that is done, the rest is just plugging into the multivariate
+normal formula.
+
+
+
+
 
 ```{r}
 par <- oo$par

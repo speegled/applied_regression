@@ -103,6 +103,10 @@ february-24
 beethoven-tempo-example
 maximum-likelihood-estimation
 mle-for-mixed-models
+what-does-z-tz-do
+what-does-multiplying-by-tau2-do
+what-does-sigma2-diagn-do
+what-does-the-final-matrix-represent
 solutions
 chapter-2-solutions
 chapter-3-solutions

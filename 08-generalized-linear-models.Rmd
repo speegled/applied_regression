@@ -1,22 +1,83 @@
 # Generalized Linear Models
 
-In this chapter, we discuss a family of models called *generalized linear models*. These models include ordinary least squares regression, and many others. All[^3] of the models presented in this chapter can be realized as examples of a common framework. We won't present the common framework in this book, but focus on two specific examples - *logistic regression* and *Poisson regression*. We will also return to the more classical framework of regression, where we are interested in the theory and assessing the fit of the model, rather than focussing exclusively on predictive modeling. We will do *a lot* of estimates of regression coefficients for various models in this chapter. I hope that by the time you get to the end of reading it, you will be able to set these up in your sleep.
+In this chapter, we discuss a family of models called *generalized linear models*. These models include ordinary least squares regression and many others. All[^3] of the models presented in this chapter can be realized as examples of this common framework. We won't dwell on the common framework in this book, but focus on two specific examples - *logistic regression* and *Poisson regression*. We will also be in the classical framework of regression, where we are interested in the theory and assessing the fit of the model, rather than focusing on predictive modeling. We will do *a lot* of estimates of regression coefficients for various models in this chapter. I hope that by the time you get to the end of reading it, you will be able to set these up in your sleep.
 
 Since generalized linear models include OLS, let's take a brief review of OLS. Recall that our model is
 
 \[
-y = \beta_0 + \sum_{i = 1}^p \beta_i x_i + \epsilon
+y_i = \beta_0 + \sum_{j = 1}^p \beta_j x_{ij} + \epsilon_i
 \]
 
 where $\epsilon$ is normal with mean 0 and unknown variance $\sigma^2$. Another way of thinking about this is that we are modeling the *expected value* of the response via a linear (affine) equation.
 
 \[
-E[y] = \beta_0 + \sum_{i = 1}^p \beta_i x_i
+E[y_i] = \beta_0 + \sum_{j = 1}^p \beta_j x_{ij}
 \]
 
-and we are assuming that we have *normal errors* or deviations from the expected value. Another way to think about it is that the response $y$ is normal with mean $\mu = \beta_0 + \sum_{i = 1}^p \beta_i x_i$ and variance $\sigma^2$.
+and we are assuming that we have *normal errors* or deviations from the expected value. Yet another way to think about it is that the response $y_i$ is normal with mean $\mu = \beta_0 + \sum_{i = j}^p \beta_j x_{ij}$ and variance $\sigma^2$.
 
 ## Logistic Regression
+
+We begin with an example. 
+
+### Malaria Example (Intro)
+
+Consider the `malaria` data set in the `fosdata` package. Mice were bit 10 times by mosquitoes, and the number of salivary gland sporozoites detected in the mosquitoes was measured. The mice were then observed to determine whether they got malaria. Some of the mice were given a malarial antibody pre-mosquito bite. Our goals are to determine whether the number of sporozoites affects the probability of infection, and whether the antibody affects the probability of infection.
+
+```{r}
+library(tidyverse)
+mm <- fosdata::malaria |> 
+  as_tibble()
+ggplot(mm, aes(x = factor(malaria), y = sporozoite)) +
+  geom_boxplot() +
+  geom_jitter(width = .1, height = .1) 
+```
+
+One question we should have is whether mosquitos with 0 sporozoites should be included in the study at all, because they can't possibly infect the mice. If we remove those mosquitos, we get the following graph.
+
+```{r}
+mm <- filter(mm, sporozoite > 0)
+ggplot(mm, aes(x = factor(malaria), y = sporozoite)) +
+  geom_boxplot() +
+  geom_jitter(width = .1, height = .1)
+```
+
+We want to think of the number of sporozoites as the *predictor* though, which is usually on the $x$ axis.
+
+```{r}
+ggplot(mm, aes(x = sporozoite, y = malaria)) +
+  geom_point() + 
+  geom_smooth(method = "lm")
+```
+
+Here we see an issue with this approach: if the line is supposed to represent the probability of getting malaria, then it is impossible for the line to be above 1 or below 0, but the line does go above 1. This is a problem with using OLS to model a binary response, though it is still sometimes approrpriate in certain situations. We will use *logistic regression*.
+
+```{r}
+ggplot(mm, aes(x = sporozoite, y = malaria)) +
+  geom_point() + 
+  geom_smooth(method = "glm", method.args = list(family = "binomial"))
+```
+
+We can see with one observed sporozoite, the probability of getting malaria is about 25%, while with 20 or more, the probability is essentially 100%. 
+
+```{r}
+ggplot(mm, aes(x = sporozoite, y = malaria)) +
+  geom_point() + 
+  geom_smooth(method = "glm", method.args = list(family = "binomial"))
+```
+
+Now let's add the `antibody` variable and see whether the graphs look different.
+
+```{r}
+ggplot(mm, aes(x = sporozoite, y = malaria, color = factor(antibody))) +
+  geom_jitter(width = .2, height = 0, alpha = .5) + 
+  geom_smooth(method = "glm", method.args = list(family = "binomial"))
+```
+
+Based on this plot, it seems that having the antibody protects from mosquitos which have a low viral load, but does not help against mosquitos with a high viral load.
+
+### The model (theory)
+
 
 Logistic regression is used to model responses that can only be two values. Such variables are called *binary* variables. Examples include determining whether a flipped coin comes up as Heads or Tails, or whether a person recovers or doesn't recover from a disease, or whether a person votes yes or no in an election. Many times, we have additional information that is naturally grouped with the outcome. For example, we may have a persons age, height, weight, the amount and type of medicine they were given in addition to whether they recovered or didn't recover from the disease. The goal is to be able to model the recovery or non-recovery from the disease on the predictors. 
 
@@ -44,22 +105,22 @@ This is a very typical and promising plot for wanting to do logistic regression.
 If we are reasoning analogously to OLS, we might think that we should try to model the *expected value* of the response as a linear (affine) equation of the predictors, as in
 
 \[
-E[y] = \beta_0 + \sum_{i = 1}^p \beta_i x_i.
+E[y_i] = \beta_0 + \sum_{j = 1}^P \beta_j x_{ij}.
 \]
 
-Sometimes that is appropriate, but if we are thinking of the response as a 0/1 random variable, then its expected value is the **probability** of a success. The affine equation above can be negative or bigger than 1, which would be impossible for a probability. Alternatively, let $p = E[y]$, and we could model the **log odds** of the response as an affine equation of the predictors:
+Sometimes that is appropriate, but if we are thinking of the response as a 0/1 random variable, then its expected value is the **probability** of a success. The affine equation above can be negative or bigger than 1, which would be impossible for a probability. Alternatively, let $p_i = E[y_i]$, and we could model the **log odds** of the response as an affine equation of the predictors (we denote the number of predictors by $P$ now):
 
 \[
-\log \frac{p}{1-p} = \beta_0 + \sum_{i = 1}^p \beta_i x_i
+\log \frac{p_i}{1-p_i} = \beta_0 + \sum_{j = 1}^P \beta_j x_{ij}
 \]
 
-This is the approach that is taken in logistic regression. For completeness, let's solve the above equation for $p$:
+This is the approach that is taken in logistic regression. For completeness, let's solve the above equation for $p_i$:
 
 \[
-p = \frac{e^{\beta_0 + \sum_{i = 1}^p \beta_i x_i}}{1 + e^{\beta_0 + \sum_{i = 1}^p \beta_i x_i}} = \frac{1}{1 + e^{-\beta_0 - \sum_{i = 1}^p \beta_i x_i}}
+p_i = \frac{e^{\beta_0 + \sum_{j = 1}^P \beta_j x_{ij}}}{1 + e^{\beta_0 + \sum_{j = 1}^P \beta_j x_{ij}}} = \frac{1}{1 + e^{-\beta_0 - \sum_{j = 1}^P \beta_j x_{ij}}}
 \]
 
-The *error* component in this model is not as easy to see as in the normal case, because it isn't simply added as a random variable. But we can see that the random component of the response is binomial with $n = 1$ and $p = \frac{1}{1 + e^{-\beta_0 - \sum_{i = 1}^p \beta_i x_i}}$. This is is often referred to as "binomial error" or "binomial noise", but the term *random component* makes more sense to me. The predictors can be either continuous or categorical, but we will be going through the derivations only for a single continuous predictor (just like we did with OLS). One final piece of terminology is the *link function*. In the case of logistic regression, the link function is $\log \frac{x}{1-x}$. This is the link between the linear combination of predictors and the expected value of the response.
+The *error* component in this model is not as easy to see as in the normal case, because it isn't simply added as a random variable. But we can see that the random component of the response is binomial with $n = 1$ and $p_i = \frac{1}{1 + e^{-\beta_0 - \sum_{j = 1}^P \beta_j x_{ij}}}$. This is is often referred to as "binomial error" or "binomial noise", but the term *random component* makes more sense to me. The predictors can be either continuous or categorical, but we will be going through the derivations only for a single continuous predictor. One final piece of terminology is the *link function*. In the case of logistic regression, the link function is $\log \frac{x}{1-x}$. This is the link between the linear combination of predictors and the expected value of the response. The inverse link function is the inverse function of $\log \frac{x}{1-x}$, which is $\frac{1}{1 + e^{-x}}$. This is the function that links the linear combination of predictors to the expected value of the response. The R functions which implement those functions are `qlogis` and `plogis`, respectively.
 
 For the specific example that we are considering, we have only a single predictor $x$, so our model is
 
@@ -73,7 +134,7 @@ The first question you might have is: how do we get estimates of $\beta_i$? The 
 
 The three loss functions are all of the form
 \[
-\frac{1}n \sum_{i = 1}^n \Phi(\text{logit}(p_i) y_i)
+\frac{1}n \sum_{i = 1}^n \Phi(p_i y_i)
 \]
 
 where $\Phi$ is one of
