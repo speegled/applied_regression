@@ -79,7 +79,152 @@ Based on this plot, it seems that having the antibody protects from mosquitos wh
 ### The model (theory)
 
 
-Logistic regression is used to model responses that can only be two values. Such variables are called *binary* variables. Examples include determining whether a flipped coin comes up as Heads or Tails, or whether a person recovers or doesn't recover from a disease, or whether a person votes yes or no in an election. Many times, we have additional information that is naturally grouped with the outcome. For example, we may have a persons age, height, weight, the amount and type of medicine they were given in addition to whether they recovered or didn't recover from the disease. The goal is to be able to model the recovery or non-recovery from the disease on the predictors. 
+Logistic regression is used to model responses that can only take two values. Such variables are called *binary* variables. Examples include determining whether a flipped coin comes up as Heads or Tails, whether a person recovers or doesn't recover from a disease, or whether a person votes yes or no in an election. Many times, we have additional information that is naturally grouped with the outcome. For example, we may have a person's age, height, weight, the amount and type of medicine they were given in addition to whether they recovered or didn't recover from the disease. The goal is to be able to model the recovery or non-recovery from the disease on the predictors.
+
+Let's call the response variable $Y$, and assume for now that we have a single continuous predictor. The response would correspond to whether the mouse got malaria in the previous example, and the predictor would be the number of sporozoites. In OLS, we model 
+
+\[
+y_i = \beta_0 + \beta_1 x_i + \epsilon_i
+\]
+
+so that the **expected value of the response** is modeled by $\beta_0 + \beta_1 x_i$. The $\epsilon_i$ is the error term. Reasoning similarly, we might reasonably model the expected value of the binary response as $\beta_0 + \beta_1 x_i$. Let's think carefully about what the expected value of a 0/1 binary random variable represents. Let $p$ be the probability of success. Then,
+
+\[
+E[Y] = 1 * p + 0 * (1 - p) = p
+\]
+
+So, modeling the expected value of the response is the same as modeling the probability of the response being 1. Then, our model would be (without the error term)
+
+\[
+p_i = \beta_0 + \beta_1 x_i
+\]
+
+This is fine, but we note that for some values of the parameters and predictors, we could get probabilities that are larger than 1 or smaller than 0. This would be difficult to interpret. So, it is common to model the **log-odds** of the probability instead.
+
+\[
+\log \frac{p}{1 - p} = \beta_0 + \beta_1 x_i
+\]
+
+The odds $\frac{p}{p - 1}$ can be any positive number and the log-odds can be any real number. Given the log-odds $L$ of an event, we can recompute the probability of the event via $p = \frac{e^L}{1 + E^L}$.
+
+**Aside** Interpreting log-odds. The log-odds of an event is the log of the odds of the event. The odds of an event is the probability of the event divided by the probability of the event not happening. So, if we have a 50% chance of an event happening, then the odds are 1, and the log-odds are 0. If we have a 75% chance of an event happening, then the odds are 3, and the log-odds are $\log(3)$. If we have a 25% chance of an event happening, then the odds are $\frac{1}{3}$, and the log-odds are $\log(\frac{1}{3})$. 
+
+If the log-odds increases by 1, then the odds increase by a multiplicative factor of $e$. If the log-odds increases by $\beta_1$, then the odds increase by a factor of $e^{\beta_1}$. So, if $\beta_1$ is positive, then the odds of the event happening increase as $x$ increases. If $\beta_1$ is negative, then the odds of the event happening decrease as $x$ increases. If $\beta_1$ is zero, then the odds of the event happening do not change as $x$ increases.
+
+In the OLS model, we explicitly had an error term $\epsilon_i$. In the logistic regression model, we don't have an explicit error term, but we can think of the response as being a random variable that is generated according to the probabilities given by the model. That is, we can think of $Y_i$ as being a Bernoulli random variable with parameter $p_i$, where $p_i$ is given by the logistic function of $\beta_0 + \beta_1 x_i$.
+
+### Estimating parameters using MLE
+
+Let's see how to use MLE and the `optim` function to estimate the parameters $\beta_0$ and $\beta_1$ in the above model. We use the `fosdata::malaria` data set for specificity. 
+
+We start by noting that the **likelihood** of a 0/1 random variable is determined by the probability of success. If $Y = 1$, then the likelihood of the data point is $p$ (probability of success) and if $Y = 0$, then the likelihood of the data point is $1 - p$ (probability of failure). We can write this succinctly as $p^Y (1 - p)^{1 - Y}$.
+
+Therefore, the likelihood of observing a sequence of 0/1 random variables $Y_1, \ldots, Y_n$ with probabilities of success $p_1, \ldots, p_n$ is given by $\Pi_{i = 1}^n p_i^{Y_i} (1 - p_i)^{1 - Y_i}$, where $p_i$ is the probability of success for observation $i$. The log of the likelihood function simplifies to $\sum_{i = 1}^n Y_i \log(p_i) + (1 - Y_i) \log(1 - p_i)$.
+
+Finally, we have the relationship between $p_i$ and the predictors and parameters: $p_i = \frac{1}{1 + e^{-\beta_0 - \beta_1 x_i}}$. Therefore, we can write the log-likelihood function in terms of $\beta_0$ and $\beta_1$ as follows:
+
+```{r}
+nll <- function(par) {
+  beta0 <- par[1]
+  beta1 <- par[2]
+  p <- boot::inv.logit(beta0 + beta1 * mm$sporozoite)
+  -1 * sum(mm$malaria * log(p) + (1 - mm$malaria) * log(1 - p))
+}
+optim(par = c(0,0), fn = nll)
+```
+
+Let's compare those to what we would get using the built-in R function `glm`, which is the workhorse for doing all things with fixed effect generalized linear models.
+
+```{r}
+glm(malaria ~ sporozoite, data = mm, family = "binomial")
+```
+
+### Estimating parameters via penalties
+
+Just like in OLS, there are alternative ways to estimate the parameters associated with logistic regression. In OLS, we saw that minimizing the SSE gave the same parameter estimates as maximizing the likelihood function. For logistic regression, the error function we want to minimize is:
+
+\[
+\frac{1}n \sum_{i = 1}^n \Phi(\eta_i y_i)
+\]
+
+where $\Phi = \log(1 + e^{-x})$ and $y_i$ has been recoded so that 1 is success and $-1$ is failure, and $\eta_i = \log {p_i}{1 - p_i}$ is the log-odds of $p_i = \beta_0 + \beta_1 x_i$.  Let's think about why this is a function that **penalizes** being away from the true observed values. The graph of $\Phi$ looks like this
+
+```{r}
+curve(log(1 + exp(-x)), from = -3, to = 3)
+```
+
+So this penalty penalizes **negative** values of $\eta_i y_i$ and encourages **positive** values of $\eta_i y_i$. If $y_i$ is 1, then we want $\eta_i$ to be positive, so that $\eta_i y_i$ is positive. If $y_i$ is $-1$, then we want $\eta_i$ to be negative, so that $\eta_i y_i$ is positive. Therefore, this penalty encourages the model to predict positive values for the predictors when the response is 1 and negative values for the predictors when the response is $-1$. Recall that large positive values of the log-odds correspond to high probabilities of success, and large negative values of the log-odds correspond to low probabilities of success. So, this penalty encourages the model to predict high probabilities of success when the response is 1 and low probabilities of success when the response is $-1$. 
+
+What isn't at all obvious is that minimizing this function will yield the same parameter estimates as maximizing the likelihood function, but let's see it in an example.
+
+```{r}
+pen <- function(par) {
+  beta0 <- par[1]
+  beta1 <- par[2]
+  p <- boot::inv.logit(beta0 + beta1 * mm$sporozoite)
+  y <- ifelse(mm$malaria == 1, 1, -1)
+  mean(log(1 + exp(-1 * (log(p/(1-p))) * y)))
+}
+optim(par = c(0,0), fn = pen)
+```
+
+### Interpreting summary
+
+Now, we turn to interpreting the summary of `glm`. 
+
+```{r}
+mod <- glm(malaria ~ sporozoite, data = mm, family = "binomial")
+summary(mod)
+```
+
+We have an estimate for intercept of -1.44 and for $\beta_1$ of 0.33341. The intercept tells us the log-odds of getting malaria when the number of sporozoites is 0 (according to the model - we actually know this is zero). The log-odds of getting malaria when the number of sporozoites is 0 is -1.44, which corresponds to a probability of getting malaria of $\frac{e^{-1.44}}{1 + e^{-1.44}}$. In R, this is computed via the `boot::inv.logit(-1.44)` function, which gives us a probability of about 0.19. So, according to the model, the probability of getting malaria when the number of sporozoites is 0 is about 19%.
+
+The sporozoite estimate tells us that the log-odds of getting malaria increases by 0.33341 for every one unit increase in the number of sporozoites. Therefore, the odds of getting malaria will increase by a multiplicative factor of $e^{0.33341}$ for every one unit increase in the number of sporozoites. In R, this is computed via `exp(0.33341)`, which gives us a multiplicative factor of about 1.4. So, according to the model, the odds of getting malaria will increase by a factor of about 40 percent for every one unit increase in the number of sporozoites. 
+
+The standard error, $z$ value and $p$ value have meanings similar to what we covered in OLS. The deviance plays a similar role to the sum of squared errors in OLS, and the null deviance is the deviance of the model with only an intercept. The difference between the null deviance and the residual deviance is a measure of how much better the model with the predictor is compared to the model with only an intercept. Formally, the null deviance is defined as -2 times the log likelihood of the model with only an intercept, and the residual deviance is defined as -2 times the log likelihood of the model with the predictor. Therefore, the difference between the null deviance and the residual deviance is 2 times the difference in log likelihoods between the two models. This can be used to perform a likelihood ratio test to determine whether the model with the predictor is significantly better than the model with only an intercept. Since we have already computed the likelihood, we can quickly confirm the deviance computations.
+
+```{r}
+#use nll from above - note that we already had a negative sign there
+2 * nll(c(-1.44, 0.33341))
+```
+
+This should be the same as the residual deviance in the summary output, which it is!
+
+We can compute an analogy of $R^2$ for logistic regression, which is called McFadden's $R^2$. This is defined as $1 - \frac{\text{residual deviance}}{\text{null deviance}}$. In R, this is computed as follows:
+
+```{r}
+1 - (mod$deviance / mod$null.deviance)
+#using the built in function from the package pscl
+library(pscl)
+pR2(mod)
+```
+
+We can also perform a hypothesis test on which of two models is better. For example, we can compare the model with the predictor `sporozoite` to the model with `sporozoite` and `antibody`. 
+
+```{r}
+mod2 <- glm(malaria ~ sporozoite + antibody, data = mm, family = "binomial")
+summary(mod2)
+anova(mod, mod2, test = "Chisq")
+```
+
+Note that there is **not** statistically significant evidence that the model with `antibody` is better than the model with just `sporozoite`. We could also have looked directly at the $p$-values in `summary(mod2)`:
+
+```{r}
+summary(mod2)
+```
+
+We get slightly different $p$-values because the tests use different assumptions. One utility of the test using deviances is that it can be used to test the null hypothesis that a group of parameters is all zero versus the alternative that at least one of them is non-zero, which is not something that we can do with the $p$-values in `summary(mod2)`. 
+
+
+
+
+## This is all from last semester
+
+
+
+
+
+
 
 We'll start in the simple case where we have a single predictor and a binary response. Let's have a specific data set in mind so that we can be concrete about things. 
 
