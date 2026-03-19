@@ -1099,7 +1099,7 @@ optim(par = c(1,1,.1), fn = neg_log_likelihood, data = dd)
 
 We see that our estimate are $\hat \beta_0 = 1.95$, $\hat \beta_1 = 1.19$ and $\hat size = 0.573$. Let's compare to what happens when we use the built in R function.
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE,eval=FALSE}
 library(VGAM)
 mod <- vgam(y ~ x, data = dd, family = posnegbinomial())
 summary(mod)
