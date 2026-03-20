@@ -213,9 +213,38 @@ Note that there is **not** statistically significant evidence that the model wit
 summary(mod2)
 ```
 
-We get slightly different $p$-values because the tests use different assumptions. One utility of the test using deviances is that it can be used to test the null hypothesis that a group of parameters is all zero versus the alternative that at least one of them is non-zero, which is not something that we can do with the $p$-values in `summary(mod2)`. 
+We get slightly different $p$-values because the tests use different assumptions. One utility of the test using deviances is that it can be used to test the null hypothesis that a group of parameters is all zero versus the alternative that at least one of them is non-zero, which is not something that we can do with the $p$-values in `summary(mod2)`. For the test using deviances to be valid, the models **must be nested**. If the models are not nested, then it is common to use AIC to decide between the models, rather than a formal hypothesis test.
 
+```{r}
+AIC(mod, mod2)
+```
 
+Note that AIC chooses the model **with** antibodies while deviances eliminate antibodies. This goes back to the purpose of the two techniques - there are some theoretical reasons to prefer AIC for predictive modeling, and using $p$-values is sometimes prefered for building parsimonious or explanatory models. For completeness, we could also include the interaction between `sporozoites` and `antibody`:
+
+```{r}
+mod3 <- glm(malaria ~ sporozoite * antibody, data = mm, family = "binomial")
+summary(mod3)
+```
+
+The model coefficients are `(Intercept)`, which is the log-odds of getting malaria when the mosquito has zero sporozoites and the mouse does not have the antibody, `sporozoite`, which is the change in log-odds of getting malaria for every one unit increase in the number of sporozoites when the mouse does not have the antibody, `antibody`, which is the change in log-odds of getting malaria for having the antibody when the number of sporozoites is **zero**, and `sporozoite:antibody`, which is the change in log-odds of getting malaria for every one unit increase in the number of sporozoites when the mouse has the antibody compared to when it does not have the antibody. 
+
+**Note**: it can be hard to directly see whether the positive `antibody` is associated with **more** malaria or **less** malaria in the model with interaction. For example, if the typical mosquito has 50 sporozoites, then the effect of the antibody on the log-odds of getting malaria would be $-1.38 + (0.34 + .37) * 50 - 4.8$, compared to $-1.38 + .34 * 50$ for the antibody negative mice. The difference in these is $.37 * 50 - 4.8 = 13.7$, which means our model would say it is **much** more likely to get malaria with the antibodies. 
+
+We can also use the `predict` function to get point predictions and confidence intervals for the probability of getting malaria associated with sporozoites and antibodies. We return to the model with `sporozoite` and `antibody`. You can read about the options in `predict` by typing `predict.glm`. Note that `predict` is a generic function which has different behavior depending on whether the object passed to it was fit using `lm` or `glm`. The one we had been using was `predict.lm`. 
+
+```{r}
+predict(mod2, newdata = data.frame(sporozoite = 10, antibody = "yes")) #log-odds
+predict(mod2, newdata = data.frame(sporozoite = 10, antibody = "yes"), type = "response") #probability
+predict(mod2, newdata = data.frame(sporozoite = 10, antibody = "no"), type = "response", se.fit = T) 
+```
+
+Note that we would want to interpret the standard error with caution here. First of all, it is the value that corresponds to **confidence** intervals in OLS, not **prediction** intervals. Second, it would be non-standard to compute a two-sided confidence interval for $p$ by taking $0.8868761 \pm 2 * 0.03624307$. A better way to compute a confidence interval would be to compute the symmetric interval in the log-odds scale, and convert it into the probability scale.
+
+```{r}
+predict(mod2, newdata = data.frame(sporozoite = 10, antibody = "no"), se.fit = T) 
+boot::inv.logit(2.059222 + 2 * 0.3612499) #upper bound
+boot::inv.logit(2.059222 - 2 * 0.3612499) #lower bound
+```
 
 
 ## This is all from last semester
