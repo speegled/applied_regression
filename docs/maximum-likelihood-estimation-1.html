@@ -23,7 +23,7 @@
 <meta name="author" content="Darrin Speegle" />
 
 
-<meta name="date" content="2026-03-19" />
+<meta name="date" content="2026-03-22" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -63,8 +63,9 @@
 
 
 <style type="text/css">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -74,7 +75,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -225,25 +226,30 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="7.1.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#malaria-example-intro"><i class="fa fa-check"></i><b>7.1.1</b> Malaria Example (Intro)</a></li>
 <li class="chapter" data-level="7.1.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#the-model-theory"><i class="fa fa-check"></i><b>7.1.2</b> The model (theory)</a></li>
 <li class="chapter" data-level="7.1.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#estimating-parameters-using-mle"><i class="fa fa-check"></i><b>7.1.3</b> Estimating parameters using MLE</a></li>
-<li class="chapter" data-level="7.1.4" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#estimating-parameters-via-penalties"><i class="fa fa-check"></i><b>7.1.4</b> Estimating parameters via penalties</a></li>
+<li class="chapter" data-level="7.1.4" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#estimating-parameters-via-loss-function"><i class="fa fa-check"></i><b>7.1.4</b> Estimating parameters via loss function</a></li>
 <li class="chapter" data-level="7.1.5" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#interpreting-summary"><i class="fa fa-check"></i><b>7.1.5</b> Interpreting summary</a></li>
 </ul></li>
-<li class="chapter" data-level="7.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#this-is-all-from-last-semester"><i class="fa fa-check"></i><b>7.2</b> This is all from last semester</a>
+<li class="chapter" data-level="7.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#mixed-effects-logistic-regression"><i class="fa fa-check"></i><b>7.2</b> Mixed Effects Logistic Regression</a>
 <ul>
-<li class="chapter" data-level="7.2.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#maximum-likelihood-estimation"><i class="fa fa-check"></i><b>7.2.1</b> Maximum Likelihood Estimation</a></li>
-<li class="chapter" data-level="7.2.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#model-diagnostics"><i class="fa fa-check"></i><b>7.2.2</b> Model Diagnostics</a></li>
-<li class="chapter" data-level="7.2.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#case-study"><i class="fa fa-check"></i><b>7.2.3</b> Case Study</a></li>
+<li class="chapter" data-level="7.2.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#nested-random-effects"><i class="fa fa-check"></i><b>7.2.1</b> Nested random effects</a></li>
 </ul></li>
-<li class="chapter" data-level="7.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#count-response-models"><i class="fa fa-check"></i><b>7.3</b> Count response models</a>
+<li class="chapter" data-level="7.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#count-regression"><i class="fa fa-check"></i><b>7.3</b> Count Regression</a></li>
+<li class="chapter" data-level="7.4" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#this-is-all-from-last-semester"><i class="fa fa-check"></i><b>7.4</b> This is all from last semester</a>
 <ul>
-<li class="chapter" data-level="7.3.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#overdispersion"><i class="fa fa-check"></i><b>7.3.1</b> Overdispersion</a></li>
-<li class="chapter" data-level="7.3.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#negative-binomial-regression"><i class="fa fa-check"></i><b>7.3.2</b> Negative Binomial Regression</a></li>
+<li class="chapter" data-level="7.4.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#maximum-likelihood-estimation"><i class="fa fa-check"></i><b>7.4.1</b> Maximum Likelihood Estimation</a></li>
+<li class="chapter" data-level="7.4.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#model-diagnostics"><i class="fa fa-check"></i><b>7.4.2</b> Model Diagnostics</a></li>
+<li class="chapter" data-level="7.4.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#case-study"><i class="fa fa-check"></i><b>7.4.3</b> Case Study</a></li>
 </ul></li>
-<li class="chapter" data-level="7.4" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-and-zero-inflated-models"><i class="fa fa-check"></i><b>7.4</b> Zero-truncated and Zero-inflated models</a>
+<li class="chapter" data-level="7.5" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#count-response-models"><i class="fa fa-check"></i><b>7.5</b> Count response models</a>
 <ul>
-<li class="chapter" data-level="7.4.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-poisson"><i class="fa fa-check"></i><b>7.4.1</b> Zero-truncated Poisson</a></li>
-<li class="chapter" data-level="7.4.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-negative-binomial"><i class="fa fa-check"></i><b>7.4.2</b> Zero-truncated Negative Binomial</a></li>
-<li class="chapter" data-level="7.4.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-inflated-poisson-and-negative-binomial"><i class="fa fa-check"></i><b>7.4.3</b> Zero-Inflated Poisson and Negative Binomial</a></li>
+<li class="chapter" data-level="7.5.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#overdispersion"><i class="fa fa-check"></i><b>7.5.1</b> Overdispersion</a></li>
+<li class="chapter" data-level="7.5.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#negative-binomial-regression"><i class="fa fa-check"></i><b>7.5.2</b> Negative Binomial Regression</a></li>
+</ul></li>
+<li class="chapter" data-level="7.6" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-and-zero-inflated-models"><i class="fa fa-check"></i><b>7.6</b> Zero-truncated and Zero-inflated models</a>
+<ul>
+<li class="chapter" data-level="7.6.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-poisson"><i class="fa fa-check"></i><b>7.6.1</b> Zero-truncated Poisson</a></li>
+<li class="chapter" data-level="7.6.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-negative-binomial"><i class="fa fa-check"></i><b>7.6.2</b> Zero-truncated Negative Binomial</a></li>
+<li class="chapter" data-level="7.6.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-inflated-poisson-and-negative-binomial"><i class="fa fa-check"></i><b>7.6.3</b> Zero-Inflated Poisson and Negative Binomial</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="8" data-path="lecture-notes.html"><a href="lecture-notes.html"><i class="fa fa-check"></i><b>8</b> Lecture Notes</a>
@@ -326,11 +332,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>We will use the method of maximum likelihood. Realistically, I should have talked about this long ago in class, but we are going to do it now.</p>
 <p>Given a probability density function <span class="math inline">\(f\)</span> of a random variable <span class="math inline">\(X\)</span>, we can associate the value of <span class="math inline">\(f(x)\)</span> with the relative likelihood that <span class="math inline">\(x\)</span> is an observed value from <span class="math inline">\(X\)</span>. The values themselves don’t mean much, but if <span class="math inline">\(f(x) = 2f(y)\)</span>, then we can say that <span class="math inline">\(x\)</span> is twice as likely as <span class="math inline">\(y\)</span>. If we have a single observation from <span class="math inline">\(X\)</span> which is normally distributed with mean <span class="math inline">\(\mu\)</span>, the most likely outcome is the mean, <span class="math inline">\(\mu\)</span>.</p>
 <p>Now, we can turn the thought process upside down. Suppose we don’t know the value of <span class="math inline">\(\mu\)</span>, but we observe a single value <span class="math inline">\(x\)</span>. The value of <span class="math inline">\(\mu\)</span> which makes <span class="math inline">\(x\)</span> most likely is <span class="math inline">\(x\)</span> itself<a href="#fn8" class="footnote-ref" id="fnref8"><sup>8</sup></a>. Let’s check that really is true.</p>
-<div class="sourceCode" id="cb1123"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1123-1"><a href="maximum-likelihood-estimation-1.html#cb1123-1" tabindex="-1"></a>like_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(mu) {</span>
-<span id="cb1123-2"><a href="maximum-likelihood-estimation-1.html#cb1123-2" tabindex="-1"></a>  <span class="fu">dnorm</span>(x, <span class="at">mean =</span> mu, <span class="at">sd =</span> <span class="dv">1</span>)</span>
-<span id="cb1123-3"><a href="maximum-likelihood-estimation-1.html#cb1123-3" tabindex="-1"></a>}</span>
-<span id="cb1123-4"><a href="maximum-likelihood-estimation-1.html#cb1123-4" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">2</span></span>
-<span id="cb1123-5"><a href="maximum-likelihood-estimation-1.html#cb1123-5" tabindex="-1"></a><span class="fu">optimize</span>(like_fun, <span class="at">interval =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">8</span>, <span class="dv">8</span>), <span class="at">maximum =</span> T)</span></code></pre></div>
+<div class="sourceCode" id="cb1185"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1185-1"><a href="maximum-likelihood-estimation-1.html#cb1185-1" tabindex="-1"></a>like_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(mu) {</span>
+<span id="cb1185-2"><a href="maximum-likelihood-estimation-1.html#cb1185-2" tabindex="-1"></a>  <span class="fu">dnorm</span>(x, <span class="at">mean =</span> mu, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb1185-3"><a href="maximum-likelihood-estimation-1.html#cb1185-3" tabindex="-1"></a>}</span>
+<span id="cb1185-4"><a href="maximum-likelihood-estimation-1.html#cb1185-4" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb1185-5"><a href="maximum-likelihood-estimation-1.html#cb1185-5" tabindex="-1"></a><span class="fu">optimize</span>(like_fun, <span class="at">interval =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">8</span>, <span class="dv">8</span>), <span class="at">maximum =</span> T)</span></code></pre></div>
 <pre><code>## $maximum
 ## [1] 2.000015
 ## 
@@ -338,22 +344,22 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## [1] 0.3989423</code></pre>
 <p>If you try a few more values of <span class="math inline">\(x\)</span>, you will see that indeed, this is the case.</p>
 <p>OK, but how would we do this if we have more than one value of <span class="math inline">\(x\)</span>? We would then compute the likelihood function given all of the samples. If the samples are independent (a common assumption, but <strong>not</strong> the case in mixed models), then we can just multiply the separate pdfs together. Let’s see how to do it if we have a sample of size <span class="math inline">\(n = 4\)</span> consisting of <code>c(1, 2, 3, 4)</code>.</p>
-<div class="sourceCode" id="cb1125"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1125-1"><a href="maximum-likelihood-estimation-1.html#cb1125-1" tabindex="-1"></a>like_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(mu) {</span>
-<span id="cb1125-2"><a href="maximum-likelihood-estimation-1.html#cb1125-2" tabindex="-1"></a>  <span class="fu">prod</span>(<span class="fu">dnorm</span>(x, <span class="at">mean =</span> mu, <span class="at">sd =</span> <span class="dv">1</span>))</span>
-<span id="cb1125-3"><a href="maximum-likelihood-estimation-1.html#cb1125-3" tabindex="-1"></a>}</span>
-<span id="cb1125-4"><a href="maximum-likelihood-estimation-1.html#cb1125-4" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>)</span>
-<span id="cb1125-5"><a href="maximum-likelihood-estimation-1.html#cb1125-5" tabindex="-1"></a><span class="fu">optimize</span>(like_fun, <span class="at">interval =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">8</span>, <span class="dv">8</span>), <span class="at">maximum =</span> T)</span></code></pre></div>
+<div class="sourceCode" id="cb1187"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1187-1"><a href="maximum-likelihood-estimation-1.html#cb1187-1" tabindex="-1"></a>like_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(mu) {</span>
+<span id="cb1187-2"><a href="maximum-likelihood-estimation-1.html#cb1187-2" tabindex="-1"></a>  <span class="fu">prod</span>(<span class="fu">dnorm</span>(x, <span class="at">mean =</span> mu, <span class="at">sd =</span> <span class="dv">1</span>))</span>
+<span id="cb1187-3"><a href="maximum-likelihood-estimation-1.html#cb1187-3" tabindex="-1"></a>}</span>
+<span id="cb1187-4"><a href="maximum-likelihood-estimation-1.html#cb1187-4" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>)</span>
+<span id="cb1187-5"><a href="maximum-likelihood-estimation-1.html#cb1187-5" tabindex="-1"></a><span class="fu">optimize</span>(like_fun, <span class="at">interval =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">8</span>, <span class="dv">8</span>), <span class="at">maximum =</span> T)</span></code></pre></div>
 <pre><code>## $maximum
 ## [1] 2.500003
 ## 
 ## $objective
 ## [1] 0.002079237</code></pre>
 <p>This works fine for small data sets, but when we have a lot of data, the product of the pdfs could get extermely small. It is better to minimze the negative of the log of the likelihood. We also have to change <code>prod</code> to <code>sum</code>.</p>
-<div class="sourceCode" id="cb1127"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1127-1"><a href="maximum-likelihood-estimation-1.html#cb1127-1" tabindex="-1"></a>like_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(mu) {</span>
-<span id="cb1127-2"><a href="maximum-likelihood-estimation-1.html#cb1127-2" tabindex="-1"></a>  <span class="fu">sum</span>(<span class="fu">dnorm</span>(x, <span class="at">mean =</span> mu, <span class="at">sd =</span> <span class="dv">1</span>, <span class="at">log =</span> T))</span>
-<span id="cb1127-3"><a href="maximum-likelihood-estimation-1.html#cb1127-3" tabindex="-1"></a>}</span>
-<span id="cb1127-4"><a href="maximum-likelihood-estimation-1.html#cb1127-4" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>)</span>
-<span id="cb1127-5"><a href="maximum-likelihood-estimation-1.html#cb1127-5" tabindex="-1"></a><span class="fu">optimize</span>(like_fun, <span class="at">interval =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">8</span>, <span class="dv">8</span>), <span class="at">maximum =</span> T)</span></code></pre></div>
+<div class="sourceCode" id="cb1189"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1189-1"><a href="maximum-likelihood-estimation-1.html#cb1189-1" tabindex="-1"></a>like_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(mu) {</span>
+<span id="cb1189-2"><a href="maximum-likelihood-estimation-1.html#cb1189-2" tabindex="-1"></a>  <span class="fu">sum</span>(<span class="fu">dnorm</span>(x, <span class="at">mean =</span> mu, <span class="at">sd =</span> <span class="dv">1</span>, <span class="at">log =</span> T))</span>
+<span id="cb1189-3"><a href="maximum-likelihood-estimation-1.html#cb1189-3" tabindex="-1"></a>}</span>
+<span id="cb1189-4"><a href="maximum-likelihood-estimation-1.html#cb1189-4" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>)</span>
+<span id="cb1189-5"><a href="maximum-likelihood-estimation-1.html#cb1189-5" tabindex="-1"></a><span class="fu">optimize</span>(like_fun, <span class="at">interval =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">8</span>, <span class="dv">8</span>), <span class="at">maximum =</span> T)</span></code></pre></div>
 <pre><code>## $maximum
 ## [1] 2.5
 ## 
@@ -367,13 +373,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><code>optim</code> will only minimize, so we need to minimize negative likelihood, which is the same as maximizing positive likelihood.</li>
 </ul>
 <p>It works like this in the case we are estimating the mean and the standard deviation.</p>
-<div class="sourceCode" id="cb1129"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1129-1"><a href="maximum-likelihood-estimation-1.html#cb1129-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>)</span>
-<span id="cb1129-2"><a href="maximum-likelihood-estimation-1.html#cb1129-2" tabindex="-1"></a>like_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
-<span id="cb1129-3"><a href="maximum-likelihood-estimation-1.html#cb1129-3" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> par[<span class="dv">1</span>]</span>
-<span id="cb1129-4"><a href="maximum-likelihood-estimation-1.html#cb1129-4" tabindex="-1"></a>  sigma <span class="ot">&lt;-</span> par[<span class="dv">2</span>]</span>
-<span id="cb1129-5"><a href="maximum-likelihood-estimation-1.html#cb1129-5" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">sum</span>(<span class="fu">dnorm</span>(x, mu, sigma, <span class="at">log =</span> T))</span>
-<span id="cb1129-6"><a href="maximum-likelihood-estimation-1.html#cb1129-6" tabindex="-1"></a>}</span>
-<span id="cb1129-7"><a href="maximum-likelihood-estimation-1.html#cb1129-7" tabindex="-1"></a><span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">fn =</span> like_fun, <span class="at">lower =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="fl">0.001</span>), <span class="at">method =</span> <span class="st">&quot;L-BFGS-B&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1191"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1191-1"><a href="maximum-likelihood-estimation-1.html#cb1191-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>)</span>
+<span id="cb1191-2"><a href="maximum-likelihood-estimation-1.html#cb1191-2" tabindex="-1"></a>like_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
+<span id="cb1191-3"><a href="maximum-likelihood-estimation-1.html#cb1191-3" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> par[<span class="dv">1</span>]</span>
+<span id="cb1191-4"><a href="maximum-likelihood-estimation-1.html#cb1191-4" tabindex="-1"></a>  sigma <span class="ot">&lt;-</span> par[<span class="dv">2</span>]</span>
+<span id="cb1191-5"><a href="maximum-likelihood-estimation-1.html#cb1191-5" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">sum</span>(<span class="fu">dnorm</span>(x, mu, sigma, <span class="at">log =</span> T))</span>
+<span id="cb1191-6"><a href="maximum-likelihood-estimation-1.html#cb1191-6" tabindex="-1"></a>}</span>
+<span id="cb1191-7"><a href="maximum-likelihood-estimation-1.html#cb1191-7" tabindex="-1"></a><span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">fn =</span> like_fun, <span class="at">lower =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="fl">0.001</span>), <span class="at">method =</span> <span class="st">&quot;L-BFGS-B&quot;</span>)</span></code></pre></div>
 <pre><code>## $par
 ## [1] 2.500001 1.118036
 ## 
@@ -390,16 +396,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## $message
 ## [1] &quot;CONVERGENCE: REL_REDUCTION_OF_F &lt;= FACTR*EPSMCH&quot;</code></pre>
 <p>This works quite generally. If we have data between 0 and 1 and we wish to estimate the parameters associated with a beta distribution, we can do the following:</p>
-<div class="sourceCode" id="cb1131"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1131-1"><a href="maximum-likelihood-estimation-1.html#cb1131-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
-<span id="cb1131-2"><a href="maximum-likelihood-estimation-1.html#cb1131-2" tabindex="-1"></a>shapes <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>, <span class="dv">2</span>)</span>
-<span id="cb1131-3"><a href="maximum-likelihood-estimation-1.html#cb1131-3" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">rbeta</span>(<span class="dv">30</span>, <span class="at">shape1 =</span> shapes[<span class="dv">1</span>], <span class="at">shape2 =</span> shapes[<span class="dv">2</span>])</span>
-<span id="cb1131-4"><a href="maximum-likelihood-estimation-1.html#cb1131-4" tabindex="-1"></a>like_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
-<span id="cb1131-5"><a href="maximum-likelihood-estimation-1.html#cb1131-5" tabindex="-1"></a>  shape1 <span class="ot">&lt;-</span> par[<span class="dv">1</span>]</span>
-<span id="cb1131-6"><a href="maximum-likelihood-estimation-1.html#cb1131-6" tabindex="-1"></a>  shape2 <span class="ot">&lt;-</span> par[<span class="dv">2</span>]</span>
-<span id="cb1131-7"><a href="maximum-likelihood-estimation-1.html#cb1131-7" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">sum</span>(<span class="fu">dbeta</span>(data, shape1, shape2, <span class="at">log =</span> T))</span>
-<span id="cb1131-8"><a href="maximum-likelihood-estimation-1.html#cb1131-8" tabindex="-1"></a>}</span>
-<span id="cb1131-9"><a href="maximum-likelihood-estimation-1.html#cb1131-9" tabindex="-1"></a>oo <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">fn =</span> like_fun, <span class="at">lower =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.01</span>, <span class="fl">0.01</span>), <span class="at">method =</span> <span class="st">&quot;L-BFGS-B&quot;</span>)</span>
-<span id="cb1131-10"><a href="maximum-likelihood-estimation-1.html#cb1131-10" tabindex="-1"></a>oo</span></code></pre></div>
+<div class="sourceCode" id="cb1193"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1193-1"><a href="maximum-likelihood-estimation-1.html#cb1193-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb1193-2"><a href="maximum-likelihood-estimation-1.html#cb1193-2" tabindex="-1"></a>shapes <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>, <span class="dv">2</span>)</span>
+<span id="cb1193-3"><a href="maximum-likelihood-estimation-1.html#cb1193-3" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">rbeta</span>(<span class="dv">30</span>, <span class="at">shape1 =</span> shapes[<span class="dv">1</span>], <span class="at">shape2 =</span> shapes[<span class="dv">2</span>])</span>
+<span id="cb1193-4"><a href="maximum-likelihood-estimation-1.html#cb1193-4" tabindex="-1"></a>like_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
+<span id="cb1193-5"><a href="maximum-likelihood-estimation-1.html#cb1193-5" tabindex="-1"></a>  shape1 <span class="ot">&lt;-</span> par[<span class="dv">1</span>]</span>
+<span id="cb1193-6"><a href="maximum-likelihood-estimation-1.html#cb1193-6" tabindex="-1"></a>  shape2 <span class="ot">&lt;-</span> par[<span class="dv">2</span>]</span>
+<span id="cb1193-7"><a href="maximum-likelihood-estimation-1.html#cb1193-7" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">sum</span>(<span class="fu">dbeta</span>(data, shape1, shape2, <span class="at">log =</span> T))</span>
+<span id="cb1193-8"><a href="maximum-likelihood-estimation-1.html#cb1193-8" tabindex="-1"></a>}</span>
+<span id="cb1193-9"><a href="maximum-likelihood-estimation-1.html#cb1193-9" tabindex="-1"></a>oo <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">fn =</span> like_fun, <span class="at">lower =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.01</span>, <span class="fl">0.01</span>), <span class="at">method =</span> <span class="st">&quot;L-BFGS-B&quot;</span>)</span>
+<span id="cb1193-10"><a href="maximum-likelihood-estimation-1.html#cb1193-10" tabindex="-1"></a>oo</span></code></pre></div>
 <pre><code>## $par
 ## [1]  5.252771 53.286377
 ## 
@@ -420,17 +426,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 y_i = \beta_0 + \beta_1 x_i + \epsilon_i
 \]</span>
 where <span class="math inline">\(\epsilon_i\)</span> are iid <span class="math inline">\(N(0, \sigma)\)</span> random variables, then it gets a little bit more complicated. We would do it like this. We suppose we want to estimate the parameters associated with modeling <code>imu_top_speed_ms</code> on <code>stride_length_m</code> in the data set <code>ardata::running_speed</code>. The main thing to notice is that the values of <span class="math inline">\(y_i\)</span> are independent, normally distributed with mean <span class="math inline">\(\beta_0 + \beta_1 x_i\)</span> and variance <span class="math inline">\(\sigma^2\)</span>.</p>
-<div class="sourceCode" id="cb1133"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1133-1"><a href="maximum-likelihood-estimation-1.html#cb1133-1" tabindex="-1"></a>rr <span class="ot">&lt;-</span> ardata<span class="sc">::</span>running_speed</span>
-<span id="cb1133-2"><a href="maximum-likelihood-estimation-1.html#cb1133-2" tabindex="-1"></a>like_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
-<span id="cb1133-3"><a href="maximum-likelihood-estimation-1.html#cb1133-3" tabindex="-1"></a>  beta0 <span class="ot">&lt;-</span> par[<span class="dv">1</span>]</span>
-<span id="cb1133-4"><a href="maximum-likelihood-estimation-1.html#cb1133-4" tabindex="-1"></a>  beta1 <span class="ot">&lt;-</span> par[<span class="dv">2</span>]</span>
-<span id="cb1133-5"><a href="maximum-likelihood-estimation-1.html#cb1133-5" tabindex="-1"></a>  sigma <span class="ot">&lt;-</span> par[<span class="dv">3</span>]</span>
-<span id="cb1133-6"><a href="maximum-likelihood-estimation-1.html#cb1133-6" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">sum</span>(<span class="fu">dnorm</span>(rr<span class="sc">$</span>imu_top_speed_ms, beta0 <span class="sc">+</span> beta1 <span class="sc">*</span> rr<span class="sc">$</span>stride_length_m, sigma, <span class="at">log =</span> T))</span>
-<span id="cb1133-7"><a href="maximum-likelihood-estimation-1.html#cb1133-7" tabindex="-1"></a>}</span>
-<span id="cb1133-8"><a href="maximum-likelihood-estimation-1.html#cb1133-8" tabindex="-1"></a>oo <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">fn =</span> like_fun, <span class="at">lower =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="sc">-</span><span class="cn">Inf</span>, <span class="fl">0.01</span>), <span class="at">method =</span> <span class="st">&quot;L-BFGS-B&quot;</span>)</span>
-<span id="cb1133-9"><a href="maximum-likelihood-estimation-1.html#cb1133-9" tabindex="-1"></a>oo<span class="sc">$</span>par</span></code></pre></div>
+<div class="sourceCode" id="cb1195"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1195-1"><a href="maximum-likelihood-estimation-1.html#cb1195-1" tabindex="-1"></a>rr <span class="ot">&lt;-</span> ardata<span class="sc">::</span>running_speed</span>
+<span id="cb1195-2"><a href="maximum-likelihood-estimation-1.html#cb1195-2" tabindex="-1"></a>like_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
+<span id="cb1195-3"><a href="maximum-likelihood-estimation-1.html#cb1195-3" tabindex="-1"></a>  beta0 <span class="ot">&lt;-</span> par[<span class="dv">1</span>]</span>
+<span id="cb1195-4"><a href="maximum-likelihood-estimation-1.html#cb1195-4" tabindex="-1"></a>  beta1 <span class="ot">&lt;-</span> par[<span class="dv">2</span>]</span>
+<span id="cb1195-5"><a href="maximum-likelihood-estimation-1.html#cb1195-5" tabindex="-1"></a>  sigma <span class="ot">&lt;-</span> par[<span class="dv">3</span>]</span>
+<span id="cb1195-6"><a href="maximum-likelihood-estimation-1.html#cb1195-6" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">sum</span>(<span class="fu">dnorm</span>(rr<span class="sc">$</span>imu_top_speed_ms, beta0 <span class="sc">+</span> beta1 <span class="sc">*</span> rr<span class="sc">$</span>stride_length_m, sigma, <span class="at">log =</span> T))</span>
+<span id="cb1195-7"><a href="maximum-likelihood-estimation-1.html#cb1195-7" tabindex="-1"></a>}</span>
+<span id="cb1195-8"><a href="maximum-likelihood-estimation-1.html#cb1195-8" tabindex="-1"></a>oo <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">fn =</span> like_fun, <span class="at">lower =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="sc">-</span><span class="cn">Inf</span>, <span class="fl">0.01</span>), <span class="at">method =</span> <span class="st">&quot;L-BFGS-B&quot;</span>)</span>
+<span id="cb1195-9"><a href="maximum-likelihood-estimation-1.html#cb1195-9" tabindex="-1"></a>oo<span class="sc">$</span>par</span></code></pre></div>
 <pre><code>## [1] 2.2157883 1.5566788 0.5272198</code></pre>
-<div class="sourceCode" id="cb1135"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1135-1"><a href="maximum-likelihood-estimation-1.html#cb1135-1" tabindex="-1"></a><span class="fu">lm</span>(imu_top_speed_ms <span class="sc">~</span> stride_length_m, <span class="at">data =</span> rr)</span></code></pre></div>
+<div class="sourceCode" id="cb1197"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1197-1"><a href="maximum-likelihood-estimation-1.html#cb1197-1" tabindex="-1"></a><span class="fu">lm</span>(imu_top_speed_ms <span class="sc">~</span> stride_length_m, <span class="at">data =</span> rr)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## lm(formula = imu_top_speed_ms ~ stride_length_m, data = rr)
@@ -442,10 +448,10 @@ where <span class="math inline">\(\epsilon_i\)</span> are iid <span class="math 
 <h2><span class="header-section-number">9.1</span> MLE for mixed models<a href="maximum-likelihood-estimation-1.html#mle-for-mixed-models" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>How does <code>lmer</code> estimate the parameters in our models? <code>lmer</code> uses maximum likelihood estimation (MLE) to estimate the parameters of the model. The likelihood function is based on the assumption that the random effects and the residuals are normally distributed. The MLE approach finds the parameter values that maximize the likelihood of observing the data given the model. In practice, <code>lmer</code> uses two different algorithms for estimating the parameters. The one we will discuss is MLE.</p>
 <p>Let’s look at an example.</p>
-<div class="sourceCode" id="cb1137"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1137-1"><a href="maximum-likelihood-estimation-1.html#cb1137-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div>
+<div class="sourceCode" id="cb1199"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1199-1"><a href="maximum-likelihood-estimation-1.html#cb1199-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div>
 <pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-## ✔ dplyr     1.1.4     ✔ readr     2.1.5
-## ✔ forcats   1.0.0     ✔ stringr   1.5.2
+## ✔ dplyr     1.2.0     ✔ readr     2.1.5
+## ✔ forcats   1.0.0     ✔ stringr   1.5.1
 ## ✔ ggplot2   4.0.0     ✔ tibble    3.3.0
 ## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
 ## ✔ purrr     1.1.0     
@@ -453,16 +459,16 @@ where <span class="math inline">\(\epsilon_i\)</span> are iid <span class="math 
 ## ✖ dplyr::filter() masks stats::filter()
 ## ✖ dplyr::lag()    masks stats::lag()
 ## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-<div class="sourceCode" id="cb1139"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1139-1"><a href="maximum-likelihood-estimation-1.html#cb1139-1" tabindex="-1"></a>ss <span class="ot">&lt;-</span> lme4<span class="sc">::</span>sleepstudy <span class="sc">|&gt;</span> </span>
-<span id="cb1139-2"><a href="maximum-likelihood-estimation-1.html#cb1139-2" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb1139-3"><a href="maximum-likelihood-estimation-1.html#cb1139-3" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb1201"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1201-1"><a href="maximum-likelihood-estimation-1.html#cb1201-1" tabindex="-1"></a>ss <span class="ot">&lt;-</span> lme4<span class="sc">::</span>sleepstudy <span class="sc">|&gt;</span> </span>
+<span id="cb1201-2"><a href="maximum-likelihood-estimation-1.html#cb1201-2" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb1201-3"><a href="maximum-likelihood-estimation-1.html#cb1201-3" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span></code></pre></div>
 <p>We estimate the parameters involved with a <strong>random intercepts</strong> model. To set notation, the mathematical formulation of this model is</p>
 <p><span class="math display">\[
 \text{reaction}_{ij} = \gamma_{00} + \beta_1 \text{days}_{ij} + u_{0i} + \epsilon_{ij}
 \]</span></p>
 <p>We can start by getting reasonable guesses for the values.</p>
-<div class="sourceCode" id="cb1140"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1140-1"><a href="maximum-likelihood-estimation-1.html#cb1140-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(reaction <span class="sc">~</span> days <span class="sc">+</span> subject, <span class="at">data =</span> ss)</span>
-<span id="cb1140-2"><a href="maximum-likelihood-estimation-1.html#cb1140-2" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
+<div class="sourceCode" id="cb1202"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1202-1"><a href="maximum-likelihood-estimation-1.html#cb1202-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(reaction <span class="sc">~</span> days <span class="sc">+</span> subject, <span class="at">data =</span> ss)</span>
+<span id="cb1202-2"><a href="maximum-likelihood-estimation-1.html#cb1202-2" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## lm(formula = reaction ~ days + subject, data = ss)
@@ -475,7 +481,7 @@ where <span class="math inline">\(\epsilon_i\)</span> are iid <span class="math 
 ##              Estimate Std. Error t value Pr(&gt;|t|)    
 ## (Intercept)  295.0310    10.4471  28.240  &lt; 2e-16 ***
 ## days          10.4673     0.8042  13.015  &lt; 2e-16 ***
-## subject309  -126.9009    13.8597  -9.156 2.35e-16 ***
+## subject309  -126.9008    13.8597  -9.156 2.35e-16 ***
 ## subject310  -111.1326    13.8597  -8.018 2.07e-13 ***
 ## subject330   -38.9124    13.8597  -2.808 0.005609 ** 
 ## subject331   -32.6978    13.8597  -2.359 0.019514 *  
@@ -499,19 +505,19 @@ where <span class="math inline">\(\epsilon_i\)</span> are iid <span class="math 
 ## Multiple R-squared:  0.7277, Adjusted R-squared:  0.6973 
 ## F-statistic: 23.91 on 18 and 161 DF,  p-value: &lt; 2.2e-16</code></pre>
 <p>We can guess that <span class="math inline">\(\gamma_{00} \approx 295\)</span> and <span class="math inline">\(\beta_1 \approx 10.5\)</span>. The variance of the residuals is approximately <span class="math inline">\(31^2\)</span> (it will likely be less, depending on how much variance is explained by the random intercept). Now we need to estimate the variance of the random intercepts. We can get a rough estimate of this by looking at the variance of the subject means.</p>
-<div class="sourceCode" id="cb1142"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1142-1"><a href="maximum-likelihood-estimation-1.html#cb1142-1" tabindex="-1"></a><span class="dv">295</span> <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">coef</span>(mod)[<span class="dv">3</span><span class="sc">:</span><span class="dv">19</span>]) <span class="co">#these are the intercepts</span></span></code></pre></div>
+<div class="sourceCode" id="cb1204"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1204-1"><a href="maximum-likelihood-estimation-1.html#cb1204-1" tabindex="-1"></a><span class="dv">295</span> <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">coef</span>(mod)[<span class="dv">3</span><span class="sc">:</span><span class="dv">19</span>]) <span class="co">#these are the intercepts</span></span></code></pre></div>
 <pre><code>##            subject309 subject310 subject330 subject331 subject332 subject333 
-##   295.0000   168.0991   183.8674   256.0876   262.3022   260.1682   269.0245 
+##   295.0000   168.0992   183.8674   256.0876   262.3022   260.1682   269.0245 
 ## subject334 subject335 subject337 subject349 subject350 subject351 subject352 
 ##   248.1682   202.9362   328.5872   228.7006   266.4688   242.9639   290.2877 
 ## subject369 subject370 subject371 subject372 
 ##   258.9008   244.5679   247.8502   270.7523</code></pre>
-<div class="sourceCode" id="cb1144"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1144-1"><a href="maximum-likelihood-estimation-1.html#cb1144-1" tabindex="-1"></a><span class="fu">var</span>(<span class="dv">295</span> <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">coef</span>(mod)[<span class="dv">3</span><span class="sc">:</span><span class="dv">19</span>]))</span></code></pre></div>
+<div class="sourceCode" id="cb1206"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1206-1"><a href="maximum-likelihood-estimation-1.html#cb1206-1" tabindex="-1"></a><span class="fu">var</span>(<span class="dv">295</span> <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">coef</span>(mod)[<span class="dv">3</span><span class="sc">:</span><span class="dv">19</span>]))</span></code></pre></div>
 <pre><code>## [1] 1474.224</code></pre>
 <p>The variance of the intercepts is about <span class="math inline">\(1474\)</span>. The final estimated value will likely be smaller than this.</p>
 <p>Let’s see what <code>lmer</code> gives.</p>
-<div class="sourceCode" id="cb1146"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1146-1"><a href="maximum-likelihood-estimation-1.html#cb1146-1" tabindex="-1"></a>mod_lmer <span class="ot">&lt;-</span> lme4<span class="sc">::</span><span class="fu">lmer</span>(reaction <span class="sc">~</span> days <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>subject), <span class="at">data =</span> ss)</span>
-<span id="cb1146-2"><a href="maximum-likelihood-estimation-1.html#cb1146-2" tabindex="-1"></a><span class="fu">summary</span>(mod_lmer)</span></code></pre></div>
+<div class="sourceCode" id="cb1208"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1208-1"><a href="maximum-likelihood-estimation-1.html#cb1208-1" tabindex="-1"></a>mod_lmer <span class="ot">&lt;-</span> lme4<span class="sc">::</span><span class="fu">lmer</span>(reaction <span class="sc">~</span> days <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>subject), <span class="at">data =</span> ss)</span>
+<span id="cb1208-2"><a href="maximum-likelihood-estimation-1.html#cb1208-2" tabindex="-1"></a><span class="fu">summary</span>(mod_lmer)</span></code></pre></div>
 <pre><code>## Linear mixed model fit by REML [&#39;lmerMod&#39;]
 ## Formula: reaction ~ days + (1 | subject)
 ##    Data: ss
@@ -543,30 +549,30 @@ y_{ij} \sim N(\gamma_{00} + \beta_1 x_{ij}, \tau^2 + \sigma^2)
 \]</span></p>
 <p>where here we use the assumption that <span class="math inline">\(u_{0i} \sim N(0, \tau^2)\)</span> and <span class="math inline">\(\epsilon_{ij} \sim N(0, \sigma^2)\)</span> are independent. The likelihood function is the product of the probability density functions for each response, which is a function of the parameters <span class="math inline">\(\gamma_{00}\)</span>, <span class="math inline">\(\beta_1\)</span>, <span class="math inline">\(\tau^2\)</span>, and <span class="math inline">\(\sigma^2\)</span>. The MLE estimates are the values of these parameters that maximize the likelihood function.</p>
 <p>When we do this, we will maximize the <strong>log</strong> of the likelihood function, in order to keep values reasonably sized.</p>
-<div class="sourceCode" id="cb1148"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1148-1"><a href="maximum-likelihood-estimation-1.html#cb1148-1" tabindex="-1"></a><span class="co">#This isn&#39;t correct</span></span>
-<span id="cb1148-2"><a href="maximum-likelihood-estimation-1.html#cb1148-2" tabindex="-1"></a>like <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
-<span id="cb1148-3"><a href="maximum-likelihood-estimation-1.html#cb1148-3" tabindex="-1"></a>  gamma <span class="ot">&lt;-</span> par[<span class="dv">1</span>]</span>
-<span id="cb1148-4"><a href="maximum-likelihood-estimation-1.html#cb1148-4" tabindex="-1"></a>  beta <span class="ot">&lt;-</span> par[<span class="dv">2</span>]</span>
-<span id="cb1148-5"><a href="maximum-likelihood-estimation-1.html#cb1148-5" tabindex="-1"></a>  tau2 <span class="ot">&lt;-</span> par[<span class="dv">3</span>]</span>
-<span id="cb1148-6"><a href="maximum-likelihood-estimation-1.html#cb1148-6" tabindex="-1"></a>  sigma2 <span class="ot">&lt;-</span> par[<span class="dv">4</span>]</span>
-<span id="cb1148-7"><a href="maximum-likelihood-estimation-1.html#cb1148-7" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> gamma <span class="sc">+</span> beta <span class="sc">*</span> ss<span class="sc">$</span>days</span>
-<span id="cb1148-8"><a href="maximum-likelihood-estimation-1.html#cb1148-8" tabindex="-1"></a>  var <span class="ot">&lt;-</span> tau2 <span class="sc">+</span> sigma2</span>
-<span id="cb1148-9"><a href="maximum-likelihood-estimation-1.html#cb1148-9" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">sum</span>(<span class="fu">dnorm</span>(ss<span class="sc">$</span>reaction, <span class="at">mean =</span> mu, <span class="at">sd =</span> <span class="fu">sqrt</span>(var), <span class="at">log =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb1148-10"><a href="maximum-likelihood-estimation-1.html#cb1148-10" tabindex="-1"></a>}</span>
-<span id="cb1148-11"><a href="maximum-likelihood-estimation-1.html#cb1148-11" tabindex="-1"></a></span>
-<span id="cb1148-12"><a href="maximum-likelihood-estimation-1.html#cb1148-12" tabindex="-1"></a><span class="fu">like</span>(<span class="fu">c</span>(<span class="dv">295</span>, <span class="fl">10.5</span>, <span class="dv">1474</span>, <span class="dv">961</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb1210"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1210-1"><a href="maximum-likelihood-estimation-1.html#cb1210-1" tabindex="-1"></a><span class="co">#This isn&#39;t correct</span></span>
+<span id="cb1210-2"><a href="maximum-likelihood-estimation-1.html#cb1210-2" tabindex="-1"></a>like <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
+<span id="cb1210-3"><a href="maximum-likelihood-estimation-1.html#cb1210-3" tabindex="-1"></a>  gamma <span class="ot">&lt;-</span> par[<span class="dv">1</span>]</span>
+<span id="cb1210-4"><a href="maximum-likelihood-estimation-1.html#cb1210-4" tabindex="-1"></a>  beta <span class="ot">&lt;-</span> par[<span class="dv">2</span>]</span>
+<span id="cb1210-5"><a href="maximum-likelihood-estimation-1.html#cb1210-5" tabindex="-1"></a>  tau2 <span class="ot">&lt;-</span> par[<span class="dv">3</span>]</span>
+<span id="cb1210-6"><a href="maximum-likelihood-estimation-1.html#cb1210-6" tabindex="-1"></a>  sigma2 <span class="ot">&lt;-</span> par[<span class="dv">4</span>]</span>
+<span id="cb1210-7"><a href="maximum-likelihood-estimation-1.html#cb1210-7" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> gamma <span class="sc">+</span> beta <span class="sc">*</span> ss<span class="sc">$</span>days</span>
+<span id="cb1210-8"><a href="maximum-likelihood-estimation-1.html#cb1210-8" tabindex="-1"></a>  var <span class="ot">&lt;-</span> tau2 <span class="sc">+</span> sigma2</span>
+<span id="cb1210-9"><a href="maximum-likelihood-estimation-1.html#cb1210-9" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">sum</span>(<span class="fu">dnorm</span>(ss<span class="sc">$</span>reaction, <span class="at">mean =</span> mu, <span class="at">sd =</span> <span class="fu">sqrt</span>(var), <span class="at">log =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb1210-10"><a href="maximum-likelihood-estimation-1.html#cb1210-10" tabindex="-1"></a>}</span>
+<span id="cb1210-11"><a href="maximum-likelihood-estimation-1.html#cb1210-11" tabindex="-1"></a></span>
+<span id="cb1210-12"><a href="maximum-likelihood-estimation-1.html#cb1210-12" tabindex="-1"></a><span class="fu">like</span>(<span class="fu">c</span>(<span class="dv">295</span>, <span class="fl">10.5</span>, <span class="dv">1474</span>, <span class="dv">961</span>))</span></code></pre></div>
 <pre><code>## [1] 1021.136</code></pre>
-<div class="sourceCode" id="cb1150"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1150-1"><a href="maximum-likelihood-estimation-1.html#cb1150-1" tabindex="-1"></a>oo <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">295</span>, <span class="fl">10.5</span>, <span class="dv">1474</span>, <span class="dv">961</span>), <span class="at">fn =</span> like, <span class="at">method =</span> <span class="st">&quot;L-BFGS-B&quot;</span>, <span class="at">lower =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="sc">-</span><span class="cn">Inf</span>, <span class="dv">0</span>, <span class="dv">0</span>))</span></code></pre></div>
-<div class="sourceCode" id="cb1151"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1151-1"><a href="maximum-likelihood-estimation-1.html#cb1151-1" tabindex="-1"></a><span class="fu">like</span>(oo<span class="sc">$</span>par)</span></code></pre></div>
+<div class="sourceCode" id="cb1212"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1212-1"><a href="maximum-likelihood-estimation-1.html#cb1212-1" tabindex="-1"></a>oo <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">295</span>, <span class="fl">10.5</span>, <span class="dv">1474</span>, <span class="dv">961</span>), <span class="at">fn =</span> like, <span class="at">method =</span> <span class="st">&quot;L-BFGS-B&quot;</span>, <span class="at">lower =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="sc">-</span><span class="cn">Inf</span>, <span class="dv">0</span>, <span class="dv">0</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb1213"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1213-1"><a href="maximum-likelihood-estimation-1.html#cb1213-1" tabindex="-1"></a><span class="fu">like</span>(oo<span class="sc">$</span>par)</span></code></pre></div>
 <pre><code>## [1] 950.1465</code></pre>
-<div class="sourceCode" id="cb1153"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1153-1"><a href="maximum-likelihood-estimation-1.html#cb1153-1" tabindex="-1"></a>tidy_modlmer <span class="ot">&lt;-</span> broom.mixed<span class="sc">::</span><span class="fu">tidy</span>(mod_lmer)</span>
-<span id="cb1153-2"><a href="maximum-likelihood-estimation-1.html#cb1153-2" tabindex="-1"></a><span class="fu">like</span>(<span class="fu">c</span>(tidy_modlmer<span class="sc">$</span>estimate[<span class="dv">1</span>], tidy_modlmer<span class="sc">$</span>estimate[<span class="dv">2</span>], tidy_modlmer<span class="sc">$</span>estimate[<span class="dv">3</span>]<span class="sc">^</span><span class="dv">2</span>, tidy_modlmer<span class="sc">$</span>estimate[<span class="dv">4</span>]<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb1215"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1215-1"><a href="maximum-likelihood-estimation-1.html#cb1215-1" tabindex="-1"></a>tidy_modlmer <span class="ot">&lt;-</span> broom.mixed<span class="sc">::</span><span class="fu">tidy</span>(mod_lmer)</span>
+<span id="cb1215-2"><a href="maximum-likelihood-estimation-1.html#cb1215-2" tabindex="-1"></a><span class="fu">like</span>(<span class="fu">c</span>(tidy_modlmer<span class="sc">$</span>estimate[<span class="dv">1</span>], tidy_modlmer<span class="sc">$</span>estimate[<span class="dv">2</span>], tidy_modlmer<span class="sc">$</span>estimate[<span class="dv">3</span>]<span class="sc">^</span><span class="dv">2</span>, tidy_modlmer<span class="sc">$</span>estimate[<span class="dv">4</span>]<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div>
 <pre><code>## [1] 950.2107</code></pre>
 <p>We can see that we don’t quite get the fully correct answer. This is because we haven’t correctly described the likelihood function for a mixed effect model. The likelihood function for a mixed effect model is more complicated than the one we wrote down above, because it allows correlation within subjects. The likelihood function for a mixed effect model is based on the joint distribution of the responses for each subject, which is a multivariate normal distribution with mean vector and covariance matrix that depend on the fixed effects and the random effects. While the <strong>marginal</strong> distribution of each response is normal, the <strong>joint</strong> distribution of the responses for each subject is multivariate normal with correlation between responses from the same subject. This is fundamentally different than what we were doing in the previous section, because now we have to compute the <strong>joint likelihood</strong> of the entire sample directly, rather than multiplying the likelihood of the samples together.</p>
 <p><strong>How would that work for linear regression</strong></p>
 <p>Let’s return to the same example we did earlier with running speed. We have to understand multivariate normal distributions to some extent, so here we go. The multivariate normal distribution is a generalization of the univariate normal distribution to multiple dimensions. Its parameters are a <em>mean vector</em> and a <em>covariance matrix</em>. The mean vector gives the expected value of each variable, while the covariance matrix gives the variance of each variable and the covariance between each pair of variables. In the following example, we will look at the <strong>joint</strong> distribution of <span class="math inline">\((X_1, X_2)\)</span>, so the length of the mean vector will be 2 and the covariance matrix will be <span class="math inline">\(2 \times 2\)</span>.</p>
-<div class="sourceCode" id="cb1155"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1155-1"><a href="maximum-likelihood-estimation-1.html#cb1155-1" tabindex="-1"></a>Sigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">5</span>), <span class="at">nrow =</span> <span class="dv">2</span>)</span>
-<span id="cb1155-2"><a href="maximum-likelihood-estimation-1.html#cb1155-2" tabindex="-1"></a><span class="fu">eigen</span>(Sigma) <span class="co">#this is a positive definite matrix, so it is a valid covariance matrix</span></span></code></pre></div>
+<div class="sourceCode" id="cb1217"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1217-1"><a href="maximum-likelihood-estimation-1.html#cb1217-1" tabindex="-1"></a>Sigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">5</span>), <span class="at">nrow =</span> <span class="dv">2</span>)</span>
+<span id="cb1217-2"><a href="maximum-likelihood-estimation-1.html#cb1217-2" tabindex="-1"></a><span class="fu">eigen</span>(Sigma) <span class="co">#this is a positive definite matrix, so it is a valid covariance matrix</span></span></code></pre></div>
 <pre><code>## eigen() decomposition
 ## $values
 ## [1] 6.236068 1.763932
@@ -575,23 +581,23 @@ y_{ij} \sim N(\gamma_{00} + \beta_1 x_{ij}, \tau^2 + \sigma^2)
 ##           [,1]       [,2]
 ## [1,] 0.5257311 -0.8506508
 ## [2,] 0.8506508  0.5257311</code></pre>
-<div class="sourceCode" id="cb1157"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1157-1"><a href="maximum-likelihood-estimation-1.html#cb1157-1" tabindex="-1"></a><span class="fu">library</span>(mvtnorm)</span>
-<span id="cb1157-2"><a href="maximum-likelihood-estimation-1.html#cb1157-2" tabindex="-1"></a>dat <span class="ot">&lt;-</span> mvtnorm<span class="sc">::</span><span class="fu">rmvnorm</span>(<span class="at">n =</span> <span class="dv">1000</span>, <span class="at">mean =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>), <span class="at">sigma =</span> Sigma)</span>
-<span id="cb1157-3"><a href="maximum-likelihood-estimation-1.html#cb1157-3" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(dat)</span>
-<span id="cb1157-4"><a href="maximum-likelihood-estimation-1.html#cb1157-4" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1157-5"><a href="maximum-likelihood-estimation-1.html#cb1157-5" tabindex="-1"></a><span class="fu">ggplot</span>(dd, <span class="fu">aes</span>(<span class="at">x =</span> X1, <span class="at">y =</span> X2)) <span class="sc">+</span> </span>
-<span id="cb1157-6"><a href="maximum-likelihood-estimation-1.html#cb1157-6" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
-<span id="cb1157-7"><a href="maximum-likelihood-estimation-1.html#cb1157-7" tabindex="-1"></a>  <span class="fu">coord_equal</span>() </span></code></pre></div>
+<div class="sourceCode" id="cb1219"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1219-1"><a href="maximum-likelihood-estimation-1.html#cb1219-1" tabindex="-1"></a><span class="fu">library</span>(mvtnorm)</span>
+<span id="cb1219-2"><a href="maximum-likelihood-estimation-1.html#cb1219-2" tabindex="-1"></a>dat <span class="ot">&lt;-</span> mvtnorm<span class="sc">::</span><span class="fu">rmvnorm</span>(<span class="at">n =</span> <span class="dv">1000</span>, <span class="at">mean =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>), <span class="at">sigma =</span> Sigma)</span>
+<span id="cb1219-3"><a href="maximum-likelihood-estimation-1.html#cb1219-3" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(dat)</span>
+<span id="cb1219-4"><a href="maximum-likelihood-estimation-1.html#cb1219-4" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1219-5"><a href="maximum-likelihood-estimation-1.html#cb1219-5" tabindex="-1"></a><span class="fu">ggplot</span>(dd, <span class="fu">aes</span>(<span class="at">x =</span> X1, <span class="at">y =</span> X2)) <span class="sc">+</span> </span>
+<span id="cb1219-6"><a href="maximum-likelihood-estimation-1.html#cb1219-6" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb1219-7"><a href="maximum-likelihood-estimation-1.html#cb1219-7" tabindex="-1"></a>  <span class="fu">coord_equal</span>() </span></code></pre></div>
 <p><img src="11-mle_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 <p>To force independence of the coordinates, we set the covariances equal to zero. Note that for general rvs, uncorrelated does not imply independent, but for multivariate normal rvs, uncorrelated does imply independent.</p>
 <p>We can also re-estimate the mean vector and the covariance matrix using MLE as follows:</p>
-<div class="sourceCode" id="cb1158"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1158-1"><a href="maximum-likelihood-estimation-1.html#cb1158-1" tabindex="-1"></a>like_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
-<span id="cb1158-2"><a href="maximum-likelihood-estimation-1.html#cb1158-2" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">c</span>(par[<span class="dv">1</span>], par[<span class="dv">2</span>])</span>
-<span id="cb1158-3"><a href="maximum-likelihood-estimation-1.html#cb1158-3" tabindex="-1"></a>  sigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(par[<span class="dv">3</span>], par[<span class="dv">4</span>], par[<span class="dv">4</span>], par[<span class="dv">5</span>]), <span class="at">nrow =</span> <span class="dv">2</span>)</span>
-<span id="cb1158-4"><a href="maximum-likelihood-estimation-1.html#cb1158-4" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">sum</span>(<span class="fu">dmvnorm</span>(dat, <span class="at">mean =</span> mu, <span class="at">sigma =</span> sigma, <span class="at">log =</span> T))</span>
-<span id="cb1158-5"><a href="maximum-likelihood-estimation-1.html#cb1158-5" tabindex="-1"></a>}</span>
-<span id="cb1158-6"><a href="maximum-likelihood-estimation-1.html#cb1158-6" tabindex="-1"></a><span class="fu">tryCatch</span>(<span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">5</span>), <span class="at">fn =</span> like_fun, <span class="at">lower =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="sc">-</span><span class="cn">Inf</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>), <span class="at">method =</span> <span class="st">&quot;L-BFGS-B&quot;</span>), </span>
-<span id="cb1158-7"><a href="maximum-likelihood-estimation-1.html#cb1158-7" tabindex="-1"></a>         <span class="at">error =</span> <span class="cf">function</span>(e) <span class="fu">print</span>(<span class="st">&quot;The covariance matrix is not positive definite&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb1220"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1220-1"><a href="maximum-likelihood-estimation-1.html#cb1220-1" tabindex="-1"></a>like_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
+<span id="cb1220-2"><a href="maximum-likelihood-estimation-1.html#cb1220-2" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">c</span>(par[<span class="dv">1</span>], par[<span class="dv">2</span>])</span>
+<span id="cb1220-3"><a href="maximum-likelihood-estimation-1.html#cb1220-3" tabindex="-1"></a>  sigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(par[<span class="dv">3</span>], par[<span class="dv">4</span>], par[<span class="dv">4</span>], par[<span class="dv">5</span>]), <span class="at">nrow =</span> <span class="dv">2</span>)</span>
+<span id="cb1220-4"><a href="maximum-likelihood-estimation-1.html#cb1220-4" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">sum</span>(<span class="fu">dmvnorm</span>(dat, <span class="at">mean =</span> mu, <span class="at">sigma =</span> sigma, <span class="at">log =</span> T))</span>
+<span id="cb1220-5"><a href="maximum-likelihood-estimation-1.html#cb1220-5" tabindex="-1"></a>}</span>
+<span id="cb1220-6"><a href="maximum-likelihood-estimation-1.html#cb1220-6" tabindex="-1"></a><span class="fu">tryCatch</span>(<span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">5</span>), <span class="at">fn =</span> like_fun, <span class="at">lower =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="sc">-</span><span class="cn">Inf</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>), <span class="at">method =</span> <span class="st">&quot;L-BFGS-B&quot;</span>), </span>
+<span id="cb1220-7"><a href="maximum-likelihood-estimation-1.html#cb1220-7" tabindex="-1"></a>         <span class="at">error =</span> <span class="cf">function</span>(e) <span class="fu">print</span>(<span class="st">&quot;The covariance matrix is not positive definite&quot;</span>))</span></code></pre></div>
 <pre><code>## $par
 ## [1] 0.9675064 3.9193232 3.1357536 1.9141789 4.9587980
 ## 
@@ -607,14 +613,14 @@ y_{ij} \sim N(\gamma_{00} + \beta_1 x_{ij}, \tau^2 + \sigma^2)
 ## 
 ## $message
 ## [1] &quot;CONVERGENCE: REL_REDUCTION_OF_F &lt;= FACTR*EPSMCH&quot;</code></pre>
-<div class="sourceCode" id="cb1160"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1160-1"><a href="maximum-likelihood-estimation-1.html#cb1160-1" tabindex="-1"></a><span class="co">#if the matrix created isn&#39;t positive definite, then this will break</span></span></code></pre></div>
+<div class="sourceCode" id="cb1222"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1222-1"><a href="maximum-likelihood-estimation-1.html#cb1222-1" tabindex="-1"></a><span class="co">#if the matrix created isn&#39;t positive definite, then this will break</span></span></code></pre></div>
 <p><strong>Returning to mixed models</strong></p>
 <p>Suppose <code>optim()</code> gives us one specific set of parameter values:</p>
-<div class="sourceCode" id="cb1161"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1161-1"><a href="maximum-likelihood-estimation-1.html#cb1161-1" tabindex="-1"></a>par <span class="ot">&lt;-</span> oo<span class="sc">$</span>par</span>
-<span id="cb1161-2"><a href="maximum-likelihood-estimation-1.html#cb1161-2" tabindex="-1"></a>gamma  <span class="ot">&lt;-</span> par[<span class="dv">1</span>]</span>
-<span id="cb1161-3"><a href="maximum-likelihood-estimation-1.html#cb1161-3" tabindex="-1"></a>beta   <span class="ot">&lt;-</span> par[<span class="dv">2</span>]</span>
-<span id="cb1161-4"><a href="maximum-likelihood-estimation-1.html#cb1161-4" tabindex="-1"></a>tau2   <span class="ot">&lt;-</span> par[<span class="dv">3</span>]</span>
-<span id="cb1161-5"><a href="maximum-likelihood-estimation-1.html#cb1161-5" tabindex="-1"></a>sigma2 <span class="ot">&lt;-</span> par[<span class="dv">4</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb1223"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1223-1"><a href="maximum-likelihood-estimation-1.html#cb1223-1" tabindex="-1"></a>par <span class="ot">&lt;-</span> oo<span class="sc">$</span>par</span>
+<span id="cb1223-2"><a href="maximum-likelihood-estimation-1.html#cb1223-2" tabindex="-1"></a>gamma  <span class="ot">&lt;-</span> par[<span class="dv">1</span>]</span>
+<span id="cb1223-3"><a href="maximum-likelihood-estimation-1.html#cb1223-3" tabindex="-1"></a>beta   <span class="ot">&lt;-</span> par[<span class="dv">2</span>]</span>
+<span id="cb1223-4"><a href="maximum-likelihood-estimation-1.html#cb1223-4" tabindex="-1"></a>tau2   <span class="ot">&lt;-</span> par[<span class="dv">3</span>]</span>
+<span id="cb1223-5"><a href="maximum-likelihood-estimation-1.html#cb1223-5" tabindex="-1"></a>sigma2 <span class="ot">&lt;-</span> par[<span class="dv">4</span>]</span></code></pre></div>
 <p>Right now, we are <strong>not optimizing</strong>.</p>
 <p>We are simply asking:</p>
 <blockquote>
@@ -625,7 +631,7 @@ data be?</p>
 model.</p>
 <p><strong>Step 1: Compute the Predicted Mean</strong></p>
 <p>The fixed-effects part of our model is</p>
-<div class="sourceCode" id="cb1162"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1162-1"><a href="maximum-likelihood-estimation-1.html#cb1162-1" tabindex="-1"></a>pred_fixed_effect <span class="ot">&lt;-</span> gamma <span class="sc">+</span> beta <span class="sc">*</span> ss<span class="sc">$</span>days</span></code></pre></div>
+<div class="sourceCode" id="cb1224"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1224-1"><a href="maximum-likelihood-estimation-1.html#cb1224-1" tabindex="-1"></a>pred_fixed_effect <span class="ot">&lt;-</span> gamma <span class="sc">+</span> beta <span class="sc">*</span> ss<span class="sc">$</span>days</span></code></pre></div>
 <p>This is exactly what we would compute in ordinary regression.</p>
 <p>So far, nothing new.</p>
 <p>This gives us the predicted mean reaction time for each observation.</p>
@@ -647,9 +653,9 @@ share the same random intercept.</p>
 accounts for correlation.</p>
 <p>** Step 3: Build the Grouping Matrix**</p>
 <p>We create a factor indicating subject membership:</p>
-<div class="sourceCode" id="cb1163"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1163-1"><a href="maximum-likelihood-estimation-1.html#cb1163-1" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">factor</span>(ss<span class="sc">$</span>subject)</span>
-<span id="cb1163-2"><a href="maximum-likelihood-estimation-1.html#cb1163-2" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span> <span class="dv">0</span> <span class="sc">+</span> g)</span>
-<span id="cb1163-3"><a href="maximum-likelihood-estimation-1.html#cb1163-3" tabindex="-1"></a>Z</span></code></pre></div>
+<div class="sourceCode" id="cb1225"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1225-1"><a href="maximum-likelihood-estimation-1.html#cb1225-1" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">factor</span>(ss<span class="sc">$</span>subject)</span>
+<span id="cb1225-2"><a href="maximum-likelihood-estimation-1.html#cb1225-2" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span> <span class="dv">0</span> <span class="sc">+</span> g)</span>
+<span id="cb1225-3"><a href="maximum-likelihood-estimation-1.html#cb1225-3" tabindex="-1"></a>Z</span></code></pre></div>
 <pre><code>##     g308 g309 g310 g330 g331 g332 g333 g334 g335 g337 g349 g350 g351 g352 g369
 ## 1      1    0    0    0    0    0    0    0    0    0    0    0    0    0    0
 ## 2      1    0    0    0    0    0    0    0    0    0    0    0    0    0    0
@@ -1026,8 +1032,8 @@ accounts for correlation.</p>
 <p>So <code>Z</code> simply records which subject each observation belongs to.</p>
 <p><strong>Step 4: Construct the Covariance Matrix</strong></p>
 <p>Here is the key line:</p>
-<div class="sourceCode" id="cb1165"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1165-1"><a href="maximum-likelihood-estimation-1.html#cb1165-1" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="fu">length</span>(ss<span class="sc">$</span>reaction)</span>
-<span id="cb1165-2"><a href="maximum-likelihood-estimation-1.html#cb1165-2" tabindex="-1"></a>(Z <span class="sc">%*%</span> <span class="fu">t</span>(Z))[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>] <span class="co">#this represents the dependence groupings</span></span></code></pre></div>
+<div class="sourceCode" id="cb1227"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1227-1"><a href="maximum-likelihood-estimation-1.html#cb1227-1" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="fu">length</span>(ss<span class="sc">$</span>reaction)</span>
+<span id="cb1227-2"><a href="maximum-likelihood-estimation-1.html#cb1227-2" tabindex="-1"></a>(Z <span class="sc">%*%</span> <span class="fu">t</span>(Z))[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>] <span class="co">#this represents the dependence groupings</span></span></code></pre></div>
 <pre><code>##    1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
 ## 1  1 1 1 1 1 1 1 1 1  1  0  0  0  0  0  0  0  0  0  0
 ## 2  1 1 1 1 1 1 1 1 1  1  0  0  0  0  0  0  0  0  0  0
@@ -1049,8 +1055,8 @@ accounts for correlation.</p>
 ## 18 0 0 0 0 0 0 0 0 0  0  1  1  1  1  1  1  1  1  1  1
 ## 19 0 0 0 0 0 0 0 0 0  0  1  1  1  1  1  1  1  1  1  1
 ## 20 0 0 0 0 0 0 0 0 0  0  1  1  1  1  1  1  1  1  1  1</code></pre>
-<div class="sourceCode" id="cb1167"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1167-1"><a href="maximum-likelihood-estimation-1.html#cb1167-1" tabindex="-1"></a>V <span class="ot">&lt;-</span> tau2 <span class="sc">*</span> (Z <span class="sc">%*%</span> <span class="fu">t</span>(Z)) <span class="sc">+</span> sigma2 <span class="sc">*</span> <span class="fu">diag</span>(N)</span>
-<span id="cb1167-2"><a href="maximum-likelihood-estimation-1.html#cb1167-2" tabindex="-1"></a>V[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb1229"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1229-1"><a href="maximum-likelihood-estimation-1.html#cb1229-1" tabindex="-1"></a>V <span class="ot">&lt;-</span> tau2 <span class="sc">*</span> (Z <span class="sc">%*%</span> <span class="fu">t</span>(Z)) <span class="sc">+</span> sigma2 <span class="sc">*</span> <span class="fu">diag</span>(N)</span>
+<span id="cb1229-2"><a href="maximum-likelihood-estimation-1.html#cb1229-2" tabindex="-1"></a>V[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>]</span></code></pre></div>
 <pre><code>##           1        2        3        4        5        6        7        8
 ## 1  2251.190 1382.095 1382.095 1382.095 1382.095 1382.095 1382.095 1382.095
 ## 2  1382.095 2251.190 1382.095 1382.095 1382.095 1382.095 1382.095 1382.095
@@ -1162,10 +1168,10 @@ accounts for correlation.</p>
 <hr />
 <p><strong>Step 5: Evaluate the Multivariate Normal Density</strong></p>
 <p>Finally, we compute:</p>
-<div class="sourceCode" id="cb1169"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1169-1"><a href="maximum-likelihood-estimation-1.html#cb1169-1" tabindex="-1"></a><span class="fu">dmvnorm</span>(ss<span class="sc">$</span>reaction,</span>
-<span id="cb1169-2"><a href="maximum-likelihood-estimation-1.html#cb1169-2" tabindex="-1"></a>        <span class="at">mean  =</span> pred_fixed_effect,</span>
-<span id="cb1169-3"><a href="maximum-likelihood-estimation-1.html#cb1169-3" tabindex="-1"></a>        <span class="at">sigma =</span> V,</span>
-<span id="cb1169-4"><a href="maximum-likelihood-estimation-1.html#cb1169-4" tabindex="-1"></a>        <span class="at">log   =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1231"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1231-1"><a href="maximum-likelihood-estimation-1.html#cb1231-1" tabindex="-1"></a><span class="fu">dmvnorm</span>(ss<span class="sc">$</span>reaction,</span>
+<span id="cb1231-2"><a href="maximum-likelihood-estimation-1.html#cb1231-2" tabindex="-1"></a>        <span class="at">mean  =</span> pred_fixed_effect,</span>
+<span id="cb1231-3"><a href="maximum-likelihood-estimation-1.html#cb1231-3" tabindex="-1"></a>        <span class="at">sigma =</span> V,</span>
+<span id="cb1231-4"><a href="maximum-likelihood-estimation-1.html#cb1231-4" tabindex="-1"></a>        <span class="at">log   =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## [1] -897.4195</code></pre>
 <p>This computes the log-likelihood of the entire response vector at once.</p>
 <p>Instead of multiplying many independent normal densities, we now
@@ -1195,33 +1201,33 @@ effects.</li>
 <p>The hardest part is building the covariance matrix correctly.</p>
 <p>Once that is done, the rest is just plugging into the multivariate
 normal formula.</p>
-<div class="sourceCode" id="cb1171"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1171-1"><a href="maximum-likelihood-estimation-1.html#cb1171-1" tabindex="-1"></a>par <span class="ot">&lt;-</span> oo<span class="sc">$</span>par</span>
-<span id="cb1171-2"><a href="maximum-likelihood-estimation-1.html#cb1171-2" tabindex="-1"></a><span class="fu">library</span>(mvtnorm)</span>
-<span id="cb1171-3"><a href="maximum-likelihood-estimation-1.html#cb1171-3" tabindex="-1"></a>nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
-<span id="cb1171-4"><a href="maximum-likelihood-estimation-1.html#cb1171-4" tabindex="-1"></a>  gamma  <span class="ot">&lt;-</span> par[<span class="dv">1</span>]</span>
-<span id="cb1171-5"><a href="maximum-likelihood-estimation-1.html#cb1171-5" tabindex="-1"></a>  beta   <span class="ot">&lt;-</span> par[<span class="dv">2</span>]</span>
-<span id="cb1171-6"><a href="maximum-likelihood-estimation-1.html#cb1171-6" tabindex="-1"></a>  tau2   <span class="ot">&lt;-</span> par[<span class="dv">3</span>]</span>
-<span id="cb1171-7"><a href="maximum-likelihood-estimation-1.html#cb1171-7" tabindex="-1"></a>  sigma2 <span class="ot">&lt;-</span> par[<span class="dv">4</span>]</span>
-<span id="cb1171-8"><a href="maximum-likelihood-estimation-1.html#cb1171-8" tabindex="-1"></a></span>
-<span id="cb1171-9"><a href="maximum-likelihood-estimation-1.html#cb1171-9" tabindex="-1"></a>  <span class="cf">if</span> (tau2 <span class="sc">&lt;</span> <span class="dv">0</span> <span class="sc">||</span> sigma2 <span class="sc">&lt;=</span> <span class="dv">0</span>) <span class="fu">return</span>(<span class="cn">Inf</span>)</span>
-<span id="cb1171-10"><a href="maximum-likelihood-estimation-1.html#cb1171-10" tabindex="-1"></a></span>
-<span id="cb1171-11"><a href="maximum-likelihood-estimation-1.html#cb1171-11" tabindex="-1"></a>  response <span class="ot">&lt;-</span> ss<span class="sc">$</span>reaction</span>
-<span id="cb1171-12"><a href="maximum-likelihood-estimation-1.html#cb1171-12" tabindex="-1"></a>  pred_fixed_effect <span class="ot">&lt;-</span> gamma <span class="sc">+</span> beta <span class="sc">*</span> ss<span class="sc">$</span>days <span class="co">#this is the same as mu, which is a good check</span></span>
-<span id="cb1171-13"><a href="maximum-likelihood-estimation-1.html#cb1171-13" tabindex="-1"></a>    </span>
-<span id="cb1171-14"><a href="maximum-likelihood-estimation-1.html#cb1171-14" tabindex="-1"></a>  g <span class="ot">&lt;-</span> <span class="fu">factor</span>(ss<span class="sc">$</span>subject) <span class="co">#this is the grouping variable for the random intercepts)</span></span>
-<span id="cb1171-15"><a href="maximum-likelihood-estimation-1.html#cb1171-15" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span> <span class="dv">0</span> <span class="sc">+</span> g)   <span class="co"># columns correspond to groups (levels of g)</span></span>
-<span id="cb1171-16"><a href="maximum-likelihood-estimation-1.html#cb1171-16" tabindex="-1"></a></span>
-<span id="cb1171-17"><a href="maximum-likelihood-estimation-1.html#cb1171-17" tabindex="-1"></a>  N <span class="ot">&lt;-</span> <span class="fu">length</span>(response)</span>
-<span id="cb1171-18"><a href="maximum-likelihood-estimation-1.html#cb1171-18" tabindex="-1"></a>  V <span class="ot">&lt;-</span> tau2 <span class="sc">*</span> (Z <span class="sc">%*%</span> <span class="fu">t</span>(Z)) <span class="sc">+</span> sigma2 <span class="sc">*</span> <span class="fu">diag</span>(N)  <span class="co"># Marginal covariance: V = tau2 * Z Z&#39; + sigma2 * I_N</span></span>
-<span id="cb1171-19"><a href="maximum-likelihood-estimation-1.html#cb1171-19" tabindex="-1"></a></span>
-<span id="cb1171-20"><a href="maximum-likelihood-estimation-1.html#cb1171-20" tabindex="-1"></a>  </span>
-<span id="cb1171-21"><a href="maximum-likelihood-estimation-1.html#cb1171-21" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">dmvnorm</span>(response, <span class="at">mean =</span> pred_fixed_effect, <span class="at">sigma =</span> V, <span class="at">log =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb1171-22"><a href="maximum-likelihood-estimation-1.html#cb1171-22" tabindex="-1"></a>}</span>
-<span id="cb1171-23"><a href="maximum-likelihood-estimation-1.html#cb1171-23" tabindex="-1"></a><span class="fu">nll</span>(par)</span></code></pre></div>
+<div class="sourceCode" id="cb1233"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1233-1"><a href="maximum-likelihood-estimation-1.html#cb1233-1" tabindex="-1"></a>par <span class="ot">&lt;-</span> oo<span class="sc">$</span>par</span>
+<span id="cb1233-2"><a href="maximum-likelihood-estimation-1.html#cb1233-2" tabindex="-1"></a><span class="fu">library</span>(mvtnorm)</span>
+<span id="cb1233-3"><a href="maximum-likelihood-estimation-1.html#cb1233-3" tabindex="-1"></a>nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
+<span id="cb1233-4"><a href="maximum-likelihood-estimation-1.html#cb1233-4" tabindex="-1"></a>  gamma  <span class="ot">&lt;-</span> par[<span class="dv">1</span>]</span>
+<span id="cb1233-5"><a href="maximum-likelihood-estimation-1.html#cb1233-5" tabindex="-1"></a>  beta   <span class="ot">&lt;-</span> par[<span class="dv">2</span>]</span>
+<span id="cb1233-6"><a href="maximum-likelihood-estimation-1.html#cb1233-6" tabindex="-1"></a>  tau2   <span class="ot">&lt;-</span> par[<span class="dv">3</span>]</span>
+<span id="cb1233-7"><a href="maximum-likelihood-estimation-1.html#cb1233-7" tabindex="-1"></a>  sigma2 <span class="ot">&lt;-</span> par[<span class="dv">4</span>]</span>
+<span id="cb1233-8"><a href="maximum-likelihood-estimation-1.html#cb1233-8" tabindex="-1"></a></span>
+<span id="cb1233-9"><a href="maximum-likelihood-estimation-1.html#cb1233-9" tabindex="-1"></a>  <span class="cf">if</span> (tau2 <span class="sc">&lt;</span> <span class="dv">0</span> <span class="sc">||</span> sigma2 <span class="sc">&lt;=</span> <span class="dv">0</span>) <span class="fu">return</span>(<span class="cn">Inf</span>)</span>
+<span id="cb1233-10"><a href="maximum-likelihood-estimation-1.html#cb1233-10" tabindex="-1"></a></span>
+<span id="cb1233-11"><a href="maximum-likelihood-estimation-1.html#cb1233-11" tabindex="-1"></a>  response <span class="ot">&lt;-</span> ss<span class="sc">$</span>reaction</span>
+<span id="cb1233-12"><a href="maximum-likelihood-estimation-1.html#cb1233-12" tabindex="-1"></a>  pred_fixed_effect <span class="ot">&lt;-</span> gamma <span class="sc">+</span> beta <span class="sc">*</span> ss<span class="sc">$</span>days <span class="co">#this is the same as mu, which is a good check</span></span>
+<span id="cb1233-13"><a href="maximum-likelihood-estimation-1.html#cb1233-13" tabindex="-1"></a>    </span>
+<span id="cb1233-14"><a href="maximum-likelihood-estimation-1.html#cb1233-14" tabindex="-1"></a>  g <span class="ot">&lt;-</span> <span class="fu">factor</span>(ss<span class="sc">$</span>subject) <span class="co">#this is the grouping variable for the random intercepts)</span></span>
+<span id="cb1233-15"><a href="maximum-likelihood-estimation-1.html#cb1233-15" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span> <span class="dv">0</span> <span class="sc">+</span> g)   <span class="co"># columns correspond to groups (levels of g)</span></span>
+<span id="cb1233-16"><a href="maximum-likelihood-estimation-1.html#cb1233-16" tabindex="-1"></a></span>
+<span id="cb1233-17"><a href="maximum-likelihood-estimation-1.html#cb1233-17" tabindex="-1"></a>  N <span class="ot">&lt;-</span> <span class="fu">length</span>(response)</span>
+<span id="cb1233-18"><a href="maximum-likelihood-estimation-1.html#cb1233-18" tabindex="-1"></a>  V <span class="ot">&lt;-</span> tau2 <span class="sc">*</span> (Z <span class="sc">%*%</span> <span class="fu">t</span>(Z)) <span class="sc">+</span> sigma2 <span class="sc">*</span> <span class="fu">diag</span>(N)  <span class="co"># Marginal covariance: V = tau2 * Z Z&#39; + sigma2 * I_N</span></span>
+<span id="cb1233-19"><a href="maximum-likelihood-estimation-1.html#cb1233-19" tabindex="-1"></a></span>
+<span id="cb1233-20"><a href="maximum-likelihood-estimation-1.html#cb1233-20" tabindex="-1"></a>  </span>
+<span id="cb1233-21"><a href="maximum-likelihood-estimation-1.html#cb1233-21" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">dmvnorm</span>(response, <span class="at">mean =</span> pred_fixed_effect, <span class="at">sigma =</span> V, <span class="at">log =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1233-22"><a href="maximum-likelihood-estimation-1.html#cb1233-22" tabindex="-1"></a>}</span>
+<span id="cb1233-23"><a href="maximum-likelihood-estimation-1.html#cb1233-23" tabindex="-1"></a><span class="fu">nll</span>(par)</span></code></pre></div>
 <pre><code>## [1] 897.4195</code></pre>
-<div class="sourceCode" id="cb1173"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1173-1"><a href="maximum-likelihood-estimation-1.html#cb1173-1" tabindex="-1"></a><span class="fu">optim</span>(<span class="at">par =</span> par, <span class="at">fn =</span> nll, <span class="at">method =</span> <span class="st">&quot;L-BFGS-B&quot;</span>, <span class="at">lower =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="sc">-</span><span class="cn">Inf</span>, <span class="dv">0</span>, <span class="dv">0</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb1235"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1235-1"><a href="maximum-likelihood-estimation-1.html#cb1235-1" tabindex="-1"></a><span class="fu">optim</span>(<span class="at">par =</span> par, <span class="at">fn =</span> nll, <span class="at">method =</span> <span class="st">&quot;L-BFGS-B&quot;</span>, <span class="at">lower =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="sc">-</span><span class="cn">Inf</span>, <span class="dv">0</span>, <span class="dv">0</span>))</span></code></pre></div>
 <pre><code>## $par
-## [1]  251.40615   10.46735 1379.07119  954.26679
+## [1]  251.40703   10.46715 1379.07124  954.27973
 ## 
 ## $value
 ## [1] 897.0538
@@ -1235,7 +1241,7 @@ normal formula.</p>
 ## 
 ## $message
 ## [1] &quot;CONVERGENCE: REL_REDUCTION_OF_F &lt;= FACTR*EPSMCH&quot;</code></pre>
-<div class="sourceCode" id="cb1175"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1175-1"><a href="maximum-likelihood-estimation-1.html#cb1175-1" tabindex="-1"></a><span class="fu">summary</span>(mod_lmer)</span></code></pre></div>
+<div class="sourceCode" id="cb1237"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1237-1"><a href="maximum-likelihood-estimation-1.html#cb1237-1" tabindex="-1"></a><span class="fu">summary</span>(mod_lmer)</span></code></pre></div>
 <pre><code>## Linear mixed model fit by REML [&#39;lmerMod&#39;]
 ## Formula: reaction ~ days + (1 | subject)
 ##    Data: ss

@@ -139,7 +139,7 @@ Let's compare those to what we would get using the built-in R function `glm`, wh
 glm(malaria ~ sporozoite, data = mm, family = "binomial")
 ```
 
-### Estimating parameters via penalties
+### Estimating parameters via loss function
 
 Just like in OLS, there are alternative ways to estimate the parameters associated with logistic regression. In OLS, we saw that minimizing the SSE gave the same parameter estimates as maximizing the likelihood function. For logistic regression, the error function we want to minimize is:
 
@@ -245,6 +245,157 @@ predict(mod2, newdata = data.frame(sporozoite = 10, antibody = "no"), se.fit = T
 boot::inv.logit(2.059222 + 2 * 0.3612499) #upper bound
 boot::inv.logit(2.059222 - 2 * 0.3612499) #lower bound
 ```
+
+When communicating results from logistic regression, it can be challenging to explain your results. The `marginaleffects` package has methods which allow for easier interpretation. First, we look at the **average marginal effect**. The average marginal effect of sporozoite estimates the *derivative* of the probability of getting malaria at each of the 139 data points and averages them. This gives an estimate for the *average effect* that a one unit change in sporozoite will have; where average means averging over the observed data.
+
+```{r}
+library(marginaleffects)
+summary(mod2)
+marginaleffects::avg_slopes(mod2)
+```
+
+The `avg_slopes` function estimates the derivative or the probability with respect to a continuous predictor, or the change in probability per category change for categorical predictors. This is often what you want to do, but in the case of `sporozoite`, the predictor is actually count data, so the derivative is hard to interpret. The `avg_comparisons` function estimates the change in probability for a one unit change in a continuous predictor, so for the case of sporozoites, it would estimate the average increase in probability assocaited with a one sporozoite increase.
+
+```{r}
+marginaleffects::avg_comparisons(mod2)
+```
+
+Sometimes, it is desirable to get the effect of a different unit of change.
+
+```{r}
+iqr_spor <- round(IQR(mm$sporozoite))
+iqr_spor
+avg_comparisons(mod2, variables = list(sporozoite = iqr_spor), type = "response")
+```
+
+
+On average, the probability of getting malaria increases by about 4.44 percentage points per increase in sporozoite. An increase of 6 spororzoites is associated with a 18.5 percentage point increase in the probability of getting malaria, averaged across conditions in the data set. Of course, neither of these statements is true when there are already 25 sporozoites, as the probability is already essentiall 1. Similarly, the average effect of not having the antibody is a 19 percentage point increase in the probability of getting malaria. We can rederive the result of `avg_comparisons` (without confidence bands):
+
+```{r}
+p1 <- predict(mod2, type = "response")
+p2 <- predict(mod2, newdata = mm |> mutate(sporozoite = sporozoite + 1), type = "response")
+mean(p2 - p1)
+```
+
+We can also directly visualize the probabilities.
+
+```{r}
+marginaleffects::plot_slopes(mod2, variables = "sporozoite", by = "antibody")
+plot_predictions(mod2, condition = "sporozoite")
+```
+
+This gives the probabilities at each sporozoite level; the other values are set at their mean or mode. In the case of `sporozoite`, the default is that the antibody is set to `no`. 
+
+
+```{r}
+avg_predictions(mod2, newdata = datagrid(sporozoite = 1)) #sets other variables to typical values
+predict(mod2, newdata = data.frame(sporozoite = 1, antibody = "no"), type = "response")
+
+avg_predictions(mod2, newdata = datagrid(sporozoite = 1, grid_type = "counterfactual")) #averages over the values observed in study
+mean(predict(mod2, newdata = mm |> mutate(sporozoite = 1), type = "response"))
+```
+
+The word *marginal* generally means to average over the other values. If we want to average the probabilities over the values observed in the data, then we need to specify.
+
+```{r}
+plot_predictions(mod2, by = "sporozoite", newdata = datagrid(sporozoite = seq(0, 30, by = 0.5), grid_type = "counterfactual"))
+```
+
+## Mixed Effects Logistic Regression
+
+Let's consider the `Contraception` data set in the `mlmRev` package. The goal is to model contraceptive usage among women in Bangladesh. This is an *exploratory* analysis.
+
+```{r}
+cc <- mlmRev::Contraception |> 
+  janitor::clean_names() |> 
+  as_tibble()
+summary(cc)
+```
+
+There are 60 different districts, and we aren't interested in modeling each one separately, but rather in modeling the spread among the districts using `district` as a random effect.
+
+```{r}
+mod1 <- lme4::glmer(use ~ livch + age + urban + (1|district), data = cc, family = "binomial")
+summary(mod1)
+```
+
+
+```{r}
+mod2 <- lme4::glmer(use ~ livch + age + urban + (1 + urban|district), data = cc, family = "binomial")
+summary(mod2)
+```
+
+Let's think carefully about what the difference in the two models is. In the first model, we are allowing the intercept to vary across districts, but we are assuming that the effect of `urban` is the same across all districts. In the second model, we are allowing both the intercept and the effect of `urban` to vary across districts. The second model is more flexible, but it also has more parameters, so we would want to use AIC or a likelihood ratio test to determine which model is better. 
+
+Looking at the coefficients, it appears that there may only be a difference between *having* a child and *not* having a child as it pertains to contraceptive use. Let's see how we can test that.
+
+```{r}
+cc$anychild <- factor(ifelse(cc$livch == "0", "none", "any"))
+
+mod3 <- lme4::glmer(use ~ anychild + age + urban + (1 + urban | district),
+                    data = cc, family = "binomial")
+
+summary(mod3)
+anova(mod2, mod3, test = "Chisq")
+```
+
+Indeed, the effect is based on whether there is a child at all; not how many children. Finally, let's examine the `age` variable. It seems unlikely that contraceptive use depends only on age; it seems plausible that usage would increase up to a certain age, and then start to decrease again. Let's add a quadratic term and see what we get.
+
+```{r}
+cc$agec <- cc$age - mean(cc$age)
+cc$agec <- cc$agec/sd(cc$agec)
+mod4 <- lme4::glmer(use ~ anychild + agec + I(agec^2) + urban + (1 + urban | district),
+                    data = cc, family = "binomial")
+summary(mod4)
+anova(mod3, mod4)
+```
+
+The quadratic term is significant. We can compute the marginal effect of age by averaging over the other observed values in the data set, as below. When doing this, you need to find the approximate largest and smallest value of the `by` variable in your data, and create a sequence of values from the minimum to the maximumm.
+
+```{r}
+library(marginaleffects)
+summary(cc$agec)
+plot_predictions(mod4, by = "agec", type = "response", newdata = datagrid(agec = seq(-1.5, 2.2, by = 0.1), grid_type = "counterfactual"))
+```
+
+Alternatively, you could plot the estimates contraceptive use by age for typical values of the other covariates. Typical in this case means either mean for numeric variables or mode for categorical data, and the random effect is considered to be zero. In this instance, there are only small differences in the two plots, but as a general rule for mixed effect models, I would default to the marginal effect above.
+
+```{r}
+plot_predictions(mod4, condition = "agec", type = "response")
+```
+
+To get estimates that are more interpretable than the log-odds estimates, we can again use `marginaleffects`. Note that the marginal effect of `age` is not easily interpretable, because of the quadratic nature of that relationship.
+
+```{r}
+avg_slopes(mod4)
+```
+
+This indicates that having a child is associated with a 0.17687 increase in the probability scale; that is, an 18 percentage point increase in contraceptive use averaged across all data points, and urban areas are associated with a 16 percentage point increase in contraceptive use, averaging over the other covariates in the study.
+
+Now that we have seen an example, let's write out the model for mixed effect logistic regression explicitly. Suppose we have one continuous predictor $x$, then the random intercepts model would be 
+
+\[
+\log \frac{p_{ij}}{1 - p_{ij}} = \beta_0 + \beta_1 x_{ij} + u_j
+\]
+
+where $p_{ij}$ is the probability of success for observation $i$ in group $j$, $\beta_0$ is the fixed intercept, $\beta_1$ is the fixed effect of the predictor, and $u_j$ is the random effect for group $j$. The random effects are assumed to be normally distributed with mean 0 and variance $\sigma^2_u$. The error term is not explicitly included in this model, but we can think of the response as being a Bernoulli random variable with parameter $p_{ij}$, where $p_{ij}$ is given by the logistic function of $\beta_0 + \beta_1 x_{ij} + u_j$.
+
+### Nested random effects
+
+In the data set `ardata::beethoven_tempos`, we had two categorical variables `symphony` and `movement`. Each symphony consisted of 4 movements, numbered 1-4. So, the data point `movement==1` could mean different things for each symphony. We day that `movement` is **nested** in `symphony`. If we want to correctly identify this in a mixed effect model, the random effect should be written as `(1|symphony/movement)`.  This ensures that R understands that `movement` is **nested** inside of `symphony`. Let's look at the `guImmun` data in the `mlmRev` package.
+
+```{r}
+gg <- mlmRev::guImmun |> 
+  janitor::clean_names() |> 
+  as_tibble()
+summary(gg)
+```
+
+In this case, we see that we have two possible random effects: community and mom, with mom nested inside of community. If each mom is given a unique identifier, then we are OK, but to be safe, we can indicate the random effect of `mom` and `comm` via `(1|comm/mom)`. This is good practice because it indicates that we know that the random effects are nested, even if it is not necessary for a given data set.
+
+## Count Regression
+
+
 
 
 ## This is all from last semester

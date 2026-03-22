@@ -23,7 +23,7 @@
 <meta name="author" content="Darrin Speegle" />
 
 
-<meta name="date" content="2026-03-19" />
+<meta name="date" content="2026-03-22" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -63,8 +63,9 @@
 
 
 <style type="text/css">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -74,7 +75,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -225,25 +226,30 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="7.1.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#malaria-example-intro"><i class="fa fa-check"></i><b>7.1.1</b> Malaria Example (Intro)</a></li>
 <li class="chapter" data-level="7.1.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#the-model-theory"><i class="fa fa-check"></i><b>7.1.2</b> The model (theory)</a></li>
 <li class="chapter" data-level="7.1.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#estimating-parameters-using-mle"><i class="fa fa-check"></i><b>7.1.3</b> Estimating parameters using MLE</a></li>
-<li class="chapter" data-level="7.1.4" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#estimating-parameters-via-penalties"><i class="fa fa-check"></i><b>7.1.4</b> Estimating parameters via penalties</a></li>
+<li class="chapter" data-level="7.1.4" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#estimating-parameters-via-loss-function"><i class="fa fa-check"></i><b>7.1.4</b> Estimating parameters via loss function</a></li>
 <li class="chapter" data-level="7.1.5" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#interpreting-summary"><i class="fa fa-check"></i><b>7.1.5</b> Interpreting summary</a></li>
 </ul></li>
-<li class="chapter" data-level="7.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#this-is-all-from-last-semester"><i class="fa fa-check"></i><b>7.2</b> This is all from last semester</a>
+<li class="chapter" data-level="7.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#mixed-effects-logistic-regression"><i class="fa fa-check"></i><b>7.2</b> Mixed Effects Logistic Regression</a>
 <ul>
-<li class="chapter" data-level="7.2.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#maximum-likelihood-estimation"><i class="fa fa-check"></i><b>7.2.1</b> Maximum Likelihood Estimation</a></li>
-<li class="chapter" data-level="7.2.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#model-diagnostics"><i class="fa fa-check"></i><b>7.2.2</b> Model Diagnostics</a></li>
-<li class="chapter" data-level="7.2.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#case-study"><i class="fa fa-check"></i><b>7.2.3</b> Case Study</a></li>
+<li class="chapter" data-level="7.2.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#nested-random-effects"><i class="fa fa-check"></i><b>7.2.1</b> Nested random effects</a></li>
 </ul></li>
-<li class="chapter" data-level="7.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#count-response-models"><i class="fa fa-check"></i><b>7.3</b> Count response models</a>
+<li class="chapter" data-level="7.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#count-regression"><i class="fa fa-check"></i><b>7.3</b> Count Regression</a></li>
+<li class="chapter" data-level="7.4" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#this-is-all-from-last-semester"><i class="fa fa-check"></i><b>7.4</b> This is all from last semester</a>
 <ul>
-<li class="chapter" data-level="7.3.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#overdispersion"><i class="fa fa-check"></i><b>7.3.1</b> Overdispersion</a></li>
-<li class="chapter" data-level="7.3.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#negative-binomial-regression"><i class="fa fa-check"></i><b>7.3.2</b> Negative Binomial Regression</a></li>
+<li class="chapter" data-level="7.4.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#maximum-likelihood-estimation"><i class="fa fa-check"></i><b>7.4.1</b> Maximum Likelihood Estimation</a></li>
+<li class="chapter" data-level="7.4.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#model-diagnostics"><i class="fa fa-check"></i><b>7.4.2</b> Model Diagnostics</a></li>
+<li class="chapter" data-level="7.4.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#case-study"><i class="fa fa-check"></i><b>7.4.3</b> Case Study</a></li>
 </ul></li>
-<li class="chapter" data-level="7.4" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-and-zero-inflated-models"><i class="fa fa-check"></i><b>7.4</b> Zero-truncated and Zero-inflated models</a>
+<li class="chapter" data-level="7.5" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#count-response-models"><i class="fa fa-check"></i><b>7.5</b> Count response models</a>
 <ul>
-<li class="chapter" data-level="7.4.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-poisson"><i class="fa fa-check"></i><b>7.4.1</b> Zero-truncated Poisson</a></li>
-<li class="chapter" data-level="7.4.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-negative-binomial"><i class="fa fa-check"></i><b>7.4.2</b> Zero-truncated Negative Binomial</a></li>
-<li class="chapter" data-level="7.4.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-inflated-poisson-and-negative-binomial"><i class="fa fa-check"></i><b>7.4.3</b> Zero-Inflated Poisson and Negative Binomial</a></li>
+<li class="chapter" data-level="7.5.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#overdispersion"><i class="fa fa-check"></i><b>7.5.1</b> Overdispersion</a></li>
+<li class="chapter" data-level="7.5.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#negative-binomial-regression"><i class="fa fa-check"></i><b>7.5.2</b> Negative Binomial Regression</a></li>
+</ul></li>
+<li class="chapter" data-level="7.6" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-and-zero-inflated-models"><i class="fa fa-check"></i><b>7.6</b> Zero-truncated and Zero-inflated models</a>
+<ul>
+<li class="chapter" data-level="7.6.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-poisson"><i class="fa fa-check"></i><b>7.6.1</b> Zero-truncated Poisson</a></li>
+<li class="chapter" data-level="7.6.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-truncated-negative-binomial"><i class="fa fa-check"></i><b>7.6.2</b> Zero-truncated Negative Binomial</a></li>
+<li class="chapter" data-level="7.6.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#zero-inflated-poisson-and-negative-binomial"><i class="fa fa-check"></i><b>7.6.3</b> Zero-Inflated Poisson and Negative Binomial</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="8" data-path="lecture-notes.html"><a href="lecture-notes.html"><i class="fa fa-check"></i><b>8</b> Lecture Notes</a>
@@ -323,7 +329,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="header">
 <h1 class="title">Applied Regression with R</h1>
 <p class="author"><em>Darrin Speegle</em></p>
-<p class="date"><em>2026-03-19</em></p>
+<p class="date"><em>2026-03-22</em></p>
 </div>
 <div id="preface" class="section level1 hasAnchor" number="1">
 <h1><span class="header-section-number">Chapter 1</span> Preface<a href="index.html#preface" class="anchor-section" aria-label="Anchor link to header"></a></h1>

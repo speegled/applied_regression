@@ -81,8 +81,11 @@ logistic-regression
 malaria-example-intro
 the-model-theory
 estimating-parameters-using-mle
-estimating-parameters-via-penalties
+estimating-parameters-via-loss-function
 interpreting-summary
+mixed-effects-logistic-regression
+nested-random-effects
+count-regression
 this-is-all-from-last-semester
 maximum-likelihood-estimation
 model-diagnostics
