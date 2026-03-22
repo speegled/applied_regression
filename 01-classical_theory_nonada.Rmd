@@ -10,7 +10,7 @@ f(x) = \frac {1}{\sqrt{2\pi}\sigma} e^{-(x- \mu)^2/(2\sigma^2)}
 \]
 We will not work much with the pdf directly, but rather use the built in R function `dnorm`, which has usage `dnorm(x, mu, sigma)`. Let's look at a couple of plots of pdfs of normal random variables.
 
-```{r fig.cap="Three normal probability density functions with mean 0. The green curve has the smallest standard deviation (sd = 1/sqrt(2), narrowest and tallest), the black curve has sd = 1 (medium width), and the red curve has sd = 2 (widest and flattest). All three are symmetric and bell-shaped around x = 0.", fig.alt="Three overlapping bell curves centered at 0. Green is narrowest and tallest, black is medium, red is widest and flattest."}
+```{r}
 curve(dnorm(x, 0, 1/sqrt(2)), from = -3, to = 3, col = 3,
       main = "Normal rvs", 
       ylab = "likelihood") #green
@@ -140,7 +140,7 @@ The reason it is tricky from a theoretical point of view to estimate the standar
 
 In this section, we see how to estimate the pdf of an rv and compare it to the pdf of a known distribution. We continue with the normal examples. Let's verify that $2X + 3Y$ is normal, when $X \sim N(0, 1)$ and $Y \sim N(1, 2)$. ($Y$ has standard deviation 2).
 
-```{r fig.cap="Estimated probability density of the simulated random variable 2X + 3Y, where X is standard normal and Y is normal with mean 1 and standard deviation 2. The curve is smooth and bell-shaped, centered near 3.", fig.alt="A single smooth bell-shaped curve centered around 3, showing the estimated density of the simulated distribution."}
+```{r}
 sim_data <- replicate(10000, {
   x <- rnorm(1, 0, 1)
   y <- rnorm(1, 1, 2)
@@ -152,7 +152,7 @@ plot(density(sim_data))
 The `plot(density())` command gives an estimated density plot of the rv that has data given in the argument of `density`. Let's a
 a pdf of a normal rv with the correct mean and standard deviation to the above plot, and see whether they match. The correct mean is $2 * 0 + 3 * 1$ and the sd is $\sqrt{4 * 1 + 9 * 4}$
 
-```{r fig.cap="The estimated density of the simulated 2X + 3Y (black curve) overlaid with the theoretical normal distribution with mean 3 and standard deviation sqrt(40) (red curve). The two curves align closely, confirming that the distribution is normal.", fig.alt="Two nearly identical bell curves overlaid: a black estimated density and a red theoretical normal curve. They match closely, confirming normality."}
+```{r}
 plot(density(sim_data))
 curve(dnorm(x, 3, sqrt(40)), a
       = T, col = 2) #shows up in red
@@ -160,7 +160,7 @@ curve(dnorm(x, 3, sqrt(40)), a
 
 Alternatively, we could have used the simulated data and estimated the mean and sd.
 
-```{r fig.cap="Estimated density of simulated 2X + 3Y (black) overlaid with a normal curve using the sample mean and standard deviation (red). The curves match closely, showing the simulated distribution is well-approximated by the theoretical normal.", fig.alt="Two overlapping bell curves: black estimated density and red normal curve using sample statistics. They align closely."}
+```{r}
 plot(density(sim_data))
 curve(dnorm(x, 
             mean(sim_data), 
@@ -196,7 +196,7 @@ In particular, we would not want to assume that the variables are independent.
 
 In the R package `HistData`, there is a data set that is the heights of parents and their adult children. Let's take a look.
 
-```{r message=FALSE, warning=FALSE, fig.cap="Scatterplot of Galton height data: parent average height on the x-axis versus adult child height on the y-axis. Points are jittered to reduce overplotting. The data shows a positive association — taller parents tend to have taller children.", fig.alt="Scatterplot showing a positive linear trend between parent height and child height, with points scattered roughly around a diagonal line from lower-left to upper-right."}
+```{r message=FALSE, warning=FALSE}
 galton <- HistData::Galton
 library(tidyverse)
 ggplot(galton, aes(parent, child)) +
@@ -205,7 +205,7 @@ ggplot(galton, aes(parent, child)) +
 
 It appears that there is a positive correlation between the height of a parent and the height of their adult child. (The parent value is the average of the father and mother of the child, and the child value has been adjusted for sex of the child. So, this may not be the best example of rigourous data collection!)
 
-```{r fig.cap="Scatterplot of Galton height data with a fitted linear regression line. The positive slope confirms the trend: children of taller parents tend to be taller, though the relationship is not perfectly linear.", fig.alt="Scatterplot of parent vs child heights with a blue regression line showing a positive slope. Points are spread around the line indicating variability."}
+```{r}
 ggplot(galton, aes(parent, child)) + 
   geom_jitter(alpha = .5) +
   geom_smooth(method = "lm")
@@ -230,7 +230,7 @@ E_g(\beta_0, \beta_1) &= \sum_{i = 1}^n g(y_i - \beta_0 + \beta_1 x_i)
 
 where $g$ is a *loss function* such that $g(x) = g(-x)$ and $g(x) \le g(y)$ whenever $0 \le x \le y$. Here are a few more loss functions $g$ that are commonly used.
 
-```{r fig.cap="Four common loss functions plotted over x from -4 to 4. Black: squared error (x squared), a parabola. Red: absolute value (L1), a V-shape. Green: pseudo-Huber with delta=2, which is quadratic near zero and linear in the tails. Blue: Tukey bisquare, which rises to a maximum and then levels off, capping the penalty for large errors.", fig.alt="Four curves on the same axes showing different loss functions. The black parabola grows fastest; the red V-shape grows linearly; the green pseudo-Huber is intermediate; the blue bisquare flattens out for large errors."}
+```{r}
 curve(x^2, from = -4, to = 4, col = 1,
       main = "Common Loss Functions") #black
 curve(abs(x), add = T, col = 2) #red
@@ -241,13 +241,13 @@ curve(delta^2 *(sqrt(1 + (x/delta)^2) - 1),
 curve(robustbase::Mchi(x, cc = 1.6, psi = "bisquare"),
       add= T, 
       col = 4) #bue
-``` 
+```
 
-of the loss function evaluated at the differences between the observed and the predicted values. We will see in later sections how to do that via math, but we also have R, which is good at doing things like this. 
+The idea is that we want to minimize the sum of the loss function evaluated at the differences between the observed and the predicted values. We will see in later sections how to do that via math, but we also have R, which is good at doing things like this. 
 
 Let's look at a different data set. This is the world happiness data set. People were surveyed in various countries around the world and asked to imagine the best life possible for them as a 10, and the worst life possible as a 0. Then they were asked to assign a number to their current life between 0 and 10. The results of the survey are summarized [here](https://mathstat.slu.edu/~speegle/Spring2020/4870/data/world_happiness_data.xls).
 
-```{r fig.cap="Scatterplot of world happiness data: log GDP per capita on the x-axis versus life ladder score (0-10 happiness scale) on the y-axis. There is a clear positive association — wealthier countries tend to report higher happiness scores, though there is substantial variability.", fig.alt="Scatterplot showing a positive trend between log GDP per capita and happiness scores. Points are scattered around an upward diagonal with some outliers below the main trend."}
+```{r}
 dd <- ardata::world_happiness
 
 dd <- filter(dd, year == 2018)
@@ -291,7 +291,7 @@ optim(par = c(1,1), fn = sse_one_argument)
 
 We see that the intercept is about -1.03 and the slope is about 0.705. Let's plot that on the scatterplot.
 
-```{r fig.cap="Scatterplot of happiness versus log GDP per capita with the SSE-minimizing line of best fit (slope 0.705, intercept -1.03) overlaid. The line from optim and the line from lm overlap almost perfectly, confirming that both methods yield the same result.", fig.alt="Scatterplot with two nearly identical upward-sloping lines overlaid on the points, confirming the SSE minimizer matches the lm output."}
+```{r}
 ggplot(dd, aes(x = log_gdp_per_capita, y = life_ladder))  + 
   geom_point() +
   geom_abline(slope = 0.705, intercept = -1.03) +
@@ -314,7 +314,7 @@ unique(dd$dataset)
 
 I'll do this example with `star`, but, you should follow along with a different one.
 
-```{r fig.cap="Scatterplot of the 'star' dataset from datasauRus, showing points arranged in the shape of a five-pointed star. This illustrates that data can have a clear non-linear structure while a linear model can still technically be fitted — it just won't be a meaningful fit.", fig.alt="Scatterplot where the data points form a recognizable five-pointed star shape, demonstrating that the data is clearly non-linear."}
+```{r}
 star <- filter(dd, dataset == "star")
 ggplot(star, aes(x = x, y = y)) +
   geom_point()
@@ -335,7 +335,7 @@ optim(par = c(50, 0), fn = sse_one_argument)
 
 We see that the line of best fit is $y = 53.33 - .10124 x$. Now, let's take a look at the line of best fit for all of the data sets. We'll use `ggplot` and `facet_wrap`.
 
-```{r fig.cap="A 3-by-4 grid of scatterplots showing all 12 datasets in the datasaurus_dozen collection, each with its linear regression line overlaid. Despite the datasets having wildly different visual shapes — including a dinosaur, a star, concentric circles, and scattered clusters — all 12 regression lines have nearly identical slopes and intercepts. This is the key insight: summary statistics alone can be deeply misleading.", fig.alt="Twelve small scatterplots in a grid. Each shows a different pattern of points (some forming recognizable shapes like a dinosaur or star), but each has a nearly flat regression line at approximately the same position, demonstrating that identical summary statistics can hide very different data structures."}
+```{r}
 ggplot(dd, aes(x, y)) +
   geom_point() +
   geom_smooth(method = "lm") +
@@ -387,14 +387,14 @@ This is our estimate for $\beta_1$, so we add a ^ to it to make this indication.
 
 Let's look at some simulated data to see how this performs.
 
-```{r fig.cap="Scatterplot of 30 simulated data points following the model y = 2x + noise, where x ranges from 0 to 10. The points fan out slightly around a positive linear trend as x increases, consistent with constant variance around the line y = 2x.", fig.alt="Scatterplot with 30 points showing a positive trend from lower-left to upper-right, with spread increasing slightly as x increases."}
+```{r}
 xs <- runif(30, 0, 10)
 ys <- 2 * xs + rnorm(30, 0, 3)
 plot(xs, ys)
 ```
 
 Our estimate for the slope is
-```{r fig.cap="Scatterplot of simulated data with the estimated regression-through-origin line overlaid. The line passes through (0, 0) and has slope approximately 2, fitting the points well.", fig.alt="Scatterplot with points following a positive trend and a straight line through the origin fitting the data closely."}
+```{r}
 beta1_hat <- sum(xs * ys)/sum(xs^2)
 plot(xs, ys)
 abline(a = 0, b = beta1_hat)
@@ -465,7 +465,7 @@ var(sim_data)
 
 Looks pretty good! Again, we would need to repeat a few times to be sure. Finally, let's estimate the density function of $\hat \beta_1$ and compare it to that of a normal with the above mean and standard deviation.
 
-```{r fig.cap="Estimated density of the simulated slope estimator beta-hat-1 (black curve) overlaid with the theoretical normal distribution with mean 2 and standard deviation sigma divided by sqrt(sum of x_i squared) (red curve). The curves match closely, confirming the theoretical result.", fig.alt="Two overlapping bell curves centered near 2: a black estimated density from simulation and a red theoretical normal curve. They align closely, validating the theoretical distribution of the slope estimator."}
+```{r}
 plot(density(sim_data))
 curve(dnorm(x, 2, sqrt(9/sum(xs^2))),a
       = T, col = 2 )
@@ -581,7 +581,7 @@ sigma_b0 <- sqrt((9 * sum(xs^2))/(30 * sum(xs^2) - sum(xs) * sum(xs)))
 
 Let's also plot it to double check normality.
 
-```{r fig.cap="Estimated density of 10,000 simulated intercept estimates beta-hat-0 (black) overlaid with the theoretical normal distribution with mean 1 and the derived standard deviation sigma_b0 (red). The close match confirms that beta-hat-0 is approximately normally distributed with the predicted parameters.", fig.alt="Two overlapping bell curves centered near 1: a black simulated density and a red theoretical normal curve. They match closely."}
+```{r}
 plot(density(sim_data))
 curve(dnorm(x, 1, sigma_b0), add = T, col = 2)
 ```
@@ -608,7 +608,7 @@ sigma_b1^2
 
 And again, we plot the density and compare to normal curve.
 
-```{r fig.cap="Estimated density of 10,000 simulated slope estimates beta-hat-1 from the full model (black) overlaid with the theoretical normal distribution with mean 2 and standard deviation sigma_b1 (red). The curves overlap closely, confirming the theoretical distribution.", fig.alt="Two overlapping bell curves centered near 2: a black simulated density and a red theoretical normal curve, closely aligned."}
+```{r}
 plot(density(sim_data))
 curve(dnorm(x, 2, sigma_b1), add = T, col = 2)
 ```
@@ -631,7 +631,7 @@ sigma_b1 <- sqrt((127 * 1/2)/(127 * sum(happy$log_gdp_per_capita^2) - sum(happy$
 
 Under the null hypothesis, we have that the **mean** of $\hat \beta_1$ is 0. So, if the null hypothesis is true, then $\hat \beta_1$ is normal with mean 0 and standard deviation about 0.053. Let's plot the pdf.
 
-```{r fig.cap="The probability density function of beta-hat-1 under the null hypothesis that beta-1 = 0, assuming known variance. The curve is a narrow normal distribution centered at 0 with standard deviation approximately 0.053. The observed slope of 0.705 falls far in the right tail, making it an extremely unlikely value under the null hypothesis.", fig.alt="A narrow bell curve centered at 0, with the x-axis ranging from about -0.8 to 0.8. The curve is very tall and tight, showing that values as large as 0.705 would be in the extreme right tail."}
+```{r}
 curve(dnorm(x, 0, 0.053), 
       from = -.8, 
       to = 0.8,
@@ -699,7 +699,7 @@ mean(sim_data)
 
 That looks better! That is our unbiased estimator of $\sigma^2$! What kind of rv is $\hat \sigma^2$, which is more commonly denoted $S^2$. Well. $S^2$ itself is not one that we are familiar with, but $(n - 2) S^2/\sigma^2$ is a $\chi^2$ random variable with $n - 2$ degrees of freedom.
 
-```{r fig.cap="Estimated density of the scaled variance estimator (n-2) S-squared divided by sigma-squared from simulation (black), overlaid with the chi-squared distribution with 28 degrees of freedom (red). The curves match closely, confirming the theoretical result that the scaled estimator follows a chi-squared distribution.", fig.alt="Two overlapping right-skewed curves: a black simulated density and a red chi-squared(28) curve. Both peak around x = 26-28 and have a long right tail. They align closely."}
+```{r}
 plot(density(28 * sim_data/9))
 curve(dchisq(x, 28), add = T, col = 2)
 ```
@@ -720,7 +720,7 @@ follows a $t$ distribution with $n - 2$ degrees of freedom.
 
 To prove this, we will once again use simulations. We assume $\beta_0 = 1$, $\beta_1 = 2$ and $\sigma = 3$.
 
-```{r, cache=TRUE, fig.cap="Estimated density of the standardized slope estimator (beta-hat-1 minus 2) divided by its standard error, from 10,000 simulations (black), overlaid with the t distribution with 28 degrees of freedom (red). The close match confirms Theorem betazerodist: the standardized slope estimator follows a t distribution.", fig.alt="Two overlapping bell-shaped curves centered at 0 with heavier tails than a normal distribution: a black simulated density and a red t(28) curve. They match closely."}
+```{r, cache=TRUE}
 n <- 30
 sim_data <- replicate(10000, {
   ys <- 1 + 2 * xs + rnorm(30, 0, 3)
@@ -759,7 +759,7 @@ Therefore, the value of the test statistic is
 
 That is, again, a very unlikely value for the test statistic that is $t$ with any degrees of freedom!!
 
-```{r fig.cap="The probability density function of the t distribution with 125 degrees of freedom, plotted from -21 to 21. The curve is symmetric and bell-shaped. The observed test statistic of approximately 13.08 falls far in the right tail, well outside the visible bulk of the distribution, indicating an extremely small p-value.", fig.alt="A symmetric bell curve centered at 0 representing the t(125) distribution. The x-axis extends to ±21, but virtually all the density is between about -4 and 4, making the test statistic of 13 essentially invisible on the tail."}
+```{r}
 curve(dt(x, 125), from = -21, to = 21)
 ```
 
@@ -790,7 +790,7 @@ We show how to get values for $\beta_0$ and $\beta_1$ that minimize
 \]
 where $g$ is *even*, $g$ is decreasing for $x \le 0$, and increasing for $x \ge 0$. Examples of $g$ were given above, such as $g(x) = x^2$, $g(x) = |x|$, or any of the 4 plots in the graph here. 
 
-```{r fig.cap="Four common loss functions plotted over x from -4 to 4. Black: squared error, a parabola. Red: absolute value (L1), a V-shape. Green: pseudo-Huber with delta=2, quadratic near zero and linear in the tails. Blue: Tukey bisquare with cc=1.6, which plateaus and caps the penalty for large errors.", fig.alt="Four curves on the same axes. The black parabola grows fastest; the red V-shape grows linearly; the green pseudo-Huber is intermediate; the blue bisquare flattens out for large errors."}
+```{r}
 curve(x^2, from = -4, to = 4, col = 1,
       main = "Common Loss Functions") #black
 curve(abs(x), add = T, col = 2) #red
@@ -849,7 +849,7 @@ optim(par = c(0, 1), fn = loss_one)
 ```
 We see that "the" line of best fit in this case is $y = -0.837  0.691 x$ rather than $y =  -1.03 + 0.705 x$. I will leave it to you to decide whether the difference between those coefficients is meaningful. Let's plot both lines.
 
-```{r fig.cap="Scatterplot of happiness versus log GDP per capita with two overlaid lines of best fit: the blue line minimizes SSE (via lm), and the black line minimizes the L1 error (via optim). The two lines are similar but not identical — the L1 line is slightly less influenced by countries with unusually low happiness for their income level.", fig.alt="Scatterplot with two nearly parallel upward-sloping lines. The blue SSE line is pulled slightly toward low-happiness outliers; the black L1 line is more resistant to them."}
+```{r}
 ggplot(happy, aes(x = log_gdp_per_capita, y = life_ladder)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) + #SSE minimizer
@@ -861,7 +861,7 @@ What is happening? Well, when we look at the scatterplot, we see that there are 
 
 Next up, we look at the *psuedo-Huber loss function* $g(x) = \delta^2 \sqrt{1 + (x/\delta)^2} - \delta^2$. In this loss function, there is a parameter $\delta$ that we can use to adjust the function. Let's plot it for a few different values of $\delta$. 
 
-```{r fig.cap="Three pseudo-Huber loss functions plotted for delta = 1 (black), delta = 0.5 (red), and delta = 2 (green). All three are symmetric, equal zero at x = 0, and grow as x moves away from zero. Smaller delta values make the function behave more like L1 (linear growth); larger delta values make it behave more like squared error (quadratic growth).", fig.alt="Three smooth curves symmetric around x=0 and y=0. The red curve (delta=0.5) grows most steeply and linearly; the green curve (delta=2) is most parabolic near zero; the black curve (delta=1) is intermediate."}
+```{r}
 curve(sqrt(1 + x^2) - 1, from = -5, to = 5, ylim = c(0, 5))
 delta = .5
 curve(delta^2 *sqrt(1 + x^2/delta^2) - delta^2, add= T, col = 2)
@@ -904,7 +904,7 @@ coefficients that are in between the two sets of coefficients that we computed p
 
 The `rlm` function also implements `psi.bisquare`, which is Tukey's bi-square function. This loss function also has a parameter, which is denoted by `cc` in the `robustbase` package. Here are some plots.
 
-```{r fig.cap="Three Tukey bisquare loss functions with different cc parameters: cc=1 (black), cc=0.5 (red), cc=2 (green). All three rise from zero at x=0 and then plateau at a maximum of 1. The cc parameter controls where the plateau begins: smaller cc values plateau sooner, meaning errors beyond that threshold are all penalized equally.", fig.alt="Three smooth curves that rise from zero, reach a flat maximum, and stay flat. The red curve (cc=0.5) plateaus closest to zero; the green curve (cc=2) plateaus furthest out; the black (cc=1) is in between."}
+```{r}
 curve(robustbase::Mchi(x, cc = 1, psi = "bisquare"), from = -2, to = 2)
 curve(robustbase::Mchi(x, cc = 0.5, psi = "bisquare"), add = T, col = 2)
 curve(robustbase::Mchi(x, cc = 2, psi = "bisquare"), add = T, col = 3)
@@ -921,7 +921,7 @@ We don't see a big change by doing it like this.
 
 Now let's set up a funky simulated data set.
 
-```{r fig.cap="Scatterplot of 20 simulated data points where y is approximately equal to x plus small random noise. The points fall tightly along a diagonal line from lower-left to upper-right, indicating a strong positive linear relationship.", fig.alt="Scatterplot of 20 points tightly clustered around the line y = x, ranging from about -5 to 5 on both axes."}
+```{r}
 xs <- runif(20, -5, 5)
 ys <- xs + rnorm(20, 0, .5)
 plot(xs, ys)
@@ -934,7 +934,7 @@ lm(ys ~ xs)
 Let's see what happens when we add an outlier that changes it to look like possible $y = -x$.
 
 
-```{r fig.cap="Scatterplot after adding one extreme outlier at approximately (-10, 10). The original 20 points still cluster tightly around y = x, but the single outlier in the upper-left corner pulls the visual trend toward a negative slope.", fig.alt="Scatterplot with 20 points along a positive diagonal and one isolated point in the upper-left corner at about x=-10, y=10, suggesting a conflicting negative trend."}
+```{r}
 xs <- c(xs, -10)
 ys <- c(ys, 10)
 plot(xs, ys)
@@ -946,7 +946,7 @@ If we just use `lm`, which uses SSE.
 lm(ys ~ xs)
 ```
 
-```{r fig.cap="Scatterplot with SSE-minimizing regression line fit to the data including the outlier. The line has been pulled substantially toward the outlier compared to what it would look like without it, now showing a near-zero or slightly negative slope instead of the true positive slope.", fig.alt="Scatterplot where the regression line is tilted toward the upper-left outlier, resulting in a much flatter slope than the true underlying y=x relationship."}
+```{r}
 plot(xs, ys)
 abline(lm(ys ~ xs))
 ```

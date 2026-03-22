@@ -341,7 +341,12 @@ We will not work much with the pdf directly, but rather use the built in R funct
 <span id="cb1-3"><a href="classicaltheory.html#cb1-3" tabindex="-1"></a>      <span class="at">ylab =</span> <span class="st">&quot;likelihood&quot;</span>) <span class="co">#green</span></span>
 <span id="cb1-4"><a href="classicaltheory.html#cb1-4" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="dv">0</span>, <span class="dv">2</span>), <span class="at">add=</span> T, <span class="at">col =</span> <span class="dv">2</span>) <span class="co">#red</span></span>
 <span id="cb1-5"><a href="classicaltheory.html#cb1-5" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="dv">0</span>, <span class="dv">1</span>), <span class="at">add =</span> T, <span class="at">col =</span> <span class="dv">1</span>) <span class="co">#black</span></span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-1"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-1-1.png" alt="Three overlapping bell curves centered at 0. Green is narrowest and tallest, black is medium, red is widest and flattest." width="672" />
+<p class="caption">
+Figure 2.1: Three normal probability density functions with mean 0. The green curve has the smallest standard deviation (sd = 1/sqrt(2), narrowest and tallest), the black curve has sd = 1 (medium width), and the red curve has sd = 2 (widest and flattest). All three are symmetric and bell-shaped around x = 0.
+</p>
+</div>
 <p>Recall that the <em>area</em> under the curve between <span class="math inline">\(x = a\)</span> and <span class="math inline">\(x = b\)</span> of the pdf of <span class="math inline">\(X\)</span> gives <span class="math inline">\(P(a \le X \le b) = \int_a^b f(x)\, dx\)</span>. Probability density functions can also be used to find the <em>expected value</em> (also called the <em>mean</em>) of a random variable <span class="math inline">\(X\)</span> via</p>
 <p><span class="math display">\[
 \mu_X = E[X] = \int_{-\infty}^\infty x f(x)\, dx.
@@ -386,7 +391,7 @@ We will not work much with the pdf directly, but rather use the built in R funct
 <p>We first get a single sample from the rv, then we put it inside <code>replicate</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="classicaltheory.html#cb2-1" tabindex="-1"></a>one_sample <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="at">mean =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">2</span>)</span>
 <span id="cb2-2"><a href="classicaltheory.html#cb2-2" tabindex="-1"></a>one_sample</span></code></pre></div>
-<pre><code>## [1] -1.32396</code></pre>
+<pre><code>## [1] 2.901524</code></pre>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="classicaltheory.html#cb4-1" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
 <span id="cb4-2"><a href="classicaltheory.html#cb4-2" tabindex="-1"></a>  one_sample <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="at">mean =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">2</span>)</span>
 <span id="cb4-3"><a href="classicaltheory.html#cb4-3" tabindex="-1"></a>  one_sample</span>
@@ -394,12 +399,12 @@ We will not work much with the pdf directly, but rather use the built in R funct
 <p>This creates a vector of length 10000 that is a random sample from a normal rv with mean 1 and sd 2. For simple examples like this, it would be more natural to do <code>sim_data &lt;- rnorm(10000, 1, 2)</code>, but the above will be easier to keep track of when we get to more complicated things, imho.</p>
 <p>Next, we just take the mean (average) of the random sample.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="classicaltheory.html#cb5-1" tabindex="-1"></a><span class="fu">mean</span>(sim_data)</span></code></pre></div>
-<pre><code>## [1] 1.002169</code></pre>
+<pre><code>## [1] 0.9727693</code></pre>
 <p>And we see that we get pretty close to 1. Let’s verify that <span class="math inline">\(2 *X + 3 * Y\)</span> has mean <span class="math inline">\(2\mu_X + 3 \mu_Y\)</span> in the case that <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are normal with means 2 and 5 respectively.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="classicaltheory.html#cb7-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>) <span class="co">#chose sd = 1</span></span>
 <span id="cb7-2"><a href="classicaltheory.html#cb7-2" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">3</span>) <span class="co">#chose different sd just to see if that matters</span></span>
 <span id="cb7-3"><a href="classicaltheory.html#cb7-3" tabindex="-1"></a><span class="dv">2</span> <span class="sc">*</span> x <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> y</span></code></pre></div>
-<pre><code>## [1] 29.14614</code></pre>
+<pre><code>## [1] 16.25781</code></pre>
 <p>That is one sample from <span class="math inline">\(2X + 3Y\)</span>. Let’s get a lot of samples.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="classicaltheory.html#cb9-1" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
 <span id="cb9-2"><a href="classicaltheory.html#cb9-2" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>) <span class="co">#chose sd = 1</span></span>
@@ -407,13 +412,13 @@ We will not work much with the pdf directly, but rather use the built in R funct
 <span id="cb9-4"><a href="classicaltheory.html#cb9-4" tabindex="-1"></a>  <span class="dv">2</span> <span class="sc">*</span> x <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> y</span>
 <span id="cb9-5"><a href="classicaltheory.html#cb9-5" tabindex="-1"></a>})</span>
 <span id="cb9-6"><a href="classicaltheory.html#cb9-6" tabindex="-1"></a><span class="fu">mean</span>(sim_data)</span></code></pre></div>
-<pre><code>## [1] 18.9224</code></pre>
+<pre><code>## [1] 19.03177</code></pre>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="classicaltheory.html#cb11-1" tabindex="-1"></a><span class="dv">2</span> <span class="sc">*</span> <span class="dv">2</span> <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> <span class="dv">5</span></span></code></pre></div>
 <pre><code>## [1] 19</code></pre>
 <p>We compare the estimated mean to the true mean of 19, and see that we are pretty close. To be sure, we might run the simulation a couple of times and see whether it looks like it is staying close to 19; sometimes larger, sometimes smaller.</p>
 <p>To estimate the variance of an rv, we take a large sample and use the R function <code>var</code>, which computes the sample variance. This is not as straightorward from a theoretical standpoint as taking the <code>mean</code>, but we will ignore the difficulties. We know from Theorem <a href="#thm:variancefacts"><strong>??</strong></a> that the variance of <span class="math inline">\(2X + 3Y\)</span> shoule be <span class="math inline">\(4 * 1 + 9 * 9 = 85\)</span>. Let’s check it out. We already have built our random sample, so we just use <code>var</code> on that.</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="classicaltheory.html#cb13-1" tabindex="-1"></a><span class="fu">var</span>(sim_data)</span></code></pre></div>
-<pre><code>## [1] 82.23593</code></pre>
+<pre><code>## [1] 85.99143</code></pre>
 <p>Let’s repeat a few times.</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="classicaltheory.html#cb15-1" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
 <span id="cb15-2"><a href="classicaltheory.html#cb15-2" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>) <span class="co">#chose sd = 1</span></span>
@@ -421,12 +426,12 @@ We will not work much with the pdf directly, but rather use the built in R funct
 <span id="cb15-4"><a href="classicaltheory.html#cb15-4" tabindex="-1"></a>  <span class="dv">2</span> <span class="sc">*</span> x <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> y</span>
 <span id="cb15-5"><a href="classicaltheory.html#cb15-5" tabindex="-1"></a>})</span>
 <span id="cb15-6"><a href="classicaltheory.html#cb15-6" tabindex="-1"></a><span class="fu">var</span>(sim_data)</span></code></pre></div>
-<pre><code>## [1] 82.87626</code></pre>
+<pre><code>## [1] 86.22083</code></pre>
 <p>Seems to be working. To estimate the standard deviation, we would take the square root, or use the <code>sd</code> R function.</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="classicaltheory.html#cb17-1" tabindex="-1"></a><span class="fu">sd</span>(sim_data)</span></code></pre></div>
-<pre><code>## [1] 9.10364</code></pre>
+<pre><code>## [1] 9.285517</code></pre>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="classicaltheory.html#cb19-1" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">var</span>(sim_data))</span></code></pre></div>
-<pre><code>## [1] 9.10364</code></pre>
+<pre><code>## [1] 9.285517</code></pre>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="classicaltheory.html#cb21-1" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="dv">85</span>)</span></code></pre></div>
 <pre><code>## [1] 9.219544</code></pre>
 <p>The reason it is tricky from a theoretical point of view to estimate the standard deviation is that, if you repeated the above a bunch of times, you would notice that <code>sd</code> is slighlty off on average. But, the variance is correct, on average.</p>
@@ -440,20 +445,35 @@ We will not work much with the pdf directly, but rather use the built in R funct
 <span id="cb23-4"><a href="classicaltheory.html#cb23-4" tabindex="-1"></a>  <span class="dv">2</span> <span class="sc">*</span> x <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> y</span>
 <span id="cb23-5"><a href="classicaltheory.html#cb23-5" tabindex="-1"></a>})</span>
 <span id="cb23-6"><a href="classicaltheory.html#cb23-6" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(sim_data))</span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-9"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-9-1.png" alt="A single smooth bell-shaped curve centered around 3, showing the estimated density of the simulated distribution." width="672" />
+<p class="caption">
+Figure 2.2: Estimated probability density of the simulated random variable 2X + 3Y, where X is standard normal and Y is normal with mean 1 and standard deviation 2. The curve is smooth and bell-shaped, centered near 3.
+</p>
+</div>
 <p>The <code>plot(density())</code> command gives an estimated density plot of the rv that has data given in the argument of <code>density</code>. Let’s a
 a pdf of a normal rv with the correct mean and standard deviation to the above plot, and see whether they match. The correct mean is <span class="math inline">\(2 * 0 + 3 * 1\)</span> and the sd is <span class="math inline">\(\sqrt{4 * 1 + 9 * 4}\)</span></p>
 <div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="classicaltheory.html#cb24-1" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(sim_data))</span>
 <span id="cb24-2"><a href="classicaltheory.html#cb24-2" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="dv">3</span>, <span class="fu">sqrt</span>(<span class="dv">40</span>)), a</span>
 <span id="cb24-3"><a href="classicaltheory.html#cb24-3" tabindex="-1"></a>      <span class="ot">=</span> T, <span class="at">col =</span> <span class="dv">2</span>) <span class="co">#shows up in red</span></span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-10"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-10-1.png" alt="Two nearly identical bell curves overlaid: a black estimated density and a red theoretical normal curve. They match closely, confirming normality." width="672" />
+<p class="caption">
+Figure 2.3: The estimated density of the simulated 2X + 3Y (black curve) overlaid with the theoretical normal distribution with mean 3 and standard deviation sqrt(40) (red curve). The two curves align closely, confirming that the distribution is normal.
+</p>
+</div>
 <p>Alternatively, we could have used the simulated data and estimated the mean and sd.</p>
 <div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="classicaltheory.html#cb25-1" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(sim_data))</span>
 <span id="cb25-2"><a href="classicaltheory.html#cb25-2" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, </span>
 <span id="cb25-3"><a href="classicaltheory.html#cb25-3" tabindex="-1"></a>            <span class="fu">mean</span>(sim_data), </span>
 <span id="cb25-4"><a href="classicaltheory.html#cb25-4" tabindex="-1"></a>            <span class="fu">sd</span>(sim_data)), a</span>
 <span id="cb25-5"><a href="classicaltheory.html#cb25-5" tabindex="-1"></a>      <span class="ot">=</span> T, <span class="at">col =</span> <span class="dv">2</span>) <span class="co">#shows up in red</span></span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-11"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-11-1.png" alt="Two overlapping bell curves: black estimated density and red normal curve using sample statistics. They align closely." width="672" />
+<p class="caption">
+Figure 2.4: Estimated density of simulated 2X + 3Y (black) overlaid with a normal curve using the sample mean and standard deviation (red). The curves match closely, showing the simulated distribution is well-approximated by the theoretical normal.
+</p>
+</div>
 <p>Since the estimated pdf of the simulated data matches that of the <code>dnorm</code> (more or less), we conclude that the distributions are the same. Note that if there is a discontinuity in the pdf, then the simulation will not match well at that point of discontinuity. Since we will mostly be dealing with normal rvs, we’ll cross that bridge when we get to it.</p>
 <div class="exercise">
 <span class="divhead-definition exercise-before"> 2.1</span>
@@ -483,13 +503,23 @@ In particular, we would not want to assume that the variables are independent.</
 <span id="cb26-2"><a href="classicaltheory.html#cb26-2" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb26-3"><a href="classicaltheory.html#cb26-3" tabindex="-1"></a><span class="fu">ggplot</span>(galton, <span class="fu">aes</span>(parent, child)) <span class="sc">+</span></span>
 <span id="cb26-4"><a href="classicaltheory.html#cb26-4" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">alpha =</span> .<span class="dv">5</span>)</span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-13"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-13-1.png" alt="Scatterplot showing a positive linear trend between parent height and child height, with points scattered roughly around a diagonal line from lower-left to upper-right." width="672" />
+<p class="caption">
+Figure 2.5: Scatterplot of Galton height data: parent average height on the x-axis versus adult child height on the y-axis. Points are jittered to reduce overplotting. The data shows a positive association — taller parents tend to have taller children.
+</p>
+</div>
 <p>It appears that there is a positive correlation between the height of a parent and the height of their adult child. (The parent value is the average of the father and mother of the child, and the child value has been adjusted for sex of the child. So, this may not be the best example of rigourous data collection!)</p>
 <div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="classicaltheory.html#cb27-1" tabindex="-1"></a><span class="fu">ggplot</span>(galton, <span class="fu">aes</span>(parent, child)) <span class="sc">+</span> </span>
 <span id="cb27-2"><a href="classicaltheory.html#cb27-2" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">alpha =</span> .<span class="dv">5</span>) <span class="sc">+</span></span>
 <span id="cb27-3"><a href="classicaltheory.html#cb27-3" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>)</span></code></pre></div>
 <pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-14"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-14-1.png" alt="Scatterplot of parent vs child heights with a blue regression line showing a positive slope. Points are spread around the line indicating variability." width="672" />
+<p class="caption">
+Figure 2.6: Scatterplot of Galton height data with a fitted linear regression line. The positive slope confirms the trend: children of taller parents tend to be taller, though the relationship is not perfectly linear.
+</p>
+</div>
 <p>The model that we are using for this data is
 <span class="math display">\[
 y_i = \beta_0 + \beta_1 x_i + \epsilon_i
@@ -515,8 +545,13 @@ E_g(\beta_0, \beta_1) &amp;= \sum_{i = 1}^n g(y_i - \beta_0 + \beta_1 x_i)
 <span id="cb29-8"><a href="classicaltheory.html#cb29-8" tabindex="-1"></a><span class="fu">curve</span>(robustbase<span class="sc">::</span><span class="fu">Mchi</span>(x, <span class="at">cc =</span> <span class="fl">1.6</span>, <span class="at">psi =</span> <span class="st">&quot;bisquare&quot;</span>),</span>
 <span id="cb29-9"><a href="classicaltheory.html#cb29-9" tabindex="-1"></a>      <span class="at">add=</span> T, </span>
 <span id="cb29-10"><a href="classicaltheory.html#cb29-10" tabindex="-1"></a>      <span class="at">col =</span> <span class="dv">4</span>) <span class="co">#bue</span></span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
-<p>The idea is that we want to minimize the sum of the loss function evaluated at the differences between the observed and the predicted values. We will see in later sections how to do that via math, but we also have R, which is good at doing things like this.</p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-15"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-15-1.png" alt="Four curves on the same axes showing different loss functions. The black parabola grows fastest; the red V-shape grows linearly; the green pseudo-Huber is intermediate; the blue bisquare flattens out for large errors." width="672" />
+<p class="caption">
+Figure 2.7: Four common loss functions plotted over x from -4 to 4. Black: squared error (x squared), a parabola. Red: absolute value (L1), a V-shape. Green: pseudo-Huber with delta=2, which is quadratic near zero and linear in the tails. Blue: Tukey bisquare, which rises to a maximum and then levels off, capping the penalty for large errors.
+</p>
+</div>
+<p>of the loss function evaluated at the differences between the observed and the predicted values. We will see in later sections how to do that via math, but we also have R, which is good at doing things like this.</p>
 <p>Let’s look at a different data set. This is the world happiness data set. People were surveyed in various countries around the world and asked to imagine the best life possible for them as a 10, and the worst life possible as a 0. Then they were asked to assign a number to their current life between 0 and 10. The results of the survey are summarized <a href="https://mathstat.slu.edu/~speegle/Spring2020/4870/data/world_happiness_data.xls">here</a>.</p>
 <div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="classicaltheory.html#cb30-1" tabindex="-1"></a>dd <span class="ot">&lt;-</span> ardata<span class="sc">::</span>world_happiness</span>
 <span id="cb30-2"><a href="classicaltheory.html#cb30-2" tabindex="-1"></a></span>
@@ -527,7 +562,12 @@ E_g(\beta_0, \beta_1) &amp;= \sum_{i = 1}^n g(y_i - \beta_0 + \beta_1 x_i)
 <span id="cb30-7"><a href="classicaltheory.html#cb30-7" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code></pre></div>
 <pre><code>## Warning: Removed 9 rows containing missing values or values outside the scale range
 ## (`geom_point()`).</code></pre>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-16"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-16-1.png" alt="Scatterplot showing a positive trend between log GDP per capita and happiness scores. Points are scattered around an upward diagonal with some outliers below the main trend." width="672" />
+<p class="caption">
+Figure 2.8: Scatterplot of world happiness data: log GDP per capita on the x-axis versus life ladder score (0-10 happiness scale) on the y-axis. There is a clear positive association — wealthier countries tend to report higher happiness scores, though there is substantial variability.
+</p>
+</div>
 <p>Let’s get rid of the data with missing values, and store the resulting variable in <code>happy</code> for future use, since <code>dd</code> will get overwritten later.</p>
 <div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="classicaltheory.html#cb32-1" tabindex="-1"></a>dd<span class="ot">&lt;-</span> dd[<span class="fu">complete.cases</span>(dd),]</span>
 <span id="cb32-2"><a href="classicaltheory.html#cb32-2" tabindex="-1"></a>happy <span class="ot">&lt;-</span> dd</span></code></pre></div>
@@ -562,7 +602,12 @@ E_g(\beta_0, \beta_1) &amp;= \sum_{i = 1}^n g(y_i - \beta_0 + \beta_1 x_i)
 <span id="cb37-3"><a href="classicaltheory.html#cb37-3" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="fl">0.705</span>, <span class="at">intercept =</span> <span class="sc">-</span><span class="fl">1.03</span>) <span class="sc">+</span></span>
 <span id="cb37-4"><a href="classicaltheory.html#cb37-4" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>)</span></code></pre></div>
 <pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-21"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-21-1.png" alt="Scatterplot with two nearly identical upward-sloping lines overlaid on the points, confirming the SSE minimizer matches the lm output." width="672" />
+<p class="caption">
+Figure 2.9: Scatterplot of happiness versus log GDP per capita with the SSE-minimizing line of best fit (slope 0.705, intercept -1.03) overlaid. The line from optim and the line from lm overlap almost perfectly, confirming that both methods yield the same result.
+</p>
+</div>
 <p>Yep. That’s the line that minimizes the sum of squares error, all right!</p>
 <p>Let’s look at one more set of data, the <code>datasauRus</code>. You will need to install the datasauRus package if you have not already done so via <code>install.packages("datasauRus")</code>. The datasauRus package contains several interesting simulated data sets. The one we are interested in for now is the <code>datasaurus_dozen</code>, which we store into <code>dd</code>.</p>
 <div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="classicaltheory.html#cb39-1" tabindex="-1"></a>dd <span class="ot">&lt;-</span> datasauRus<span class="sc">::</span>datasaurus_dozen</span></code></pre></div>
@@ -575,7 +620,12 @@ E_g(\beta_0, \beta_1) &amp;= \sum_{i = 1}^n g(y_i - \beta_0 + \beta_1 x_i)
 <div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="classicaltheory.html#cb42-1" tabindex="-1"></a>star <span class="ot">&lt;-</span> <span class="fu">filter</span>(dd, dataset <span class="sc">==</span> <span class="st">&quot;star&quot;</span>)</span>
 <span id="cb42-2"><a href="classicaltheory.html#cb42-2" tabindex="-1"></a><span class="fu">ggplot</span>(star, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)) <span class="sc">+</span></span>
 <span id="cb42-3"><a href="classicaltheory.html#cb42-3" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-24"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-24-1.png" alt="Scatterplot where the data points form a recognizable five-pointed star shape, demonstrating that the data is clearly non-linear." width="672" />
+<p class="caption">
+Figure 2.10: Scatterplot of the ‘star’ dataset from datasauRus, showing points arranged in the shape of a five-pointed star. This illustrates that data can have a clear non-linear structure while a linear model can still technically be fitted — it just won’t be a meaningful fit.
+</p>
+</div>
 <p>Yep, it looks like a star! This certainly is <strong>not</strong> of the form <span class="math inline">\(y = \beta_0 + \beta_1 x + \epsilon\)</span> (Why?), but we can still find the line that is the best fit of this data. Not saying it will be a good fit, but it is still the one that minimizes SSE.</p>
 <div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="classicaltheory.html#cb43-1" tabindex="-1"></a>sse <span class="ot">&lt;-</span> <span class="cf">function</span>(b0, b1) {</span>
 <span id="cb43-2"><a href="classicaltheory.html#cb43-2" tabindex="-1"></a>  <span class="fu">sum</span>((star<span class="sc">$</span>y <span class="sc">-</span> (b0 <span class="sc">+</span> b1 <span class="sc">*</span> star<span class="sc">$</span>x))<span class="sc">^</span><span class="dv">2</span>)</span>
@@ -605,7 +655,12 @@ E_g(\beta_0, \beta_1) &amp;= \sum_{i = 1}^n g(y_i - \beta_0 + \beta_1 x_i)
 <span id="cb45-3"><a href="classicaltheory.html#cb45-3" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>) <span class="sc">+</span></span>
 <span id="cb45-4"><a href="classicaltheory.html#cb45-4" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>dataset)</span></code></pre></div>
 <pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-26"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-26-1.png" alt="Twelve small scatterplots in a grid. Each shows a different pattern of points (some forming recognizable shapes like a dinosaur or star), but each has a nearly flat regression line at approximately the same position, demonstrating that identical summary statistics can hide very different data structures." width="672" />
+<p class="caption">
+Figure 2.11: A 3-by-4 grid of scatterplots showing all 12 datasets in the datasaurus_dozen collection, each with its linear regression line overlaid. Despite the datasets having wildly different visual shapes — including a dinosaur, a star, concentric circles, and scattered clusters — all 12 regression lines have nearly identical slopes and intercepts. This is the key insight: summary statistics alone can be deeply misleading.
+</p>
+</div>
 <p>It turns out that all 12 of these data sets have very similar lines of best fit!</p>
 <div class="exercise">
 <span class="divhead-definition exercise-before"> 2.2</span>
@@ -648,12 +703,22 @@ This is our estimate for <span class="math inline">\(\beta_1\)</span>, so we add
 <div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="classicaltheory.html#cb47-1" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
 <span id="cb47-2"><a href="classicaltheory.html#cb47-2" tabindex="-1"></a>ys <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> xs <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">3</span>)</span>
 <span id="cb47-3"><a href="classicaltheory.html#cb47-3" tabindex="-1"></a><span class="fu">plot</span>(xs, ys)</span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-27"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-27-1.png" alt="Scatterplot with 30 points showing a positive trend from lower-left to upper-right, with spread increasing slightly as x increases." width="672" />
+<p class="caption">
+Figure 2.12: Scatterplot of 30 simulated data points following the model y = 2x + noise, where x ranges from 0 to 10. The points fan out slightly around a positive linear trend as x increases, consistent with constant variance around the line y = 2x.
+</p>
+</div>
 <p>Our estimate for the slope is</p>
 <div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="classicaltheory.html#cb48-1" tabindex="-1"></a>beta1_hat <span class="ot">&lt;-</span> <span class="fu">sum</span>(xs <span class="sc">*</span> ys)<span class="sc">/</span><span class="fu">sum</span>(xs<span class="sc">^</span><span class="dv">2</span>)</span>
 <span id="cb48-2"><a href="classicaltheory.html#cb48-2" tabindex="-1"></a><span class="fu">plot</span>(xs, ys)</span>
 <span id="cb48-3"><a href="classicaltheory.html#cb48-3" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> <span class="dv">0</span>, <span class="at">b =</span> beta1_hat)</span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-28"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-28-1.png" alt="Scatterplot with points following a positive trend and a straight line through the origin fitting the data closely." width="672" />
+<p class="caption">
+Figure 2.13: Scatterplot of simulated data with the estimated regression-through-origin line overlaid. The line passes through (0, 0) and has slope approximately 2, fitting the points well.
+</p>
+</div>
 <p>That looks pretty good! Let’s look at the formula for <span class="math inline">\(\hat \beta_1\)</span> in some more detail. In particular, let’s assume that our model is correct, and that <span class="math inline">\(y_i = \beta_1 x_i + \epsilon_i\)</span>, where <span class="math inline">\(\epsilon_i\)</span> are independent normal rvs with mean 0 and variance <span class="math inline">\(\sigma^2\)</span>. Under this model, the <span class="math inline">\(x_i\)</span> are <strong>constants</strong>; there is nothing random about them contained in the model. However, the <span class="math inline">\(y_i\)</span> are random variables! The <span class="math inline">\(y_i\)</span> are the sum of a constant (<span class="math inline">\(\beta_1 x_i\)</span>) and a normal random variable. By Theorem <a href="#thm:normalfacts"><strong>??</strong></a>, that means that <span class="math inline">\(y_i\)</span> is <strong>also normal</strong>. The mean of <span class="math inline">\(y_i\)</span> is <span class="math inline">\(\beta_1 x_i\)</span> and the variance of <span class="math inline">\(y_i\)</span> is <span class="math inline">\(\sigma^2\)</span>.</p>
 <p><strong>Question</strong> Are the <span class="math inline">\(y_i\)</span> independent or dependent? There are spoilers below, so think about this before you read further.</p>
 <p>So, up to know, we have that <span class="math inline">\(\hat \beta_1 = \frac{\sum x_i y_i}{\sum x_i^2} = \frac{1}{\sum x_i^2}\sum x_i y_i\)</span>. The pieces are the constants <span class="math inline">\(x_i\)</span> and the normal random variables <span class="math inline">\(y_i\)</span>. Let’s compute the expected value of <span class="math inline">\(\hat \beta_1\)</span>.</p>
@@ -672,7 +737,7 @@ E[\hat \beta_1] &amp;= E\bigl[\frac {1}{\sum x_i^2}\sum x_i y_i\bigr]\\
 <p>Then we will create a data set and estimate the slope.</p>
 <div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="classicaltheory.html#cb50-1" tabindex="-1"></a>ys <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> xs <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">3</span>)</span>
 <span id="cb50-2"><a href="classicaltheory.html#cb50-2" tabindex="-1"></a><span class="fu">sum</span>(xs <span class="sc">*</span> ys)<span class="sc">/</span><span class="fu">sum</span>(xs<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div>
-<pre><code>## [1] 2.014571</code></pre>
+<pre><code>## [1] 1.93056</code></pre>
 <p>Next, we put that inside of <code>replicate</code> to get a large sample of possible estimates of slopes.</p>
 <div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="classicaltheory.html#cb52-1" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
 <span id="cb52-2"><a href="classicaltheory.html#cb52-2" tabindex="-1"></a>  ys <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> xs <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">3</span>)</span>
@@ -680,7 +745,7 @@ E[\hat \beta_1] &amp;= E\bigl[\frac {1}{\sum x_i^2}\sum x_i y_i\bigr]\\
 <span id="cb52-4"><a href="classicaltheory.html#cb52-4" tabindex="-1"></a>})</span></code></pre></div>
 <p>And we compute the mean. We should get something really close to 2, which is the true value of the slope.</p>
 <div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="classicaltheory.html#cb53-1" tabindex="-1"></a><span class="fu">mean</span>(sim_data)</span></code></pre></div>
-<pre><code>## [1] 2.000319</code></pre>
+<pre><code>## [1] 2.000564</code></pre>
 <p>To be safe, we should repeat that a few times to see if the estimated expected value of <span class="math inline">\(\hat \beta_1\)</span> is on both sides of 2, and doesn’t seem to be biased. More generally, we know that <span class="math inline">\(\hat \beta_1\)</span> is a <strong>normal random variable</strong> with mean 2. What is its variance? Well, since the <span class="math inline">\(y_i\)</span> are independent, we can compute the variance as follows.</p>
 <p><span class="math display">\[
 \begin{aligned}
@@ -692,14 +757,19 @@ V(\hat \beta_1) &amp;= V(\frac {1}{\sum x_i^2}\sum x_i y_i)\\
 \]</span></p>
 <p>Again, let’s check that is true via… simulations!</p>
 <div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="classicaltheory.html#cb55-1" tabindex="-1"></a><span class="fu">var</span>(sim_data)</span></code></pre></div>
-<pre><code>## [1] 0.008717658</code></pre>
+<pre><code>## [1] 0.008816476</code></pre>
 <div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="classicaltheory.html#cb57-1" tabindex="-1"></a><span class="dv">9</span><span class="sc">/</span>(<span class="fu">sum</span> (xs<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div>
 <pre><code>## [1] 0.008847458</code></pre>
 <p>Looks pretty good! Again, we would need to repeat a few times to be sure. Finally, let’s estimate the density function of <span class="math inline">\(\hat \beta_1\)</span> and compare it to that of a normal with the above mean and standard deviation.</p>
 <div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="classicaltheory.html#cb59-1" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(sim_data))</span>
 <span id="cb59-2"><a href="classicaltheory.html#cb59-2" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="dv">2</span>, <span class="fu">sqrt</span>(<span class="dv">9</span><span class="sc">/</span><span class="fu">sum</span>(xs<span class="sc">^</span><span class="dv">2</span>))),a</span>
 <span id="cb59-3"><a href="classicaltheory.html#cb59-3" tabindex="-1"></a>      <span class="ot">=</span> T, <span class="at">col =</span> <span class="dv">2</span> )</span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-34-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-34"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-34-1.png" alt="Two overlapping bell curves centered near 2: a black estimated density from simulation and a red theoretical normal curve. They align closely, validating the theoretical distribution of the slope estimator." width="672" />
+<p class="caption">
+Figure 2.14: Estimated density of the simulated slope estimator beta-hat-1 (black curve) overlaid with the theoretical normal distribution with mean 2 and standard deviation sigma divided by sqrt(sum of x_i squared) (red curve). The curves match closely, confirming the theoretical result.
+</p>
+</div>
 <p>That is compelling to me. We have seen that <span class="math inline">\(\hat \beta_1\)</span> is normal with mean <span class="math inline">\(\beta_1\)</span> and standard deviation <span class="math inline">\(\frac{\sigma}{\sqrt{\sum x_i^2}}\)</span>.</p>
 <p>If we wanted to estimate <strong>all</strong> of the parameters in the model, though, we would need to come up with an estimate for <span class="math inline">\(\sigma\)</span> or <span class="math inline">\(\sigma^2\)</span>. The traditional way to estimate <span class="math inline">\(\sigma^2\)</span> given a random sample <span class="math inline">\(v_i\)</span> from a population with <strong>known</strong> mean <span class="math inline">\(\mu\)</span> is <span class="math inline">\(S^2 \approx \frac 1n \sum_{i = 1}^n (v_i - \mu)^2\)</span>. If we <strong>don’t</strong> know <span class="math inline">\(\mu\)</span>, then we estimate it from the data, and use <span class="math inline">\(S^2 = \frac 1{n-1} \sum_{i = 1}^n (v_i - \overline{v})^2\)</span>, where the rule of thumb is that you subtract one from the denominator for each parameter that you estimated. In this case, we estimated <span class="math inline">\(\mu\)</span>, so we subtract 1.</p>
 <p>In our case, we have a random sample from a population with known mean 0, but we are estimating one parameter still, namely <span class="math inline">\(\beta\)</span>.
@@ -780,7 +850,12 @@ over all choices of <span class="math inline">\(\beta_0\)</span> and <span class
 <p>Let’s also plot it to double check normality.</p>
 <div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb73-1"><a href="classicaltheory.html#cb73-1" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(sim_data))</span>
 <span id="cb73-2"><a href="classicaltheory.html#cb73-2" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="dv">1</span>, sigma_b0), <span class="at">add =</span> T, <span class="at">col =</span> <span class="dv">2</span>)</span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-40-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-40"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-40-1.png" alt="Two overlapping bell curves centered near 1: a black simulated density and a red theoretical normal curve. They match closely." width="672" />
+<p class="caption">
+Figure 2.15: Estimated density of 10,000 simulated intercept estimates beta-hat-0 (black) overlaid with the theoretical normal distribution with mean 1 and the derived standard deviation sigma_b0 (red). The close match confirms that beta-hat-0 is approximately normally distributed with the predicted parameters.
+</p>
+</div>
 <p>We do a similar simulation for <span class="math inline">\(\beta_1\)</span> below.</p>
 <div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb74-1"><a href="classicaltheory.html#cb74-1" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">10</span>)</span>
 <span id="cb74-2"><a href="classicaltheory.html#cb74-2" tabindex="-1"></a>sx <span class="ot">&lt;-</span> <span class="fu">sum</span>(xs)</span>
@@ -803,7 +878,12 @@ over all choices of <span class="math inline">\(\beta_0\)</span> and <span class
 <p>And again, we plot the density and compare to normal curve.</p>
 <div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb82-1"><a href="classicaltheory.html#cb82-1" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(sim_data))</span>
 <span id="cb82-2"><a href="classicaltheory.html#cb82-2" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="dv">2</span>, sigma_b1), <span class="at">add =</span> T, <span class="at">col =</span> <span class="dv">2</span>)</span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-42-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-42"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-42-1.png" alt="Two overlapping bell curves centered near 2: a black simulated density and a red theoretical normal curve, closely aligned." width="672" />
+<p class="caption">
+Figure 2.16: Estimated density of 10,000 simulated slope estimates beta-hat-1 from the full model (black) overlaid with the theoretical normal distribution with mean 2 and standard deviation sigma_b1 (red). The curves overlap closely, confirming the theoretical distribution.
+</p>
+</div>
 <p>We can use this information to perform hypothesis tests and create confidence intervals!</p>
 <div id="hypothesis-test-interlude" class="section level3 hasAnchor" number="2.4.1">
 <h3><span class="header-section-number">2.4.1</span> Hypothesis Test Interlude<a href="classicaltheory.html#hypothesis-test-interlude" class="anchor-section" aria-label="Anchor link to header"></a></h3>
@@ -819,7 +899,12 @@ We need to assume, at this point, that the variance of <span class="math inline"
 <span id="cb84-3"><a href="classicaltheory.html#cb84-3" tabindex="-1"></a>      <span class="at">to =</span> <span class="fl">0.8</span>,</span>
 <span id="cb84-4"><a href="classicaltheory.html#cb84-4" tabindex="-1"></a>      <span class="at">ylab =</span> <span class="st">&quot;likelihood&quot;</span>, </span>
 <span id="cb84-5"><a href="classicaltheory.html#cb84-5" tabindex="-1"></a>      <span class="at">main =</span> <span class="st">&quot;pdf of beta1 hat&quot;</span>)</span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-44-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-44"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-44-1.png" alt="A narrow bell curve centered at 0, with the x-axis ranging from about -0.8 to 0.8. The curve is very tall and tight, showing that values as large as 0.705 would be in the extreme right tail." width="672" />
+<p class="caption">
+Figure 2.17: The probability density function of beta-hat-1 under the null hypothesis that beta-1 = 0, assuming known variance. The curve is a narrow normal distribution centered at 0 with standard deviation approximately 0.053. The observed slope of 0.705 falls far in the right tail, making it an extremely unlikely value under the null hypothesis.
+</p>
+</div>
 <p>It is <strong>very</strong> unlikely that the computed slope would be 0.705 or larger! The <span class="math inline">\(p\)</span>-value is obtained by computing the probability of getting 0.705 or larger given that <span class="math inline">\(H_0\)</span> is true.</p>
 <div class="sourceCode" id="cb85"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb85-1"><a href="classicaltheory.html#cb85-1" tabindex="-1"></a><span class="fu">pnorm</span>(<span class="fl">0.705</span>, <span class="dv">0</span>, .<span class="dv">053</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 <pre><code>## [1] 1.1285e-40</code></pre>
@@ -867,7 +952,12 @@ We need to assume, at this point, that the variance of <span class="math inline"
 <p>That looks better! That is our unbiased estimator of <span class="math inline">\(\sigma^2\)</span>! What kind of rv is <span class="math inline">\(\hat \sigma^2\)</span>, which is more commonly denoted <span class="math inline">\(S^2\)</span>. Well. <span class="math inline">\(S^2\)</span> itself is not one that we are familiar with, but <span class="math inline">\((n - 2) S^2/\sigma^2\)</span> is a <span class="math inline">\(\chi^2\)</span> random variable with <span class="math inline">\(n - 2\)</span> degrees of freedom.</p>
 <div class="sourceCode" id="cb97"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb97-1"><a href="classicaltheory.html#cb97-1" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(<span class="dv">28</span> <span class="sc">*</span> sim_data<span class="sc">/</span><span class="dv">9</span>))</span>
 <span id="cb97-2"><a href="classicaltheory.html#cb97-2" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dchisq</span>(x, <span class="dv">28</span>), <span class="at">add =</span> T, <span class="at">col =</span> <span class="dv">2</span>)</span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-51-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-51"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-51-1.png" alt="Two overlapping right-skewed curves: a black simulated density and a red chi-squared(28) curve. Both peak around x = 26-28 and have a long right tail. They align closely." width="672" />
+<p class="caption">
+Figure 2.18: Estimated density of the scaled variance estimator (n-2) S-squared divided by sigma-squared from simulation (black), overlaid with the chi-squared distribution with 28 degrees of freedom (red). The curves match closely, confirming the theoretical result that the scaled estimator follows a chi-squared distribution.
+</p>
+</div>
 <p>Now, we are ready to do actual hypothesis testing on the slope without assuming that we know the underlying variance.</p>
 <p>:::{.theorem, #betazerodist}
 Let <span class="math inline">\((x_1, y_1), \ldots, (x_n, y_n)\)</span> be a random sample from the model
@@ -891,7 +981,12 @@ follows a <span class="math inline">\(t\)</span> distribution with <span class="
 <span id="cb98-8"><a href="classicaltheory.html#cb98-8" tabindex="-1"></a>})</span>
 <span id="cb98-9"><a href="classicaltheory.html#cb98-9" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(sim_data))</span>
 <span id="cb98-10"><a href="classicaltheory.html#cb98-10" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dt</span>(x, <span class="dv">28</span>), <span class="at">add =</span> T, <span class="at">col =</span> <span class="dv">2</span>)</span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-52-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-52"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-52-1.png" alt="Two overlapping bell-shaped curves centered at 0 with heavier tails than a normal distribution: a black simulated density and a red t(28) curve. They match closely." width="672" />
+<p class="caption">
+Figure 2.19: Estimated density of the standardized slope estimator (beta-hat-1 minus 2) divided by its standard error, from 10,000 simulations (black), overlaid with the t distribution with 28 degrees of freedom (red). The close match confirms Theorem betazerodist: the standardized slope estimator follows a t distribution.
+</p>
+</div>
 <div class="example">
 <span class="divhead-definition example-before">Example 2.1</span>
 <p><span id="exm:unnamed-chunk-53" class="example"><strong>Example 2.1  </strong></span>Using the <span class="math inline">\(t\)</span> distribution to do a hypothesis test.</p>
@@ -911,7 +1006,12 @@ is <span class="math inline">\(t\)</span> with 125 degrees of freedom, since the
 ##           13.08232</code></pre>
 <p>That is, again, a very unlikely value for the test statistic that is <span class="math inline">\(t\)</span> with any degrees of freedom!!</p>
 <div class="sourceCode" id="cb102"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb102-1"><a href="classicaltheory.html#cb102-1" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dt</span>(x, <span class="dv">125</span>), <span class="at">from =</span> <span class="sc">-</span><span class="dv">21</span>, <span class="at">to =</span> <span class="dv">21</span>)</span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-56-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-56"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-56-1.png" alt="A symmetric bell curve centered at 0 representing the t(125) distribution. The x-axis extends to ±21, but virtually all the density is between about -4 and 4, making the test statistic of 13 essentially invisible on the tail." width="672" />
+<p class="caption">
+Figure 2.20: The probability density function of the t distribution with 125 degrees of freedom, plotted from -21 to 21. The curve is symmetric and bell-shaped. The observed test statistic of approximately 13.08 falls far in the right tail, well outside the visible bulk of the distribution, indicating an extremely small p-value.
+</p>
+</div>
 <p>To compute the <span class="math inline">\(p\)</span>-value, we use <code>pt</code> as follows:</p>
 <div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="classicaltheory.html#cb103-1" tabindex="-1"></a><span class="fu">pt</span>(<span class="fl">13.08232</span>, <span class="dv">125</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>) <span class="sc">*</span> <span class="dv">2</span></span></code></pre></div>
 <pre><code>## [1] 3.604795e-25</code></pre>
@@ -944,7 +1044,12 @@ where <span class="math inline">\(g\)</span> is <em>even</em>, <span class="math
 <span id="cb105-8"><a href="classicaltheory.html#cb105-8" tabindex="-1"></a><span class="fu">curve</span>(robustbase<span class="sc">::</span><span class="fu">Mchi</span>(x, <span class="at">cc =</span> <span class="fl">1.6</span>, <span class="at">psi =</span> <span class="st">&quot;bisquare&quot;</span>),</span>
 <span id="cb105-9"><a href="classicaltheory.html#cb105-9" tabindex="-1"></a>      <span class="at">add=</span> T, </span>
 <span id="cb105-10"><a href="classicaltheory.html#cb105-10" tabindex="-1"></a>      <span class="at">col =</span> <span class="dv">4</span>) <span class="co">#bue</span></span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-59-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-59"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-59-1.png" alt="Four curves on the same axes. The black parabola grows fastest; the red V-shape grows linearly; the green pseudo-Huber is intermediate; the blue bisquare flattens out for large errors." width="672" />
+<p class="caption">
+Figure 2.21: Four common loss functions plotted over x from -4 to 4. Black: squared error, a parabola. Red: absolute value (L1), a V-shape. Green: pseudo-Huber with delta=2, quadratic near zero and linear in the tails. Blue: Tukey bisquare with cc=1.6, which plateaus and caps the penalty for large errors.
+</p>
+</div>
 <p>Let’s find the values of <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> that minimize the <span class="math inline">\(L^1\)</span> error, which is
 <span class="math display">\[
 \sum \bigl|y_i - (\beta_0 + \beta_1 x_i)|
@@ -995,7 +1100,12 @@ in the happiness data set. We will also compare that to the values we got using 
 <span id="cb113-3"><a href="classicaltheory.html#cb113-3" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span> <span class="co">#SSE minimizer</span></span>
 <span id="cb113-4"><a href="classicaltheory.html#cb113-4" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="fl">0.691</span>, <span class="at">intercept =</span> <span class="sc">-</span><span class="fl">0.837</span>)</span></code></pre></div>
 <pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-65-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-65"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-65-1.png" alt="Scatterplot with two nearly parallel upward-sloping lines. The blue SSE line is pulled slightly toward low-happiness outliers; the black L1 line is more resistant to them." width="672" />
+<p class="caption">
+Figure 2.22: Scatterplot of happiness versus log GDP per capita with two overlaid lines of best fit: the blue line minimizes SSE (via lm), and the black line minimizes the L1 error (via optim). The two lines are similar but not identical — the L1 line is slightly less influenced by countries with unusually low happiness for their income level.
+</p>
+</div>
 <p>What is happening? Well, when we look at the scatterplot, we see that there are some countries with abnormally low happiness for their gdp. The SSE worries about fitting those points more than the <span class="math inline">\(L^1\)</span> error does, and the corresponding line that minimizes SSE is closer to those points that are kind of far away from the lines. This behavior can either be a feature or a bug for the method chosen. Or both.</p>
 <p>Next up, we look at the <em>psuedo-Huber loss function</em> <span class="math inline">\(g(x) = \delta^2 \sqrt{1 + (x/\delta)^2} - \delta^2\)</span>. In this loss function, there is a parameter <span class="math inline">\(\delta\)</span> that we can use to adjust the function. Let’s plot it for a few different values of <span class="math inline">\(\delta\)</span>.</p>
 <div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="classicaltheory.html#cb115-1" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">sqrt</span>(<span class="dv">1</span> <span class="sc">+</span> x<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> <span class="dv">1</span>, <span class="at">from =</span> <span class="sc">-</span><span class="dv">5</span>, <span class="at">to =</span> <span class="dv">5</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">5</span>))</span>
@@ -1003,7 +1113,12 @@ in the happiness data set. We will also compare that to the values we got using 
 <span id="cb115-3"><a href="classicaltheory.html#cb115-3" tabindex="-1"></a><span class="fu">curve</span>(delta<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span><span class="fu">sqrt</span>(<span class="dv">1</span> <span class="sc">+</span> x<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>delta<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> delta<span class="sc">^</span><span class="dv">2</span>, <span class="at">add=</span> T, <span class="at">col =</span> <span class="dv">2</span>)</span>
 <span id="cb115-4"><a href="classicaltheory.html#cb115-4" tabindex="-1"></a>delta <span class="ot">=</span> <span class="dv">2</span></span>
 <span id="cb115-5"><a href="classicaltheory.html#cb115-5" tabindex="-1"></a><span class="fu">curve</span>(delta<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span><span class="fu">sqrt</span>(<span class="dv">1</span> <span class="sc">+</span> x<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>delta<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> delta<span class="sc">^</span><span class="dv">2</span>, <span class="at">add =</span> T, <span class="at">col =</span> <span class="dv">3</span>)</span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-66-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-66"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-66-1.png" alt="Three smooth curves symmetric around x=0 and y=0. The red curve (delta=0.5) grows most steeply and linearly; the green curve (delta=2) is most parabolic near zero; the black curve (delta=1) is intermediate." width="672" />
+<p class="caption">
+Figure 2.23: Three pseudo-Huber loss functions plotted for delta = 1 (black), delta = 0.5 (red), and delta = 2 (green). All three are symmetric, equal zero at x = 0, and grow as x moves away from zero. Smaller delta values make the function behave more like L1 (linear growth); larger delta values make it behave more like squared error (quadratic growth).
+</p>
+</div>
 <p>This loss function combines elements of both SSE and <span class="math inline">\(L^1\)</span>. When the error <span class="math inline">\(y_i - (\beta_0 + \beta_1 x_i)\)</span> is small, we get behavior that looks like a quadratic <span class="math inline">\(g(x) = x^2\)</span>. When the error is large, <span class="math inline">\(g\)</span> flattens out and looks like a straight line. When <span class="math inline">\(\delta\)</span> is small, the loss function behaves like <span class="math inline">\(L^1\)</span>, and when <span class="math inline">\(\delta\)</span> is big, it behaves like SSE.</p>
 <p>This loss function is an attempt to strike a balance between the two methods that we have seen so far. With the set-up from above, we only need to change the function <span class="math inline">\(g\)</span> to find the lines of best fit.</p>
 <div class="sourceCode" id="cb116"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb116-1"><a href="classicaltheory.html#cb116-1" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
@@ -1065,7 +1180,12 @@ coefficients that are in between the two sets of coefficients that we computed p
 <div class="sourceCode" id="cb123"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb123-1"><a href="classicaltheory.html#cb123-1" tabindex="-1"></a><span class="fu">curve</span>(robustbase<span class="sc">::</span><span class="fu">Mchi</span>(x, <span class="at">cc =</span> <span class="dv">1</span>, <span class="at">psi =</span> <span class="st">&quot;bisquare&quot;</span>), <span class="at">from =</span> <span class="sc">-</span><span class="dv">2</span>, <span class="at">to =</span> <span class="dv">2</span>)</span>
 <span id="cb123-2"><a href="classicaltheory.html#cb123-2" tabindex="-1"></a><span class="fu">curve</span>(robustbase<span class="sc">::</span><span class="fu">Mchi</span>(x, <span class="at">cc =</span> <span class="fl">0.5</span>, <span class="at">psi =</span> <span class="st">&quot;bisquare&quot;</span>), <span class="at">add =</span> T, <span class="at">col =</span> <span class="dv">2</span>)</span>
 <span id="cb123-3"><a href="classicaltheory.html#cb123-3" tabindex="-1"></a><span class="fu">curve</span>(robustbase<span class="sc">::</span><span class="fu">Mchi</span>(x, <span class="at">cc =</span> <span class="dv">2</span>, <span class="at">psi =</span> <span class="st">&quot;bisquare&quot;</span>), <span class="at">add =</span> T, <span class="at">col =</span> <span class="dv">3</span>)</span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-71-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-71"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-71-1.png" alt="Three smooth curves that rise from zero, reach a flat maximum, and stay flat. The red curve (cc=0.5) plateaus closest to zero; the green curve (cc=2) plateaus furthest out; the black (cc=1) is in between." width="672" />
+<p class="caption">
+Figure 2.24: Three Tukey bisquare loss functions with different cc parameters: cc=1 (black), cc=0.5 (red), cc=2 (green). All three rise from zero at x=0 and then plateau at a maximum of 1. The cc parameter controls where the plateau begins: smaller cc values plateau sooner, meaning errors beyond that threshold are all penalized equally.
+</p>
+</div>
 <p>The thing to know about this loss function is that for “small” errors, the loss function behaves like SSE. But, there is a maximum error allowed of 1, and the <code>cc</code> parameter gives the value of the raw error that corresponds to when the loss function starts equaling 1. In other words, if <code>cc = 1</code>, then all errors between observed and predicted that are bigger than 1 are penalized the same amount! This has the benefit of limiting the impact that a single (or multiple) outliers can have on the estimation of the line of best fit. Let’s first look at what happens with the happiness data, then we’ll switch over to simulated data.</p>
 <div class="sourceCode" id="cb124"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb124-1"><a href="classicaltheory.html#cb124-1" tabindex="-1"></a><span class="fu">library</span>(MASS)</span></code></pre></div>
 <pre><code>## 
@@ -1090,8 +1210,13 @@ coefficients that are in between the two sets of coefficients that we computed p
 <div class="sourceCode" id="cb129"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb129-1"><a href="classicaltheory.html#cb129-1" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">20</span>, <span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>)</span>
 <span id="cb129-2"><a href="classicaltheory.html#cb129-2" tabindex="-1"></a>ys <span class="ot">&lt;-</span> xs <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">0</span>, .<span class="dv">5</span>)</span>
 <span id="cb129-3"><a href="classicaltheory.html#cb129-3" tabindex="-1"></a><span class="fu">plot</span>(xs, ys)</span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-73-1.png" width="672" />
-This data looks a lot like <span class="math inline">\(y = x\)</span>. Indeed,</p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-73"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-73-1.png" alt="Scatterplot of 20 points tightly clustered around the line y = x, ranging from about -5 to 5 on both axes." width="672" />
+<p class="caption">
+Figure 2.25: Scatterplot of 20 simulated data points where y is approximately equal to x plus small random noise. The points fall tightly along a diagonal line from lower-left to upper-right, indicating a strong positive linear relationship.
+</p>
+</div>
+<p>This data looks a lot like <span class="math inline">\(y = x\)</span>. Indeed,</p>
 <div class="sourceCode" id="cb130"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb130-1"><a href="classicaltheory.html#cb130-1" tabindex="-1"></a><span class="fu">lm</span>(ys <span class="sc">~</span> xs)</span></code></pre></div>
 <pre><code>## 
 ## Call:
@@ -1104,7 +1229,12 @@ This data looks a lot like <span class="math inline">\(y = x\)</span>. Indeed,</
 <div class="sourceCode" id="cb132"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb132-1"><a href="classicaltheory.html#cb132-1" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">c</span>(xs, <span class="sc">-</span><span class="dv">10</span>)</span>
 <span id="cb132-2"><a href="classicaltheory.html#cb132-2" tabindex="-1"></a>ys <span class="ot">&lt;-</span> <span class="fu">c</span>(ys, <span class="dv">10</span>)</span>
 <span id="cb132-3"><a href="classicaltheory.html#cb132-3" tabindex="-1"></a><span class="fu">plot</span>(xs, ys)</span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-75-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-75"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-75-1.png" alt="Scatterplot with 20 points along a positive diagonal and one isolated point in the upper-left corner at about x=-10, y=10, suggesting a conflicting negative trend." width="672" />
+<p class="caption">
+Figure 2.26: Scatterplot after adding one extreme outlier at approximately (-10, 10). The original 20 points still cluster tightly around y = x, but the single outlier in the upper-left corner pulls the visual trend toward a negative slope.
+</p>
+</div>
 <p>If we just use <code>lm</code>, which uses SSE.</p>
 <div class="sourceCode" id="cb133"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb133-1"><a href="classicaltheory.html#cb133-1" tabindex="-1"></a><span class="fu">lm</span>(ys <span class="sc">~</span> xs)</span></code></pre></div>
 <pre><code>## 
@@ -1116,7 +1246,12 @@ This data looks a lot like <span class="math inline">\(y = x\)</span>. Indeed,</
 ##     -0.5012       0.1422</code></pre>
 <div class="sourceCode" id="cb135"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb135-1"><a href="classicaltheory.html#cb135-1" tabindex="-1"></a><span class="fu">plot</span>(xs, ys)</span>
 <span id="cb135-2"><a href="classicaltheory.html#cb135-2" tabindex="-1"></a><span class="fu">abline</span>(<span class="fu">lm</span>(ys <span class="sc">~</span> xs))</span></code></pre></div>
-<p><img src="01-classical_theory_files/figure-html/unnamed-chunk-77-1.png" width="672" /></p>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-77"></span>
+<img src="01-classical_theory_files/figure-html/unnamed-chunk-77-1.png" alt="Scatterplot where the regression line is tilted toward the upper-left outlier, resulting in a much flatter slope than the true underlying y=x relationship." width="672" />
+<p class="caption">
+Figure 2.27: Scatterplot with SSE-minimizing regression line fit to the data including the outlier. The line has been pulled substantially toward the outlier compared to what it would look like without it, now showing a near-zero or slightly negative slope instead of the true positive slope.
+</p>
+</div>
 <p>Repeat the above, replacing the outlier with successively bigger outliers, and see what happens to the line of best fit. Convince yourself that when the outlier is big enough, the line of best fit is perpendicular to the original line.</p>
 <div class="sourceCode" id="cb136"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb136-1"><a href="classicaltheory.html#cb136-1" tabindex="-1"></a>xs[<span class="dv">21</span>] <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">20</span></span>
 <span id="cb136-2"><a href="classicaltheory.html#cb136-2" tabindex="-1"></a>ys[<span class="dv">21</span>] <span class="ot">&lt;-</span> <span class="dv">20</span></span>
