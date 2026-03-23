@@ -395,6 +395,46 @@ In this case, we see that we have two possible random effects: community and mom
 
 ## Count Regression
 
+In this section, we suppose that the response variable is a **count** of some object. For example, the number of times a person goes to the doctor in a year, the number of times a person goes to the gym in a week, or the number of times a person eats out in a month. A common model for count data is the Poisson regression model. In this model, we assume that the response variable $Y$ is a Poisson random variable with mean parameter $\lambda$, where $\lambda$ is given by the exponential function of a linear combination of the predictors. Since counts can only be nonnegative numbers, the expected number of occurences will be  positive and we model
+
+\[
+log E[Y] = log \lambda = \beta_0 + \beta_1 x_1 + \ldots + \beta_P x_P
+\]
+
+The error term is not explicitly included in this model, but we can think of the response as being a Poisson random variable with parameter $\lambda$, where $\lambda$ is given by the exponential function of a linear combination of the predictors. 
+
+We illustrate this by looking at the `bioChemists` data set in the `pscl` package. We wish to model `art`, the count of articles produced during the last 3 years of the Ph.D. In this example, we only model it on `ment`, which is the count of articles produced by Ph.D. mentor during the last 3 years, which we treat as numeric.
+
+The model is 
+
+\[
+\log \lambda_i = \beta_0 + \beta_1 x_i
+\]
+
+whre $\lambda_i$ is the expected number of articles produced by the $i$th Ph.D. student, $\beta_0$ is the expected number of articles produced by a Ph.D. student whose mentor has produced 0 articles, and $\beta_1$ is the change in the expected number of articles produced by the Ph.D. student for every one article increase in the number of articles produced by the mentor. 
+
+The **likelihood** of the data given values of $\beta_0$ and $\beta_1$ is 
+
+\[
+\Pi_{i = 1}^n \mathtext{dpois}(y_i, \beta_0 + \beta_1 x_i)
+\]
+or taking logs, it is `sum(dpois(y, betao + beta1 x, log = T))`. This is the function we want to maximize for our MLE.
+
+```{r}
+bb <- pscl::bioChemists
+nll <- function(par) {
+  beta0 <- par[1]
+  beta1 <- par[2]
+  -1 * sum(dpois(bb$art, exp(beta0 + beta1 * bb$ment), log = T))
+}(par = c(0,0), fn = nll)
+optim(par = c(0,0), fn = nll)
+```
+
+We get an estimate of 0.26 for $\beta_0$ and 0.026 for $\beta_1$. Let's compare with `glm`.
+
+```{r}
+glm(art ~ ment, data = bb, family = poisson)
+```
 
 
 

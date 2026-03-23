@@ -23,7 +23,7 @@
 <meta name="author" content="Darrin Speegle" />
 
 
-<meta name="date" content="2026-03-22" />
+<meta name="date" content="2026-03-23" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -446,8 +446,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb277-4"><a href="intro-to-predictive-modeling.html#cb277-4" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(expenses <span class="sc">~</span> ., <span class="at">data =</span> dd)</span>
 <span id="cb277-5"><a href="intro-to-predictive-modeling.html#cb277-5" tabindex="-1"></a>errors <span class="ot">&lt;-</span> <span class="fu">predict</span>(mod, <span class="at">newdata =</span> dd[test_indices,]) <span class="sc">-</span> dd<span class="sc">$</span>expenses[test_indices]</span>
 <span id="cb277-6"><a href="intro-to-predictive-modeling.html#cb277-6" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>(errors<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div>
-<pre><code>## [1] 5745.774</code></pre>
-<p>We see that with the first train/test split, we have an estimated RMSE of 5746. (For comparison purposes, if we simply took the mean value, then the RMSE would be about $12K).</p>
+<pre><code>## [1] 6475.677</code></pre>
+<p>We see that with the first train/test split, we have an estimated RMSE of 6476. (For comparison purposes, if we simply took the mean value, then the RMSE would be about $12K).</p>
 <p>Now, we can repeat the train/test split a bunch of times… say 50. If our model building procedure were slower than this, we might not be able to do 50.</p>
 <div class="sourceCode" id="cb279"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb279-1"><a href="intro-to-predictive-modeling.html#cb279-1" tabindex="-1"></a>rmse <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">50</span>, {</span>
 <span id="cb279-2"><a href="intro-to-predictive-modeling.html#cb279-2" tabindex="-1"></a>  train_indices <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>N,<span class="fu">ceiling</span>(N <span class="sc">*</span> .<span class="dv">7</span>))</span>
@@ -458,12 +458,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb279-7"><a href="intro-to-predictive-modeling.html#cb279-7" tabindex="-1"></a>})</span></code></pre></div>
 <p>Once we have these values, we can compute the mean and standard deviation to get a feeling for the <strong>range</strong> of MSE that we would expect to get with this model.</p>
 <div class="sourceCode" id="cb280"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb280-1"><a href="intro-to-predictive-modeling.html#cb280-1" tabindex="-1"></a><span class="fu">mean</span>(rmse)</span></code></pre></div>
-<pre><code>## [1] 6032.267</code></pre>
+<pre><code>## [1] 6022.356</code></pre>
 <div class="sourceCode" id="cb282"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb282-1"><a href="intro-to-predictive-modeling.html#cb282-1" tabindex="-1"></a><span class="fu">quantile</span>(rmse, <span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">975</span>))</span></code></pre></div>
 <pre><code>##     2.5%    97.5% 
-## 5555.256 6551.373</code></pre>
+## 5585.603 6451.723</code></pre>
 <div class="sourceCode" id="cb284"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb284-1"><a href="intro-to-predictive-modeling.html#cb284-1" tabindex="-1"></a><span class="fu">c</span>(<span class="fu">mean</span>(rmse) <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sd</span>(rmse), <span class="fu">mean</span>(rmse) <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sd</span>(rmse))</span></code></pre></div>
-<pre><code>## [1] 5480.767 6583.767</code></pre>
+<pre><code>## [1] 5566.609 6478.103</code></pre>
 <p>We can either compute the 95% confidence interval of the RMSE from the quantiles or by taking two times the standard deviation. This is saying that we would be surprised if the true RMSE of this model on unseen, future data is less than $5500 or more than $6500</p>
 <div class="exercise">
 <span class="divhead-definition exercise-before"> 4.2</span>
@@ -483,16 +483,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb290-4"><a href="intro-to-predictive-modeling.html#cb290-4" tabindex="-1"></a>      <span class="at">trControl =</span> <span class="fu">trainControl</span>(<span class="at">method =</span> <span class="st">&quot;repeatedcv&quot;</span>,</span>
 <span id="cb290-5"><a href="intro-to-predictive-modeling.html#cb290-5" tabindex="-1"></a>                               <span class="at">repeats =</span> <span class="dv">5</span>))</span>
 <span id="cb290-6"><a href="intro-to-predictive-modeling.html#cb290-6" tabindex="-1"></a>repeated_cv<span class="sc">$</span>results</span></code></pre></div>
-<pre><code>##   intercept     RMSE Rsquared      MAE   RMSESD RsquaredSD    MAESD
-## 1      TRUE 6075.193 0.747344 4202.317 342.7776 0.04650358 205.1697</code></pre>
-<p>From this table, we see that the repeated 10-fold CV estimated RMSE is 6073 with standard deviation 368. Recall that using repeated LGOCV, we got an estimated RMSE of 6032 and a standard deviation of 276.</p>
+<pre><code>##   intercept     RMSE  Rsquared      MAE   RMSESD RsquaredSD    MAESD
+## 1      TRUE 6071.881 0.7485514 4203.838 463.8294 0.04697231 259.1877</code></pre>
+<p>From this table, we see that the repeated 10-fold CV estimated RMSE is 6073 with standard deviation 368. Recall that using repeated LGOCV, we got an estimated RMSE of 6022 and a standard deviation of 228.</p>
 <p>Finally, let’s see what happens with the bootstrap, which is the default in <code>caret</code> for <code>lm</code>.</p>
 <div class="sourceCode" id="cb292"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb292-1"><a href="intro-to-predictive-modeling.html#cb292-1" tabindex="-1"></a>boot_rmse <span class="ot">&lt;-</span> <span class="fu">train</span>(<span class="at">x =</span> <span class="fu">select</span>(dd, <span class="sc">-</span>expenses), </span>
 <span id="cb292-2"><a href="intro-to-predictive-modeling.html#cb292-2" tabindex="-1"></a>      <span class="at">y =</span> dd<span class="sc">$</span>expenses,</span>
 <span id="cb292-3"><a href="intro-to-predictive-modeling.html#cb292-3" tabindex="-1"></a>      <span class="at">method =</span> <span class="st">&quot;lm&quot;</span>)</span>
 <span id="cb292-4"><a href="intro-to-predictive-modeling.html#cb292-4" tabindex="-1"></a>boot_rmse<span class="sc">$</span>results</span></code></pre></div>
 <pre><code>##   intercept     RMSE  Rsquared      MAE   RMSESD RsquaredSD    MAESD
-## 1      TRUE 6097.241 0.7519009 4226.409 235.7043 0.02136532 155.5505</code></pre>
+## 1      TRUE 6118.308 0.7489816 4225.766 251.2966 0.01832244 147.0524</code></pre>
 <p>All three methods give relatively similar results in this case. We can guess that our RMSE on future, unseen data will be about <span class="math inline">\(\$6100 \pm \$600\)</span>.</p>
 </div>
 <div id="a-brief-return-to-inference" class="section level2 hasAnchor" number="4.2">
@@ -504,7 +504,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode" id="cb294"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb294-1"><a href="intro-to-predictive-modeling.html#cb294-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">20</span>) <span class="co">#true mean is 0</span></span>
 <span id="cb294-2"><a href="intro-to-predictive-modeling.html#cb294-2" tabindex="-1"></a>ttest <span class="ot">&lt;-</span> <span class="fu">t.test</span>(x)</span>
 <span id="cb294-3"><a href="intro-to-predictive-modeling.html#cb294-3" tabindex="-1"></a>ttest<span class="sc">$</span>conf.int</span></code></pre></div>
-<pre><code>## [1] -0.6202392  0.3989782
+<pre><code>## [1] -0.6325464  0.4328594
 ## attr(,&quot;conf.level&quot;)
 ## [1] 0.95</code></pre>
 <p>We can also compute a <strong>bootstrap</strong> confidence interval of the mean. We do so by resampling from the data (with replacement), and computing the mean each time. We then compute the appropriate quantiles of the means to get the bootstrap confidence interval.</p>
@@ -513,7 +513,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb296-3"><a href="intro-to-predictive-modeling.html#cb296-3" tabindex="-1"></a>})</span>
 <span id="cb296-4"><a href="intro-to-predictive-modeling.html#cb296-4" tabindex="-1"></a><span class="fu">quantile</span>(means, <span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">975</span>))</span></code></pre></div>
 <pre><code>##       2.5%      97.5% 
-## -0.5670794  0.3689154</code></pre>
+## -0.5781454  0.3982498</code></pre>
 <p>We see that the two methods give similar results. The booststrap method can sometimes be useful when the data does <strong>not</strong> meet the assumptions of <code>t.test</code>, but this is not a course in bootstrapping. The interested reader can consult <a href="https://www.amazon.com/Mathematical-Statistics-Resampling-Laura-Chihara-dp-111941654X/dp/111941654X">Mathematical Statistics with Resampling and R</a> for more information.</p>
 </div>
 <p>Next, we show how we can use resampling techniques to construct confidence intervals associated with regression. As an example, we show one way to use the bootstrap to create a confidence interval for the slope. We assume for simplicity that we have only one explanatory variable <span class="math inline">\(x\)</span>. We consider the observations <span class="math inline">\((x_1, y_1), \ldots, (x_n, y_n)\)</span> to be typical of all observations that we could have observed. To bootstrap, we choose <span class="math inline">\(n\)</span> of the observations with replacement and recompute the regression model. When doing so, we get a range of values that the slope could have been, and if we compute quantlies of those values, then that is a confidence interval for the slope.</p>
@@ -531,18 +531,18 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## 
 ## Coefficients:
 ## (Intercept)            x  
-##       3.684        1.510</code></pre>
+##       1.056        1.995</code></pre>
 <div class="sourceCode" id="cb301"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb301-1"><a href="intro-to-predictive-modeling.html#cb301-1" tabindex="-1"></a>slopes <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">2000</span>, {</span>
 <span id="cb301-2"><a href="intro-to-predictive-modeling.html#cb301-2" tabindex="-1"></a>  df2 <span class="ot">&lt;-</span> df[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df), <span class="at">replace =</span> T),] <span class="co">#boostrap</span></span>
 <span id="cb301-3"><a href="intro-to-predictive-modeling.html#cb301-3" tabindex="-1"></a>  mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x, <span class="at">data =</span> df2)</span>
 <span id="cb301-4"><a href="intro-to-predictive-modeling.html#cb301-4" tabindex="-1"></a>  <span class="fu">coef</span>(mod)[<span class="dv">2</span>] <span class="co">#compute slope of bootstrapped data</span></span>
 <span id="cb301-5"><a href="intro-to-predictive-modeling.html#cb301-5" tabindex="-1"></a>})</span>
 <span id="cb301-6"><a href="intro-to-predictive-modeling.html#cb301-6" tabindex="-1"></a><span class="fu">quantile</span>(slopes, <span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">975</span>))</span></code></pre></div>
-<pre><code>##      2.5%     97.5% 
-## 0.5871466 2.4308931</code></pre>
+<pre><code>##     2.5%    97.5% 
+## 1.355622 2.664511</code></pre>
 <div class="sourceCode" id="cb303"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb303-1"><a href="intro-to-predictive-modeling.html#cb303-1" tabindex="-1"></a><span class="fu">confint</span>(mod, <span class="at">parm =</span> <span class="st">&quot;x&quot;</span>)</span></code></pre></div>
 <pre><code>##      2.5 %   97.5 %
-## x 0.512299 2.507589</code></pre>
+## x 1.234449 2.755104</code></pre>
 <p>The confidence interval for slope is relatively robust to departures from assumptions, meaning that it often is approximately a 95 percent confidence interval even when normality, homoskedasticity, and few outliers for the model are not met. The next example shows one time where the coverage of the 95 percent confidence interval is not ideal, and compares the coverage to the bootstrap confidence interval.</p>
 <div class="example">
 <span class="divhead-definition example-before">Example 4.2</span>
