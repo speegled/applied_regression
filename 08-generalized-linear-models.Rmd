@@ -436,6 +436,118 @@ We get an estimate of 0.26 for $\beta_0$ and 0.026 for $\beta_1$. Let's compare 
 glm(art ~ ment, data = bb, family = poisson)
 ```
 
+Let's now model the number of articles carefully on the other variables.
+
+```{r}
+mod <- glm(art ~ fem + mar + kid5 + phd + ment, data = bb, family = poisson)
+summary(mod)
+```
+
+Recall that our model says that the **expected value** of the response is given by an affine combination of the predictors, and the **observed value** of the response is a sample from a Poisson random variable with that expected value. Poisson random variables have the property that their *variance* is equal to their *mean*. This will be one of our two primary diagnostics when seeing whether we have appropriately modeled a count variable.
+
+To intuitively test whether the expected value is equal to the variance, we can compute all of the expected values
+
+```{r}
+evals <- predict(mod, type = "response")
+```
+
+and then use these to estimate the variance:
+
+```{r}
+mean(evals)
+mean((mean(evals) - bb$art)^2)
+```
+
+We see that we have a **rough** estimate of 3.7 for the variance and 1.7 for the mean. This indicates that the variance might be larger than the mean, in which case we say the response is **overdispersed** or exhibits **overdispersion**.
+
+Here are three more principled approaches to estimating the dispersion:
+
+```{r}
+mean((evals - bb$art)^2/evals)
+mod$deviance/mod$df.residual #this is very common in R, because you can read it directly off of summary(mod)
+performance::check_overdispersion(mod)
+```
+
+However you slice it, it appears that the data is not well-modeled by Poisson regression. One option for proceeding is to use *quasipoisson*, and this is often done in base R.
+
+```{r}
+mod <- glm(art ~ fem + mar + kid5 + phd + ment, data = bb, family = quasipoisson)
+summary(mod)
+```
+
+The second common issue in count regression is *zero inflation*. That is when there are more zero values than would be expected from the model. The quick way to check that is"
+
+```{r}
+performance::check_zeroinflation(mod)
+```
+
+We can see that there are more observed zeros than predicted zeros, and we are likely underfitting the number of zeros. At this point, we want to fix that, and the cleanest way it so move away from base R and from `lme4` to use the `glmmTMB` package. Let's start over.
+
+```{r}
+library(glmmTMB)
+mod <- glmmTMB::glmmTMB(art ~ fem + mar + kid5 + phd + ment, data = bb, family = poisson)
+summary(mod)
+performance::check_overdispersion(mod) 
+```
+
+OK, we see overdispersion. We will change our random model of the response from *Poisson* to *negative binomial*. Recall negative binomial random variables model the number of failures until a certain number of successes, where the probability of success is determined by the predictors. This is a more flexible model for count data, which allows the variance to be greater than the mean.
+ 
+The base R command for computing probabilities related to negative binomial rvs is `dnbinom`, `pnbinom`, `qnbinom`, and `rnbinom`. 
+The parameters are `size` and `prob`, where `size` is the number of successes and `prob` is the probability of success. 
+The mean of a negative binomial rv is `size * (1 - prob) / prob` and the variance is `size * (1 - prob) / prob^2`.
+ 
+The formula for the probability of x failures before the nth success with a probability of success p is (x + n - 1)!/(n - 1)!x! p^n (1 - p)^x
+
+Replacing y! with Gamma(y + 1), we can extend this definition to the number of successes being **noninteger**. There is no real interpretation for this,
+but it turns out to be useful for modeling.
+ 
+We use the parameterization with size = dispersion and mu = mean. In this parameterization, dispersion \to infinity corresponds to the Poisson distribution.
+
+This is NOT the same notion of dispersion used in count regression (e.g., quasi-Poisson), where Var(Y) = phi * mu and phi = 1 corresponds to Poisson.
+
+The conflict arises because negative binomial dispersion controls a quadratic variance term (mu + mu^2 / dispersion), whereas quasi-Poisson dispersion is a multiplicative scaling of mu.
+ 
+At any rate, the crucial fact is that by choosing the size parameter carefully we can have thevariance of the response vary with the size of the response. A natural guess is that the variance should
+ be the mean^2. If $E[Y] = 1$ then $aY$ has mean a and variance a^2, for example. I am not saying that
+ there is any kind of multiplicative thing going on here, but variance being proportional to the mean^2
+ makes some sense. 
+ 
+ We can also try the variance being proportional to the mean itself (rather than **equal** to the mean itself). That is
+ also implemented in `glmmTMB`.
+ 
+ Let's see how all of this works.
+ 
+```{r}
+mod2 <- glmmTMB::glmmTMB(art ~ fem + mar + kid5 + phd + ment, data = bb, family = nbinom2) #assumes variance = mu + mu^2/dispersion
+summary(mod2)
+performance::check_overdispersion(mod2) #looks good
+performance::check_zeroinflation(mod2)
+```
+ 
+We notice that switching to a negative binomial random model fixed both the overdispersion and the zero inflation! That's really nice; it looks like our data is pretty well modeled by negative binomial. We also could have tried:
+
+```{r}
+mod3 <- glmmTMB::glmmTMB(art ~ fem + mar + kid5 + phd + ment, data = bb, family = nbinom1) #assumes variance = mu + mu/dispersion
+AIC(mod2, mod3)
+```
+
+We see that the model 2 is preferred. Now we can trust the $p$-values a little bit better, so we can do some variable selection to get a parsimonious model. We remove `mar` and `phd` to get the following model.
+
+```{r}
+mod4 <- glmmTMB::glmmTMB(art ~ fem + kid5 + ment, data = bb, family = nbinom2) 
+summary(mod4)
+performance::check_overdispersion(mod4)
+performance::check_zeroinflation(mod4)
+```
+
+As before, we can use `marginaleffects` to get easier interpretations of the coefficients.
+
+```{r}
+library(marginaleffects)
+avg_comparisons(mod4)
+summary(bb)
+plot_predictions(mod4, by = "ment", newdata = datagrid(ment = seq(0, 77, by = 1), grid_type = "counterfactual"), vcov = TRUE)
+```
 
 
 ## This is all from last semester
