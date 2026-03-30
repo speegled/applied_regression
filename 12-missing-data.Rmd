@@ -1,0 +1,66 @@
+# Missing Data
+
+In this shorter chapter, we discuss missing data. As a reminder, when there is missing data in a data frame, `lm` restricts to the complete cases. That is, `lm` runs a regression on only those observations for which there is no missing data in any of the variables. Depending on why the data is missing, this can lead to a loss of interpretive power, bias in the estimates of the coefficients, or worse outcomes. We will see examples of these (and simulations illustrating them) later in this chapter.
+
+We start by discussing three types of missing data:
+
+**Missing Completely at Random (MCAR)**. Data that is MCAR is randomly missing in a way that doesn't depend on any of observed or unobserved data. It is as if for each value in the data set, a random number was generated and the data point was removed if the random number satisfied a given property.
+
+**Missing at Random (MAR)**. This is **unfortunately named** and is very often misunderstood. The probability that a value is missing **can** depend on the **other** data, but it doesn't depend on the value of the data itself. For example, blood pressure readings could be more often missing for younger patients, but once the probability of observing blood pressure is adjusted for age, the chance of it missing does not further depend on the blood pressure itself.
+
+**Missing not at Random (MNAR)**. Data that is MNAR if the probability that it is missing depends on the values themselves, even after adjusting for the other observed variables. For example, if some patients with high blood pressure refuse to allow their blood pressure to be taken. If this refusal is not predictable via the other variables in the data set, then the missing blood pressure would be missing not at random.
+
+There are two older techniques of dealing with missing data - complete case analysis (the default in `lm`) and mean imputation, where all missing values are replaced with the mean (or mode if categorical) of the data. Neither of these techniques are currently considered best practices for dealing with missing data.
+
+Current best practices invlolve **imputing** the missing data on the observed variables **including the response**. Ideally, we should include the *uncertainty* in our imputation by repeating the imputation multiple times. We then run an analysis for each multiply imputed data set and combine the results. This technique is called **multiple imputation**. Finally, a **sensitivity analysis** is recommended, which will help explain how sensitive the model is to our missingness assumptions.
+
+For those of you coming from a machine learning or predictive modeling background, including the response should cause alarm bells to ring. But, we will see that it is indeed a good idea for interpretive models. 
+
+It is important to keep two things separate: **First** we will build an **imputation** model, which is used to impute missing data. **Second** we will build a model of the response, which is the interpretable  model that we are looking for in the end.
+
+Let's see how all of this works with a specific data set. We consider the `Pima.tr2` data set from the `MASS` package.
+
+```{r}
+library(mice)
+library(tidyverse)
+pp <- MASS::Pima.tr2 |> 
+  as_tibble()
+pp
+```
+
+According to the documentation, a population of women who were at least 21 years old, of Pima Indian heritage and living near Phoenix, Arizona, was tested for diabetes according to World Health Organization criteria. The data were collected by the US National Institute of Diabetes and Digestive and Kidney Diseases.
+
+```{r}
+summary(pp)
+```
+
+We see that there are quite a few missing values. Suppose we wanted to determine whether the blood pressure depends on the diabetic criterion. Let's look at the pattern of missing data. 
+
+
+```{r}
+mice::md.pattern(pp)
+```
+
+We see that 84 observations are missing skin only, 1 is missing bp only, 12 are missing both skin and bp, etc. We certainly could just run a t-test on the 287 observed values. Realistically, that would be just fine. But, let's see how we can do multiple imputation in this context.
+
+
+We start by building the multiple imputation model, using the default methods. Setting `m=20` ensures that we have 20 different data points imputed. A rule of thumb is that `m` should be as large as the percentage of observations with missing data, so in that case, we would set it equal to 33.
+
+```{r}
+imp <- mice(pp, m = 20, seed = 2026, printFlag = FALSE)
+```
+
+Next, we fit the model `bp ~ type` (which corresponds to a $t$-test but uses `lm`) using the imputed data.
+
+```{r}
+fit <- with(imp, lm(bp ~ type))
+summary(pool(fit))
+```
+
+We see in the pooled model, we have a point of estimate of 4.22, so that women diabetis is associated with an increase of 4 units of blood pressure, and the $p$-value is $0.00371$. Let's compare that to what we would have obtained if we just used the complete cases.
+
+```{r}
+summary(lm(bp ~ type, data = pp))
+```
+
+Pretty similar. That is not surprising since there were only 13 missing values of bp. Note that in this case, we got a *smaller* effect size, a *larger* standard error, and a *higher* $p$-value. Imputing missing data does not always change your model in the direction of more significance; it is a principled way of trying to handle missing data.

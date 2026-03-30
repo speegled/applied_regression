@@ -12,6 +12,7 @@ rmd_files: [
   "08-generalized-linear-models.Rmd",
   "10-lecture-notes.Rmd",
   "11-mle.Rmd",
+  "12-missing-data.Rmd",
   "solutions.Rmd"
   ]
 

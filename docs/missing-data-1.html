@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Page not found | Applied Regression with R</title>
+  <title>Chapter 10 Missing Data | Applied Regression with R</title>
   <meta name="description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
   <meta name="generator" content="bookdown 0.46 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Page not found | Applied Regression with R" />
+  <meta property="og:title" content="Chapter 10 Missing Data | Applied Regression with R" />
   <meta property="og:type" content="book" />
   
   <meta property="og:description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Page not found | Applied Regression with R" />
+  <meta name="twitter:title" content="Chapter 10 Missing Data | Applied Regression with R" />
   
   <meta name="twitter:description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon" />
-
-
+<link rel="prev" href="maximum-likelihood-estimation.html"/>
+<link rel="next" href="solutions.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -313,19 +313,127 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="page-not-found" class="section level1">
-<h1>Page not found</h1>
-<p>The page you requested cannot be found (perhaps it was moved or renamed).</p>
-<p>You may want to try searching to find the page's new location, or use
-the table of contents to find the page you are looking for.</p>
+<div id="missing-data-1" class="section level1 hasAnchor" number="10">
+<h1><span class="header-section-number">Chapter 10</span> Missing Data<a href="missing-data-1.html#missing-data-1" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>In this shorter chapter, we discuss missing data. As a reminder, when there is missing data in a data frame, <code>lm</code> restricts to the complete cases. That is, <code>lm</code> runs a regression on only those observations for which there is no missing data in any of the variables. Depending on why the data is missing, this can lead to a loss of interpretive power, bias in the estimates of the coefficients, or worse outcomes. We will see examples of these (and simulations illustrating them) later in this chapter.</p>
+<p>We start by discussing three types of missing data:</p>
+<p><strong>Missing Completely at Random (MCAR)</strong>. Data that is MCAR is randomly missing in a way that doesn’t depend on any of observed or unobserved data. It is as if for each value in the data set, a random number was generated and the data point was removed if the random number satisfied a given property.</p>
+<p><strong>Missing at Random (MAR)</strong>. This is <strong>unfortunately named</strong> and is very often misunderstood. The probability that a value is missing <strong>can</strong> depend on the <strong>other</strong> data, but it doesn’t depend on the value of the data itself. For example, blood pressure readings could be more often missing for younger patients, but once the probability of observing blood pressure is adjusted for age, the chance of it missing does not further depend on the blood pressure itself.</p>
+<p><strong>Missing not at Random (MNAR)</strong>. Data that is MNAR if the probability that it is missing depends on the values themselves, even after adjusting for the other observed variables. For example, if some patients with high blood pressure refuse to allow their blood pressure to be taken. If this refusal is not predictable via the other variables in the data set, then the missing blood pressure would be missing not at random.</p>
+<p>There are two older techniques of dealing with missing data - complete case analysis (the default in <code>lm</code>) and mean imputation, where all missing values are replaced with the mean (or mode if categorical) of the data. Neither of these techniques are currently considered best practices for dealing with missing data.</p>
+<p>Current best practices invlolve <strong>imputing</strong> the missing data on the observed variables <strong>including the response</strong>. Ideally, we should include the <em>uncertainty</em> in our imputation by repeating the imputation multiple times. We then run an analysis for each multiply imputed data set and combine the results. This technique is called <strong>multiple imputation</strong>. Finally, a <strong>sensitivity analysis</strong> is recommended, which will help explain how sensitive the model is to our missingness assumptions.</p>
+<p>For those of you coming from a machine learning or predictive modeling background, including the response should cause alarm bells to ring. But, we will see that it is indeed a good idea for interpretive models.</p>
+<p>It is important to keep two things separate: <strong>First</strong> we will build an <strong>imputation</strong> model, which is used to impute missing data. <strong>Second</strong> we will build a model of the response, which is the interpretable model that we are looking for in the end.</p>
+<p>Let’s see how all of this works with a specific data set. We consider the <code>Pima.tr2</code> data set from the <code>MASS</code> package.</p>
+<div class="sourceCode" id="cb1181"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1181-1"><a href="missing-data-1.html#cb1181-1" tabindex="-1"></a><span class="fu">library</span>(mice)</span></code></pre></div>
+<pre><code>## Warning: package &#39;mice&#39; was built under R version 4.5.2</code></pre>
+<pre><code>## 
+## Attaching package: &#39;mice&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:stats&#39;:
+## 
+##     filter</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     cbind, rbind</code></pre>
+<div class="sourceCode" id="cb1186"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1186-1"><a href="missing-data-1.html#cb1186-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div>
+<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 4.5.2</code></pre>
+<pre><code>## Warning: package &#39;dplyr&#39; was built under R version 4.5.2</code></pre>
+<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ dplyr     1.2.0     ✔ readr     2.1.5
+## ✔ forcats   1.0.0     ✔ stringr   1.5.2
+## ✔ ggplot2   4.0.2     ✔ tibble    3.3.0
+## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+## ✔ purrr     1.1.0</code></pre>
+<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks mice::filter(), stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<div class="sourceCode" id="cb1191"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1191-1"><a href="missing-data-1.html#cb1191-1" tabindex="-1"></a>pp <span class="ot">&lt;-</span> MASS<span class="sc">::</span>Pima.tr2 <span class="sc">|&gt;</span> </span>
+<span id="cb1191-2"><a href="missing-data-1.html#cb1191-2" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span>
+<span id="cb1191-3"><a href="missing-data-1.html#cb1191-3" tabindex="-1"></a>pp</span></code></pre></div>
+<pre><code>## # A tibble: 300 × 8
+##    npreg   glu    bp  skin   bmi   ped   age type 
+##    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;fct&gt;
+##  1     5    86    68    28  30.2 0.364    24 No   
+##  2     7   195    70    33  25.1 0.163    55 Yes  
+##  3     5    77    82    41  35.8 0.156    35 No   
+##  4     0   165    76    43  47.9 0.259    26 No   
+##  5     0   107    60    25  26.4 0.133    23 No   
+##  6     5    97    76    27  35.6 0.378    52 Yes  
+##  7     3    83    58    31  34.3 0.336    25 No   
+##  8     1   193    50    16  25.9 0.655    24 No   
+##  9     3   142    80    15  32.4 0.2      63 No   
+## 10     2   128    78    37  43.3 1.22     31 Yes  
+## # ℹ 290 more rows</code></pre>
+<p>According to the documentation, a population of women who were at least 21 years old, of Pima Indian heritage and living near Phoenix, Arizona, was tested for diabetes according to World Health Organization criteria. The data were collected by the US National Institute of Diabetes and Digestive and Kidney Diseases.</p>
+<div class="sourceCode" id="cb1193"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1193-1"><a href="missing-data-1.html#cb1193-1" tabindex="-1"></a><span class="fu">summary</span>(pp)</span></code></pre></div>
+<pre><code>##      npreg             glu              bp              skin      
+##  Min.   : 0.000   Min.   : 56.0   Min.   : 38.00   Min.   : 7.00  
+##  1st Qu.: 1.000   1st Qu.:101.0   1st Qu.: 64.00   1st Qu.:21.00  
+##  Median : 3.000   Median :121.0   Median : 72.00   Median :29.00  
+##  Mean   : 3.787   Mean   :123.7   Mean   : 72.32   Mean   :29.15  
+##  3rd Qu.: 6.000   3rd Qu.:142.0   3rd Qu.: 80.00   3rd Qu.:36.00  
+##  Max.   :14.000   Max.   :199.0   Max.   :114.00   Max.   :99.00  
+##                                   NA&#39;s   :13       NA&#39;s   :98     
+##       bmi             ped              age        type    
+##  Min.   :18.20   Min.   :0.0780   Min.   :21.0   No :194  
+##  1st Qu.:27.10   1st Qu.:0.2367   1st Qu.:24.0   Yes:106  
+##  Median :32.00   Median :0.3360   Median :29.0            
+##  Mean   :32.05   Mean   :0.4357   Mean   :33.1            
+##  3rd Qu.:36.50   3rd Qu.:0.5867   3rd Qu.:40.0            
+##  Max.   :52.90   Max.   :2.2880   Max.   :72.0            
+##  NA&#39;s   :3</code></pre>
+<p>We see that there are quite a few missing values. Suppose we wanted to determine whether the blood pressure depends on the diabetic criterion. Let’s look at the pattern of missing data.</p>
+<div class="sourceCode" id="cb1195"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1195-1"><a href="missing-data-1.html#cb1195-1" tabindex="-1"></a>mice<span class="sc">::</span><span class="fu">md.pattern</span>(pp)</span></code></pre></div>
+<p><img src="12-missing-data_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre><code>##     npreg glu ped age type bmi bp skin    
+## 200     1   1   1   1    1   1  1    1   0
+## 84      1   1   1   1    1   1  1    0   1
+## 1       1   1   1   1    1   1  0    1   1
+## 12      1   1   1   1    1   1  0    0   2
+## 1       1   1   1   1    1   0  1    1   1
+## 2       1   1   1   1    1   0  1    0   2
+##         0   0   0   0    0   3 13   98 114</code></pre>
+<p>We see that 84 observations are missing skin only, 1 is missing bp only, 12 are missing both skin and bp, etc. We certainly could just run a t-test on the 287 observed values. Realistically, that would be just fine. But, let’s see how we can do multiple imputation in this context.</p>
+<p>We start by building the multiple imputation model, using the default methods. Setting <code>m=20</code> ensures that we have 20 different data points imputed. A rule of thumb is that <code>m</code> should be as large as the percentage of observations with missing data, so in that case, we would set it equal to 33.</p>
+<div class="sourceCode" id="cb1197"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1197-1"><a href="missing-data-1.html#cb1197-1" tabindex="-1"></a>imp <span class="ot">&lt;-</span> <span class="fu">mice</span>(pp, <span class="at">m =</span> <span class="dv">20</span>, <span class="at">seed =</span> <span class="dv">2026</span>, <span class="at">printFlag =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<p>Next, we fit the model <code>bp ~ type</code> (which corresponds to a <span class="math inline">\(t\)</span>-test but uses <code>lm</code>) using the imputed data.</p>
+<div class="sourceCode" id="cb1198"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1198-1"><a href="missing-data-1.html#cb1198-1" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">with</span>(imp, <span class="fu">lm</span>(bp <span class="sc">~</span> type))</span>
+<span id="cb1198-2"><a href="missing-data-1.html#cb1198-2" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">pool</span>(fit))</span></code></pre></div>
+<pre><code>##          term  estimate std.error statistic       df       p.value
+## 1 (Intercept) 70.744588 0.8332498 84.902012 289.7984 9.057191e-207
+## 2     typeYes  4.220978 1.4412727  2.928647 257.1075  3.709798e-03</code></pre>
+<p>We see in the pooled model, we have a point of estimate of 4.22, so that women diabetis is associated with an increase of 4 units of blood pressure, and the <span class="math inline">\(p\)</span>-value is <span class="math inline">\(0.00371\)</span>. Let’s compare that to what we would have obtained if we just used the complete cases.</p>
+<div class="sourceCode" id="cb1200"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1200-1"><a href="missing-data-1.html#cb1200-1" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(bp <span class="sc">~</span> type, <span class="at">data =</span> pp))</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = bp ~ type, data = pp)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -35.255  -8.027  -0.799   7.201  39.201 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  70.7989     0.8388  84.405   &lt;2e-16 ***
+## typeYes       4.4562     1.4355   3.104   0.0021 ** 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 11.53 on 285 degrees of freedom
+##   (13 observations deleted due to missingness)
+## Multiple R-squared:  0.03271,    Adjusted R-squared:  0.02931 
+## F-statistic: 9.637 on 1 and 285 DF,  p-value: 0.002099</code></pre>
+<p>Pretty similar. That is not surprising since there were only 13 missing values of bp. Note that in this case, we got a <em>smaller</em> effect size, a <em>larger</em> standard error, and a <em>higher</em> <span class="math inline">\(p\)</span>-value. Imputing missing data does not always change your model in the direction of more significance; it is a principled way of trying to handle missing data.</p>
+
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-
+<a href="maximum-likelihood-estimation.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="solutions.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
