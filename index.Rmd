@@ -21,4 +21,15 @@ documentclass: book     # needs to be here, not in _output.yml
 
 # Preface
 
-These notes are for an applied regression course using R. Mathematical derivations are de-emphasized, while simulations are used to provide evidence for many statements throughout the book. The prerequisite material for this book is contained in [Probability, Statistics, and Data: A Fresh Approach Using R](https://mathstat.slu.edu/~speegle/_book/preface.html) by Speegle and Clair. 
+These notes are for an applied regression course using R. Mathematical derivations are de-emphasized, while simulations are used to provide evidence for many statements throughout the book. The prerequisite material for this book is contained in [Probability, Statistics, and Data: A Fresh Approach Using R](https://mathstat.slu.edu/~speegle/_book/preface.html) by Speegle and Clair.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+--- 
+
+

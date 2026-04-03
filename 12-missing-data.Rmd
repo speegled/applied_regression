@@ -20,7 +20,7 @@ It is important to keep two things separate: **First** we will build an **imputa
 
 Let's see how all of this works with a specific data set. We consider the `Pima.tr2` data set from the `MASS` package.
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 library(mice)
 library(tidyverse)
 pp <- MASS::Pima.tr2 |> 
@@ -64,3 +64,62 @@ summary(lm(bp ~ type, data = pp))
 ```
 
 Pretty similar. That is not surprising since there were only 13 missing values of bp. Note that in this case, we got a *smaller* effect size, a *larger* standard error, and a *higher* $p$-value. Imputing missing data does not always change your model in the direction of more significance; it is a principled way of trying to handle missing data.
+
+## Technical Details
+
+In this section, we discuss the technical details about how the imputation is made, and how the results are pooled to a single result. For simplicity, we will consider the following data set.
+
+```{r}
+dd <- data.frame(
+  x1 = runif(40)
+) |> 
+  mutate(x2 = x1 + runif(40),
+         y = 1 + 2 * x2 + rnorm(40))
+
+dd$x1[1:3] <- NA
+dd$x2[c(1, 5)] <- NA
+```
+
+We have 5 missing values, distributed as follows:
+
+```{r}
+md.pattern(dd)
+```
+
+We start by assigning values to the missing values of `x1` and `x2`.
+
+```{r}
+aa <- dd |> 
+  mutate(x1 = ifelse(is.na(x1), sample(x1[!is.na(x1)], size = 3, replace = T), x1),
+         x2 = ifelse(is.na(x2), sample(x1[!is.na(x2)], size = 3, replace = T), x2))
+md.pattern(aa)
+```
+
+It is unlikely that these are good choices for `x1` and `x2`, but since they are sampled from existing values of the variables, at least we know they are **possible** values. For example, we know (because of the construction) that `x1` needs to be between 0 and 1, and it will be for these poorly imputed values.
+
+Next, we model `x1` on the other variables.
+
+```{r}
+missingx1 <- 1:3
+missingx2 <- c(1, 5)
+mod <- lm(x1 ~ y + x2, data = aa)
+```
+
+Now, we need to choose a value of `x1` that is close to the predicted value with some noise added in. We are not going to follow the exact procedure of `mice` here, but simplify it as follows. The way we add noise is by adding it to the **coefficients** rather than the predicted values. In this case, we will take a random draw from a multivariate normal distribution with mean of the predicted values of the coefficients and covariance matrix given by our estimate of that covariance matrix from `lm`. 
+
+```{r}
+betadot <- MASS::mvrnorm(1, mu = coef(mod), Sigma = vcov(mod))
+betadot
+coef(mod)
+```
+
+Now we predict our `x1` variable.
+
+```{r}
+betadot %*% matrix(c(rep(1, times = length(missingx1)), aa$y[missingx1], aa$x2[missingx1]), nrow = length(missingx1))
+predict(mod, newdata = aa[missingx1,])
+
+```
+
+
+
