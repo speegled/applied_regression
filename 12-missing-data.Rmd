@@ -246,6 +246,13 @@ fit2 <- with(imp2, lm(bp ~ type))
 summary(pool(fit2))
 ```
 
+If we want to see confidence intervals after pooling, we use:
+
+```{r}
+summary(pool(fit), conf.int = T)
+```
+
+
 ## Pooling
 
 Now that we understand how the multiple imputations are produced, we need to understand how the results are pooled into a final answer. We only consider OLS. The coefficient values are easy: you estimate the coefficient for each imputed data set and take the mean.
