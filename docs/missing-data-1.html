@@ -23,7 +23,7 @@
 <meta name="author" content="Darrin Speegle" />
 
 
-<meta name="date" content="2026-03-30" />
+<meta name="date" content="2026-04-06" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -63,8 +63,9 @@
 
 
 <style type="text/css">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -74,7 +75,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -286,7 +287,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="9.1.4" data-path="maximum-likelihood-estimation.html"><a href="maximum-likelihood-estimation.html#what-does-the-final-matrix-represent"><i class="fa fa-check"></i><b>9.1.4</b> What does the final matrix represent?</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="10" data-path="missing-data-1.html"><a href="missing-data-1.html"><i class="fa fa-check"></i><b>10</b> Missing Data</a></li>
+<li class="chapter" data-level="10" data-path="missing-data-1.html"><a href="missing-data-1.html"><i class="fa fa-check"></i><b>10</b> Missing Data</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="missing-data-1.html"><a href="missing-data-1.html#technical-details"><i class="fa fa-check"></i><b>10.1</b> Technical Details</a></li>
+<li class="chapter" data-level="10.2" data-path="missing-data-1.html"><a href="missing-data-1.html#diagnostics"><i class="fa fa-check"></i><b>10.2</b> Diagnostics</a></li>
+<li class="chapter" data-level="10.3" data-path="missing-data-1.html"><a href="missing-data-1.html#pooling"><i class="fa fa-check"></i><b>10.3</b> Pooling</a></li>
+<li class="chapter" data-level="10.4" data-path="missing-data-1.html"><a href="missing-data-1.html#simulations"><i class="fa fa-check"></i><b>10.4</b> Simulations</a></li>
+</ul></li>
 <li class="chapter" data-level="11" data-path="solutions.html"><a href="solutions.html"><i class="fa fa-check"></i><b>11</b> Solutions</a>
 <ul>
 <li class="chapter" data-level="11.1" data-path="solutions.html"><a href="solutions.html#chapter-2-solutions"><i class="fa fa-check"></i><b>11.1</b> Chapter 2 Solutions</a></li>
@@ -325,32 +332,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>For those of you coming from a machine learning or predictive modeling background, including the response should cause alarm bells to ring. But, we will see that it is indeed a good idea for interpretive models.</p>
 <p>It is important to keep two things separate: <strong>First</strong> we will build an <strong>imputation</strong> model, which is used to impute missing data. <strong>Second</strong> we will build a model of the response, which is the interpretable model that we are looking for in the end.</p>
 <p>Let’s see how all of this works with a specific data set. We consider the <code>Pima.tr2</code> data set from the <code>MASS</code> package.</p>
-<div class="sourceCode" id="cb1181"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1181-1"><a href="missing-data-1.html#cb1181-1" tabindex="-1"></a><span class="fu">library</span>(mice)</span></code></pre></div>
-<pre><code>## Warning: package &#39;mice&#39; was built under R version 4.5.2</code></pre>
-<pre><code>## 
-## Attaching package: &#39;mice&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:stats&#39;:
-## 
-##     filter</code></pre>
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
-## 
-##     cbind, rbind</code></pre>
-<div class="sourceCode" id="cb1186"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1186-1"><a href="missing-data-1.html#cb1186-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div>
-<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 4.5.2</code></pre>
-<pre><code>## Warning: package &#39;dplyr&#39; was built under R version 4.5.2</code></pre>
-<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-## ✔ dplyr     1.2.0     ✔ readr     2.1.5
-## ✔ forcats   1.0.0     ✔ stringr   1.5.2
-## ✔ ggplot2   4.0.2     ✔ tibble    3.3.0
-## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
-## ✔ purrr     1.1.0</code></pre>
-<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-## ✖ dplyr::filter() masks mice::filter(), stats::filter()
-## ✖ dplyr::lag()    masks stats::lag()
-## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-<div class="sourceCode" id="cb1191"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1191-1"><a href="missing-data-1.html#cb1191-1" tabindex="-1"></a>pp <span class="ot">&lt;-</span> MASS<span class="sc">::</span>Pima.tr2 <span class="sc">|&gt;</span> </span>
-<span id="cb1191-2"><a href="missing-data-1.html#cb1191-2" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span>
-<span id="cb1191-3"><a href="missing-data-1.html#cb1191-3" tabindex="-1"></a>pp</span></code></pre></div>
+<div class="sourceCode" id="cb1166"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1166-1"><a href="missing-data-1.html#cb1166-1" tabindex="-1"></a><span class="fu">library</span>(mice)</span>
+<span id="cb1166-2"><a href="missing-data-1.html#cb1166-2" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1166-3"><a href="missing-data-1.html#cb1166-3" tabindex="-1"></a>pp <span class="ot">&lt;-</span> MASS<span class="sc">::</span>Pima.tr2 <span class="sc">|&gt;</span> </span>
+<span id="cb1166-4"><a href="missing-data-1.html#cb1166-4" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span>
+<span id="cb1166-5"><a href="missing-data-1.html#cb1166-5" tabindex="-1"></a>pp</span></code></pre></div>
 <pre><code>## # A tibble: 300 × 8
 ##    npreg   glu    bp  skin   bmi   ped   age type 
 ##    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;fct&gt;
@@ -366,7 +352,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## 10     2   128    78    37  43.3 1.22     31 Yes  
 ## # ℹ 290 more rows</code></pre>
 <p>According to the documentation, a population of women who were at least 21 years old, of Pima Indian heritage and living near Phoenix, Arizona, was tested for diabetes according to World Health Organization criteria. The data were collected by the US National Institute of Diabetes and Digestive and Kidney Diseases.</p>
-<div class="sourceCode" id="cb1193"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1193-1"><a href="missing-data-1.html#cb1193-1" tabindex="-1"></a><span class="fu">summary</span>(pp)</span></code></pre></div>
+<div class="sourceCode" id="cb1168"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1168-1"><a href="missing-data-1.html#cb1168-1" tabindex="-1"></a><span class="fu">summary</span>(pp)</span></code></pre></div>
 <pre><code>##      npreg             glu              bp              skin      
 ##  Min.   : 0.000   Min.   : 56.0   Min.   : 38.00   Min.   : 7.00  
 ##  1st Qu.: 1.000   1st Qu.:101.0   1st Qu.: 64.00   1st Qu.:21.00  
@@ -384,7 +370,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ##  Max.   :52.90   Max.   :2.2880   Max.   :72.0            
 ##  NA&#39;s   :3</code></pre>
 <p>We see that there are quite a few missing values. Suppose we wanted to determine whether the blood pressure depends on the diabetic criterion. Let’s look at the pattern of missing data.</p>
-<div class="sourceCode" id="cb1195"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1195-1"><a href="missing-data-1.html#cb1195-1" tabindex="-1"></a>mice<span class="sc">::</span><span class="fu">md.pattern</span>(pp)</span></code></pre></div>
+<div class="sourceCode" id="cb1170"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1170-1"><a href="missing-data-1.html#cb1170-1" tabindex="-1"></a>mice<span class="sc">::</span><span class="fu">md.pattern</span>(pp)</span></code></pre></div>
 <p><img src="12-missing-data_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <pre><code>##     npreg glu ped age type bmi bp skin    
 ## 200     1   1   1   1    1   1  1    1   0
@@ -396,15 +382,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ##         0   0   0   0    0   3 13   98 114</code></pre>
 <p>We see that 84 observations are missing skin only, 1 is missing bp only, 12 are missing both skin and bp, etc. We certainly could just run a t-test on the 287 observed values. Realistically, that would be just fine. But, let’s see how we can do multiple imputation in this context.</p>
 <p>We start by building the multiple imputation model, using the default methods. Setting <code>m=20</code> ensures that we have 20 different data points imputed. A rule of thumb is that <code>m</code> should be as large as the percentage of observations with missing data, so in that case, we would set it equal to 33.</p>
-<div class="sourceCode" id="cb1197"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1197-1"><a href="missing-data-1.html#cb1197-1" tabindex="-1"></a>imp <span class="ot">&lt;-</span> <span class="fu">mice</span>(pp, <span class="at">m =</span> <span class="dv">20</span>, <span class="at">seed =</span> <span class="dv">2026</span>, <span class="at">printFlag =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1172"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1172-1"><a href="missing-data-1.html#cb1172-1" tabindex="-1"></a>imp <span class="ot">&lt;-</span> <span class="fu">mice</span>(pp, <span class="at">m =</span> <span class="dv">20</span>, <span class="at">seed =</span> <span class="dv">2026</span>, <span class="at">printFlag =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 <p>Next, we fit the model <code>bp ~ type</code> (which corresponds to a <span class="math inline">\(t\)</span>-test but uses <code>lm</code>) using the imputed data.</p>
-<div class="sourceCode" id="cb1198"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1198-1"><a href="missing-data-1.html#cb1198-1" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">with</span>(imp, <span class="fu">lm</span>(bp <span class="sc">~</span> type))</span>
-<span id="cb1198-2"><a href="missing-data-1.html#cb1198-2" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">pool</span>(fit))</span></code></pre></div>
+<div class="sourceCode" id="cb1173"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1173-1"><a href="missing-data-1.html#cb1173-1" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">with</span>(imp, <span class="fu">lm</span>(bp <span class="sc">~</span> type))</span>
+<span id="cb1173-2"><a href="missing-data-1.html#cb1173-2" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">pool</span>(fit))</span></code></pre></div>
 <pre><code>##          term  estimate std.error statistic       df       p.value
 ## 1 (Intercept) 70.744588 0.8332498 84.902012 289.7984 9.057191e-207
 ## 2     typeYes  4.220978 1.4412727  2.928647 257.1075  3.709798e-03</code></pre>
 <p>We see in the pooled model, we have a point of estimate of 4.22, so that women diabetis is associated with an increase of 4 units of blood pressure, and the <span class="math inline">\(p\)</span>-value is <span class="math inline">\(0.00371\)</span>. Let’s compare that to what we would have obtained if we just used the complete cases.</p>
-<div class="sourceCode" id="cb1200"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1200-1"><a href="missing-data-1.html#cb1200-1" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(bp <span class="sc">~</span> type, <span class="at">data =</span> pp))</span></code></pre></div>
+<div class="sourceCode" id="cb1175"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1175-1"><a href="missing-data-1.html#cb1175-1" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(bp <span class="sc">~</span> type, <span class="at">data =</span> pp))</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## lm(formula = bp ~ type, data = pp)
@@ -425,7 +411,1213 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## Multiple R-squared:  0.03271,    Adjusted R-squared:  0.02931 
 ## F-statistic: 9.637 on 1 and 285 DF,  p-value: 0.002099</code></pre>
 <p>Pretty similar. That is not surprising since there were only 13 missing values of bp. Note that in this case, we got a <em>smaller</em> effect size, a <em>larger</em> standard error, and a <em>higher</em> <span class="math inline">\(p\)</span>-value. Imputing missing data does not always change your model in the direction of more significance; it is a principled way of trying to handle missing data.</p>
+<div id="technical-details" class="section level2 hasAnchor" number="10.1">
+<h2><span class="header-section-number">10.1</span> Technical Details<a href="missing-data-1.html#technical-details" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>In this section, we discuss the technical details about how the imputation is made, and how the results are pooled to a single result. For simplicity, we will consider the following data set.</p>
+<div class="sourceCode" id="cb1177"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1177-1"><a href="missing-data-1.html#cb1177-1" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb1177-2"><a href="missing-data-1.html#cb1177-2" tabindex="-1"></a>  <span class="at">x1 =</span> <span class="fu">runif</span>(<span class="dv">40</span>)</span>
+<span id="cb1177-3"><a href="missing-data-1.html#cb1177-3" tabindex="-1"></a>) <span class="sc">|&gt;</span> </span>
+<span id="cb1177-4"><a href="missing-data-1.html#cb1177-4" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">x2 =</span> x1 <span class="sc">+</span> <span class="fu">runif</span>(<span class="dv">40</span>),</span>
+<span id="cb1177-5"><a href="missing-data-1.html#cb1177-5" tabindex="-1"></a>         <span class="at">y =</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> x2 <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">40</span>))</span>
+<span id="cb1177-6"><a href="missing-data-1.html#cb1177-6" tabindex="-1"></a></span>
+<span id="cb1177-7"><a href="missing-data-1.html#cb1177-7" tabindex="-1"></a>dd<span class="sc">$</span>x1[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb1177-8"><a href="missing-data-1.html#cb1177-8" tabindex="-1"></a>dd<span class="sc">$</span>x2[<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>)] <span class="ot">&lt;-</span> <span class="cn">NA</span></span></code></pre></div>
+<p>We have 5 missing values, distributed as follows:</p>
+<div class="sourceCode" id="cb1178"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1178-1"><a href="missing-data-1.html#cb1178-1" tabindex="-1"></a><span class="fu">md.pattern</span>(dd)</span></code></pre></div>
+<p><img src="12-missing-data_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<pre><code>##    y x2 x1  
+## 36 1  1  1 0
+## 2  1  1  0 1
+## 1  1  0  1 1
+## 1  1  0  0 2
+##    0  2  3 5</code></pre>
+<p>We start by assigning values to the missing values of <code>x1</code> and <code>x2</code>.</p>
+<div class="sourceCode" id="cb1180"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1180-1"><a href="missing-data-1.html#cb1180-1" tabindex="-1"></a>aa <span class="ot">&lt;-</span> dd <span class="sc">|&gt;</span> </span>
+<span id="cb1180-2"><a href="missing-data-1.html#cb1180-2" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">x1 =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(x1), <span class="fu">sample</span>(x1[<span class="sc">!</span><span class="fu">is.na</span>(x1)], <span class="at">size =</span> <span class="dv">3</span>, <span class="at">replace =</span> T), x1),</span>
+<span id="cb1180-3"><a href="missing-data-1.html#cb1180-3" tabindex="-1"></a>         <span class="at">x2 =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(x2), <span class="fu">sample</span>(x1[<span class="sc">!</span><span class="fu">is.na</span>(x2)], <span class="at">size =</span> <span class="dv">3</span>, <span class="at">replace =</span> T), x2))</span>
+<span id="cb1180-4"><a href="missing-data-1.html#cb1180-4" tabindex="-1"></a><span class="fu">md.pattern</span>(aa)</span></code></pre></div>
+<pre><code>##  /\     /\
+## {  `---&#39;  }
+## {  O   O  }
+## ==&gt;  V &lt;==  No need for mice. This data set is completely observed.
+##  \  \|/  /
+##   `-----&#39;</code></pre>
+<p><img src="12-missing-data_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<pre><code>##    x1 x2 y  
+## 40  1  1 1 0
+##     0  0 0 0</code></pre>
+<p>It is unlikely that these are good choices for <code>x1</code> and <code>x2</code>, but since they are sampled from existing values of the variables, at least we know they are <strong>possible</strong> values. For example, we know (because of the construction) that <code>x1</code> needs to be between 0 and 1, and it will be for these poorly imputed values.</p>
+<p>Next, we model <code>x1</code> on the other variables.</p>
+<div class="sourceCode" id="cb1183"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1183-1"><a href="missing-data-1.html#cb1183-1" tabindex="-1"></a>missingx1 <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span></span>
+<span id="cb1183-2"><a href="missing-data-1.html#cb1183-2" tabindex="-1"></a>missingx2 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>)</span>
+<span id="cb1183-3"><a href="missing-data-1.html#cb1183-3" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(x1 <span class="sc">~</span> y <span class="sc">+</span> x2, <span class="at">data =</span> aa)</span></code></pre></div>
+<p>Now, we need to choose a value of <code>x1</code> that is close to the predicted value with some noise added in. We are not going to follow the exact procedure of <code>mice</code> here, but simplify it as follows. The way we add noise is by adding it to the <strong>coefficients</strong> rather than the predicted values. In this case, we will take a random draw from a multivariate normal distribution with mean of the predicted values of the coefficients and covariance matrix given by our estimate of that covariance matrix from <code>lm</code>.</p>
+<div class="sourceCode" id="cb1184"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1184-1"><a href="missing-data-1.html#cb1184-1" tabindex="-1"></a>betadot <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(<span class="dv">1</span>, <span class="at">mu =</span> <span class="fu">coef</span>(mod), <span class="at">Sigma =</span> <span class="fu">vcov</span>(mod))</span>
+<span id="cb1184-2"><a href="missing-data-1.html#cb1184-2" tabindex="-1"></a>betadot</span></code></pre></div>
+<pre><code>## (Intercept)           y          x2 
+## 0.128775465 0.001728477 0.433429235</code></pre>
+<div class="sourceCode" id="cb1186"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1186-1"><a href="missing-data-1.html#cb1186-1" tabindex="-1"></a><span class="fu">coef</span>(mod)</span></code></pre></div>
+<pre><code>## (Intercept)           y          x2 
+##  0.29480533 -0.04351301  0.39066677</code></pre>
+<p>Now we predict our <code>x1</code> variable from the perturbed values of the coefficients. We can compare to the prediction from the original value of the coefficients by using <code>predict</code>.</p>
+<div class="sourceCode" id="cb1188"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1188-1"><a href="missing-data-1.html#cb1188-1" tabindex="-1"></a>pp <span class="ot">&lt;-</span> betadot <span class="sc">%*%</span> <span class="fu">t</span>(<span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>, <span class="at">times =</span> <span class="fu">length</span>(missingx1)), aa<span class="sc">$</span>y[missingx1], aa<span class="sc">$</span>x2[missingx1]), <span class="at">nrow =</span> <span class="fu">length</span>(missingx1)))</span>
+<span id="cb1188-2"><a href="missing-data-1.html#cb1188-2" tabindex="-1"></a>pp</span></code></pre></div>
+<pre><code>##           [,1]      [,2]      [,3]
+## [1,] 0.3901853 0.7349779 0.4545586</code></pre>
+<div class="sourceCode" id="cb1190"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1190-1"><a href="missing-data-1.html#cb1190-1" tabindex="-1"></a><span class="fu">predict</span>(mod, <span class="at">newdata =</span> aa[missingx1,])</span></code></pre></div>
+<pre><code>##         1         2         3 
+## 0.3097650 0.5902952 0.4836123</code></pre>
+<p>We don’t automatically take the closest value to the predicted values; we choose the nearest 5 or so closest values and choose one at random.</p>
+<div class="sourceCode" id="cb1192"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1192-1"><a href="missing-data-1.html#cb1192-1" tabindex="-1"></a>find_replacement <span class="ot">&lt;-</span> <span class="cf">function</span>(vector, val) {</span>
+<span id="cb1192-2"><a href="missing-data-1.html#cb1192-2" tabindex="-1"></a>  candidates <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">abs</span>(vector <span class="sc">-</span> val), <span class="at">index.return =</span> <span class="cn">TRUE</span>)<span class="sc">$</span>ix[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
+<span id="cb1192-3"><a href="missing-data-1.html#cb1192-3" tabindex="-1"></a>  vector[<span class="fu">sample</span>(candidates, <span class="dv">1</span>)]</span>
+<span id="cb1192-4"><a href="missing-data-1.html#cb1192-4" tabindex="-1"></a>}</span>
+<span id="cb1192-5"><a href="missing-data-1.html#cb1192-5" tabindex="-1"></a></span>
+<span id="cb1192-6"><a href="missing-data-1.html#cb1192-6" tabindex="-1"></a>find_replacement <span class="ot">&lt;-</span> <span class="fu">Vectorize</span>(find_replacement, <span class="at">vectorize.args =</span> <span class="st">&quot;val&quot;</span>)</span>
+<span id="cb1192-7"><a href="missing-data-1.html#cb1192-7" tabindex="-1"></a>aa<span class="sc">$</span>x1[missingx1] <span class="ot">&lt;-</span> <span class="fu">find_replacement</span>(aa<span class="sc">$</span>x1, pp)</span></code></pre></div>
+<p>Now, we repeat the entire process for the second predictor variable.</p>
+<div class="sourceCode" id="cb1193"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1193-1"><a href="missing-data-1.html#cb1193-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(x2 <span class="sc">~</span> y <span class="sc">+</span> x1, <span class="at">data =</span> aa)</span>
+<span id="cb1193-2"><a href="missing-data-1.html#cb1193-2" tabindex="-1"></a>betadot <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(<span class="dv">1</span>, <span class="at">mu =</span> <span class="fu">coef</span>(mod), <span class="at">Sigma =</span> <span class="fu">vcov</span>(mod))</span>
+<span id="cb1193-3"><a href="missing-data-1.html#cb1193-3" tabindex="-1"></a>pp <span class="ot">&lt;-</span> betadot <span class="sc">%*%</span> <span class="fu">t</span>(<span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>, <span class="at">times =</span> <span class="fu">length</span>(missingx1)), aa<span class="sc">$</span>y[missingx1], aa<span class="sc">$</span>x2[missingx1]), <span class="at">nrow =</span> <span class="fu">length</span>(missingx1)))</span>
+<span id="cb1193-4"><a href="missing-data-1.html#cb1193-4" tabindex="-1"></a>find_replacement <span class="ot">&lt;-</span> <span class="fu">Vectorize</span>(find_replacement, <span class="at">vectorize.args =</span> <span class="st">&quot;val&quot;</span>)</span>
+<span id="cb1193-5"><a href="missing-data-1.html#cb1193-5" tabindex="-1"></a>aa<span class="sc">$</span>x2[missingx1] <span class="ot">&lt;-</span> <span class="fu">find_replacement</span>(aa<span class="sc">$</span>x2, pp)</span></code></pre></div>
+<p>Then, we would repeat this a bunch of times for a burn-in or initialization phase, and after that burn-in, we would start to take values. The package name <code>mice</code> stands for multiple imputation by chained equations; the chaining is the repeating of the imputation like we are doing here.</p>
+<p>To be clear, this leaves out some important steps along the way, but it does give the <strong>flavor</strong> of the algorithm.</p>
+<p>Now that we have seen how it works for <strong>one stream</strong>, we need to get multiple imputations. <code>mice</code> will have as many streams as you want imputations, and after a number of iterations, it will take one data set from each stream. For diagnostics, what we like to see is that each of the streams is mixing well. They are offering similar ranges of values across each of the streams. You don’t want to see one stream off in Jefferson City while the other streams are in CWE. In practice, we will use the built in diagnostics to determine whether that is accurate.</p>
+</div>
+<div id="diagnostics" class="section level2 hasAnchor" number="10.2">
+<h2><span class="header-section-number">10.2</span> Diagnostics<a href="missing-data-1.html#diagnostics" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We return to our example above and look at the built in diagnostics. We re-run the imputation model to include more iterations and more streams.</p>
+<div class="sourceCode" id="cb1194"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1194-1"><a href="missing-data-1.html#cb1194-1" tabindex="-1"></a>pp <span class="ot">&lt;-</span> MASS<span class="sc">::</span>Pima.tr2 <span class="sc">|&gt;</span> </span>
+<span id="cb1194-2"><a href="missing-data-1.html#cb1194-2" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span>
+<span id="cb1194-3"><a href="missing-data-1.html#cb1194-3" tabindex="-1"></a>imp <span class="ot">&lt;-</span> <span class="fu">mice</span>(pp, <span class="at">m =</span> <span class="dv">10</span>, <span class="at">maxit =</span> <span class="dv">100</span>, <span class="at">seed =</span> <span class="dv">2026</span>, <span class="at">printFlag =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1194-4"><a href="missing-data-1.html#cb1194-4" tabindex="-1"></a><span class="fu">plot</span>(imp)</span></code></pre></div>
+<p><img src="12-missing-data_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>We can see that the chains seem to be mixing pretty well over the ten iterations shown. Now, we check convergence.</p>
+<div class="sourceCode" id="cb1195"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1195-1"><a href="missing-data-1.html#cb1195-1" tabindex="-1"></a>diag_mean <span class="ot">&lt;-</span> <span class="fu">convergence</span>(imp, <span class="at">diagnostic =</span> <span class="st">&quot;all&quot;</span>, <span class="at">parameter =</span> <span class="st">&quot;mean&quot;</span>)</span>
+<span id="cb1195-2"><a href="missing-data-1.html#cb1195-2" tabindex="-1"></a>diag_mean <span class="sc">|&gt;</span> </span>
+<span id="cb1195-3"><a href="missing-data-1.html#cb1195-3" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(ac)) <span class="sc">|&gt;</span> </span>
+<span id="cb1195-4"><a href="missing-data-1.html#cb1195-4" tabindex="-1"></a>  <span class="fu">head</span>()</span></code></pre></div>
+<pre><code>##   .it vrb        ac     psrf
+## 1   2  bp 0.2744142 1.038749
+## 2   3  bp 0.4300519 1.018780
+## 3   4  bp 0.4068853 1.190329
+## 4   5  bp 0.3075506 1.074987
+## 5   6  bp 0.1984613 1.070197
+## 6   7  bp 0.2225751 1.123700</code></pre>
+<div class="sourceCode" id="cb1197"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1197-1"><a href="missing-data-1.html#cb1197-1" tabindex="-1"></a>diag_sd <span class="ot">&lt;-</span> <span class="fu">convergence</span>(imp, <span class="at">diagnostic =</span> <span class="st">&quot;all&quot;</span>, <span class="at">parameter =</span> <span class="st">&quot;sd&quot;</span>)</span>
+<span id="cb1197-2"><a href="missing-data-1.html#cb1197-2" tabindex="-1"></a>diag_sd <span class="sc">|&gt;</span> </span>
+<span id="cb1197-3"><a href="missing-data-1.html#cb1197-3" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(ac)) <span class="sc">|&gt;</span> </span>
+<span id="cb1197-4"><a href="missing-data-1.html#cb1197-4" tabindex="-1"></a>  <span class="fu">head</span>()</span></code></pre></div>
+<pre><code>##   .it vrb           ac      psrf
+## 1   2  bp  0.507853979 0.9494988
+## 2   3  bp  0.357216306 0.9620480
+## 3   4  bp  0.002698788 1.0827214
+## 4   5  bp -0.049755635 1.1526683
+## 5   6  bp  0.014085274 1.1534442
+## 6   7  bp  0.028220096 1.3202511</code></pre>
+<p>The <code>psrf</code> variable is measuring the variance of the variable <em>within</em> the stream versus the variance of the variable <em>between</em> the streams. Ideally, this should be close to 1. The <code>ac</code> variable is measuring the autocorrelation of the variable. Ideally, this should be close to 0. However, possibly more important than the <em>values</em> of the statistics is the <em>behavior</em> of the statistics. If the statistic shows a clear decreasing trend over iterations, then that is evidence that the stream has not yet fully converged, and we should consider running the stream for more iterations. Let’s look at some plots.</p>
+<div class="sourceCode" id="cb1199"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1199-1"><a href="missing-data-1.html#cb1199-1" tabindex="-1"></a><span class="co"># Plot lag-1 autocorrelation for chain means</span></span>
+<span id="cb1199-2"><a href="missing-data-1.html#cb1199-2" tabindex="-1"></a>diag_mean</span></code></pre></div>
+<pre><code>##     .it   vrb          ac      psrf
+## 1     1 npreg          NA        NA
+## 2     2 npreg          NA        NA
+## 3     3 npreg          NA        NA
+## 4     4 npreg          NA        NA
+## 5     5 npreg          NA        NA
+## 6     6 npreg          NA        NA
+## 7     7 npreg          NA        NA
+## 8     8 npreg          NA        NA
+## 9     9 npreg          NA        NA
+## 10   10 npreg          NA        NA
+## 11   11 npreg          NA        NA
+## 12   12 npreg          NA        NA
+## 13   13 npreg          NA        NA
+## 14   14 npreg          NA        NA
+## 15   15 npreg          NA        NA
+## 16   16 npreg          NA        NA
+## 17   17 npreg          NA        NA
+## 18   18 npreg          NA        NA
+## 19   19 npreg          NA        NA
+## 20   20 npreg          NA        NA
+## 21   21 npreg          NA        NA
+## 22   22 npreg          NA        NA
+## 23   23 npreg          NA        NA
+## 24   24 npreg          NA        NA
+## 25   25 npreg          NA        NA
+## 26   26 npreg          NA        NA
+## 27   27 npreg          NA        NA
+## 28   28 npreg          NA        NA
+## 29   29 npreg          NA        NA
+## 30   30 npreg          NA        NA
+## 31   31 npreg          NA        NA
+## 32   32 npreg          NA        NA
+## 33   33 npreg          NA        NA
+## 34   34 npreg          NA        NA
+## 35   35 npreg          NA        NA
+## 36   36 npreg          NA        NA
+## 37   37 npreg          NA        NA
+## 38   38 npreg          NA        NA
+## 39   39 npreg          NA        NA
+## 40   40 npreg          NA        NA
+## 41   41 npreg          NA        NA
+## 42   42 npreg          NA        NA
+## 43   43 npreg          NA        NA
+## 44   44 npreg          NA        NA
+## 45   45 npreg          NA        NA
+## 46   46 npreg          NA        NA
+## 47   47 npreg          NA        NA
+## 48   48 npreg          NA        NA
+## 49   49 npreg          NA        NA
+## 50   50 npreg          NA        NA
+## 51   51 npreg          NA        NA
+## 52   52 npreg          NA        NA
+## 53   53 npreg          NA        NA
+## 54   54 npreg          NA        NA
+## 55   55 npreg          NA        NA
+## 56   56 npreg          NA        NA
+## 57   57 npreg          NA        NA
+## 58   58 npreg          NA        NA
+## 59   59 npreg          NA        NA
+## 60   60 npreg          NA        NA
+## 61   61 npreg          NA        NA
+## 62   62 npreg          NA        NA
+## 63   63 npreg          NA        NA
+## 64   64 npreg          NA        NA
+## 65   65 npreg          NA        NA
+## 66   66 npreg          NA        NA
+## 67   67 npreg          NA        NA
+## 68   68 npreg          NA        NA
+## 69   69 npreg          NA        NA
+## 70   70 npreg          NA        NA
+## 71   71 npreg          NA        NA
+## 72   72 npreg          NA        NA
+## 73   73 npreg          NA        NA
+## 74   74 npreg          NA        NA
+## 75   75 npreg          NA        NA
+## 76   76 npreg          NA        NA
+## 77   77 npreg          NA        NA
+## 78   78 npreg          NA        NA
+## 79   79 npreg          NA        NA
+## 80   80 npreg          NA        NA
+## 81   81 npreg          NA        NA
+## 82   82 npreg          NA        NA
+## 83   83 npreg          NA        NA
+## 84   84 npreg          NA        NA
+## 85   85 npreg          NA        NA
+## 86   86 npreg          NA        NA
+## 87   87 npreg          NA        NA
+## 88   88 npreg          NA        NA
+## 89   89 npreg          NA        NA
+## 90   90 npreg          NA        NA
+## 91   91 npreg          NA        NA
+## 92   92 npreg          NA        NA
+## 93   93 npreg          NA        NA
+## 94   94 npreg          NA        NA
+## 95   95 npreg          NA        NA
+## 96   96 npreg          NA        NA
+## 97   97 npreg          NA        NA
+## 98   98 npreg          NA        NA
+## 99   99 npreg          NA        NA
+## 100 100 npreg          NA        NA
+## 101   1   glu          NA        NA
+## 102   2   glu          NA        NA
+## 103   3   glu          NA        NA
+## 104   4   glu          NA        NA
+## 105   5   glu          NA        NA
+## 106   6   glu          NA        NA
+## 107   7   glu          NA        NA
+## 108   8   glu          NA        NA
+## 109   9   glu          NA        NA
+## 110  10   glu          NA        NA
+## 111  11   glu          NA        NA
+## 112  12   glu          NA        NA
+## 113  13   glu          NA        NA
+## 114  14   glu          NA        NA
+## 115  15   glu          NA        NA
+## 116  16   glu          NA        NA
+## 117  17   glu          NA        NA
+## 118  18   glu          NA        NA
+## 119  19   glu          NA        NA
+## 120  20   glu          NA        NA
+## 121  21   glu          NA        NA
+## 122  22   glu          NA        NA
+## 123  23   glu          NA        NA
+## 124  24   glu          NA        NA
+## 125  25   glu          NA        NA
+## 126  26   glu          NA        NA
+## 127  27   glu          NA        NA
+## 128  28   glu          NA        NA
+## 129  29   glu          NA        NA
+## 130  30   glu          NA        NA
+## 131  31   glu          NA        NA
+## 132  32   glu          NA        NA
+## 133  33   glu          NA        NA
+## 134  34   glu          NA        NA
+## 135  35   glu          NA        NA
+## 136  36   glu          NA        NA
+## 137  37   glu          NA        NA
+## 138  38   glu          NA        NA
+## 139  39   glu          NA        NA
+## 140  40   glu          NA        NA
+## 141  41   glu          NA        NA
+## 142  42   glu          NA        NA
+## 143  43   glu          NA        NA
+## 144  44   glu          NA        NA
+## 145  45   glu          NA        NA
+## 146  46   glu          NA        NA
+## 147  47   glu          NA        NA
+## 148  48   glu          NA        NA
+## 149  49   glu          NA        NA
+## 150  50   glu          NA        NA
+## 151  51   glu          NA        NA
+## 152  52   glu          NA        NA
+## 153  53   glu          NA        NA
+## 154  54   glu          NA        NA
+## 155  55   glu          NA        NA
+## 156  56   glu          NA        NA
+## 157  57   glu          NA        NA
+## 158  58   glu          NA        NA
+## 159  59   glu          NA        NA
+## 160  60   glu          NA        NA
+## 161  61   glu          NA        NA
+## 162  62   glu          NA        NA
+## 163  63   glu          NA        NA
+## 164  64   glu          NA        NA
+## 165  65   glu          NA        NA
+## 166  66   glu          NA        NA
+## 167  67   glu          NA        NA
+## 168  68   glu          NA        NA
+## 169  69   glu          NA        NA
+## 170  70   glu          NA        NA
+## 171  71   glu          NA        NA
+## 172  72   glu          NA        NA
+## 173  73   glu          NA        NA
+## 174  74   glu          NA        NA
+## 175  75   glu          NA        NA
+## 176  76   glu          NA        NA
+## 177  77   glu          NA        NA
+## 178  78   glu          NA        NA
+## 179  79   glu          NA        NA
+## 180  80   glu          NA        NA
+## 181  81   glu          NA        NA
+## 182  82   glu          NA        NA
+## 183  83   glu          NA        NA
+## 184  84   glu          NA        NA
+## 185  85   glu          NA        NA
+## 186  86   glu          NA        NA
+## 187  87   glu          NA        NA
+## 188  88   glu          NA        NA
+## 189  89   glu          NA        NA
+## 190  90   glu          NA        NA
+## 191  91   glu          NA        NA
+## 192  92   glu          NA        NA
+## 193  93   glu          NA        NA
+## 194  94   glu          NA        NA
+## 195  95   glu          NA        NA
+## 196  96   glu          NA        NA
+## 197  97   glu          NA        NA
+## 198  98   glu          NA        NA
+## 199  99   glu          NA        NA
+## 200 100   glu          NA        NA
+## 201   1    bp          NA 0.9025134
+## 202   2    bp 0.274414205 1.0387489
+## 203   3    bp 0.430051921 1.0187798
+## 204   4    bp 0.406885333 1.1903288
+## 205   5    bp 0.307550622 1.0749873
+## 206   6    bp 0.198461321 1.0701969
+## 207   7    bp 0.222575139 1.1236995
+## 208   8    bp 0.217432384 1.1515554
+## 209   9    bp 0.196347299 1.1132163
+## 210  10    bp 0.215475198 1.1042642
+## 211  11    bp 0.213538252 1.0885568
+## 212  12    bp 0.198923447 1.0504048
+## 213  13    bp 0.167758125 1.0518121
+## 214  14    bp 0.193705678 1.0337010
+## 215  15    bp 0.174332845 1.0305253
+## 216  16    bp 0.208344446 1.0288402
+## 217  17    bp 0.202958761 1.0276775
+## 218  18    bp 0.220073279 1.0271214
+## 219  19    bp 0.200456822 1.0229107
+## 220  20    bp 0.208761502 1.0164417
+## 221  21    bp 0.210108205 1.0129716
+## 222  22    bp 0.175249762 1.0041591
+## 223  23    bp 0.143887453 1.0009483
+## 224  24    bp 0.129443631 0.9966360
+## 225  25    bp 0.134678748 1.0002171
+## 226  26    bp 0.146060858 1.0024162
+## 227  27    bp 0.133987829 1.0044595
+## 228  28    bp 0.139721571 1.0087099
+## 229  29    bp 0.145214800 1.0149400
+## 230  30    bp 0.123229977 1.0200401
+## 231  31    bp 0.124855296 1.0148580
+## 232  32    bp 0.124210420 1.0179424
+## 233  33    bp 0.115326424 1.0190637
+## 234  34    bp 0.119105684 1.0109681
+## 235  35    bp 0.120154398 1.0101430
+## 236  36    bp 0.104118370 1.0122440
+## 237  37    bp 0.105709538 1.0200563
+## 238  38    bp 0.094488898 1.0140192
+## 239  39    bp 0.088186740 1.0145891
+## 240  40    bp 0.090529549 1.0126118
+## 241  41    bp 0.077692640 1.0075130
+## 242  42    bp 0.070034645 1.0109707
+## 243  43    bp 0.052149815 1.0133681
+## 244  44    bp 0.058742054 1.0089314
+## 245  45    bp 0.062255886 1.0063450
+## 246  46    bp 0.059300771 1.0064670
+## 247  47    bp 0.060803766 1.0084986
+## 248  48    bp 0.061949224 1.0093106
+## 249  49    bp 0.055336503 1.0061609
+## 250  50    bp 0.049697937 1.0084699
+## 251  51    bp 0.048495011 1.0104261
+## 252  52    bp 0.041747146 1.0121765
+## 253  53    bp 0.048222987 1.0097478
+## 254  54    bp 0.036795814 1.0081610
+## 255  55    bp 0.029018321 1.0075074
+## 256  56    bp 0.030931976 1.0086999
+## 257  57    bp 0.024187541 1.0057997
+## 258  58    bp 0.026450424 1.0083583
+## 259  59    bp 0.025380839 1.0072083
+## 260  60    bp 0.017620034 1.0078651
+## 261  61    bp 0.017482909 1.0067724
+## 262  62    bp 0.017682641 1.0071748
+## 263  63    bp 0.006842298 1.0075550
+## 264  64    bp 0.012778183 1.0063276
+## 265  65    bp 0.010930566 1.0071442
+## 266  66    bp 0.020524308 1.0073489
+## 267  67    bp 0.016778845 1.0091820
+## 268  68    bp 0.017228310 1.0065640
+## 269  69    bp 0.019209224 1.0072824
+## 270  70    bp 0.009011122 1.0067336
+## 271  71    bp 0.011481623 1.0084131
+## 272  72    bp 0.006865745 1.0086601
+## 273  73    bp 0.004461631 1.0084611
+## 274  74    bp 0.011721838 1.0081006
+## 275  75    bp 0.016181339 1.0075865
+## 276  76    bp 0.020448524 1.0054310
+## 277  77    bp 0.020029745 1.0056514
+## 278  78    bp 0.015205879 1.0054975
+## 279  79    bp 0.021088250 1.0065817
+## 280  80    bp 0.024103636 1.0072178
+## 281  81    bp 0.017226903 1.0055094
+## 282  82    bp 0.020470147 1.0049607
+## 283  83    bp 0.025257063 1.0036371
+## 284  84    bp 0.031629678 1.0032927
+## 285  85    bp 0.029660350 1.0041489
+## 286  86    bp 0.036051819 1.0053172
+## 287  87    bp 0.040190888 1.0060372
+## 288  88    bp 0.035175626 1.0036307
+## 289  89    bp 0.031328888 1.0041208
+## 290  90    bp 0.033273247 1.0042066
+## 291  91    bp 0.041493151 1.0038420
+## 292  92    bp 0.042568407 1.0031100
+## 293  93    bp 0.037169206 1.0033743
+## 294  94    bp 0.034966851 1.0032195
+## 295  95    bp 0.033426739 1.0039513
+## 296  96    bp 0.030646134 1.0055889
+## 297  97    bp 0.024812634 1.0054168
+## 298  98    bp 0.031180634 1.0055583
+## 299  99    bp 0.036541898 1.0056715
+## 300 100    bp 0.039135143 1.0064919
+## 301   1  skin          NA 0.9392308
+## 302   2  skin 0.372223252 0.9488168
+## 303   3  skin 0.140734618 1.0662009
+## 304   4  skin 0.054346152 1.1078878
+## 305   5  skin 0.078304801 1.2142773
+## 306   6  skin 0.108591403 1.1095276
+## 307   7  skin 0.159140447 1.0834994
+## 308   8  skin 0.092159073 1.0670830
+## 309   9  skin 0.059611367 1.0059976
+## 310  10  skin 0.071736549 1.0144795
+## 311  11  skin 0.043896800 1.0041809
+## 312  12  skin 0.019176783 1.0008727
+## 313  13  skin 0.021294577 1.0052582
+## 314  14  skin 0.057801845 1.0115318
+## 315  15  skin 0.038177934 1.0163711
+## 316  16  skin 0.070689623 1.0030835
+## 317  17  skin 0.079988387 1.0246860
+## 318  18  skin 0.084638834 1.0194109
+## 319  19  skin 0.067733009 1.0200221
+## 320  20  skin 0.090443647 1.0298760
+## 321  21  skin 0.101572548 1.0348413
+## 322  22  skin 0.093391312 1.0250387
+## 323  23  skin 0.084075697 1.0001735
+## 324  24  skin 0.073307115 1.0012835
+## 325  25  skin 0.092970833 0.9952200
+## 326  26  skin 0.126002425 0.9949920
+## 327  27  skin 0.104408366 0.9946431
+## 328  28  skin 0.110585591 0.9921053
+## 329  29  skin 0.116367069 0.9926126
+## 330  30  skin 0.111245292 0.9944718
+## 331  31  skin 0.120231693 0.9965228
+## 332  32  skin 0.120474456 0.9926857
+## 333  33  skin 0.122654800 0.9937627
+## 334  34  skin 0.125977473 0.9988956
+## 335  35  skin 0.109555590 0.9967925
+## 336  36  skin 0.089919406 0.9981086
+## 337  37  skin 0.090687101 0.9957392
+## 338  38  skin 0.079893834 0.9977272
+## 339  39  skin 0.058370001 0.9987136
+## 340  40  skin 0.065261707 1.0025779
+## 341  41  skin 0.069596003 1.0025765
+## 342  42  skin 0.070605470 1.0052945
+## 343  43  skin 0.071249805 1.0038808
+## 344  44  skin 0.081476322 1.0015167
+## 345  45  skin 0.073215470 1.0013681
+## 346  46  skin 0.068047653 1.0014701
+## 347  47  skin 0.071587294 1.0034748
+## 348  48  skin 0.060395694 1.0044861
+## 349  49  skin 0.065638247 1.0031789
+## 350  50  skin 0.070566432 1.0030880
+## 351  51  skin 0.077449492 1.0059002
+## 352  52  skin 0.088319188 1.0087055
+## 353  53  skin 0.083267542 1.0077373
+## 354  54  skin 0.080786367 1.0070945
+## 355  55  skin 0.080472816 1.0048509
+## 356  56  skin 0.075125771 1.0027556
+## 357  57  skin 0.066021992 1.0029203
+## 358  58  skin 0.056440418 1.0050142
+## 359  59  skin 0.058896001 1.0068744
+## 360  60  skin 0.054038641 1.0053085
+## 361  61  skin 0.051182397 1.0043209
+## 362  62  skin 0.038298816 1.0052107
+## 363  63  skin 0.044789286 1.0048479
+## 364  64  skin 0.046509528 1.0038495
+## 365  65  skin 0.043118433 1.0043036
+## 366  66  skin 0.041683609 1.0053048
+## 367  67  skin 0.042713670 1.0038111
+## 368  68  skin 0.044183291 1.0029125
+## 369  69  skin 0.052554766 1.0016310
+## 370  70  skin 0.054726895 1.0016300
+## 371  71  skin 0.065316276 1.0016743
+## 372  72  skin 0.066737936 1.0017553
+## 373  73  skin 0.060824814 1.0011767
+## 374  74  skin 0.058489230 1.0020542
+## 375  75  skin 0.057503994 1.0010559
+## 376  76  skin 0.060916970 1.0000152
+## 377  77  skin 0.056185480 1.0001200
+## 378  78  skin 0.052438053 0.9994463
+## 379  79  skin 0.053465912 0.9994019
+## 380  80  skin 0.058787627 1.0005621
+## 381  81  skin 0.052917270 1.0000798
+## 382  82  skin 0.044813514 0.9998434
+## 383  83  skin 0.050579460 0.9994333
+## 384  84  skin 0.051020304 0.9988661
+## 385  85  skin 0.044431748 0.9996718
+## 386  86  skin 0.049925749 1.0016007
+## 387  87  skin 0.051842885 1.0032396
+## 388  88  skin 0.050191820 1.0030239
+## 389  89  skin 0.053736346 1.0029833
+## 390  90  skin 0.048340107 1.0021089
+## 391  91  skin 0.042050456 1.0034754
+## 392  92  skin 0.035819512 1.0036520
+## 393  93  skin 0.036983363 1.0038159
+## 394  94  skin 0.036058971 1.0048018
+## 395  95  skin 0.031747521 1.0060837
+## 396  96  skin 0.032159894 1.0063520
+## 397  97  skin 0.035057650 1.0050222
+## 398  98  skin 0.037084102 1.0046647
+## 399  99  skin 0.042594045 1.0049388
+## 400 100  skin 0.047875716 1.0063121
+## 401   1   bmi          NA 1.4268981
+## 402   2   bmi 0.677214836 0.9718824
+## 403   3   bmi 0.507819101 0.9920150
+## 404   4   bmi 0.544035675 1.4637310
+## 405   5   bmi 0.508151200 1.4475341
+## 406   6   bmi 0.500658939 1.2558078
+## 407   7   bmi 0.403791365 1.1548249
+## 408   8   bmi 0.402493101 1.1825030
+## 409   9   bmi 0.427875887 1.2569099
+## 410  10   bmi 0.422706151 1.1999467
+## 411  11   bmi 0.414863661 1.2703609
+## 412  12   bmi 0.376044131 1.2164943
+## 413  13   bmi 0.370468507 1.2118721
+## 414  14   bmi 0.349526058 1.1343605
+## 415  15   bmi 0.343422897 1.1048010
+## 416  16   bmi 0.327234570 1.0833215
+## 417  17   bmi 0.357963288 1.0994690
+## 418  18   bmi 0.340266299 1.0874638
+## 419  19   bmi 0.291845288 1.0725750
+## 420  20   bmi 0.295112875 1.0527045
+## 421  21   bmi 0.310490473 1.0671009
+## 422  22   bmi 0.310365014 1.0667273
+## 423  23   bmi 0.288106305 1.0543557
+## 424  24   bmi 0.290521307 1.0439411
+## 425  25   bmi 0.277425873 1.0399448
+## 426  26   bmi 0.287266524 1.0524196
+## 427  27   bmi 0.296133450 1.0479081
+## 428  28   bmi 0.311676583 1.0621976
+## 429  29   bmi 0.316222598 1.0644005
+## 430  30   bmi 0.314079938 1.0523858
+## 431  31   bmi 0.307604915 1.0505516
+## 432  32   bmi 0.295302681 1.0444097
+## 433  33   bmi 0.292916764 1.0489267
+## 434  34   bmi 0.298239209 1.0489633
+## 435  35   bmi 0.292841866 1.0592616
+## 436  36   bmi 0.292578849 1.0608168
+## 437  37   bmi 0.282628262 1.0583291
+## 438  38   bmi 0.278363776 1.0501766
+## 439  39   bmi 0.283209124 1.0467824
+## 440  40   bmi 0.279465118 1.0435616
+## 441  41   bmi 0.281440992 1.0410492
+## 442  42   bmi 0.270620254 1.0383847
+## 443  43   bmi 0.276947866 1.0346232
+## 444  44   bmi 0.278918860 1.0294425
+## 445  45   bmi 0.284862977 1.0274673
+## 446  46   bmi 0.294805504 1.0266541
+## 447  47   bmi 0.301081105 1.0286149
+## 448  48   bmi 0.302467802 1.0314732
+## 449  49   bmi 0.301210671 1.0335673
+## 450  50   bmi 0.306542923 1.0281314
+## 451  51   bmi 0.301833717 1.0297919
+## 452  52   bmi 0.301762760 1.0319375
+## 453  53   bmi 0.299340288 1.0340241
+## 454  54   bmi 0.301465668 1.0359921
+## 455  55   bmi 0.302860835 1.0393937
+## 456  56   bmi 0.300275018 1.0442576
+## 457  57   bmi 0.302267180 1.0404027
+## 458  58   bmi 0.300847206 1.0402422
+## 459  59   bmi 0.302749573 1.0360914
+## 460  60   bmi 0.308020186 1.0319112
+## 461  61   bmi 0.309070177 1.0321256
+## 462  62   bmi 0.301832119 1.0284095
+## 463  63   bmi 0.293367014 1.0323707
+## 464  64   bmi 0.295621858 1.0328844
+## 465  65   bmi 0.292679052 1.0316633
+## 466  66   bmi 0.293834792 1.0352908
+## 467  67   bmi 0.291669064 1.0348401
+## 468  68   bmi 0.296245460 1.0312376
+## 469  69   bmi 0.297864438 1.0318268
+## 470  70   bmi 0.293369881 1.0333711
+## 471  71   bmi 0.285627057 1.0322409
+## 472  72   bmi 0.284760432 1.0343350
+## 473  73   bmi 0.279587970 1.0359531
+## 474  74   bmi 0.279870850 1.0336048
+## 475  75   bmi 0.277670305 1.0350619
+## 476  76   bmi 0.272432601 1.0333933
+## 477  77   bmi 0.277233501 1.0319863
+## 478  78   bmi 0.278782963 1.0295987
+## 479  79   bmi 0.276425764 1.0281032
+## 480  80   bmi 0.279970956 1.0261378
+## 481  81   bmi 0.280040752 1.0263451
+## 482  82   bmi 0.280400777 1.0250475
+## 483  83   bmi 0.273759850 1.0241279
+## 484  84   bmi 0.276220265 1.0238645
+## 485  85   bmi 0.278335100 1.0238008
+## 486  86   bmi 0.279879622 1.0200788
+## 487  87   bmi 0.283256564 1.0196757
+## 488  88   bmi 0.279679009 1.0197441
+## 489  89   bmi 0.284375100 1.0198957
+## 490  90   bmi 0.282684812 1.0186495
+## 491  91   bmi 0.286653192 1.0179950
+## 492  92   bmi 0.283263071 1.0176881
+## 493  93   bmi 0.287284977 1.0180801
+## 494  94   bmi 0.291782348 1.0188281
+## 495  95   bmi 0.288422359 1.0189341
+## 496  96   bmi 0.285646575 1.0174250
+## 497  97   bmi 0.286225262 1.0172134
+## 498  98   bmi 0.288433044 1.0170597
+## 499  99   bmi 0.287950715 1.0165015
+## 500 100   bmi 0.293198564 1.0163644
+## 501   1   ped          NA        NA
+## 502   2   ped          NA        NA
+## 503   3   ped          NA        NA
+## 504   4   ped          NA        NA
+## 505   5   ped          NA        NA
+## 506   6   ped          NA        NA
+## 507   7   ped          NA        NA
+## 508   8   ped          NA        NA
+## 509   9   ped          NA        NA
+## 510  10   ped          NA        NA
+## 511  11   ped          NA        NA
+## 512  12   ped          NA        NA
+## 513  13   ped          NA        NA
+## 514  14   ped          NA        NA
+## 515  15   ped          NA        NA
+## 516  16   ped          NA        NA
+## 517  17   ped          NA        NA
+## 518  18   ped          NA        NA
+## 519  19   ped          NA        NA
+## 520  20   ped          NA        NA
+## 521  21   ped          NA        NA
+## 522  22   ped          NA        NA
+## 523  23   ped          NA        NA
+## 524  24   ped          NA        NA
+## 525  25   ped          NA        NA
+## 526  26   ped          NA        NA
+## 527  27   ped          NA        NA
+## 528  28   ped          NA        NA
+## 529  29   ped          NA        NA
+## 530  30   ped          NA        NA
+## 531  31   ped          NA        NA
+## 532  32   ped          NA        NA
+## 533  33   ped          NA        NA
+## 534  34   ped          NA        NA
+## 535  35   ped          NA        NA
+## 536  36   ped          NA        NA
+## 537  37   ped          NA        NA
+## 538  38   ped          NA        NA
+## 539  39   ped          NA        NA
+## 540  40   ped          NA        NA
+## 541  41   ped          NA        NA
+## 542  42   ped          NA        NA
+## 543  43   ped          NA        NA
+## 544  44   ped          NA        NA
+## 545  45   ped          NA        NA
+## 546  46   ped          NA        NA
+## 547  47   ped          NA        NA
+## 548  48   ped          NA        NA
+## 549  49   ped          NA        NA
+## 550  50   ped          NA        NA
+## 551  51   ped          NA        NA
+## 552  52   ped          NA        NA
+## 553  53   ped          NA        NA
+## 554  54   ped          NA        NA
+## 555  55   ped          NA        NA
+## 556  56   ped          NA        NA
+## 557  57   ped          NA        NA
+## 558  58   ped          NA        NA
+## 559  59   ped          NA        NA
+## 560  60   ped          NA        NA
+## 561  61   ped          NA        NA
+## 562  62   ped          NA        NA
+## 563  63   ped          NA        NA
+## 564  64   ped          NA        NA
+## 565  65   ped          NA        NA
+## 566  66   ped          NA        NA
+## 567  67   ped          NA        NA
+## 568  68   ped          NA        NA
+## 569  69   ped          NA        NA
+## 570  70   ped          NA        NA
+## 571  71   ped          NA        NA
+## 572  72   ped          NA        NA
+## 573  73   ped          NA        NA
+## 574  74   ped          NA        NA
+## 575  75   ped          NA        NA
+## 576  76   ped          NA        NA
+## 577  77   ped          NA        NA
+## 578  78   ped          NA        NA
+## 579  79   ped          NA        NA
+## 580  80   ped          NA        NA
+## 581  81   ped          NA        NA
+## 582  82   ped          NA        NA
+## 583  83   ped          NA        NA
+## 584  84   ped          NA        NA
+## 585  85   ped          NA        NA
+## 586  86   ped          NA        NA
+## 587  87   ped          NA        NA
+## 588  88   ped          NA        NA
+## 589  89   ped          NA        NA
+## 590  90   ped          NA        NA
+## 591  91   ped          NA        NA
+## 592  92   ped          NA        NA
+## 593  93   ped          NA        NA
+## 594  94   ped          NA        NA
+## 595  95   ped          NA        NA
+## 596  96   ped          NA        NA
+## 597  97   ped          NA        NA
+## 598  98   ped          NA        NA
+## 599  99   ped          NA        NA
+## 600 100   ped          NA        NA
+## 601   1   age          NA        NA
+## 602   2   age          NA        NA
+## 603   3   age          NA        NA
+## 604   4   age          NA        NA
+## 605   5   age          NA        NA
+## 606   6   age          NA        NA
+## 607   7   age          NA        NA
+## 608   8   age          NA        NA
+## 609   9   age          NA        NA
+## 610  10   age          NA        NA
+## 611  11   age          NA        NA
+## 612  12   age          NA        NA
+## 613  13   age          NA        NA
+## 614  14   age          NA        NA
+## 615  15   age          NA        NA
+## 616  16   age          NA        NA
+## 617  17   age          NA        NA
+## 618  18   age          NA        NA
+## 619  19   age          NA        NA
+## 620  20   age          NA        NA
+## 621  21   age          NA        NA
+## 622  22   age          NA        NA
+## 623  23   age          NA        NA
+## 624  24   age          NA        NA
+## 625  25   age          NA        NA
+## 626  26   age          NA        NA
+## 627  27   age          NA        NA
+## 628  28   age          NA        NA
+## 629  29   age          NA        NA
+## 630  30   age          NA        NA
+## 631  31   age          NA        NA
+## 632  32   age          NA        NA
+## 633  33   age          NA        NA
+## 634  34   age          NA        NA
+## 635  35   age          NA        NA
+## 636  36   age          NA        NA
+## 637  37   age          NA        NA
+## 638  38   age          NA        NA
+## 639  39   age          NA        NA
+## 640  40   age          NA        NA
+## 641  41   age          NA        NA
+## 642  42   age          NA        NA
+## 643  43   age          NA        NA
+## 644  44   age          NA        NA
+## 645  45   age          NA        NA
+## 646  46   age          NA        NA
+## 647  47   age          NA        NA
+## 648  48   age          NA        NA
+## 649  49   age          NA        NA
+## 650  50   age          NA        NA
+## 651  51   age          NA        NA
+## 652  52   age          NA        NA
+## 653  53   age          NA        NA
+## 654  54   age          NA        NA
+## 655  55   age          NA        NA
+## 656  56   age          NA        NA
+## 657  57   age          NA        NA
+## 658  58   age          NA        NA
+## 659  59   age          NA        NA
+## 660  60   age          NA        NA
+## 661  61   age          NA        NA
+## 662  62   age          NA        NA
+## 663  63   age          NA        NA
+## 664  64   age          NA        NA
+## 665  65   age          NA        NA
+## 666  66   age          NA        NA
+## 667  67   age          NA        NA
+## 668  68   age          NA        NA
+## 669  69   age          NA        NA
+## 670  70   age          NA        NA
+## 671  71   age          NA        NA
+## 672  72   age          NA        NA
+## 673  73   age          NA        NA
+## 674  74   age          NA        NA
+## 675  75   age          NA        NA
+## 676  76   age          NA        NA
+## 677  77   age          NA        NA
+## 678  78   age          NA        NA
+## 679  79   age          NA        NA
+## 680  80   age          NA        NA
+## 681  81   age          NA        NA
+## 682  82   age          NA        NA
+## 683  83   age          NA        NA
+## 684  84   age          NA        NA
+## 685  85   age          NA        NA
+## 686  86   age          NA        NA
+## 687  87   age          NA        NA
+## 688  88   age          NA        NA
+## 689  89   age          NA        NA
+## 690  90   age          NA        NA
+## 691  91   age          NA        NA
+## 692  92   age          NA        NA
+## 693  93   age          NA        NA
+## 694  94   age          NA        NA
+## 695  95   age          NA        NA
+## 696  96   age          NA        NA
+## 697  97   age          NA        NA
+## 698  98   age          NA        NA
+## 699  99   age          NA        NA
+## 700 100   age          NA        NA
+## 701   1  type          NA        NA
+## 702   2  type          NA        NA
+## 703   3  type          NA        NA
+## 704   4  type          NA        NA
+## 705   5  type          NA        NA
+## 706   6  type          NA        NA
+## 707   7  type          NA        NA
+## 708   8  type          NA        NA
+## 709   9  type          NA        NA
+## 710  10  type          NA        NA
+## 711  11  type          NA        NA
+## 712  12  type          NA        NA
+## 713  13  type          NA        NA
+## 714  14  type          NA        NA
+## 715  15  type          NA        NA
+## 716  16  type          NA        NA
+## 717  17  type          NA        NA
+## 718  18  type          NA        NA
+## 719  19  type          NA        NA
+## 720  20  type          NA        NA
+## 721  21  type          NA        NA
+## 722  22  type          NA        NA
+## 723  23  type          NA        NA
+## 724  24  type          NA        NA
+## 725  25  type          NA        NA
+## 726  26  type          NA        NA
+## 727  27  type          NA        NA
+## 728  28  type          NA        NA
+## 729  29  type          NA        NA
+## 730  30  type          NA        NA
+## 731  31  type          NA        NA
+## 732  32  type          NA        NA
+## 733  33  type          NA        NA
+## 734  34  type          NA        NA
+## 735  35  type          NA        NA
+## 736  36  type          NA        NA
+## 737  37  type          NA        NA
+## 738  38  type          NA        NA
+## 739  39  type          NA        NA
+## 740  40  type          NA        NA
+## 741  41  type          NA        NA
+## 742  42  type          NA        NA
+## 743  43  type          NA        NA
+## 744  44  type          NA        NA
+## 745  45  type          NA        NA
+## 746  46  type          NA        NA
+## 747  47  type          NA        NA
+## 748  48  type          NA        NA
+## 749  49  type          NA        NA
+## 750  50  type          NA        NA
+## 751  51  type          NA        NA
+## 752  52  type          NA        NA
+## 753  53  type          NA        NA
+## 754  54  type          NA        NA
+## 755  55  type          NA        NA
+## 756  56  type          NA        NA
+## 757  57  type          NA        NA
+## 758  58  type          NA        NA
+## 759  59  type          NA        NA
+## 760  60  type          NA        NA
+## 761  61  type          NA        NA
+## 762  62  type          NA        NA
+## 763  63  type          NA        NA
+## 764  64  type          NA        NA
+## 765  65  type          NA        NA
+## 766  66  type          NA        NA
+## 767  67  type          NA        NA
+## 768  68  type          NA        NA
+## 769  69  type          NA        NA
+## 770  70  type          NA        NA
+## 771  71  type          NA        NA
+## 772  72  type          NA        NA
+## 773  73  type          NA        NA
+## 774  74  type          NA        NA
+## 775  75  type          NA        NA
+## 776  76  type          NA        NA
+## 777  77  type          NA        NA
+## 778  78  type          NA        NA
+## 779  79  type          NA        NA
+## 780  80  type          NA        NA
+## 781  81  type          NA        NA
+## 782  82  type          NA        NA
+## 783  83  type          NA        NA
+## 784  84  type          NA        NA
+## 785  85  type          NA        NA
+## 786  86  type          NA        NA
+## 787  87  type          NA        NA
+## 788  88  type          NA        NA
+## 789  89  type          NA        NA
+## 790  90  type          NA        NA
+## 791  91  type          NA        NA
+## 792  92  type          NA        NA
+## 793  93  type          NA        NA
+## 794  94  type          NA        NA
+## 795  95  type          NA        NA
+## 796  96  type          NA        NA
+## 797  97  type          NA        NA
+## 798  98  type          NA        NA
+## 799  99  type          NA        NA
+## 800 100  type          NA        NA</code></pre>
+<div class="sourceCode" id="cb1201"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1201-1"><a href="missing-data-1.html#cb1201-1" tabindex="-1"></a>diag_mean <span class="sc">|&gt;</span> </span>
+<span id="cb1201-2"><a href="missing-data-1.html#cb1201-2" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">str_detect</span>(vrb, <span class="st">&quot;bp|skin|bmi&quot;</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb1201-3"><a href="missing-data-1.html#cb1201-3" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .it, <span class="at">y =</span> ac)) <span class="sc">+</span></span>
+<span id="cb1201-4"><a href="missing-data-1.html#cb1201-4" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb1201-5"><a href="missing-data-1.html#cb1201-5" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb1201-6"><a href="missing-data-1.html#cb1201-6" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> vrb, <span class="at">scales =</span> <span class="st">&quot;free_y&quot;</span>) <span class="sc">+</span></span>
+<span id="cb1201-7"><a href="missing-data-1.html#cb1201-7" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb1201-8"><a href="missing-data-1.html#cb1201-8" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;Iteration&quot;</span>,</span>
+<span id="cb1201-9"><a href="missing-data-1.html#cb1201-9" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;Lag-1 autocorrelation&quot;</span>,</span>
+<span id="cb1201-10"><a href="missing-data-1.html#cb1201-10" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;MICE convergence diagnostics: chain means&quot;</span></span>
+<span id="cb1201-11"><a href="missing-data-1.html#cb1201-11" tabindex="-1"></a>  )</span></code></pre></div>
+<pre><code>## Warning: Removed 1 row containing missing values or values outside the scale range
+## (`geom_line()`).</code></pre>
+<p><img src="12-missing-data_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p>For the first plot, we see a decreasing lag-1 autocorrelation through about the first 60 iterations, at which point it starts to wander. We see that <code>skin</code> and <code>bmi</code> neither get to 0 autocorrelation, but they seem to have stabilized. We present the rest of the plots without comment.</p>
+<div class="sourceCode" id="cb1203"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1203-1"><a href="missing-data-1.html#cb1203-1" tabindex="-1"></a><span class="co"># Plot PSRF for chain means</span></span>
+<span id="cb1203-2"><a href="missing-data-1.html#cb1203-2" tabindex="-1"></a>diag_mean <span class="sc">|&gt;</span> </span>
+<span id="cb1203-3"><a href="missing-data-1.html#cb1203-3" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">str_detect</span>(vrb, <span class="st">&quot;bp|skin|bmi&quot;</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb1203-4"><a href="missing-data-1.html#cb1203-4" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .it, <span class="at">y =</span> psrf)) <span class="sc">+</span></span>
+<span id="cb1203-5"><a href="missing-data-1.html#cb1203-5" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb1203-6"><a href="missing-data-1.html#cb1203-6" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb1203-7"><a href="missing-data-1.html#cb1203-7" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> vrb, <span class="at">scales =</span> <span class="st">&quot;free_y&quot;</span>) <span class="sc">+</span></span>
+<span id="cb1203-8"><a href="missing-data-1.html#cb1203-8" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb1203-9"><a href="missing-data-1.html#cb1203-9" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;Iteration&quot;</span>,</span>
+<span id="cb1203-10"><a href="missing-data-1.html#cb1203-10" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;PSRF&quot;</span>,</span>
+<span id="cb1203-11"><a href="missing-data-1.html#cb1203-11" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;MICE convergence diagnostics: chain means&quot;</span></span>
+<span id="cb1203-12"><a href="missing-data-1.html#cb1203-12" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img src="12-missing-data_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<div class="sourceCode" id="cb1204"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1204-1"><a href="missing-data-1.html#cb1204-1" tabindex="-1"></a><span class="co"># Repeat for chain SDs if you want</span></span>
+<span id="cb1204-2"><a href="missing-data-1.html#cb1204-2" tabindex="-1"></a>diag_sd <span class="sc">|&gt;</span> </span>
+<span id="cb1204-3"><a href="missing-data-1.html#cb1204-3" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">str_detect</span>(vrb, <span class="st">&quot;bp|skin|bmi&quot;</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb1204-4"><a href="missing-data-1.html#cb1204-4" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .it, <span class="at">y =</span> ac)) <span class="sc">+</span></span>
+<span id="cb1204-5"><a href="missing-data-1.html#cb1204-5" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb1204-6"><a href="missing-data-1.html#cb1204-6" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb1204-7"><a href="missing-data-1.html#cb1204-7" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> vrb, <span class="at">scales =</span> <span class="st">&quot;free_y&quot;</span>) <span class="sc">+</span></span>
+<span id="cb1204-8"><a href="missing-data-1.html#cb1204-8" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb1204-9"><a href="missing-data-1.html#cb1204-9" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;Iteration&quot;</span>,</span>
+<span id="cb1204-10"><a href="missing-data-1.html#cb1204-10" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;Lag-1 autocorrelation&quot;</span>,</span>
+<span id="cb1204-11"><a href="missing-data-1.html#cb1204-11" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;MICE convergence diagnostics: chain SDs&quot;</span></span>
+<span id="cb1204-12"><a href="missing-data-1.html#cb1204-12" tabindex="-1"></a>  )</span></code></pre></div>
+<pre><code>## Warning: Removed 1 row containing missing values or values outside the scale range
+## (`geom_line()`).</code></pre>
+<p><img src="12-missing-data_files/figure-html/unnamed-chunk-18-2.png" width="672" /></p>
+<div class="sourceCode" id="cb1206"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1206-1"><a href="missing-data-1.html#cb1206-1" tabindex="-1"></a>diag_sd <span class="sc">|&gt;</span> </span>
+<span id="cb1206-2"><a href="missing-data-1.html#cb1206-2" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">str_detect</span>(vrb, <span class="st">&quot;bp|skin|bmi&quot;</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb1206-3"><a href="missing-data-1.html#cb1206-3" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .it, <span class="at">y =</span> psrf)) <span class="sc">+</span></span>
+<span id="cb1206-4"><a href="missing-data-1.html#cb1206-4" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb1206-5"><a href="missing-data-1.html#cb1206-5" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb1206-6"><a href="missing-data-1.html#cb1206-6" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> vrb, <span class="at">scales =</span> <span class="st">&quot;free_y&quot;</span>) <span class="sc">+</span></span>
+<span id="cb1206-7"><a href="missing-data-1.html#cb1206-7" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb1206-8"><a href="missing-data-1.html#cb1206-8" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;Iteration&quot;</span>,</span>
+<span id="cb1206-9"><a href="missing-data-1.html#cb1206-9" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;PSRF&quot;</span>,</span>
+<span id="cb1206-10"><a href="missing-data-1.html#cb1206-10" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;MICE convergence diagnostics: chain SDs&quot;</span></span>
+<span id="cb1206-11"><a href="missing-data-1.html#cb1206-11" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img src="12-missing-data_files/figure-html/unnamed-chunk-18-3.png" width="672" /></p>
+<p>Overall, the convergence looks good. We do have some autocorrelation in the successive estimates of variables. According to classical MCMC diagnostics, autocorrelation generally impacts the <strong>effective sample size</strong>. It is not clear whether that is an issure here, though, as we aren’t taking multiple imputations from the same stream.</p>
+<p>Overall, these diagnostics look pretty good, and if we like, we can run the full analysis twice to see whether we get similar results as a final test.</p>
+<div class="sourceCode" id="cb1207"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1207-1"><a href="missing-data-1.html#cb1207-1" tabindex="-1"></a>imp2 <span class="ot">&lt;-</span> <span class="fu">mice</span>(pp, <span class="at">m =</span> <span class="dv">10</span>, <span class="at">maxit =</span> <span class="dv">100</span>, <span class="at">set.seed =</span> <span class="dv">2027</span>, <span class="at">printFlag =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1207-2"><a href="missing-data-1.html#cb1207-2" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">with</span>(imp, <span class="fu">lm</span>(bp <span class="sc">~</span> type))</span>
+<span id="cb1207-3"><a href="missing-data-1.html#cb1207-3" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">pool</span>(fit))</span></code></pre></div>
+<pre><code>##          term  estimate std.error statistic       df       p.value
+## 1 (Intercept) 70.773711 0.8309905  85.16789 292.9304 1.040195e-208
+## 2     typeYes  4.370628 1.4268972   3.06303 262.8270  2.418691e-03</code></pre>
+<div class="sourceCode" id="cb1209"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1209-1"><a href="missing-data-1.html#cb1209-1" tabindex="-1"></a>fit2 <span class="ot">&lt;-</span> <span class="fu">with</span>(imp2, <span class="fu">lm</span>(bp <span class="sc">~</span> type))</span>
+<span id="cb1209-2"><a href="missing-data-1.html#cb1209-2" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">pool</span>(fit2))</span></code></pre></div>
+<pre><code>##          term  estimate std.error statistic       df       p.value
+## 1 (Intercept) 70.662371 0.8404924 84.072592 286.5090 5.953085e-204
+## 2     typeYes  4.343289 1.4274567  3.042677 272.0848  2.574054e-03</code></pre>
+</div>
+<div id="pooling" class="section level2 hasAnchor" number="10.3">
+<h2><span class="header-section-number">10.3</span> Pooling<a href="missing-data-1.html#pooling" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Now that we understand how the multiple imputations are produced, we need to understand how the results are pooled into a final answer. We only consider OLS. The coefficient values are easy: you estimate the coefficient for each imputed data set and take the mean.</p>
+<p>The first command creates a <strong>list</strong> of all of the data sets. We can run each one of those through <code>lm</code>.</p>
+<div class="sourceCode" id="cb1211"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1211-1"><a href="missing-data-1.html#cb1211-1" tabindex="-1"></a>datlist <span class="ot">&lt;-</span> <span class="fu">complete</span>(imp, <span class="at">action =</span> <span class="st">&quot;all&quot;</span>)</span>
+<span id="cb1211-2"><a href="missing-data-1.html#cb1211-2" tabindex="-1"></a></span>
+<span id="cb1211-3"><a href="missing-data-1.html#cb1211-3" tabindex="-1"></a>fits <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_df</span>(datlist, <span class="cf">function</span>(dat) {</span>
+<span id="cb1211-4"><a href="missing-data-1.html#cb1211-4" tabindex="-1"></a>  <span class="fu">lm</span>(bp <span class="sc">~</span> type, <span class="at">data =</span>dat) <span class="sc">|&gt;</span> </span>
+<span id="cb1211-5"><a href="missing-data-1.html#cb1211-5" tabindex="-1"></a>    broom<span class="sc">::</span><span class="fu">tidy</span>()</span>
+<span id="cb1211-6"><a href="missing-data-1.html#cb1211-6" tabindex="-1"></a>})</span>
+<span id="cb1211-7"><a href="missing-data-1.html#cb1211-7" tabindex="-1"></a></span>
+<span id="cb1211-8"><a href="missing-data-1.html#cb1211-8" tabindex="-1"></a><span class="fu">head</span>(fits)</span></code></pre></div>
+<pre><code>## # A tibble: 6 × 5
+##   term        estimate std.error statistic   p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)    70.9      0.828     85.5  9.26e-212
+## 2 typeYes         3.91     1.39       2.81 5.32e-  3
+## 3 (Intercept)    70.7      0.821     86.1  1.52e-212
+## 4 typeYes         4.89     1.38       3.54 4.64e-  4
+## 5 (Intercept)    70.8      0.838     84.4  3.85e-210
+## 6 typeYes         4.61     1.41       3.27 1.20e-  3</code></pre>
+<p>We see we have slope and intercept estimates for each of the imputed data sets. To get the pooled estimate, we simply average and compare to <code>mice::pool</code>.</p>
+<div class="sourceCode" id="cb1213"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1213-1"><a href="missing-data-1.html#cb1213-1" tabindex="-1"></a>fits <span class="sc">|&gt;</span> </span>
+<span id="cb1213-2"><a href="missing-data-1.html#cb1213-2" tabindex="-1"></a>  <span class="fu">group_by</span>(term) <span class="sc">|&gt;</span> </span>
+<span id="cb1213-3"><a href="missing-data-1.html#cb1213-3" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">estimate =</span> <span class="fu">mean</span>(estimate)) <span class="sc">|&gt;</span> </span>
+<span id="cb1213-4"><a href="missing-data-1.html#cb1213-4" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb1213-5"><a href="missing-data-1.html#cb1213-5" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">digits =</span> <span class="dv">7</span>)</span></code></pre></div>
+<pre><code>##          term  estimate
+## 1 (Intercept) 70.773711
+## 2     typeYes  4.370628</code></pre>
+<div class="sourceCode" id="cb1215"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1215-1"><a href="missing-data-1.html#cb1215-1" tabindex="-1"></a><span class="fu">pool</span>(<span class="fu">with</span>(imp, <span class="fu">lm</span>(bp <span class="sc">~</span> type))) <span class="sc">|&gt;</span> <span class="fu">summary</span>()</span></code></pre></div>
+<pre><code>##          term  estimate std.error statistic       df       p.value
+## 1 (Intercept) 70.773711 0.8309905  85.16789 292.9304 1.040195e-208
+## 2     typeYes  4.370628 1.4268972   3.06303 262.8270  2.418691e-03</code></pre>
+<p>For the pooled estimate of standard error for the slope, we need to combine both an estimate of the the standard errors and additionally we need to add a component that takes into account our uncertainty in the estimate of the coefficients. I asked ChatGPT to give a short heuristic for the formula, and it wrote - Rubin’s pooling rule adds the between-imputation variance <span class="math inline">\(B\)</span> because the estimates from the different imputed datasets do not agree exactly, and that disagreement reflects real uncertainty about the missing values. The usual within-imputation variance <span class="math inline">\(\bar U\)</span> tells us how uncertain we would be if the data were complete, while <span class="math inline">\(B\)</span> measures the additional uncertainty created by not knowing the missing data. Thus the pooled variance must account for both ordinary sampling variability and the extra variability introduced by the imputation process.</p>
+<div class="sourceCode" id="cb1217"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1217-1"><a href="missing-data-1.html#cb1217-1" tabindex="-1"></a><span class="fu">pool</span>(<span class="fu">with</span>(imp, <span class="fu">lm</span>(bp <span class="sc">~</span> type))) </span></code></pre></div>
+<pre><code>## Class: mipo    m = 10 
+##          term  m  estimate      ubar          b         t dfcom       df
+## 1 (Intercept) 10 70.773711 0.6848528 0.00517501 0.6905453   298 292.9304
+## 2     typeYes 10  4.370628 1.9382626 0.08888458 2.0360356   298 262.8270
+##           riv      lambda        fmi
+## 1 0.008312021 0.008243501 0.01494614
+## 2 0.050443649 0.048021280 0.05518367</code></pre>
+<div class="sourceCode" id="cb1219"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1219-1"><a href="missing-data-1.html#cb1219-1" tabindex="-1"></a>fits <span class="sc">|&gt;</span> </span>
+<span id="cb1219-2"><a href="missing-data-1.html#cb1219-2" tabindex="-1"></a>  <span class="fu">filter</span>(term <span class="sc">==</span> <span class="st">&quot;typeYes&quot;</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb1219-3"><a href="missing-data-1.html#cb1219-3" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">B =</span> <span class="fu">var</span>(estimate), <span class="at">Ubar =</span> <span class="fu">mean</span>(std.error<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb1219-4"><a href="missing-data-1.html#cb1219-4" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">se =</span> <span class="fu">sqrt</span>((<span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">10</span>) <span class="sc">*</span> B <span class="sc">+</span> Ubar)) <span class="sc">|&gt;</span> </span>
+<span id="cb1219-5"><a href="missing-data-1.html#cb1219-5" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb1219-6"><a href="missing-data-1.html#cb1219-6" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">digits =</span> <span class="dv">7</span>)</span></code></pre></div>
+<pre><code>##         se
+## 1 1.426897</code></pre>
+<div class="sourceCode" id="cb1221"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1221-1"><a href="missing-data-1.html#cb1221-1" tabindex="-1"></a><span class="fu">pool</span>(<span class="fu">with</span>(imp, <span class="fu">lm</span>(bp <span class="sc">~</span> type))) <span class="sc">|&gt;</span> <span class="fu">summary</span>()</span></code></pre></div>
+<pre><code>##          term  estimate std.error statistic       df       p.value
+## 1 (Intercept) 70.773711 0.8309905  85.16789 292.9304 1.040195e-208
+## 2     typeYes  4.370628 1.4268972   3.06303 262.8270  2.418691e-03</code></pre>
+</div>
+<div id="simulations" class="section level2 hasAnchor" number="10.4">
+<h2><span class="header-section-number">10.4</span> Simulations<a href="missing-data-1.html#simulations" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Now, let’s compare using <code>mice</code> to using complete cases and using mean imputation, two methods that are also relatively commonly used. We compare the bias of estimates 95 for the coefficients in the three cases.</p>
+<p>We will have a data set with two predictors and a response, and we will choose missing data according to other data in the set. Note that this is essentially the model that we use in <code>mice</code>. If the data is missing by a different mechanism, then results might be different.</p>
+<div class="sourceCode" id="cb1223"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1223-1"><a href="missing-data-1.html#cb1223-1" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x1 =</span> <span class="fu">runif</span>(<span class="dv">50</span>),</span>
+<span id="cb1223-2"><a href="missing-data-1.html#cb1223-2" tabindex="-1"></a>           <span class="at">x2 =</span> <span class="fu">runif</span>(<span class="dv">50</span>))</span>
+<span id="cb1223-3"><a href="missing-data-1.html#cb1223-3" tabindex="-1"></a></span>
+<span id="cb1223-4"><a href="missing-data-1.html#cb1223-4" tabindex="-1"></a>dd <span class="ot">&lt;-</span> dd <span class="sc">|&gt;</span> </span>
+<span id="cb1223-5"><a href="missing-data-1.html#cb1223-5" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">y =</span> x1 <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> x2 <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="dv">0</span>, <span class="fl">1.5</span>)) </span></code></pre></div>
+<p>That is our data set, now we need to inject missing data. We will aim for about 10% missing in <code>x1</code> and <code>x2</code> separately. Some rows may have both variables missing.</p>
+<div class="sourceCode" id="cb1224"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1224-1"><a href="missing-data-1.html#cb1224-1" tabindex="-1"></a>rep <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
+<span id="cb1224-2"><a href="missing-data-1.html#cb1224-2" tabindex="-1"></a><span class="cf">while</span>(rep) {</span>
+<span id="cb1224-3"><a href="missing-data-1.html#cb1224-3" tabindex="-1"></a>  b1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1</span>, <span class="sc">-</span><span class="dv">5</span>, <span class="dv">0</span>)</span>
+<span id="cb1224-4"><a href="missing-data-1.html#cb1224-4" tabindex="-1"></a>  b2 <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1</span>, <span class="sc">-</span><span class="dv">20</span>, <span class="dv">0</span>)</span>
+<span id="cb1224-5"><a href="missing-data-1.html#cb1224-5" tabindex="-1"></a>  ex <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">plogis</span>(b1 <span class="sc">*</span> dd<span class="sc">$</span>y <span class="sc">+</span> b2 <span class="sc">*</span> dd<span class="sc">$</span>x2))</span>
+<span id="cb1224-6"><a href="missing-data-1.html#cb1224-6" tabindex="-1"></a>  <span class="cf">if</span>(ex <span class="sc">&gt;</span> <span class="dv">4</span> <span class="sc">&amp;&amp;</span> ex <span class="sc">&lt;</span> <span class="dv">6</span>) {</span>
+<span id="cb1224-7"><a href="missing-data-1.html#cb1224-7" tabindex="-1"></a>    rep <span class="ot">&lt;-</span> <span class="cn">FALSE</span></span>
+<span id="cb1224-8"><a href="missing-data-1.html#cb1224-8" tabindex="-1"></a>  }</span>
+<span id="cb1224-9"><a href="missing-data-1.html#cb1224-9" tabindex="-1"></a>}</span>
+<span id="cb1224-10"><a href="missing-data-1.html#cb1224-10" tabindex="-1"></a>removex1 <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">as.logical</span>(<span class="fu">rbinom</span>(<span class="dv">50</span>, <span class="dv">1</span>, <span class="at">prob =</span> <span class="fu">plogis</span>(b1 <span class="sc">*</span> dd<span class="sc">$</span>y <span class="sc">+</span> b2 <span class="sc">*</span> dd<span class="sc">$</span>x2))))</span>
+<span id="cb1224-11"><a href="missing-data-1.html#cb1224-11" tabindex="-1"></a></span>
+<span id="cb1224-12"><a href="missing-data-1.html#cb1224-12" tabindex="-1"></a></span>
+<span id="cb1224-13"><a href="missing-data-1.html#cb1224-13" tabindex="-1"></a>rep <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
+<span id="cb1224-14"><a href="missing-data-1.html#cb1224-14" tabindex="-1"></a><span class="cf">while</span>(rep) {</span>
+<span id="cb1224-15"><a href="missing-data-1.html#cb1224-15" tabindex="-1"></a>  b1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1</span>, <span class="sc">-</span><span class="dv">5</span>, <span class="dv">0</span>)</span>
+<span id="cb1224-16"><a href="missing-data-1.html#cb1224-16" tabindex="-1"></a>  b2 <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1</span>, <span class="sc">-</span><span class="dv">10</span>, <span class="dv">0</span>)</span>
+<span id="cb1224-17"><a href="missing-data-1.html#cb1224-17" tabindex="-1"></a>  ex <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">plogis</span>(b1 <span class="sc">*</span> dd<span class="sc">$</span>y <span class="sc">+</span> b2 <span class="sc">*</span> (dd<span class="sc">$</span>x1 <span class="sc">+</span> <span class="fl">0.5</span>)))</span>
+<span id="cb1224-18"><a href="missing-data-1.html#cb1224-18" tabindex="-1"></a>  <span class="fu">plogis</span>(b1 <span class="sc">*</span> dd<span class="sc">$</span>y <span class="sc">+</span> b2 <span class="sc">*</span> (dd<span class="sc">$</span>x1 <span class="sc">+</span> <span class="fl">0.5</span>))</span>
+<span id="cb1224-19"><a href="missing-data-1.html#cb1224-19" tabindex="-1"></a>  ex</span>
+<span id="cb1224-20"><a href="missing-data-1.html#cb1224-20" tabindex="-1"></a>  <span class="cf">if</span>(ex <span class="sc">&gt;</span> <span class="dv">4</span> <span class="sc">&amp;&amp;</span> ex <span class="sc">&lt;</span> <span class="dv">6</span>) {</span>
+<span id="cb1224-21"><a href="missing-data-1.html#cb1224-21" tabindex="-1"></a>    rep <span class="ot">&lt;-</span> <span class="cn">FALSE</span></span>
+<span id="cb1224-22"><a href="missing-data-1.html#cb1224-22" tabindex="-1"></a>  }</span>
+<span id="cb1224-23"><a href="missing-data-1.html#cb1224-23" tabindex="-1"></a>}</span>
+<span id="cb1224-24"><a href="missing-data-1.html#cb1224-24" tabindex="-1"></a>removex2 <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">as.logical</span>(<span class="fu">rbinom</span>(<span class="dv">50</span>, <span class="dv">1</span>, <span class="at">prob =</span> <span class="fu">plogis</span>(b1 <span class="sc">*</span> dd<span class="sc">$</span>y <span class="sc">+</span> b2 <span class="sc">*</span> (dd<span class="sc">$</span>x1 <span class="sc">+</span> <span class="fl">0.5</span>)  ))))</span>
+<span id="cb1224-25"><a href="missing-data-1.html#cb1224-25" tabindex="-1"></a></span>
+<span id="cb1224-26"><a href="missing-data-1.html#cb1224-26" tabindex="-1"></a>dd<span class="sc">$</span>x1[removex1] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb1224-27"><a href="missing-data-1.html#cb1224-27" tabindex="-1"></a>dd<span class="sc">$</span>x2[removex2] <span class="ot">&lt;-</span> <span class="cn">NA</span></span></code></pre></div>
+<p>Our three models are built below:</p>
+<div class="sourceCode" id="cb1225"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1225-1"><a href="missing-data-1.html#cb1225-1" tabindex="-1"></a>mod1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> dd)</span>
+<span id="cb1225-2"><a href="missing-data-1.html#cb1225-2" tabindex="-1"></a>broom<span class="sc">::</span><span class="fu">tidy</span>(mod1) <span class="sc">|&gt;</span> </span>
+<span id="cb1225-3"><a href="missing-data-1.html#cb1225-3" tabindex="-1"></a>  <span class="fu">select</span>(term, estimate) <span class="sc">|&gt;</span> </span>
+<span id="cb1225-4"><a href="missing-data-1.html#cb1225-4" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">method =</span> <span class="st">&quot;complete_cases&quot;</span>)</span></code></pre></div>
+<pre><code>## # A tibble: 3 × 3
+##   term        estimate method        
+##   &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;         
+## 1 (Intercept)    0.876 complete_cases
+## 2 x1             1.02  complete_cases
+## 3 x2             0.896 complete_cases</code></pre>
+<div class="sourceCode" id="cb1227"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1227-1"><a href="missing-data-1.html#cb1227-1" tabindex="-1"></a>dd2 <span class="ot">&lt;-</span> dd <span class="sc">|&gt;</span> </span>
+<span id="cb1227-2"><a href="missing-data-1.html#cb1227-2" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">x1 =</span> <span class="fu">case_when</span>(</span>
+<span id="cb1227-3"><a href="missing-data-1.html#cb1227-3" tabindex="-1"></a>    <span class="fu">is.na</span>(x1) <span class="sc">~</span> <span class="fu">mean</span>(x1, <span class="at">na.rm =</span> T),</span>
+<span id="cb1227-4"><a href="missing-data-1.html#cb1227-4" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> x1</span>
+<span id="cb1227-5"><a href="missing-data-1.html#cb1227-5" tabindex="-1"></a>  ),</span>
+<span id="cb1227-6"><a href="missing-data-1.html#cb1227-6" tabindex="-1"></a>  <span class="at">x2 =</span> <span class="fu">case_when</span>(</span>
+<span id="cb1227-7"><a href="missing-data-1.html#cb1227-7" tabindex="-1"></a>    <span class="fu">is.na</span>(x2) <span class="sc">~</span> <span class="fu">mean</span>(x2, <span class="at">na.rm =</span> T),</span>
+<span id="cb1227-8"><a href="missing-data-1.html#cb1227-8" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> x2</span>
+<span id="cb1227-9"><a href="missing-data-1.html#cb1227-9" tabindex="-1"></a>  ))</span>
+<span id="cb1227-10"><a href="missing-data-1.html#cb1227-10" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> dd2)</span>
+<span id="cb1227-11"><a href="missing-data-1.html#cb1227-11" tabindex="-1"></a>broom<span class="sc">::</span><span class="fu">tidy</span>(mod2) <span class="sc">|&gt;</span> </span>
+<span id="cb1227-12"><a href="missing-data-1.html#cb1227-12" tabindex="-1"></a>  <span class="fu">select</span>(term, estimate) <span class="sc">|&gt;</span> </span>
+<span id="cb1227-13"><a href="missing-data-1.html#cb1227-13" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">method =</span> <span class="st">&quot;mean&quot;</span>)</span></code></pre></div>
+<pre><code>## # A tibble: 3 × 3
+##   term        estimate method
+##   &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; 
+## 1 (Intercept)    0.538 mean  
+## 2 x1             0.508 mean  
+## 3 x2             1.14  mean</code></pre>
+<div class="sourceCode" id="cb1229"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1229-1"><a href="missing-data-1.html#cb1229-1" tabindex="-1"></a>imp <span class="ot">&lt;-</span> <span class="fu">mice</span>(dd, <span class="at">m =</span> <span class="dv">12</span>, <span class="at">printFlag =</span> F)</span>
+<span id="cb1229-2"><a href="missing-data-1.html#cb1229-2" tabindex="-1"></a>mod3 <span class="ot">&lt;-</span> <span class="fu">with</span>(imp, <span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2))</span>
+<span id="cb1229-3"><a href="missing-data-1.html#cb1229-3" tabindex="-1"></a><span class="fu">pool</span>(mod3)<span class="sc">$</span>pooled <span class="sc">|&gt;</span> </span>
+<span id="cb1229-4"><a href="missing-data-1.html#cb1229-4" tabindex="-1"></a>  <span class="fu">select</span>(term, estimate) <span class="sc">|&gt;</span> </span>
+<span id="cb1229-5"><a href="missing-data-1.html#cb1229-5" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">method =</span> <span class="st">&quot;mice&quot;</span>)</span></code></pre></div>
+<pre><code>##          term  estimate method
+## 1 (Intercept) 0.8216117   mice
+## 2          x1 0.3657083   mice
+## 3          x2 0.7835339   mice</code></pre>
+<p>Now we iterate:</p>
+<div class="sourceCode" id="cb1231"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1231-1"><a href="missing-data-1.html#cb1231-1" tabindex="-1"></a>tt <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_df</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">500</span>, <span class="cf">function</span>(x) {</span>
+<span id="cb1231-2"><a href="missing-data-1.html#cb1231-2" tabindex="-1"></a>  dd <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x1 =</span> <span class="fu">runif</span>(<span class="dv">50</span>),</span>
+<span id="cb1231-3"><a href="missing-data-1.html#cb1231-3" tabindex="-1"></a>                   <span class="at">x2 =</span> <span class="fu">runif</span>(<span class="dv">50</span>))</span>
+<span id="cb1231-4"><a href="missing-data-1.html#cb1231-4" tabindex="-1"></a>  </span>
+<span id="cb1231-5"><a href="missing-data-1.html#cb1231-5" tabindex="-1"></a>  dd <span class="ot">&lt;-</span> dd <span class="sc">|&gt;</span> </span>
+<span id="cb1231-6"><a href="missing-data-1.html#cb1231-6" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">y =</span> x1 <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> x2 <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">50</span>, <span class="dv">0</span>, <span class="fl">1.5</span>)) </span>
+<span id="cb1231-7"><a href="missing-data-1.html#cb1231-7" tabindex="-1"></a>  </span>
+<span id="cb1231-8"><a href="missing-data-1.html#cb1231-8" tabindex="-1"></a>  rep <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
+<span id="cb1231-9"><a href="missing-data-1.html#cb1231-9" tabindex="-1"></a>  <span class="cf">while</span>(rep) {</span>
+<span id="cb1231-10"><a href="missing-data-1.html#cb1231-10" tabindex="-1"></a>    b1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1</span>, <span class="sc">-</span><span class="dv">5</span>, <span class="dv">0</span>)</span>
+<span id="cb1231-11"><a href="missing-data-1.html#cb1231-11" tabindex="-1"></a>    b2 <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1</span>, <span class="sc">-</span><span class="dv">20</span>, <span class="dv">0</span>)</span>
+<span id="cb1231-12"><a href="missing-data-1.html#cb1231-12" tabindex="-1"></a>    ex <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">plogis</span>(b1 <span class="sc">*</span> dd<span class="sc">$</span>y <span class="sc">+</span> b2 <span class="sc">*</span> dd<span class="sc">$</span>x2))</span>
+<span id="cb1231-13"><a href="missing-data-1.html#cb1231-13" tabindex="-1"></a>    <span class="cf">if</span>(ex <span class="sc">&gt;</span> <span class="dv">3</span> <span class="sc">&amp;&amp;</span> ex <span class="sc">&lt;</span> <span class="dv">7</span>) {</span>
+<span id="cb1231-14"><a href="missing-data-1.html#cb1231-14" tabindex="-1"></a>      rep <span class="ot">&lt;-</span> <span class="cn">FALSE</span></span>
+<span id="cb1231-15"><a href="missing-data-1.html#cb1231-15" tabindex="-1"></a>    }</span>
+<span id="cb1231-16"><a href="missing-data-1.html#cb1231-16" tabindex="-1"></a>  }</span>
+<span id="cb1231-17"><a href="missing-data-1.html#cb1231-17" tabindex="-1"></a>  removex1 <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">as.logical</span>(<span class="fu">rbinom</span>(<span class="dv">50</span>, <span class="dv">1</span>, <span class="at">prob =</span> <span class="fu">plogis</span>(b1 <span class="sc">*</span> dd<span class="sc">$</span>y <span class="sc">+</span> b2 <span class="sc">*</span> dd<span class="sc">$</span>x2))))</span>
+<span id="cb1231-18"><a href="missing-data-1.html#cb1231-18" tabindex="-1"></a>  </span>
+<span id="cb1231-19"><a href="missing-data-1.html#cb1231-19" tabindex="-1"></a>  </span>
+<span id="cb1231-20"><a href="missing-data-1.html#cb1231-20" tabindex="-1"></a>  rep <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
+<span id="cb1231-21"><a href="missing-data-1.html#cb1231-21" tabindex="-1"></a>  <span class="cf">while</span>(rep) {</span>
+<span id="cb1231-22"><a href="missing-data-1.html#cb1231-22" tabindex="-1"></a>    b1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1</span>, <span class="sc">-</span><span class="dv">5</span>, <span class="dv">0</span>)</span>
+<span id="cb1231-23"><a href="missing-data-1.html#cb1231-23" tabindex="-1"></a>    b2 <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1</span>, <span class="sc">-</span><span class="dv">10</span>, <span class="dv">0</span>)</span>
+<span id="cb1231-24"><a href="missing-data-1.html#cb1231-24" tabindex="-1"></a>    ex <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">plogis</span>(b1 <span class="sc">*</span> dd<span class="sc">$</span>y <span class="sc">+</span> b2 <span class="sc">*</span> (dd<span class="sc">$</span>x1 <span class="sc">+</span> <span class="fl">0.5</span>)))</span>
+<span id="cb1231-25"><a href="missing-data-1.html#cb1231-25" tabindex="-1"></a>    <span class="fu">plogis</span>(b1 <span class="sc">*</span> dd<span class="sc">$</span>y <span class="sc">+</span> b2 <span class="sc">*</span> (dd<span class="sc">$</span>x1 <span class="sc">+</span> <span class="fl">0.5</span>))</span>
+<span id="cb1231-26"><a href="missing-data-1.html#cb1231-26" tabindex="-1"></a>    ex</span>
+<span id="cb1231-27"><a href="missing-data-1.html#cb1231-27" tabindex="-1"></a>    <span class="cf">if</span>(ex <span class="sc">&gt;</span> <span class="dv">3</span> <span class="sc">&amp;&amp;</span> ex <span class="sc">&lt;</span> <span class="dv">7</span>) {</span>
+<span id="cb1231-28"><a href="missing-data-1.html#cb1231-28" tabindex="-1"></a>      rep <span class="ot">&lt;-</span> <span class="cn">FALSE</span></span>
+<span id="cb1231-29"><a href="missing-data-1.html#cb1231-29" tabindex="-1"></a>    }</span>
+<span id="cb1231-30"><a href="missing-data-1.html#cb1231-30" tabindex="-1"></a>  }</span>
+<span id="cb1231-31"><a href="missing-data-1.html#cb1231-31" tabindex="-1"></a>  removex2 <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">as.logical</span>(<span class="fu">rbinom</span>(<span class="dv">50</span>, <span class="dv">1</span>, <span class="at">prob =</span> <span class="fu">plogis</span>(b1 <span class="sc">*</span> dd<span class="sc">$</span>y <span class="sc">+</span> b2 <span class="sc">*</span> (dd<span class="sc">$</span>x1 <span class="sc">+</span> <span class="fl">0.5</span>)  ))))</span>
+<span id="cb1231-32"><a href="missing-data-1.html#cb1231-32" tabindex="-1"></a>  </span>
+<span id="cb1231-33"><a href="missing-data-1.html#cb1231-33" tabindex="-1"></a>  dd<span class="sc">$</span>x1[removex1] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb1231-34"><a href="missing-data-1.html#cb1231-34" tabindex="-1"></a>  dd<span class="sc">$</span>x2[removex2] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb1231-35"><a href="missing-data-1.html#cb1231-35" tabindex="-1"></a>  </span>
+<span id="cb1231-36"><a href="missing-data-1.html#cb1231-36" tabindex="-1"></a>  </span>
+<span id="cb1231-37"><a href="missing-data-1.html#cb1231-37" tabindex="-1"></a>  mod1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> dd)</span>
+<span id="cb1231-38"><a href="missing-data-1.html#cb1231-38" tabindex="-1"></a>  </span>
+<span id="cb1231-39"><a href="missing-data-1.html#cb1231-39" tabindex="-1"></a>  </span>
+<span id="cb1231-40"><a href="missing-data-1.html#cb1231-40" tabindex="-1"></a>  dd2 <span class="ot">&lt;-</span> dd <span class="sc">|&gt;</span> </span>
+<span id="cb1231-41"><a href="missing-data-1.html#cb1231-41" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">x1 =</span> <span class="fu">case_when</span>(</span>
+<span id="cb1231-42"><a href="missing-data-1.html#cb1231-42" tabindex="-1"></a>      <span class="fu">is.na</span>(x1) <span class="sc">~</span> <span class="fu">mean</span>(x1, <span class="at">na.rm =</span> T),</span>
+<span id="cb1231-43"><a href="missing-data-1.html#cb1231-43" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> x1</span>
+<span id="cb1231-44"><a href="missing-data-1.html#cb1231-44" tabindex="-1"></a>    ),</span>
+<span id="cb1231-45"><a href="missing-data-1.html#cb1231-45" tabindex="-1"></a>    <span class="at">x2 =</span> <span class="fu">case_when</span>(</span>
+<span id="cb1231-46"><a href="missing-data-1.html#cb1231-46" tabindex="-1"></a>      <span class="fu">is.na</span>(x2) <span class="sc">~</span> <span class="fu">mean</span>(x2, <span class="at">na.rm =</span> T),</span>
+<span id="cb1231-47"><a href="missing-data-1.html#cb1231-47" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> x2</span>
+<span id="cb1231-48"><a href="missing-data-1.html#cb1231-48" tabindex="-1"></a>    ))</span>
+<span id="cb1231-49"><a href="missing-data-1.html#cb1231-49" tabindex="-1"></a>  mod2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> dd2)</span>
+<span id="cb1231-50"><a href="missing-data-1.html#cb1231-50" tabindex="-1"></a>  </span>
+<span id="cb1231-51"><a href="missing-data-1.html#cb1231-51" tabindex="-1"></a>  </span>
+<span id="cb1231-52"><a href="missing-data-1.html#cb1231-52" tabindex="-1"></a>  imp <span class="ot">&lt;-</span> <span class="fu">mice</span>(dd, <span class="at">m =</span> <span class="dv">12</span>, <span class="at">printFlag =</span> F)</span>
+<span id="cb1231-53"><a href="missing-data-1.html#cb1231-53" tabindex="-1"></a>  mod3 <span class="ot">&lt;-</span> <span class="fu">with</span>(imp, <span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2))</span>
+<span id="cb1231-54"><a href="missing-data-1.html#cb1231-54" tabindex="-1"></a>  </span>
+<span id="cb1231-55"><a href="missing-data-1.html#cb1231-55" tabindex="-1"></a>  <span class="fu">bind_rows</span>(broom<span class="sc">::</span><span class="fu">tidy</span>(mod2) <span class="sc">|&gt;</span> </span>
+<span id="cb1231-56"><a href="missing-data-1.html#cb1231-56" tabindex="-1"></a>              <span class="fu">select</span>(term, estimate) <span class="sc">|&gt;</span> </span>
+<span id="cb1231-57"><a href="missing-data-1.html#cb1231-57" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">method =</span> <span class="st">&quot;mean&quot;</span>),</span>
+<span id="cb1231-58"><a href="missing-data-1.html#cb1231-58" tabindex="-1"></a>            broom<span class="sc">::</span><span class="fu">tidy</span>(mod1) <span class="sc">|&gt;</span> </span>
+<span id="cb1231-59"><a href="missing-data-1.html#cb1231-59" tabindex="-1"></a>              <span class="fu">select</span>(term, estimate) <span class="sc">|&gt;</span> </span>
+<span id="cb1231-60"><a href="missing-data-1.html#cb1231-60" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">method =</span> <span class="st">&quot;complete_cases&quot;</span>),</span>
+<span id="cb1231-61"><a href="missing-data-1.html#cb1231-61" tabindex="-1"></a>            <span class="fu">pool</span>(mod3)<span class="sc">$</span>pooled <span class="sc">|&gt;</span> </span>
+<span id="cb1231-62"><a href="missing-data-1.html#cb1231-62" tabindex="-1"></a>              <span class="fu">select</span>(term, estimate) <span class="sc">|&gt;</span> </span>
+<span id="cb1231-63"><a href="missing-data-1.html#cb1231-63" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">method =</span> <span class="st">&quot;mice&quot;</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb1231-64"><a href="missing-data-1.html#cb1231-64" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">iteration =</span> x)</span>
+<span id="cb1231-65"><a href="missing-data-1.html#cb1231-65" tabindex="-1"></a>  </span>
+<span id="cb1231-66"><a href="missing-data-1.html#cb1231-66" tabindex="-1"></a>  </span>
+<span id="cb1231-67"><a href="missing-data-1.html#cb1231-67" tabindex="-1"></a>})</span>
+<span id="cb1231-68"><a href="missing-data-1.html#cb1231-68" tabindex="-1"></a></span>
+<span id="cb1231-69"><a href="missing-data-1.html#cb1231-69" tabindex="-1"></a><span class="fu">save</span>(tt, <span class="at">file =</span> <span class="st">&quot;mice_simulation.rda&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1232"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1232-1"><a href="missing-data-1.html#cb1232-1" tabindex="-1"></a><span class="fu">load</span>(<span class="st">&quot;mice_simulation.rda&quot;</span>)</span>
+<span id="cb1232-2"><a href="missing-data-1.html#cb1232-2" tabindex="-1"></a></span>
+<span id="cb1232-3"><a href="missing-data-1.html#cb1232-3" tabindex="-1"></a>tt <span class="sc">|&gt;</span> </span>
+<span id="cb1232-4"><a href="missing-data-1.html#cb1232-4" tabindex="-1"></a>  <span class="fu">group_by</span>(term, method) <span class="sc">|&gt;</span> </span>
+<span id="cb1232-5"><a href="missing-data-1.html#cb1232-5" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">mu =</span> <span class="fu">mean</span>(estimate)) <span class="sc">|&gt;</span> </span>
+<span id="cb1232-6"><a href="missing-data-1.html#cb1232-6" tabindex="-1"></a>  <span class="fu">arrange</span>(method)</span></code></pre></div>
+<pre><code>## `summarise()` has regrouped the output.
+## ℹ Summaries were computed grouped by term and method.
+## ℹ Output is grouped by term.
+## ℹ Use `summarise(.groups = &quot;drop_last&quot;)` to silence this message.
+## ℹ Use `summarise(.by = c(term, method))` for per-operation grouping
+##   (`?dplyr::dplyr_by`) instead.</code></pre>
+<pre><code>## # A tibble: 9 × 3
+## # Groups:   term [3]
+##   term        method            mu
+##   &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt;
+## 1 (Intercept) complete_cases 0.805
+## 2 x1          complete_cases 0.682
+## 3 x2          complete_cases 1.33 
+## 4 (Intercept) mean           0.198
+## 5 x1          mean           0.905
+## 6 x2          mean           1.64 
+## 7 (Intercept) mice           0.122
+## 8 x1          mice           0.941
+## 9 x2          mice           1.82</code></pre>
 
+</div>
 </div>
             </section>
 

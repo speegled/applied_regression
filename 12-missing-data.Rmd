@@ -113,13 +113,345 @@ betadot
 coef(mod)
 ```
 
-Now we predict our `x1` variable.
+Now we predict our `x1` variable from the perturbed values of the coefficients. We can compare to the prediction from the original value of the coefficients by using `predict`. 
 
 ```{r}
-betadot %*% matrix(c(rep(1, times = length(missingx1)), aa$y[missingx1], aa$x2[missingx1]), nrow = length(missingx1))
+pp <- betadot %*% t(matrix(c(rep(1, times = length(missingx1)), aa$y[missingx1], aa$x2[missingx1]), nrow = length(missingx1)))
+pp
 predict(mod, newdata = aa[missingx1,])
+```
+
+We don't automatically take the closest value to the predicted values; we choose the nearest 5 or so closest values and choose one at random.
+
+```{r}
+find_replacement <- function(vector, val) {
+  candidates <- sort(abs(vector - val), index.return = TRUE)$ix[1:5]
+  vector[sample(candidates, 1)]
+}
+
+find_replacement <- Vectorize(find_replacement, vectorize.args = "val")
+aa$x1[missingx1] <- find_replacement(aa$x1, pp)
+```
+
+Now, we repeat the entire process for the second predictor variable.
+
+```{r}
+mod <- lm(x2 ~ y + x1, data = aa)
+betadot <- MASS::mvrnorm(1, mu = coef(mod), Sigma = vcov(mod))
+pp <- betadot %*% t(matrix(c(rep(1, times = length(missingx1)), aa$y[missingx1], aa$x2[missingx1]), nrow = length(missingx1)))
+find_replacement <- Vectorize(find_replacement, vectorize.args = "val")
+aa$x2[missingx1] <- find_replacement(aa$x2, pp)
+```
+
+Then, we would repeat this a bunch of times for a burn-in or initialization phase, and after that burn-in, we would start to take values. The package name `mice` stands for multiple imputation by chained equations; the chaining is the repeating of the imputation like we are doing here. 
+
+To be clear, this leaves out some important steps along the way, but it does give the **flavor** of the algorithm.  
+
+Now that we have seen how it works for **one stream**, we need to get multiple imputations. `mice` will have as many streams as you want imputations, and after a number of iterations, it will take one data set from each stream. For diagnostics, what we like to see is that each of the streams is mixing well. They are offering similar ranges of values across each of the streams. You don't want to see one stream off in Jefferson City while the other streams are in CWE. In practice, we will use the built in diagnostics to determine whether that is accurate.
+
+## Diagnostics
+
+We return to our example above and look at the built in diagnostics. We re-run the imputation model to include more iterations and more streams.
+
+```{r}
+pp <- MASS::Pima.tr2 |> 
+  as_tibble()
+imp <- mice(pp, m = 10, maxit = 100, seed = 2026, printFlag = FALSE)
+plot(imp)
+```
+
+We can see that the chains seem to be mixing pretty well over the ten iterations shown. Now, we check convergence.
+
+```{r}
+diag_mean <- convergence(imp, diagnostic = "all", parameter = "mean")
+diag_mean |> 
+  filter(!is.na(ac)) |> 
+  head()
+
+diag_sd <- convergence(imp, diagnostic = "all", parameter = "sd")
+diag_sd |> 
+  filter(!is.na(ac)) |> 
+  head()
+```
+
+The `psrf` variable is measuring the variance of the variable *within* the stream versus the variance of the variable *between* the streams. Ideally, this should be close to 1. The `ac` variable is measuring the autocorrelation of the variable. Ideally, this should be close to 0. However, possibly more important than the *values* of the statistics is the *behavior* of the statistics. If the statistic shows a clear decreasing trend over iterations, then that is evidence that the stream has not yet fully converged, and we should consider running the stream for more iterations. Let's look at some plots. 
+
+```{r}
+# Plot lag-1 autocorrelation for chain means
+diag_mean
+diag_mean |> 
+  filter(str_detect(vrb, "bp|skin|bmi")) |> 
+  ggplot(aes(x = .it, y = ac)) +
+  geom_line() +
+  geom_hline(yintercept = 0, linetype = 2) +
+  facet_wrap(~ vrb, scales = "free_y") +
+  labs(
+    x = "Iteration",
+    y = "Lag-1 autocorrelation",
+    title = "MICE convergence diagnostics: chain means"
+  )
+```
+
+For the first plot, we see a decreasing lag-1 autocorrelation through about the first 60 iterations, at which point it starts to wander. We see that `skin` and `bmi` neither get to 0 autocorrelation, but they seem to have stabilized. We present the rest of the plots without comment.
+
+```{r}
+# Plot PSRF for chain means
+diag_mean |> 
+  filter(str_detect(vrb, "bp|skin|bmi")) |> 
+  ggplot(aes(x = .it, y = psrf)) +
+  geom_line() +
+  geom_hline(yintercept = 1, linetype = 2) +
+  facet_wrap(~ vrb, scales = "free_y") +
+  labs(
+    x = "Iteration",
+    y = "PSRF",
+    title = "MICE convergence diagnostics: chain means"
+  )
+
+# Repeat for chain SDs if you want
+diag_sd |> 
+  filter(str_detect(vrb, "bp|skin|bmi")) |> 
+  ggplot(aes(x = .it, y = ac)) +
+  geom_line() +
+  geom_hline(yintercept = 0, linetype = 2) +
+  facet_wrap(~ vrb, scales = "free_y") +
+  labs(
+    x = "Iteration",
+    y = "Lag-1 autocorrelation",
+    title = "MICE convergence diagnostics: chain SDs"
+  )
+
+diag_sd |> 
+  filter(str_detect(vrb, "bp|skin|bmi")) |> 
+  ggplot(aes(x = .it, y = psrf)) +
+  geom_line() +
+  geom_hline(yintercept = 1, linetype = 2) +
+  facet_wrap(~ vrb, scales = "free_y") +
+  labs(
+    x = "Iteration",
+    y = "PSRF",
+    title = "MICE convergence diagnostics: chain SDs"
+  )
+```
+
+Overall, the convergence looks good. We do have some autocorrelation in the successive estimates of variables. According to classical MCMC diagnostics, autocorrelation generally impacts the **effective sample size**. It is not clear whether that is an issure here, though, as we aren't taking multiple imputations from the same stream.
+
+Overall, these diagnostics look pretty good, and if we like, we can run the full analysis twice to see whether we get similar results as a final test.
+
+```{r}
+imp2 <- mice(pp, m = 10, maxit = 100, set.seed = 2027, printFlag = FALSE)
+fit <- with(imp, lm(bp ~ type))
+summary(pool(fit))
+fit2 <- with(imp2, lm(bp ~ type))
+summary(pool(fit2))
+```
+
+## Pooling
+
+Now that we understand how the multiple imputations are produced, we need to understand how the results are pooled into a final answer. We only consider OLS. The coefficient values are easy: you estimate the coefficient for each imputed data set and take the mean.
+
+The first command creates a **list** of all of the data sets. We can run each one of those through `lm`.
+
+```{r}
+datlist <- complete(imp, action = "all")
+
+fits <- purrr::map_df(datlist, function(dat) {
+  lm(bp ~ type, data =dat) |> 
+    broom::tidy()
+})
+
+head(fits)
+```
+
+We see we have slope and intercept estimates for each of the imputed data sets. To get the pooled estimate, we simply average and compare to `mice::pool`.
+
+```{r}
+fits |> 
+  group_by(term) |> 
+  summarise(estimate = mean(estimate)) |> 
+  as.data.frame() |> 
+  print(digits = 7)
+
+pool(with(imp, lm(bp ~ type))) |> summary()
+```
+
+For the pooled estimate of standard error for the slope, we need to combine both an estimate of the the standard errors and additionally we need to add a component that takes into account our uncertainty in the estimate of the coefficients. I asked ChatGPT to give a short heuristic for the formula, and it wrote - Rubin’s pooling rule adds the between-imputation variance \(B\) because the estimates from the different imputed datasets do not agree exactly, and that disagreement reflects real uncertainty about the missing values. The usual within-imputation variance \(\bar U\) tells us how uncertain we would be if the data were complete, while \(B\) measures the additional uncertainty created by not knowing the missing data. Thus the pooled variance must account for both ordinary sampling variability and the extra variability introduced by the imputation process.
+
+
+```{r}
+pool(with(imp, lm(bp ~ type))) 
+fits |> 
+  filter(term == "typeYes") |> 
+  summarize(B = var(estimate), Ubar = mean(std.error^2)) |> 
+  summarize(se = sqrt((1 + 1/10) * B + Ubar)) |> 
+  as.data.frame() |> 
+  print(digits = 7)
+
+pool(with(imp, lm(bp ~ type))) |> summary()
+```
+
+## Simulations
+
+Now, let's compare using `mice` to using complete cases and using mean imputation, two methods that are also relatively commonly used. We compare the bias of estimates 95 for the coefficients in the three cases. 
+
+We will have a data set with two predictors and a response, and we will choose missing data according to other data in the set. Note that this is essentially the model that we use in `mice`. If the data is missing by a different mechanism, then results might be different.
+
+```{r}
+dd <- data.frame(x1 = runif(50),
+           x2 = runif(50))
+
+dd <- dd |> 
+  mutate(y = x1 + 2 * x2 + rnorm(50, 0, 1.5)) 
+```
+
+That is our data set, now we need to inject missing data. We will aim for about 10% missing in `x1` and `x2` separately. Some rows may have both variables missing.
+
+```{r}
+
+rep <- TRUE
+while(rep) {
+  b1 <- runif(1, -5, 0)
+  b2 <- runif(1, -20, 0)
+  ex <- sum(plogis(b1 * dd$y + b2 * dd$x2))
+  if(ex > 4 && ex < 6) {
+    rep <- FALSE
+  }
+}
+removex1 <- which(as.logical(rbinom(50, 1, prob = plogis(b1 * dd$y + b2 * dd$x2))))
+
+
+rep <- TRUE
+while(rep) {
+  b1 <- runif(1, -5, 0)
+  b2 <- runif(1, -10, 0)
+  ex <- sum(plogis(b1 * dd$y + b2 * (dd$x1 + 0.5)))
+  plogis(b1 * dd$y + b2 * (dd$x1 + 0.5))
+  ex
+  if(ex > 4 && ex < 6) {
+    rep <- FALSE
+  }
+}
+removex2 <- which(as.logical(rbinom(50, 1, prob = plogis(b1 * dd$y + b2 * (dd$x1 + 0.5)  ))))
+
+dd$x1[removex1] <- NA
+dd$x2[removex2] <- NA
+```
+
+Our three models are built below:
+
+```{r}
+mod1 <- lm(y ~ x1 + x2, data = dd)
+broom::tidy(mod1) |> 
+  select(term, estimate) |> 
+  mutate(method = "complete_cases")
+
+dd2 <- dd |> 
+  mutate(x1 = case_when(
+    is.na(x1) ~ mean(x1, na.rm = T),
+    TRUE ~ x1
+  ),
+  x2 = case_when(
+    is.na(x2) ~ mean(x2, na.rm = T),
+    TRUE ~ x2
+  ))
+mod2 <- lm(y ~ x1 + x2, data = dd2)
+broom::tidy(mod2) |> 
+  select(term, estimate) |> 
+  mutate(method = "mean")
+
+imp <- mice(dd, m = 12, printFlag = F)
+mod3 <- with(imp, lm(y ~ x1 + x2))
+pool(mod3)$pooled |> 
+  select(term, estimate) |> 
+  mutate(method = "mice")
 
 ```
+
+Now we iterate:
+
+```{r eval=FALSE}
+tt <- purrr::map_df(1:500, function(x) {
+  dd <- data.frame(x1 = runif(50),
+                   x2 = runif(50))
+  
+  dd <- dd |> 
+    mutate(y = x1 + 2 * x2 + rnorm(50, 0, 1.5)) 
+  
+  rep <- TRUE
+  while(rep) {
+    b1 <- runif(1, -5, 0)
+    b2 <- runif(1, -20, 0)
+    ex <- sum(plogis(b1 * dd$y + b2 * dd$x2))
+    if(ex > 3 && ex < 7) {
+      rep <- FALSE
+    }
+  }
+  removex1 <- which(as.logical(rbinom(50, 1, prob = plogis(b1 * dd$y + b2 * dd$x2))))
+  
+  
+  rep <- TRUE
+  while(rep) {
+    b1 <- runif(1, -5, 0)
+    b2 <- runif(1, -10, 0)
+    ex <- sum(plogis(b1 * dd$y + b2 * (dd$x1 + 0.5)))
+    plogis(b1 * dd$y + b2 * (dd$x1 + 0.5))
+    ex
+    if(ex > 3 && ex < 7) {
+      rep <- FALSE
+    }
+  }
+  removex2 <- which(as.logical(rbinom(50, 1, prob = plogis(b1 * dd$y + b2 * (dd$x1 + 0.5)  ))))
+  
+  dd$x1[removex1] <- NA
+  dd$x2[removex2] <- NA
+  
+  
+  mod1 <- lm(y ~ x1 + x2, data = dd)
+  
+  
+  dd2 <- dd |> 
+    mutate(x1 = case_when(
+      is.na(x1) ~ mean(x1, na.rm = T),
+      TRUE ~ x1
+    ),
+    x2 = case_when(
+      is.na(x2) ~ mean(x2, na.rm = T),
+      TRUE ~ x2
+    ))
+  mod2 <- lm(y ~ x1 + x2, data = dd2)
+  
+  
+  imp <- mice(dd, m = 12, printFlag = F)
+  mod3 <- with(imp, lm(y ~ x1 + x2))
+  
+  bind_rows(broom::tidy(mod2) |> 
+              select(term, estimate) |> 
+              mutate(method = "mean"),
+            broom::tidy(mod1) |> 
+              select(term, estimate) |> 
+              mutate(method = "complete_cases"),
+            pool(mod3)$pooled |> 
+              select(term, estimate) |> 
+              mutate(method = "mice")) |> 
+    mutate(iteration = x)
+  
+  
+})
+
+save(tt, file = "mice_simulation.rda")
+```
+
+```{r}
+load("mice_simulation.rda")
+
+tt |> 
+  group_by(term, method) |> 
+  summarize(mu = mean(estimate)) |> 
+  arrange(method)
+```
+
+
+
 
 
 

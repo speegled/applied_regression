@@ -147,6 +147,10 @@ what-does-multiplying-by-tau2-do
 what-does-sigma2-diagn-do
 what-does-the-final-matrix-represent
 missing-data-1
+technical-details
+diagnostics
+pooling
+simulations
 solutions
 chapter-2-solutions
 chapter-3-solutions
