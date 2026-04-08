@@ -23,7 +23,7 @@
 <meta name="author" content="Darrin Speegle" />
 
 
-<meta name="date" content="2026-04-06" />
+<meta name="date" content="2026-04-08" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -63,9 +63,8 @@
 
 
 <style type="text/css">
-html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -75,7 +74,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -293,6 +292,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="10.2" data-path="missing-data-1.html"><a href="missing-data-1.html#diagnostics"><i class="fa fa-check"></i><b>10.2</b> Diagnostics</a></li>
 <li class="chapter" data-level="10.3" data-path="missing-data-1.html"><a href="missing-data-1.html#pooling"><i class="fa fa-check"></i><b>10.3</b> Pooling</a></li>
 <li class="chapter" data-level="10.4" data-path="missing-data-1.html"><a href="missing-data-1.html#simulations"><i class="fa fa-check"></i><b>10.4</b> Simulations</a></li>
+<li class="chapter" data-level="10.5" data-path="missing-data-1.html"><a href="missing-data-1.html#sensitivity-analysis"><i class="fa fa-check"></i><b>10.5</b> Sensitivity Analysis</a></li>
 </ul></li>
 <li class="chapter" data-level="11" data-path="solutions.html"><a href="solutions.html"><i class="fa fa-check"></i><b>11</b> Solutions</a>
 <ul>
@@ -338,51 +338,53 @@ E[y_i] = \beta_0 + \sum_{j = 1}^p \beta_j x_{ij}
 <div id="malaria-example-intro" class="section level3 hasAnchor" number="7.1.1">
 <h3><span class="header-section-number">7.1.1</span> Malaria Example (Intro)<a href="generalized-linear-models.html#malaria-example-intro" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>Consider the <code>malaria</code> data set in the <code>fosdata</code> package. Mice were bit 10 times by mosquitoes, and the number of salivary gland sporozoites detected in the mosquitoes was measured. The mice were then observed to determine whether they got malaria. Some of the mice were given a malarial antibody pre-mosquito bite. Our goals are to determine whether the number of sporozoites affects the probability of infection, and whether the antibody affects the probability of infection.</p>
-<div class="sourceCode" id="cb654"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb654-1"><a href="generalized-linear-models.html#cb654-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div>
+<div class="sourceCode" id="cb657"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb657-1"><a href="generalized-linear-models.html#cb657-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div>
+<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 4.5.2</code></pre>
+<pre><code>## Warning: package &#39;dplyr&#39; was built under R version 4.5.2</code></pre>
 <pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
 ## ✔ dplyr     1.2.0     ✔ readr     2.1.5
-## ✔ forcats   1.0.0     ✔ stringr   1.5.1
-## ✔ ggplot2   4.0.0     ✔ tibble    3.3.0
+## ✔ forcats   1.0.0     ✔ stringr   1.5.2
+## ✔ ggplot2   4.0.2     ✔ tibble    3.3.0
 ## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
 ## ✔ purrr     1.1.0     
 ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
 ## ✖ dplyr::filter() masks stats::filter()
 ## ✖ dplyr::lag()    masks stats::lag()
 ## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-<div class="sourceCode" id="cb656"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb656-1"><a href="generalized-linear-models.html#cb656-1" tabindex="-1"></a>mm <span class="ot">&lt;-</span> fosdata<span class="sc">::</span>malaria <span class="sc">|&gt;</span> </span>
-<span id="cb656-2"><a href="generalized-linear-models.html#cb656-2" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span>
-<span id="cb656-3"><a href="generalized-linear-models.html#cb656-3" tabindex="-1"></a><span class="fu">ggplot</span>(mm, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(malaria), <span class="at">y =</span> sporozoite)) <span class="sc">+</span></span>
-<span id="cb656-4"><a href="generalized-linear-models.html#cb656-4" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
-<span id="cb656-5"><a href="generalized-linear-models.html#cb656-5" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> .<span class="dv">1</span>, <span class="at">height =</span> .<span class="dv">1</span>) </span></code></pre></div>
+<div class="sourceCode" id="cb661"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb661-1"><a href="generalized-linear-models.html#cb661-1" tabindex="-1"></a>mm <span class="ot">&lt;-</span> fosdata<span class="sc">::</span>malaria <span class="sc">|&gt;</span> </span>
+<span id="cb661-2"><a href="generalized-linear-models.html#cb661-2" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span>
+<span id="cb661-3"><a href="generalized-linear-models.html#cb661-3" tabindex="-1"></a><span class="fu">ggplot</span>(mm, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(malaria), <span class="at">y =</span> sporozoite)) <span class="sc">+</span></span>
+<span id="cb661-4"><a href="generalized-linear-models.html#cb661-4" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb661-5"><a href="generalized-linear-models.html#cb661-5" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> .<span class="dv">1</span>, <span class="at">height =</span> .<span class="dv">1</span>) </span></code></pre></div>
 <p><img src="08-generalized-linear-models_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
 <p>One question we should have is whether mosquitos with 0 sporozoites should be included in the study at all, because they can’t possibly infect the mice. If we remove those mosquitos, we get the following graph.</p>
-<div class="sourceCode" id="cb657"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb657-1"><a href="generalized-linear-models.html#cb657-1" tabindex="-1"></a>mm <span class="ot">&lt;-</span> <span class="fu">filter</span>(mm, sporozoite <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
-<span id="cb657-2"><a href="generalized-linear-models.html#cb657-2" tabindex="-1"></a><span class="fu">ggplot</span>(mm, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(malaria), <span class="at">y =</span> sporozoite)) <span class="sc">+</span></span>
-<span id="cb657-3"><a href="generalized-linear-models.html#cb657-3" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
-<span id="cb657-4"><a href="generalized-linear-models.html#cb657-4" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> .<span class="dv">1</span>, <span class="at">height =</span> .<span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb662"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb662-1"><a href="generalized-linear-models.html#cb662-1" tabindex="-1"></a>mm <span class="ot">&lt;-</span> <span class="fu">filter</span>(mm, sporozoite <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb662-2"><a href="generalized-linear-models.html#cb662-2" tabindex="-1"></a><span class="fu">ggplot</span>(mm, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(malaria), <span class="at">y =</span> sporozoite)) <span class="sc">+</span></span>
+<span id="cb662-3"><a href="generalized-linear-models.html#cb662-3" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb662-4"><a href="generalized-linear-models.html#cb662-4" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> .<span class="dv">1</span>, <span class="at">height =</span> .<span class="dv">1</span>)</span></code></pre></div>
 <p><img src="08-generalized-linear-models_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <p>We want to think of the number of sporozoites as the <em>predictor</em> though, which is usually on the <span class="math inline">\(x\)</span> axis.</p>
-<div class="sourceCode" id="cb658"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb658-1"><a href="generalized-linear-models.html#cb658-1" tabindex="-1"></a><span class="fu">ggplot</span>(mm, <span class="fu">aes</span>(<span class="at">x =</span> sporozoite, <span class="at">y =</span> malaria)) <span class="sc">+</span></span>
-<span id="cb658-2"><a href="generalized-linear-models.html#cb658-2" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
-<span id="cb658-3"><a href="generalized-linear-models.html#cb658-3" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb663"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb663-1"><a href="generalized-linear-models.html#cb663-1" tabindex="-1"></a><span class="fu">ggplot</span>(mm, <span class="fu">aes</span>(<span class="at">x =</span> sporozoite, <span class="at">y =</span> malaria)) <span class="sc">+</span></span>
+<span id="cb663-2"><a href="generalized-linear-models.html#cb663-2" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb663-3"><a href="generalized-linear-models.html#cb663-3" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>)</span></code></pre></div>
 <pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
 <p><img src="08-generalized-linear-models_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>Here we see an issue with this approach: if the line is supposed to represent the probability of getting malaria, then it is impossible for the line to be above 1 or below 0, but the line does go above 1. This is a problem with using OLS to model a binary response, though it is still sometimes approrpriate in certain situations. We will use <em>logistic regression</em>.</p>
-<div class="sourceCode" id="cb660"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb660-1"><a href="generalized-linear-models.html#cb660-1" tabindex="-1"></a><span class="fu">ggplot</span>(mm, <span class="fu">aes</span>(<span class="at">x =</span> sporozoite, <span class="at">y =</span> malaria)) <span class="sc">+</span></span>
-<span id="cb660-2"><a href="generalized-linear-models.html#cb660-2" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
-<span id="cb660-3"><a href="generalized-linear-models.html#cb660-3" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;glm&quot;</span>, <span class="at">method.args =</span> <span class="fu">list</span>(<span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb665"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb665-1"><a href="generalized-linear-models.html#cb665-1" tabindex="-1"></a><span class="fu">ggplot</span>(mm, <span class="fu">aes</span>(<span class="at">x =</span> sporozoite, <span class="at">y =</span> malaria)) <span class="sc">+</span></span>
+<span id="cb665-2"><a href="generalized-linear-models.html#cb665-2" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb665-3"><a href="generalized-linear-models.html#cb665-3" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;glm&quot;</span>, <span class="at">method.args =</span> <span class="fu">list</span>(<span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>))</span></code></pre></div>
 <pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
 <p><img src="08-generalized-linear-models_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <p>We can see with one observed sporozoite, the probability of getting malaria is about 25%, while with 20 or more, the probability is essentially 100%.</p>
-<div class="sourceCode" id="cb662"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb662-1"><a href="generalized-linear-models.html#cb662-1" tabindex="-1"></a><span class="fu">ggplot</span>(mm, <span class="fu">aes</span>(<span class="at">x =</span> sporozoite, <span class="at">y =</span> malaria)) <span class="sc">+</span></span>
-<span id="cb662-2"><a href="generalized-linear-models.html#cb662-2" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
-<span id="cb662-3"><a href="generalized-linear-models.html#cb662-3" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;glm&quot;</span>, <span class="at">method.args =</span> <span class="fu">list</span>(<span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb667"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb667-1"><a href="generalized-linear-models.html#cb667-1" tabindex="-1"></a><span class="fu">ggplot</span>(mm, <span class="fu">aes</span>(<span class="at">x =</span> sporozoite, <span class="at">y =</span> malaria)) <span class="sc">+</span></span>
+<span id="cb667-2"><a href="generalized-linear-models.html#cb667-2" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb667-3"><a href="generalized-linear-models.html#cb667-3" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;glm&quot;</span>, <span class="at">method.args =</span> <span class="fu">list</span>(<span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>))</span></code></pre></div>
 <pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
 <p><img src="08-generalized-linear-models_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <p>Now let’s add the <code>antibody</code> variable and see whether the graphs look different.</p>
-<div class="sourceCode" id="cb664"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb664-1"><a href="generalized-linear-models.html#cb664-1" tabindex="-1"></a><span class="fu">ggplot</span>(mm, <span class="fu">aes</span>(<span class="at">x =</span> sporozoite, <span class="at">y =</span> malaria, <span class="at">color =</span> <span class="fu">factor</span>(antibody))) <span class="sc">+</span></span>
-<span id="cb664-2"><a href="generalized-linear-models.html#cb664-2" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> .<span class="dv">2</span>, <span class="at">height =</span> <span class="dv">0</span>, <span class="at">alpha =</span> .<span class="dv">5</span>) <span class="sc">+</span> </span>
-<span id="cb664-3"><a href="generalized-linear-models.html#cb664-3" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;glm&quot;</span>, <span class="at">method.args =</span> <span class="fu">list</span>(<span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb669"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb669-1"><a href="generalized-linear-models.html#cb669-1" tabindex="-1"></a><span class="fu">ggplot</span>(mm, <span class="fu">aes</span>(<span class="at">x =</span> sporozoite, <span class="at">y =</span> malaria, <span class="at">color =</span> <span class="fu">factor</span>(antibody))) <span class="sc">+</span></span>
+<span id="cb669-2"><a href="generalized-linear-models.html#cb669-2" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> .<span class="dv">2</span>, <span class="at">height =</span> <span class="dv">0</span>, <span class="at">alpha =</span> .<span class="dv">5</span>) <span class="sc">+</span> </span>
+<span id="cb669-3"><a href="generalized-linear-models.html#cb669-3" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;glm&quot;</span>, <span class="at">method.args =</span> <span class="fu">list</span>(<span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>))</span></code></pre></div>
 <pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
 <p><img src="08-generalized-linear-models_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <p>Based on this plot, it seems that having the antibody protects from mosquitos which have a low viral load, but does not help against mosquitos with a high viral load.</p>
@@ -417,14 +419,14 @@ p_i = \beta_0 + \beta_1 x_i
 <p>We start by noting that the <strong>likelihood</strong> of a 0/1 random variable is determined by the probability of success. If <span class="math inline">\(Y = 1\)</span>, then the likelihood of the data point is <span class="math inline">\(p\)</span> (probability of success) and if <span class="math inline">\(Y = 0\)</span>, then the likelihood of the data point is <span class="math inline">\(1 - p\)</span> (probability of failure). We can write this succinctly as <span class="math inline">\(p^Y (1 - p)^{1 - Y}\)</span>.</p>
 <p>Therefore, the likelihood of observing a sequence of 0/1 random variables <span class="math inline">\(Y_1, \ldots, Y_n\)</span> with probabilities of success <span class="math inline">\(p_1, \ldots, p_n\)</span> is given by <span class="math inline">\(\Pi_{i = 1}^n p_i^{Y_i} (1 - p_i)^{1 - Y_i}\)</span>, where <span class="math inline">\(p_i\)</span> is the probability of success for observation <span class="math inline">\(i\)</span>. The log of the likelihood function simplifies to <span class="math inline">\(\sum_{i = 1}^n Y_i \log(p_i) + (1 - Y_i) \log(1 - p_i)\)</span>.</p>
 <p>Finally, we have the relationship between <span class="math inline">\(p_i\)</span> and the predictors and parameters: <span class="math inline">\(p_i = \frac{1}{1 + e^{-\beta_0 - \beta_1 x_i}}\)</span>. Therefore, we can write the log-likelihood function in terms of <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> as follows:</p>
-<div class="sourceCode" id="cb666"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb666-1"><a href="generalized-linear-models.html#cb666-1" tabindex="-1"></a>mm <span class="ot">&lt;-</span> fosdata<span class="sc">::</span>malaria</span>
-<span id="cb666-2"><a href="generalized-linear-models.html#cb666-2" tabindex="-1"></a>nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
-<span id="cb666-3"><a href="generalized-linear-models.html#cb666-3" tabindex="-1"></a>  beta0 <span class="ot">&lt;-</span> par[<span class="dv">1</span>]</span>
-<span id="cb666-4"><a href="generalized-linear-models.html#cb666-4" tabindex="-1"></a>  beta1 <span class="ot">&lt;-</span> par[<span class="dv">2</span>]</span>
-<span id="cb666-5"><a href="generalized-linear-models.html#cb666-5" tabindex="-1"></a>  p <span class="ot">&lt;-</span> boot<span class="sc">::</span><span class="fu">inv.logit</span>(beta0 <span class="sc">+</span> beta1 <span class="sc">*</span> mm<span class="sc">$</span>sporozoite)</span>
-<span id="cb666-6"><a href="generalized-linear-models.html#cb666-6" tabindex="-1"></a>  <span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> <span class="fu">sum</span>(mm<span class="sc">$</span>malaria <span class="sc">*</span> <span class="fu">log</span>(p) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> mm<span class="sc">$</span>malaria) <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> p))</span>
-<span id="cb666-7"><a href="generalized-linear-models.html#cb666-7" tabindex="-1"></a>}</span>
-<span id="cb666-8"><a href="generalized-linear-models.html#cb666-8" tabindex="-1"></a><span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">fn =</span> nll)</span></code></pre></div>
+<div class="sourceCode" id="cb671"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb671-1"><a href="generalized-linear-models.html#cb671-1" tabindex="-1"></a>mm <span class="ot">&lt;-</span> fosdata<span class="sc">::</span>malaria</span>
+<span id="cb671-2"><a href="generalized-linear-models.html#cb671-2" tabindex="-1"></a>nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
+<span id="cb671-3"><a href="generalized-linear-models.html#cb671-3" tabindex="-1"></a>  beta0 <span class="ot">&lt;-</span> par[<span class="dv">1</span>]</span>
+<span id="cb671-4"><a href="generalized-linear-models.html#cb671-4" tabindex="-1"></a>  beta1 <span class="ot">&lt;-</span> par[<span class="dv">2</span>]</span>
+<span id="cb671-5"><a href="generalized-linear-models.html#cb671-5" tabindex="-1"></a>  p <span class="ot">&lt;-</span> boot<span class="sc">::</span><span class="fu">inv.logit</span>(beta0 <span class="sc">+</span> beta1 <span class="sc">*</span> mm<span class="sc">$</span>sporozoite)</span>
+<span id="cb671-6"><a href="generalized-linear-models.html#cb671-6" tabindex="-1"></a>  <span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> <span class="fu">sum</span>(mm<span class="sc">$</span>malaria <span class="sc">*</span> <span class="fu">log</span>(p) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> mm<span class="sc">$</span>malaria) <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> p))</span>
+<span id="cb671-7"><a href="generalized-linear-models.html#cb671-7" tabindex="-1"></a>}</span>
+<span id="cb671-8"><a href="generalized-linear-models.html#cb671-8" tabindex="-1"></a><span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">fn =</span> nll)</span></code></pre></div>
 <pre><code>## $par
 ## [1] -2.4756270  0.4621516
 ## 
@@ -441,7 +443,7 @@ p_i = \beta_0 + \beta_1 x_i
 ## $message
 ## NULL</code></pre>
 <p>Let’s compare those to what we would get using the built-in R function <code>glm</code>, which is the workhorse for doing all things with fixed effect generalized linear models.</p>
-<div class="sourceCode" id="cb668"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb668-1"><a href="generalized-linear-models.html#cb668-1" tabindex="-1"></a><span class="fu">glm</span>(malaria <span class="sc">~</span> sporozoite, <span class="at">data =</span> mm, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb673"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb673-1"><a href="generalized-linear-models.html#cb673-1" tabindex="-1"></a><span class="fu">glm</span>(malaria <span class="sc">~</span> sporozoite, <span class="at">data =</span> mm, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span></code></pre></div>
 <pre><code>## 
 ## Call:  glm(formula = malaria ~ sporozoite, family = &quot;binomial&quot;, data = mm)
 ## 
@@ -460,18 +462,18 @@ p_i = \beta_0 + \beta_1 x_i
 \frac{1}n \sum_{i = 1}^n \Phi(\eta_i y_i)
 \]</span></p>
 <p>where <span class="math inline">\(\Phi = \log(1 + e^{-x})\)</span> and <span class="math inline">\(y_i\)</span> has been recoded so that 1 is success and <span class="math inline">\(-1\)</span> is failure, and <span class="math inline">\(\eta_i = \log {p_i}{1 - p_i}\)</span> is the log-odds of <span class="math inline">\(p_i = \beta_0 + \beta_1 x_i\)</span>. Let’s think about why this is a function that <strong>penalizes</strong> being away from the true observed values. The graph of <span class="math inline">\(\Phi\)</span> looks like this</p>
-<div class="sourceCode" id="cb670"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb670-1"><a href="generalized-linear-models.html#cb670-1" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>x)), <span class="at">from =</span> <span class="sc">-</span><span class="dv">3</span>, <span class="at">to =</span> <span class="dv">3</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb675"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb675-1"><a href="generalized-linear-models.html#cb675-1" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>x)), <span class="at">from =</span> <span class="sc">-</span><span class="dv">3</span>, <span class="at">to =</span> <span class="dv">3</span>)</span></code></pre></div>
 <p><img src="08-generalized-linear-models_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 <p>So this penalty penalizes <strong>negative</strong> values of <span class="math inline">\(\eta_i y_i\)</span> and encourages <strong>positive</strong> values of <span class="math inline">\(\eta_i y_i\)</span>. If <span class="math inline">\(y_i\)</span> is 1, then we want <span class="math inline">\(\eta_i\)</span> to be positive, so that <span class="math inline">\(\eta_i y_i\)</span> is positive. If <span class="math inline">\(y_i\)</span> is <span class="math inline">\(-1\)</span>, then we want <span class="math inline">\(\eta_i\)</span> to be negative, so that <span class="math inline">\(\eta_i y_i\)</span> is positive. Therefore, this penalty encourages the model to predict positive values for the predictors when the response is 1 and negative values for the predictors when the response is <span class="math inline">\(-1\)</span>. Recall that large positive values of the log-odds correspond to high probabilities of success, and large negative values of the log-odds correspond to low probabilities of success. So, this penalty encourages the model to predict high probabilities of success when the response is 1 and low probabilities of success when the response is <span class="math inline">\(-1\)</span>.</p>
 <p>What isn’t at all obvious is that minimizing this function will yield the same parameter estimates as maximizing the likelihood function, but let’s see it in an example.</p>
-<div class="sourceCode" id="cb671"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb671-1"><a href="generalized-linear-models.html#cb671-1" tabindex="-1"></a>pen <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
-<span id="cb671-2"><a href="generalized-linear-models.html#cb671-2" tabindex="-1"></a>  beta0 <span class="ot">&lt;-</span> par[<span class="dv">1</span>]</span>
-<span id="cb671-3"><a href="generalized-linear-models.html#cb671-3" tabindex="-1"></a>  beta1 <span class="ot">&lt;-</span> par[<span class="dv">2</span>]</span>
-<span id="cb671-4"><a href="generalized-linear-models.html#cb671-4" tabindex="-1"></a>  p <span class="ot">&lt;-</span> boot<span class="sc">::</span><span class="fu">inv.logit</span>(beta0 <span class="sc">+</span> beta1 <span class="sc">*</span> mm<span class="sc">$</span>sporozoite)</span>
-<span id="cb671-5"><a href="generalized-linear-models.html#cb671-5" tabindex="-1"></a>  y <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(mm<span class="sc">$</span>malaria <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>)</span>
-<span id="cb671-6"><a href="generalized-linear-models.html#cb671-6" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> (<span class="fu">log</span>(p<span class="sc">/</span>(<span class="dv">1</span><span class="sc">-</span>p))) <span class="sc">*</span> y)))</span>
-<span id="cb671-7"><a href="generalized-linear-models.html#cb671-7" tabindex="-1"></a>}</span>
-<span id="cb671-8"><a href="generalized-linear-models.html#cb671-8" tabindex="-1"></a><span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">fn =</span> pen)</span></code></pre></div>
+<div class="sourceCode" id="cb676"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb676-1"><a href="generalized-linear-models.html#cb676-1" tabindex="-1"></a>pen <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
+<span id="cb676-2"><a href="generalized-linear-models.html#cb676-2" tabindex="-1"></a>  beta0 <span class="ot">&lt;-</span> par[<span class="dv">1</span>]</span>
+<span id="cb676-3"><a href="generalized-linear-models.html#cb676-3" tabindex="-1"></a>  beta1 <span class="ot">&lt;-</span> par[<span class="dv">2</span>]</span>
+<span id="cb676-4"><a href="generalized-linear-models.html#cb676-4" tabindex="-1"></a>  p <span class="ot">&lt;-</span> boot<span class="sc">::</span><span class="fu">inv.logit</span>(beta0 <span class="sc">+</span> beta1 <span class="sc">*</span> mm<span class="sc">$</span>sporozoite)</span>
+<span id="cb676-5"><a href="generalized-linear-models.html#cb676-5" tabindex="-1"></a>  y <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(mm<span class="sc">$</span>malaria <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb676-6"><a href="generalized-linear-models.html#cb676-6" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> (<span class="fu">log</span>(p<span class="sc">/</span>(<span class="dv">1</span><span class="sc">-</span>p))) <span class="sc">*</span> y)))</span>
+<span id="cb676-7"><a href="generalized-linear-models.html#cb676-7" tabindex="-1"></a>}</span>
+<span id="cb676-8"><a href="generalized-linear-models.html#cb676-8" tabindex="-1"></a><span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">fn =</span> pen)</span></code></pre></div>
 <pre><code>## $par
 ## [1] -2.4756270  0.4621516
 ## 
@@ -491,8 +493,8 @@ p_i = \beta_0 + \beta_1 x_i
 <div id="interpreting-summary" class="section level3 hasAnchor" number="7.1.5">
 <h3><span class="header-section-number">7.1.5</span> Interpreting summary<a href="generalized-linear-models.html#interpreting-summary" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>Now, we turn to interpreting the summary of <code>glm</code>.</p>
-<div class="sourceCode" id="cb673"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb673-1"><a href="generalized-linear-models.html#cb673-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">glm</span>(malaria <span class="sc">~</span> sporozoite, <span class="at">data =</span> mm, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
-<span id="cb673-2"><a href="generalized-linear-models.html#cb673-2" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
+<div class="sourceCode" id="cb678"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb678-1"><a href="generalized-linear-models.html#cb678-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">glm</span>(malaria <span class="sc">~</span> sporozoite, <span class="at">data =</span> mm, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
+<span id="cb678-2"><a href="generalized-linear-models.html#cb678-2" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## glm(formula = malaria ~ sporozoite, family = &quot;binomial&quot;, data = mm)
@@ -514,28 +516,28 @@ p_i = \beta_0 + \beta_1 x_i
 <p>We have an estimate for intercept of -1.44 and for <span class="math inline">\(\beta_1\)</span> of 0.33341. The intercept tells us the log-odds of getting malaria when the number of sporozoites is 0 (according to the model - we actually know this is zero). The log-odds of getting malaria when the number of sporozoites is 0 is -1.44, which corresponds to a probability of getting malaria of <span class="math inline">\(\frac{e^{-1.44}}{1 + e^{-1.44}}\)</span>. In R, this is computed via the <code>boot::inv.logit(-1.44)</code> function, which gives us a probability of about 0.19. So, according to the model, the probability of getting malaria when the number of sporozoites is 0 is about 19%.</p>
 <p>The sporozoite estimate tells us that the log-odds of getting malaria increases by 0.33341 for every one unit increase in the number of sporozoites. Therefore, the odds of getting malaria will increase by a multiplicative factor of <span class="math inline">\(e^{0.33341}\)</span> for every one unit increase in the number of sporozoites. In R, this is computed via <code>exp(0.33341)</code>, which gives us a multiplicative factor of about 1.4. So, according to the model, the odds of getting malaria will increase by a factor of about 40 percent for every one unit increase in the number of sporozoites.</p>
 <p>The standard error, <span class="math inline">\(z\)</span> value and <span class="math inline">\(p\)</span> value have meanings similar to what we covered in OLS. The deviance plays a similar role to the sum of squared errors in OLS, and the null deviance is the deviance of the model with only an intercept. The difference between the null deviance and the residual deviance is a measure of how much better the model with the predictor is compared to the model with only an intercept. Formally, the null deviance is defined as -2 times the log likelihood of the model with only an intercept, and the residual deviance is defined as -2 times the log likelihood of the model with the predictor. Therefore, the difference between the null deviance and the residual deviance is 2 times the difference in log likelihoods between the two models. This can be used to perform a likelihood ratio test to determine whether the model with the predictor is significantly better than the model with only an intercept. Since we have already computed the likelihood, we can quickly confirm the deviance computations.</p>
-<div class="sourceCode" id="cb675"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb675-1"><a href="generalized-linear-models.html#cb675-1" tabindex="-1"></a><span class="co">#use nll from above - note that we already had a negative sign there</span></span>
-<span id="cb675-2"><a href="generalized-linear-models.html#cb675-2" tabindex="-1"></a><span class="dv">2</span> <span class="sc">*</span> <span class="fu">nll</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.44</span>, <span class="fl">0.33341</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb680"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb680-1"><a href="generalized-linear-models.html#cb680-1" tabindex="-1"></a><span class="co">#use nll from above - note that we already had a negative sign there</span></span>
+<span id="cb680-2"><a href="generalized-linear-models.html#cb680-2" tabindex="-1"></a><span class="dv">2</span> <span class="sc">*</span> <span class="fu">nll</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.44</span>, <span class="fl">0.33341</span>))</span></code></pre></div>
 <pre><code>## [1] 132.599</code></pre>
 <p>This should be the same as the residual deviance in the summary output, which it is!</p>
 <p>We can compute an analogy of <span class="math inline">\(R^2\)</span> for logistic regression, which is called McFadden’s <span class="math inline">\(R^2\)</span>. This is defined as <span class="math inline">\(1 - \frac{\text{residual deviance}}{\text{null deviance}}\)</span>. In R, this is computed as follows:</p>
-<div class="sourceCode" id="cb677"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb677-1"><a href="generalized-linear-models.html#cb677-1" tabindex="-1"></a><span class="dv">1</span> <span class="sc">-</span> (mod<span class="sc">$</span>deviance <span class="sc">/</span> mod<span class="sc">$</span>null.deviance)</span></code></pre></div>
+<div class="sourceCode" id="cb682"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb682-1"><a href="generalized-linear-models.html#cb682-1" tabindex="-1"></a><span class="dv">1</span> <span class="sc">-</span> (mod<span class="sc">$</span>deviance <span class="sc">/</span> mod<span class="sc">$</span>null.deviance)</span></code></pre></div>
 <pre><code>## [1] 0.4862102</code></pre>
-<div class="sourceCode" id="cb679"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb679-1"><a href="generalized-linear-models.html#cb679-1" tabindex="-1"></a><span class="co">#using the built in function from the package pscl</span></span>
-<span id="cb679-2"><a href="generalized-linear-models.html#cb679-2" tabindex="-1"></a><span class="fu">library</span>(pscl)</span></code></pre></div>
+<div class="sourceCode" id="cb684"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb684-1"><a href="generalized-linear-models.html#cb684-1" tabindex="-1"></a><span class="co">#using the built in function from the package pscl</span></span>
+<span id="cb684-2"><a href="generalized-linear-models.html#cb684-2" tabindex="-1"></a><span class="fu">library</span>(pscl)</span></code></pre></div>
 <pre><code>## Classes and Methods for R originally developed in the
 ## Political Science Computational Laboratory
 ## Department of Political Science
 ## Stanford University (2002-2015),
 ## by and under the direction of Simon Jackman.
 ## hurdle and zeroinfl functions by Achim Zeileis.</code></pre>
-<div class="sourceCode" id="cb681"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb681-1"><a href="generalized-linear-models.html#cb681-1" tabindex="-1"></a><span class="fu">pR2</span>(mod)</span></code></pre></div>
+<div class="sourceCode" id="cb686"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb686-1"><a href="generalized-linear-models.html#cb686-1" tabindex="-1"></a><span class="fu">pR2</span>(mod)</span></code></pre></div>
 <pre><code>## fitting null model for pseudo-r2</code></pre>
 <pre><code>##          llh      llhNull           G2     McFadden         r2ML         r2CU 
 ##  -62.6345017 -121.9068723  118.5447411    0.4862102    0.4824152    0.6502174</code></pre>
 <p>We can also perform a hypothesis test on which of two models is better. For example, we can compare the model with the predictor <code>sporozoite</code> to the model with <code>sporozoite</code> and <code>antibody</code>.</p>
-<div class="sourceCode" id="cb684"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb684-1"><a href="generalized-linear-models.html#cb684-1" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">glm</span>(malaria <span class="sc">~</span> sporozoite <span class="sc">+</span> antibody, <span class="at">data =</span> mm, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
-<span id="cb684-2"><a href="generalized-linear-models.html#cb684-2" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
+<div class="sourceCode" id="cb689"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb689-1"><a href="generalized-linear-models.html#cb689-1" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">glm</span>(malaria <span class="sc">~</span> sporozoite <span class="sc">+</span> antibody, <span class="at">data =</span> mm, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
+<span id="cb689-2"><a href="generalized-linear-models.html#cb689-2" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## glm(formula = malaria ~ sporozoite + antibody, family = &quot;binomial&quot;, 
@@ -556,7 +558,7 @@ p_i = \beta_0 + \beta_1 x_i
 ## AIC: 128.75
 ## 
 ## Number of Fisher Scoring iterations: 6</code></pre>
-<div class="sourceCode" id="cb686"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb686-1"><a href="generalized-linear-models.html#cb686-1" tabindex="-1"></a><span class="fu">anova</span>(mod, mod2, <span class="at">test =</span> <span class="st">&quot;Chisq&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb691"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb691-1"><a href="generalized-linear-models.html#cb691-1" tabindex="-1"></a><span class="fu">anova</span>(mod, mod2, <span class="at">test =</span> <span class="st">&quot;Chisq&quot;</span>)</span></code></pre></div>
 <pre><code>## Analysis of Deviance Table
 ## 
 ## Model 1: malaria ~ sporozoite
@@ -565,7 +567,7 @@ p_i = \beta_0 + \beta_1 x_i
 ## 1       178     125.27                     
 ## 2       177     122.75  1   2.5192   0.1125</code></pre>
 <p>Note that there is <strong>not</strong> statistically significant evidence that the model with <code>antibody</code> is better than the model with just <code>sporozoite</code>. We could also have looked directly at the <span class="math inline">\(p\)</span>-values in <code>summary(mod2)</code>:</p>
-<div class="sourceCode" id="cb688"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb688-1"><a href="generalized-linear-models.html#cb688-1" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
+<div class="sourceCode" id="cb693"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb693-1"><a href="generalized-linear-models.html#cb693-1" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## glm(formula = malaria ~ sporozoite + antibody, family = &quot;binomial&quot;, 
@@ -587,13 +589,13 @@ p_i = \beta_0 + \beta_1 x_i
 ## 
 ## Number of Fisher Scoring iterations: 6</code></pre>
 <p>We get slightly different <span class="math inline">\(p\)</span>-values because the tests use different assumptions. One utility of the test using deviances is that it can be used to test the null hypothesis that a group of parameters is all zero versus the alternative that at least one of them is non-zero, which is not something that we can do with the <span class="math inline">\(p\)</span>-values in <code>summary(mod2)</code>. For the test using deviances to be valid, the models <strong>must be nested</strong>. If the models are not nested, then it is common to use AIC to decide between the models, rather than a formal hypothesis test.</p>
-<div class="sourceCode" id="cb690"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb690-1"><a href="generalized-linear-models.html#cb690-1" tabindex="-1"></a><span class="fu">AIC</span>(mod, mod2)</span></code></pre></div>
+<div class="sourceCode" id="cb695"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb695-1"><a href="generalized-linear-models.html#cb695-1" tabindex="-1"></a><span class="fu">AIC</span>(mod, mod2)</span></code></pre></div>
 <pre><code>##      df      AIC
 ## mod   2 129.2690
 ## mod2  3 128.7498</code></pre>
 <p>Note that AIC chooses the model <strong>with</strong> antibodies while deviances eliminate antibodies. This goes back to the purpose of the two techniques - there are some theoretical reasons to prefer AIC for predictive modeling, and using <span class="math inline">\(p\)</span>-values is sometimes prefered for building parsimonious or explanatory models. For completeness, we could also include the interaction between <code>sporozoites</code> and <code>antibody</code>:</p>
-<div class="sourceCode" id="cb692"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb692-1"><a href="generalized-linear-models.html#cb692-1" tabindex="-1"></a>mod3 <span class="ot">&lt;-</span> <span class="fu">glm</span>(malaria <span class="sc">~</span> sporozoite <span class="sc">*</span> antibody, <span class="at">data =</span> mm, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
-<span id="cb692-2"><a href="generalized-linear-models.html#cb692-2" tabindex="-1"></a><span class="fu">summary</span>(mod3)</span></code></pre></div>
+<div class="sourceCode" id="cb697"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb697-1"><a href="generalized-linear-models.html#cb697-1" tabindex="-1"></a>mod3 <span class="ot">&lt;-</span> <span class="fu">glm</span>(malaria <span class="sc">~</span> sporozoite <span class="sc">*</span> antibody, <span class="at">data =</span> mm, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
+<span id="cb697-2"><a href="generalized-linear-models.html#cb697-2" tabindex="-1"></a><span class="fu">summary</span>(mod3)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## glm(formula = malaria ~ sporozoite * antibody, family = &quot;binomial&quot;, 
@@ -618,13 +620,13 @@ p_i = \beta_0 + \beta_1 x_i
 <p>The model coefficients are <code>(Intercept)</code>, which is the log-odds of getting malaria when the mosquito has zero sporozoites and the mouse does not have the antibody, <code>sporozoite</code>, which is the change in log-odds of getting malaria for every one unit increase in the number of sporozoites when the mouse does not have the antibody, <code>antibody</code>, which is the change in log-odds of getting malaria for having the antibody when the number of sporozoites is <strong>zero</strong>, and <code>sporozoite:antibody</code>, which is the change in log-odds of getting malaria for every one unit increase in the number of sporozoites when the mouse has the antibody compared to when it does not have the antibody.</p>
 <p><strong>Note</strong>: it can be hard to directly see whether the positive <code>antibody</code> is associated with <strong>more</strong> malaria or <strong>less</strong> malaria in the model with interaction. For example, if the typical mosquito has 50 sporozoites, then the effect of the antibody on the log-odds of getting malaria would be <span class="math inline">\(-1.38 + (0.34 + .37) * 50 - 4.8\)</span>, compared to <span class="math inline">\(-1.38 + .34 * 50\)</span> for the antibody negative mice. The difference in these is <span class="math inline">\(.37 * 50 - 4.8 = 13.7\)</span>, which means our model would say it is <strong>much</strong> more likely to get malaria with the antibodies.</p>
 <p>We can also use the <code>predict</code> function to get point predictions and confidence intervals for the probability of getting malaria associated with sporozoites and antibodies. We return to the model with <code>sporozoite</code> and <code>antibody</code>. You can read about the options in <code>predict</code> by typing <code>predict.glm</code>. Note that <code>predict</code> is a generic function which has different behavior depending on whether the object passed to it was fit using <code>lm</code> or <code>glm</code>. The one we had been using was <code>predict.lm</code>.</p>
-<div class="sourceCode" id="cb694"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb694-1"><a href="generalized-linear-models.html#cb694-1" tabindex="-1"></a><span class="fu">predict</span>(mod2, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">sporozoite =</span> <span class="dv">10</span>, <span class="at">antibody =</span> <span class="st">&quot;yes&quot;</span>)) <span class="co">#log-odds</span></span></code></pre></div>
+<div class="sourceCode" id="cb699"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb699-1"><a href="generalized-linear-models.html#cb699-1" tabindex="-1"></a><span class="fu">predict</span>(mod2, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">sporozoite =</span> <span class="dv">10</span>, <span class="at">antibody =</span> <span class="st">&quot;yes&quot;</span>)) <span class="co">#log-odds</span></span></code></pre></div>
 <pre><code>##         1 
 ## 0.7896223</code></pre>
-<div class="sourceCode" id="cb696"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb696-1"><a href="generalized-linear-models.html#cb696-1" tabindex="-1"></a><span class="fu">predict</span>(mod2, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">sporozoite =</span> <span class="dv">10</span>, <span class="at">antibody =</span> <span class="st">&quot;yes&quot;</span>), <span class="at">type =</span> <span class="st">&quot;response&quot;</span>) <span class="co">#probability</span></span></code></pre></div>
+<div class="sourceCode" id="cb701"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb701-1"><a href="generalized-linear-models.html#cb701-1" tabindex="-1"></a><span class="fu">predict</span>(mod2, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">sporozoite =</span> <span class="dv">10</span>, <span class="at">antibody =</span> <span class="st">&quot;yes&quot;</span>), <span class="at">type =</span> <span class="st">&quot;response&quot;</span>) <span class="co">#probability</span></span></code></pre></div>
 <pre><code>##         1 
 ## 0.6877502</code></pre>
-<div class="sourceCode" id="cb698"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb698-1"><a href="generalized-linear-models.html#cb698-1" tabindex="-1"></a><span class="fu">predict</span>(mod2, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">sporozoite =</span> <span class="dv">10</span>, <span class="at">antibody =</span> <span class="st">&quot;no&quot;</span>), <span class="at">type =</span> <span class="st">&quot;response&quot;</span>, <span class="at">se.fit =</span> T) </span></code></pre></div>
+<div class="sourceCode" id="cb703"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb703-1"><a href="generalized-linear-models.html#cb703-1" tabindex="-1"></a><span class="fu">predict</span>(mod2, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">sporozoite =</span> <span class="dv">10</span>, <span class="at">antibody =</span> <span class="st">&quot;no&quot;</span>), <span class="at">type =</span> <span class="st">&quot;response&quot;</span>, <span class="at">se.fit =</span> T) </span></code></pre></div>
 <pre><code>## $fit
 ##         1 
 ## 0.9119706 
@@ -636,7 +638,7 @@ p_i = \beta_0 + \beta_1 x_i
 ## $residual.scale
 ## [1] 1</code></pre>
 <p>Note that we would want to interpret the standard error with caution here. First of all, it is the value that corresponds to <strong>confidence</strong> intervals in OLS, not <strong>prediction</strong> intervals. Second, it would be non-standard to compute a two-sided confidence interval for <span class="math inline">\(p\)</span> by taking <span class="math inline">\(0.8868761 \pm 2 * 0.03624307\)</span>. A better way to compute a confidence interval would be to compute the symmetric interval in the log-odds scale, and convert it into the probability scale.</p>
-<div class="sourceCode" id="cb700"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb700-1"><a href="generalized-linear-models.html#cb700-1" tabindex="-1"></a><span class="fu">predict</span>(mod2, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">sporozoite =</span> <span class="dv">10</span>, <span class="at">antibody =</span> <span class="st">&quot;no&quot;</span>), <span class="at">se.fit =</span> T) </span></code></pre></div>
+<div class="sourceCode" id="cb705"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb705-1"><a href="generalized-linear-models.html#cb705-1" tabindex="-1"></a><span class="fu">predict</span>(mod2, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">sporozoite =</span> <span class="dv">10</span>, <span class="at">antibody =</span> <span class="st">&quot;no&quot;</span>), <span class="at">se.fit =</span> T) </span></code></pre></div>
 <pre><code>## $fit
 ##        1 
 ## 2.337937 
@@ -646,14 +648,14 @@ p_i = \beta_0 + \beta_1 x_i
 ## 
 ## $residual.scale
 ## [1] 1</code></pre>
-<div class="sourceCode" id="cb702"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb702-1"><a href="generalized-linear-models.html#cb702-1" tabindex="-1"></a>boot<span class="sc">::</span><span class="fu">inv.logit</span>(<span class="fl">2.059222</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fl">0.3612499</span>) <span class="co">#upper bound</span></span></code></pre></div>
+<div class="sourceCode" id="cb707"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb707-1"><a href="generalized-linear-models.html#cb707-1" tabindex="-1"></a>boot<span class="sc">::</span><span class="fu">inv.logit</span>(<span class="fl">2.059222</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fl">0.3612499</span>) <span class="co">#upper bound</span></span></code></pre></div>
 <pre><code>## [1] 0.9416801</code></pre>
-<div class="sourceCode" id="cb704"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb704-1"><a href="generalized-linear-models.html#cb704-1" tabindex="-1"></a>boot<span class="sc">::</span><span class="fu">inv.logit</span>(<span class="fl">2.059222</span> <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fl">0.3612499</span>) <span class="co">#lower bound</span></span></code></pre></div>
+<div class="sourceCode" id="cb709"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb709-1"><a href="generalized-linear-models.html#cb709-1" tabindex="-1"></a>boot<span class="sc">::</span><span class="fu">inv.logit</span>(<span class="fl">2.059222</span> <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fl">0.3612499</span>) <span class="co">#lower bound</span></span></code></pre></div>
 <pre><code>## [1] 0.7919504</code></pre>
 <p>When communicating results from logistic regression, it can be challenging to explain your results. The <code>marginaleffects</code> package has methods which allow for easier interpretation. First, we look at the <strong>average marginal effect</strong>. The average marginal effect of sporozoite estimates the <em>derivative</em> of the probability of getting malaria at each of the 139 data points and averages them. This gives an estimate for the <em>average effect</em> that a one unit change in sporozoite will have; where average means averging over the observed data.</p>
-<div class="sourceCode" id="cb706"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb706-1"><a href="generalized-linear-models.html#cb706-1" tabindex="-1"></a><span class="fu">library</span>(marginaleffects)</span></code></pre></div>
+<div class="sourceCode" id="cb711"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb711-1"><a href="generalized-linear-models.html#cb711-1" tabindex="-1"></a><span class="fu">library</span>(marginaleffects)</span></code></pre></div>
 <pre><code>## Warning: package &#39;marginaleffects&#39; was built under R version 4.5.2</code></pre>
-<div class="sourceCode" id="cb708"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb708-1"><a href="generalized-linear-models.html#cb708-1" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
+<div class="sourceCode" id="cb713"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb713-1"><a href="generalized-linear-models.html#cb713-1" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## glm(formula = malaria ~ sporozoite + antibody, family = &quot;binomial&quot;, 
@@ -674,7 +676,7 @@ p_i = \beta_0 + \beta_1 x_i
 ## AIC: 128.75
 ## 
 ## Number of Fisher Scoring iterations: 6</code></pre>
-<div class="sourceCode" id="cb710"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb710-1"><a href="generalized-linear-models.html#cb710-1" tabindex="-1"></a>marginaleffects<span class="sc">::</span><span class="fu">avg_slopes</span>(mod2)</span></code></pre></div>
+<div class="sourceCode" id="cb715"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb715-1"><a href="generalized-linear-models.html#cb715-1" tabindex="-1"></a>marginaleffects<span class="sc">::</span><span class="fu">avg_slopes</span>(mod2)</span></code></pre></div>
 <pre><code>## 
 ##        Term Contrast Estimate Std. Error     z Pr(&gt;|z|)   S   2.5 % 97.5 %
 ##  antibody   yes - no  -0.1648   0.097257 -1.69   0.0902 3.5 -0.3554 0.0258
@@ -682,7 +684,7 @@ p_i = \beta_0 + \beta_1 x_i
 ## 
 ## Type: response</code></pre>
 <p>The <code>avg_slopes</code> function estimates the derivative or the probability with respect to a continuous predictor, or the change in probability per category change for categorical predictors. This is often what you want to do, but in the case of <code>sporozoite</code>, the predictor is actually count data, so the derivative is hard to interpret. The <code>avg_comparisons</code> function estimates the change in probability for a one unit change in a continuous predictor, so for the case of sporozoites, it would estimate the average increase in probability assocaited with a one sporozoite increase.</p>
-<div class="sourceCode" id="cb712"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb712-1"><a href="generalized-linear-models.html#cb712-1" tabindex="-1"></a>marginaleffects<span class="sc">::</span><span class="fu">avg_comparisons</span>(mod2)</span></code></pre></div>
+<div class="sourceCode" id="cb717"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb717-1"><a href="generalized-linear-models.html#cb717-1" tabindex="-1"></a>marginaleffects<span class="sc">::</span><span class="fu">avg_comparisons</span>(mod2)</span></code></pre></div>
 <pre><code>## 
 ##        Term Contrast Estimate Std. Error     z Pr(&gt;|z|)   S   2.5 % 97.5 %
 ##  antibody   yes - no  -0.1648   0.097257 -1.69   0.0902 3.5 -0.3554 0.0258
@@ -690,10 +692,10 @@ p_i = \beta_0 + \beta_1 x_i
 ## 
 ## Type: response</code></pre>
 <p>Sometimes, it is desirable to get the effect of a different unit of change.</p>
-<div class="sourceCode" id="cb714"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb714-1"><a href="generalized-linear-models.html#cb714-1" tabindex="-1"></a>iqr_spor <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">IQR</span>(mm<span class="sc">$</span>sporozoite))</span>
-<span id="cb714-2"><a href="generalized-linear-models.html#cb714-2" tabindex="-1"></a>iqr_spor</span></code></pre></div>
+<div class="sourceCode" id="cb719"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb719-1"><a href="generalized-linear-models.html#cb719-1" tabindex="-1"></a>iqr_spor <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">IQR</span>(mm<span class="sc">$</span>sporozoite))</span>
+<span id="cb719-2"><a href="generalized-linear-models.html#cb719-2" tabindex="-1"></a>iqr_spor</span></code></pre></div>
 <pre><code>## [1] 10</code></pre>
-<div class="sourceCode" id="cb716"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb716-1"><a href="generalized-linear-models.html#cb716-1" tabindex="-1"></a><span class="fu">avg_comparisons</span>(mod2, <span class="at">variables =</span> <span class="fu">list</span>(<span class="at">sporozoite =</span> iqr_spor), <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb721"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb721-1"><a href="generalized-linear-models.html#cb721-1" tabindex="-1"></a><span class="fu">avg_comparisons</span>(mod2, <span class="at">variables =</span> <span class="fu">list</span>(<span class="at">sporozoite =</span> iqr_spor), <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Estimate Std. Error    z Pr(&gt;|z|)     S 2.5 % 97.5 %
 ##     0.386     0.0206 18.7   &lt;0.001 256.2 0.345  0.426
@@ -702,45 +704,45 @@ p_i = \beta_0 + \beta_1 x_i
 ## Type: response
 ## Comparison: +10</code></pre>
 <p>On average, the probability of getting malaria increases by about 4.44 percentage points per increase in sporozoite. An increase of 6 spororzoites is associated with a 18.5 percentage point increase in the probability of getting malaria, averaged across conditions in the data set. Of course, neither of these statements is true when there are already 25 sporozoites, as the probability is already essentiall 1. Similarly, the average effect of not having the antibody is a 19 percentage point increase in the probability of getting malaria. We can rederive the result of <code>avg_comparisons</code> (without confidence bands):</p>
-<div class="sourceCode" id="cb718"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb718-1"><a href="generalized-linear-models.html#cb718-1" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">predict</span>(mod2, <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span>
-<span id="cb718-2"><a href="generalized-linear-models.html#cb718-2" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">predict</span>(mod2, <span class="at">newdata =</span> mm <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">sporozoite =</span> sporozoite <span class="sc">+</span> <span class="dv">1</span>), <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span>
-<span id="cb718-3"><a href="generalized-linear-models.html#cb718-3" tabindex="-1"></a><span class="fu">mean</span>(p2 <span class="sc">-</span> p1)</span></code></pre></div>
+<div class="sourceCode" id="cb723"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb723-1"><a href="generalized-linear-models.html#cb723-1" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">predict</span>(mod2, <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span>
+<span id="cb723-2"><a href="generalized-linear-models.html#cb723-2" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">predict</span>(mod2, <span class="at">newdata =</span> mm <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">sporozoite =</span> sporozoite <span class="sc">+</span> <span class="dv">1</span>), <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span>
+<span id="cb723-3"><a href="generalized-linear-models.html#cb723-3" tabindex="-1"></a><span class="fu">mean</span>(p2 <span class="sc">-</span> p1)</span></code></pre></div>
 <pre><code>## [1] 0.05061776</code></pre>
 <p>We can also directly visualize the probabilities.</p>
-<div class="sourceCode" id="cb720"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb720-1"><a href="generalized-linear-models.html#cb720-1" tabindex="-1"></a>marginaleffects<span class="sc">::</span><span class="fu">plot_slopes</span>(mod2, <span class="at">variables =</span> <span class="st">&quot;sporozoite&quot;</span>, <span class="at">by =</span> <span class="st">&quot;antibody&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb725"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb725-1"><a href="generalized-linear-models.html#cb725-1" tabindex="-1"></a>marginaleffects<span class="sc">::</span><span class="fu">plot_slopes</span>(mod2, <span class="at">variables =</span> <span class="st">&quot;sporozoite&quot;</span>, <span class="at">by =</span> <span class="st">&quot;antibody&quot;</span>)</span></code></pre></div>
 <p><img src="08-generalized-linear-models_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
-<div class="sourceCode" id="cb721"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb721-1"><a href="generalized-linear-models.html#cb721-1" tabindex="-1"></a><span class="fu">plot_predictions</span>(mod2, <span class="at">condition =</span> <span class="st">&quot;sporozoite&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb726"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb726-1"><a href="generalized-linear-models.html#cb726-1" tabindex="-1"></a><span class="fu">plot_predictions</span>(mod2, <span class="at">condition =</span> <span class="st">&quot;sporozoite&quot;</span>)</span></code></pre></div>
 <p><img src="08-generalized-linear-models_files/figure-html/unnamed-chunk-24-2.png" width="672" /></p>
 <p>This gives the probabilities at each sporozoite level; the other values are set at their mean or mode. In the case of <code>sporozoite</code>, the default is that the antibody is set to <code>no</code>.</p>
-<div class="sourceCode" id="cb722"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb722-1"><a href="generalized-linear-models.html#cb722-1" tabindex="-1"></a><span class="fu">avg_predictions</span>(mod2, <span class="at">newdata =</span> <span class="fu">datagrid</span>(<span class="at">sporozoite =</span> <span class="dv">1</span>)) <span class="co">#sets other variables to typical values</span></span></code></pre></div>
+<div class="sourceCode" id="cb727"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb727-1"><a href="generalized-linear-models.html#cb727-1" tabindex="-1"></a><span class="fu">avg_predictions</span>(mod2, <span class="at">newdata =</span> <span class="fu">datagrid</span>(<span class="at">sporozoite =</span> <span class="dv">1</span>)) <span class="co">#sets other variables to typical values</span></span></code></pre></div>
 <pre><code>## 
 ##  sporozoite Estimate Std. Error    z Pr(&gt;|z|)   S  2.5 % 97.5 %
 ##           1    0.116     0.0389 2.98  0.00289 8.4 0.0397  0.192
 ## 
 ## Type: response</code></pre>
-<div class="sourceCode" id="cb724"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb724-1"><a href="generalized-linear-models.html#cb724-1" tabindex="-1"></a><span class="fu">predict</span>(mod2, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">sporozoite =</span> <span class="dv">1</span>, <span class="at">antibody =</span> <span class="st">&quot;no&quot;</span>), <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb729"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb729-1"><a href="generalized-linear-models.html#cb729-1" tabindex="-1"></a><span class="fu">predict</span>(mod2, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">sporozoite =</span> <span class="dv">1</span>, <span class="at">antibody =</span> <span class="st">&quot;no&quot;</span>), <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span></code></pre></div>
 <pre><code>##         1 
 ## 0.1159286</code></pre>
-<div class="sourceCode" id="cb726"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb726-1"><a href="generalized-linear-models.html#cb726-1" tabindex="-1"></a><span class="fu">avg_predictions</span>(mod2, <span class="at">newdata =</span> <span class="fu">datagrid</span>(<span class="at">sporozoite =</span> <span class="dv">1</span>, <span class="at">grid_type =</span> <span class="st">&quot;counterfactual&quot;</span>)) <span class="co">#averages over the values observed in study</span></span></code></pre></div>
+<div class="sourceCode" id="cb731"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb731-1"><a href="generalized-linear-models.html#cb731-1" tabindex="-1"></a><span class="fu">avg_predictions</span>(mod2, <span class="at">newdata =</span> <span class="fu">datagrid</span>(<span class="at">sporozoite =</span> <span class="dv">1</span>, <span class="at">grid_type =</span> <span class="st">&quot;counterfactual&quot;</span>)) <span class="co">#averages over the values observed in study</span></span></code></pre></div>
 <pre><code>## 
 ##  Estimate Std. Error    z Pr(&gt;|z|)   S  2.5 % 97.5 %
 ##     0.108     0.0366 2.95  0.00315 8.3 0.0363   0.18
 ## 
 ## Type: response</code></pre>
-<div class="sourceCode" id="cb728"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb728-1"><a href="generalized-linear-models.html#cb728-1" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">predict</span>(mod2, <span class="at">newdata =</span> mm <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">sporozoite =</span> <span class="dv">1</span>), <span class="at">type =</span> <span class="st">&quot;response&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb733"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb733-1"><a href="generalized-linear-models.html#cb733-1" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">predict</span>(mod2, <span class="at">newdata =</span> mm <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">sporozoite =</span> <span class="dv">1</span>), <span class="at">type =</span> <span class="st">&quot;response&quot;</span>))</span></code></pre></div>
 <pre><code>## [1] 0.1080348</code></pre>
 <p>The word <em>marginal</em> generally means to average over the other values. If we want to average the probabilities over the values observed in the data, then we need to specify.</p>
-<div class="sourceCode" id="cb730"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb730-1"><a href="generalized-linear-models.html#cb730-1" tabindex="-1"></a><span class="fu">plot_predictions</span>(mod2, <span class="at">by =</span> <span class="st">&quot;sporozoite&quot;</span>, <span class="at">newdata =</span> <span class="fu">datagrid</span>(<span class="at">sporozoite =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">30</span>, <span class="at">by =</span> <span class="fl">0.5</span>), <span class="at">grid_type =</span> <span class="st">&quot;counterfactual&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb735"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb735-1"><a href="generalized-linear-models.html#cb735-1" tabindex="-1"></a><span class="fu">plot_predictions</span>(mod2, <span class="at">by =</span> <span class="st">&quot;sporozoite&quot;</span>, <span class="at">newdata =</span> <span class="fu">datagrid</span>(<span class="at">sporozoite =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">30</span>, <span class="at">by =</span> <span class="fl">0.5</span>), <span class="at">grid_type =</span> <span class="st">&quot;counterfactual&quot;</span>))</span></code></pre></div>
 <p><img src="08-generalized-linear-models_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
 </div>
 </div>
 <div id="mixed-effects-logistic-regression" class="section level2 hasAnchor" number="7.2">
 <h2><span class="header-section-number">7.2</span> Mixed Effects Logistic Regression<a href="generalized-linear-models.html#mixed-effects-logistic-regression" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Let’s consider the <code>Contraception</code> data set in the <code>mlmRev</code> package. The goal is to model contraceptive usage among women in Bangladesh. This is an <em>exploratory</em> analysis.</p>
-<div class="sourceCode" id="cb731"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb731-1"><a href="generalized-linear-models.html#cb731-1" tabindex="-1"></a>cc <span class="ot">&lt;-</span> mlmRev<span class="sc">::</span>Contraception <span class="sc">|&gt;</span> </span>
-<span id="cb731-2"><a href="generalized-linear-models.html#cb731-2" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb731-3"><a href="generalized-linear-models.html#cb731-3" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span>
-<span id="cb731-4"><a href="generalized-linear-models.html#cb731-4" tabindex="-1"></a><span class="fu">summary</span>(cc)</span></code></pre></div>
+<div class="sourceCode" id="cb736"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb736-1"><a href="generalized-linear-models.html#cb736-1" tabindex="-1"></a>cc <span class="ot">&lt;-</span> mlmRev<span class="sc">::</span>Contraception <span class="sc">|&gt;</span> </span>
+<span id="cb736-2"><a href="generalized-linear-models.html#cb736-2" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb736-3"><a href="generalized-linear-models.html#cb736-3" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span>
+<span id="cb736-4"><a href="generalized-linear-models.html#cb736-4" tabindex="-1"></a><span class="fu">summary</span>(cc)</span></code></pre></div>
 <pre><code>##      woman         district    use      livch         age             urban   
 ##  1      :   1   14     : 118   N:1175   0 :530   Min.   :-13.560000   N:1372  
 ##  2      :   1   1      : 117   Y: 759   1 :356   1st Qu.: -7.559900   Y: 562  
@@ -750,8 +752,8 @@ p_i = \beta_0 + \beta_1 x_i
 ##  6      :   1   30     :  61                     Max.   : 19.440000           
 ##  (Other):1928   (Other):1420</code></pre>
 <p>There are 60 different districts, and we aren’t interested in modeling each one separately, but rather in modeling the spread among the districts using <code>district</code> as a random effect.</p>
-<div class="sourceCode" id="cb733"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb733-1"><a href="generalized-linear-models.html#cb733-1" tabindex="-1"></a>mod1 <span class="ot">&lt;-</span> lme4<span class="sc">::</span><span class="fu">glmer</span>(use <span class="sc">~</span> livch <span class="sc">+</span> age <span class="sc">+</span> urban <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>district), <span class="at">data =</span> cc, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
-<span id="cb733-2"><a href="generalized-linear-models.html#cb733-2" tabindex="-1"></a><span class="fu">summary</span>(mod1)</span></code></pre></div>
+<div class="sourceCode" id="cb738"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb738-1"><a href="generalized-linear-models.html#cb738-1" tabindex="-1"></a>mod1 <span class="ot">&lt;-</span> lme4<span class="sc">::</span><span class="fu">glmer</span>(use <span class="sc">~</span> livch <span class="sc">+</span> age <span class="sc">+</span> urban <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>district), <span class="at">data =</span> cc, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
+<span id="cb738-2"><a href="generalized-linear-models.html#cb738-2" tabindex="-1"></a><span class="fu">summary</span>(mod1)</span></code></pre></div>
 <pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
 ##   Approximation) [glmerMod]
 ##  Family: binomial  ( logit )
@@ -772,10 +774,10 @@ p_i = \beta_0 + \beta_1 x_i
 ## 
 ## Fixed effects:
 ##              Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept) -1.689648   0.147332 -11.468  &lt; 2e-16 ***
-## livch1       1.109125   0.157850   7.026 2.12e-12 ***
-## livch2       1.376341   0.174640   7.881 3.25e-15 ***
-## livch3+      1.345184   0.179408   7.498 6.49e-14 ***
+## (Intercept) -1.689648   0.147333 -11.468  &lt; 2e-16 ***
+## livch1       1.109125   0.157851   7.026 2.12e-12 ***
+## livch2       1.376341   0.174641   7.881 3.25e-15 ***
+## livch3+      1.345184   0.179411   7.498 6.49e-14 ***
 ## age         -0.026594   0.007879  -3.375 0.000738 ***
 ## urbanY       0.732979   0.119386   6.140 8.28e-10 ***
 ## ---
@@ -788,8 +790,10 @@ p_i = \beta_0 + \beta_1 x_i
 ## livch3+ -0.752  0.540  0.620              
 ## age      0.449 -0.213 -0.380 -0.675       
 ## urbanY  -0.289  0.055  0.089  0.092 -0.044</code></pre>
-<div class="sourceCode" id="cb735"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb735-1"><a href="generalized-linear-models.html#cb735-1" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> lme4<span class="sc">::</span><span class="fu">glmer</span>(use <span class="sc">~</span> livch <span class="sc">+</span> age <span class="sc">+</span> urban <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> urban<span class="sc">|</span>district), <span class="at">data =</span> cc, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
-<span id="cb735-2"><a href="generalized-linear-models.html#cb735-2" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
+<div class="sourceCode" id="cb740"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb740-1"><a href="generalized-linear-models.html#cb740-1" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> lme4<span class="sc">::</span><span class="fu">glmer</span>(use <span class="sc">~</span> livch <span class="sc">+</span> age <span class="sc">+</span> urban <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> urban<span class="sc">|</span>district), <span class="at">data =</span> cc, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span></code></pre></div>
+<pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control$checkConv, : Model failed to converge with max|grad| = 0.00307215 (tol = 0.002, component 1)
+##   See ?lme4::convergence and ?lme4::troubleshooting.</code></pre>
+<div class="sourceCode" id="cb742"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb742-1"><a href="generalized-linear-models.html#cb742-1" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
 <pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
 ##   Approximation) [glmerMod]
 ##  Family: binomial  ( logit )
@@ -801,22 +805,22 @@ p_i = \beta_0 + \beta_1 x_i
 ## 
 ## Scaled residuals: 
 ##     Min      1Q  Median      3Q     Max 
-## -1.9127 -0.7456 -0.4933  0.9335  2.9271 
+## -1.9127 -0.7456 -0.4933  0.9335  2.9270 
 ## 
 ## Random effects:
-##  Groups   Name        Variance Std.Dev. Corr 
-##  district (Intercept) 0.3812   0.6174        
-##           urbanY      0.6419   0.8012   -0.80
+##  Groups   Name        Variance Std.Dev. Corr  
+##  district (Intercept) 0.3811   0.6173         
+##           urbanY      0.6418   0.8011   -0.80 
 ## Number of obs: 1934, groups:  district, 60
 ## 
 ## Fixed effects:
 ##              Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept) -1.711645   0.159623 -10.723  &lt; 2e-16 ***
-## livch1       1.125534   0.159900   7.039 1.94e-12 ***
-## livch2       1.368233   0.176848   7.737 1.02e-14 ***
-## livch3+      1.354673   0.182409   7.427 1.11e-13 ***
-## age         -0.026519   0.008001  -3.315 0.000918 ***
-## urbanY       0.815124   0.169722   4.803 1.57e-06 ***
+## (Intercept) -1.711588   0.159615 -10.723  &lt; 2e-16 ***
+## livch1       1.125511   0.159895   7.039 1.94e-12 ***
+## livch2       1.368152   0.176844   7.736 1.02e-14 ***
+## livch3+      1.354560   0.182403   7.426 1.12e-13 ***
+## age         -0.026515   0.008001  -3.314 0.000919 ***
+## urbanY       0.815111   0.169708   4.803 1.56e-06 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
@@ -826,15 +830,18 @@ p_i = \beta_0 + \beta_1 x_i
 ## livch2  -0.590  0.487                     
 ## livch3+ -0.701  0.538  0.617              
 ## age      0.422 -0.212 -0.380 -0.675       
-## urbanY  -0.473  0.042  0.066  0.062 -0.035</code></pre>
+## urbanY  -0.473  0.042  0.066  0.062 -0.035
+## optimizer (Nelder_Mead) convergence code: 0 (OK)
+## Model failed to converge with max|grad| = 0.00307215 (tol = 0.002, component 1)
+##   See ?lme4::convergence and ?lme4::troubleshooting.</code></pre>
 <p>Let’s think carefully about what the difference in the two models is. In the first model, we are allowing the intercept to vary across districts, but we are assuming that the effect of <code>urban</code> is the same across all districts. In the second model, we are allowing both the intercept and the effect of <code>urban</code> to vary across districts. The second model is more flexible, but it also has more parameters, so we would want to use AIC or a likelihood ratio test to determine which model is better.</p>
 <p>Looking at the coefficients, it appears that there may only be a difference between <em>having</em> a child and <em>not</em> having a child as it pertains to contraceptive use. Let’s see how we can test that.</p>
-<div class="sourceCode" id="cb737"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb737-1"><a href="generalized-linear-models.html#cb737-1" tabindex="-1"></a>cc<span class="sc">$</span>anychild <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">ifelse</span>(cc<span class="sc">$</span>livch <span class="sc">==</span> <span class="st">&quot;0&quot;</span>, <span class="st">&quot;none&quot;</span>, <span class="st">&quot;any&quot;</span>))</span>
-<span id="cb737-2"><a href="generalized-linear-models.html#cb737-2" tabindex="-1"></a></span>
-<span id="cb737-3"><a href="generalized-linear-models.html#cb737-3" tabindex="-1"></a>mod3 <span class="ot">&lt;-</span> lme4<span class="sc">::</span><span class="fu">glmer</span>(use <span class="sc">~</span> anychild <span class="sc">+</span> age <span class="sc">+</span> urban <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> urban <span class="sc">|</span> district),</span>
-<span id="cb737-4"><a href="generalized-linear-models.html#cb737-4" tabindex="-1"></a>                    <span class="at">data =</span> cc, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
-<span id="cb737-5"><a href="generalized-linear-models.html#cb737-5" tabindex="-1"></a></span>
-<span id="cb737-6"><a href="generalized-linear-models.html#cb737-6" tabindex="-1"></a><span class="fu">summary</span>(mod3)</span></code></pre></div>
+<div class="sourceCode" id="cb744"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb744-1"><a href="generalized-linear-models.html#cb744-1" tabindex="-1"></a>cc<span class="sc">$</span>anychild <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">ifelse</span>(cc<span class="sc">$</span>livch <span class="sc">==</span> <span class="st">&quot;0&quot;</span>, <span class="st">&quot;none&quot;</span>, <span class="st">&quot;any&quot;</span>))</span>
+<span id="cb744-2"><a href="generalized-linear-models.html#cb744-2" tabindex="-1"></a></span>
+<span id="cb744-3"><a href="generalized-linear-models.html#cb744-3" tabindex="-1"></a>mod3 <span class="ot">&lt;-</span> lme4<span class="sc">::</span><span class="fu">glmer</span>(use <span class="sc">~</span> anychild <span class="sc">+</span> age <span class="sc">+</span> urban <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> urban <span class="sc">|</span> district),</span>
+<span id="cb744-4"><a href="generalized-linear-models.html#cb744-4" tabindex="-1"></a>                    <span class="at">data =</span> cc, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
+<span id="cb744-5"><a href="generalized-linear-models.html#cb744-5" tabindex="-1"></a></span>
+<span id="cb744-6"><a href="generalized-linear-models.html#cb744-6" tabindex="-1"></a><span class="fu">summary</span>(mod3)</span></code></pre></div>
 <pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
 ##   Approximation) [glmerMod]
 ##  Family: binomial  ( logit )
@@ -849,17 +856,17 @@ p_i = \beta_0 + \beta_1 x_i
 ## -1.8993 -0.7411 -0.4945  0.9420  2.9162 
 ## 
 ## Random effects:
-##  Groups   Name        Variance Std.Dev. Corr 
-##  district (Intercept) 0.3772   0.6142        
-##           urbanY      0.6580   0.8112   -0.80
+##  Groups   Name        Variance Std.Dev. Corr  
+##  district (Intercept) 0.3772   0.6142         
+##           urbanY      0.6580   0.8112   -0.80 
 ## Number of obs: 1934, groups:  district, 60
 ## 
 ## Fixed effects:
 ##               Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)  -0.424250   0.109757  -3.865 0.000111 ***
-## anychildnone -1.241573   0.141641  -8.766  &lt; 2e-16 ***
+## (Intercept)  -0.424246   0.109757  -3.865 0.000111 ***
+## anychildnone -1.241581   0.141641  -8.766  &lt; 2e-16 ***
 ## age          -0.021407   0.006635  -3.226 0.001254 ** 
-## urbanY        0.807604   0.170438   4.738 2.15e-06 ***
+## urbanY        0.807606   0.170437   4.738 2.15e-06 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
@@ -868,7 +875,7 @@ p_i = \beta_0 + \beta_1 x_i
 ## anychildnon -0.268              
 ## age         -0.162  0.507       
 ## urbanY      -0.598 -0.064 -0.027</code></pre>
-<div class="sourceCode" id="cb739"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb739-1"><a href="generalized-linear-models.html#cb739-1" tabindex="-1"></a><span class="fu">anova</span>(mod2, mod3, <span class="at">test =</span> <span class="st">&quot;Chisq&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb746"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb746-1"><a href="generalized-linear-models.html#cb746-1" tabindex="-1"></a><span class="fu">anova</span>(mod2, mod3, <span class="at">test =</span> <span class="st">&quot;Chisq&quot;</span>)</span></code></pre></div>
 <pre><code>## Data: cc
 ## Models:
 ## mod3: use ~ anychild + age + urban + (1 + urban | district)
@@ -877,11 +884,11 @@ p_i = \beta_0 + \beta_1 x_i
 ## mod3    7 2415.5 2454.5 -1200.8    2401.5                     
 ## mod2    9 2417.0 2467.1 -1199.5    2399.0 2.5109  2     0.2849</code></pre>
 <p>Indeed, the effect is based on whether there is a child at all; not how many children. Finally, let’s examine the <code>age</code> variable. It seems unlikely that contraceptive use depends only on age; it seems plausible that usage would increase up to a certain age, and then start to decrease again. Let’s add a quadratic term and see what we get.</p>
-<div class="sourceCode" id="cb741"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb741-1"><a href="generalized-linear-models.html#cb741-1" tabindex="-1"></a>cc<span class="sc">$</span>agec <span class="ot">&lt;-</span> cc<span class="sc">$</span>age <span class="sc">-</span> <span class="fu">mean</span>(cc<span class="sc">$</span>age)</span>
-<span id="cb741-2"><a href="generalized-linear-models.html#cb741-2" tabindex="-1"></a>cc<span class="sc">$</span>agec <span class="ot">&lt;-</span> cc<span class="sc">$</span>agec<span class="sc">/</span><span class="fu">sd</span>(cc<span class="sc">$</span>agec)</span>
-<span id="cb741-3"><a href="generalized-linear-models.html#cb741-3" tabindex="-1"></a>mod4 <span class="ot">&lt;-</span> lme4<span class="sc">::</span><span class="fu">glmer</span>(use <span class="sc">~</span> anychild <span class="sc">+</span> agec <span class="sc">+</span> <span class="fu">I</span>(agec<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> urban <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> urban <span class="sc">|</span> district),</span>
-<span id="cb741-4"><a href="generalized-linear-models.html#cb741-4" tabindex="-1"></a>                    <span class="at">data =</span> cc, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
-<span id="cb741-5"><a href="generalized-linear-models.html#cb741-5" tabindex="-1"></a><span class="fu">summary</span>(mod4)</span></code></pre></div>
+<div class="sourceCode" id="cb748"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb748-1"><a href="generalized-linear-models.html#cb748-1" tabindex="-1"></a>cc<span class="sc">$</span>agec <span class="ot">&lt;-</span> cc<span class="sc">$</span>age <span class="sc">-</span> <span class="fu">mean</span>(cc<span class="sc">$</span>age)</span>
+<span id="cb748-2"><a href="generalized-linear-models.html#cb748-2" tabindex="-1"></a>cc<span class="sc">$</span>agec <span class="ot">&lt;-</span> cc<span class="sc">$</span>agec<span class="sc">/</span><span class="fu">sd</span>(cc<span class="sc">$</span>agec)</span>
+<span id="cb748-3"><a href="generalized-linear-models.html#cb748-3" tabindex="-1"></a>mod4 <span class="ot">&lt;-</span> lme4<span class="sc">::</span><span class="fu">glmer</span>(use <span class="sc">~</span> anychild <span class="sc">+</span> agec <span class="sc">+</span> <span class="fu">I</span>(agec<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> urban <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> urban <span class="sc">|</span> district),</span>
+<span id="cb748-4"><a href="generalized-linear-models.html#cb748-4" tabindex="-1"></a>                    <span class="at">data =</span> cc, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
+<span id="cb748-5"><a href="generalized-linear-models.html#cb748-5" tabindex="-1"></a><span class="fu">summary</span>(mod4)</span></code></pre></div>
 <pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
 ##   Approximation) [glmerMod]
 ##  Family: binomial  ( logit )
@@ -896,15 +903,15 @@ p_i = \beta_0 + \beta_1 x_i
 ## -1.8820 -0.7463 -0.4476  0.8967  3.0666 
 ## 
 ## Random effects:
-##  Groups   Name        Variance Std.Dev. Corr 
-##  district (Intercept) 0.3824   0.6184        
-##           urbanY      0.5454   0.7385   -0.79
+##  Groups   Name        Variance Std.Dev. Corr  
+##  district (Intercept) 0.3824   0.6184         
+##           urbanY      0.5454   0.7385   -0.79 
 ## Number of obs: 1934, groups:  district, 60
 ## 
 ## Fixed effects:
 ##              Estimate Std. Error z value Pr(&gt;|z|)    
 ## (Intercept)  -0.16493    0.11736  -1.405     0.16    
-## anychildnone -0.87228    0.15015  -5.809 6.27e-09 ***
+## anychildnone -0.87229    0.15015  -5.809 6.27e-09 ***
 ## agec          0.05201    0.07194   0.723     0.47    
 ## I(agec^2)    -0.36992    0.05925  -6.243 4.29e-10 ***
 ## urbanY        0.77019    0.16408   4.694 2.68e-06 ***
@@ -917,7 +924,7 @@ p_i = \beta_0 + \beta_1 x_i
 ## agec         0.053  0.567              
 ## I(agec^2)   -0.338 -0.349 -0.507       
 ## urbanY      -0.558 -0.074 -0.035  0.019</code></pre>
-<div class="sourceCode" id="cb743"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb743-1"><a href="generalized-linear-models.html#cb743-1" tabindex="-1"></a><span class="fu">anova</span>(mod3, mod4)</span></code></pre></div>
+<div class="sourceCode" id="cb750"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb750-1"><a href="generalized-linear-models.html#cb750-1" tabindex="-1"></a><span class="fu">anova</span>(mod3, mod4)</span></code></pre></div>
 <pre><code>## Data: cc
 ## Models:
 ## mod3: use ~ anychild + age + urban + (1 + urban | district)
@@ -928,11 +935,11 @@ p_i = \beta_0 + \beta_1 x_i
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p>The quadratic term is significant. We can compute the marginal effect of age by averaging over the other observed values in the data set, as below. When doing this, you need to find the approximate largest and smallest value of the <code>by</code> variable in your data, and create a sequence of values from the minimum to the maximumm.</p>
-<div class="sourceCode" id="cb745"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb745-1"><a href="generalized-linear-models.html#cb745-1" tabindex="-1"></a><span class="fu">library</span>(marginaleffects)</span>
-<span id="cb745-2"><a href="generalized-linear-models.html#cb745-2" tabindex="-1"></a><span class="fu">summary</span>(cc<span class="sc">$</span>agec)</span></code></pre></div>
+<div class="sourceCode" id="cb752"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb752-1"><a href="generalized-linear-models.html#cb752-1" tabindex="-1"></a><span class="fu">library</span>(marginaleffects)</span>
+<span id="cb752-2"><a href="generalized-linear-models.html#cb752-2" tabindex="-1"></a><span class="fu">summary</span>(cc<span class="sc">$</span>agec)</span></code></pre></div>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 ## -1.5047 -0.8390 -0.1733  0.0000  0.7143  2.1566</code></pre>
-<div class="sourceCode" id="cb747"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb747-1"><a href="generalized-linear-models.html#cb747-1" tabindex="-1"></a><span class="fu">plot_predictions</span>(mod4, <span class="at">by =</span> <span class="st">&quot;agec&quot;</span>, <span class="at">type =</span> <span class="st">&quot;response&quot;</span>, <span class="at">newdata =</span> <span class="fu">datagrid</span>(<span class="at">agec =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="fl">1.5</span>, <span class="fl">2.2</span>, <span class="at">by =</span> <span class="fl">0.1</span>), <span class="at">grid_type =</span> <span class="st">&quot;counterfactual&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb754"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb754-1"><a href="generalized-linear-models.html#cb754-1" tabindex="-1"></a><span class="fu">plot_predictions</span>(mod4, <span class="at">by =</span> <span class="st">&quot;agec&quot;</span>, <span class="at">type =</span> <span class="st">&quot;response&quot;</span>, <span class="at">newdata =</span> <span class="fu">datagrid</span>(<span class="at">agec =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="fl">1.5</span>, <span class="fl">2.2</span>, <span class="at">by =</span> <span class="fl">0.1</span>), <span class="at">grid_type =</span> <span class="st">&quot;counterfactual&quot;</span>))</span></code></pre></div>
 <pre><code>## Warning: For this model type, `marginaleffects` only takes into account the
 ## uncertainty in fixed-effect parameters. This is often appropriate when
 ## `re.form=NA`, but may be surprising to users who set `re.form=NULL` (default)
@@ -945,7 +952,7 @@ p_i = \beta_0 + \beta_1 x_i
 ## this warning.</code></pre>
 <p><img src="08-generalized-linear-models_files/figure-html/unnamed-chunk-32-1.png" width="672" /></p>
 <p>Alternatively, you could plot the estimates contraceptive use by age for typical values of the other covariates. Typical in this case means either mean for numeric variables or mode for categorical data, and the random effect is considered to be zero. In this instance, there are only small differences in the two plots, but as a general rule for mixed effect models, I would default to the marginal effect above.</p>
-<div class="sourceCode" id="cb749"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb749-1"><a href="generalized-linear-models.html#cb749-1" tabindex="-1"></a><span class="fu">plot_predictions</span>(mod4, <span class="at">condition =</span> <span class="st">&quot;agec&quot;</span>, <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb756"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb756-1"><a href="generalized-linear-models.html#cb756-1" tabindex="-1"></a><span class="fu">plot_predictions</span>(mod4, <span class="at">condition =</span> <span class="st">&quot;agec&quot;</span>, <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span></code></pre></div>
 <pre><code>## Warning: For this model type, `marginaleffects` only takes into account the
 ## uncertainty in fixed-effect parameters. This is often appropriate when
 ## `re.form=NA`, but may be surprising to users who set `re.form=NULL` (default)
@@ -958,7 +965,7 @@ p_i = \beta_0 + \beta_1 x_i
 ## this warning.</code></pre>
 <p><img src="08-generalized-linear-models_files/figure-html/unnamed-chunk-33-1.png" width="672" /></p>
 <p>To get estimates that are more interpretable than the log-odds estimates, we can again use <code>marginaleffects</code>. Note that the marginal effect of <code>age</code> is not easily interpretable, because of the quadratic nature of that relationship.</p>
-<div class="sourceCode" id="cb751"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb751-1"><a href="generalized-linear-models.html#cb751-1" tabindex="-1"></a><span class="fu">avg_slopes</span>(mod4)</span></code></pre></div>
+<div class="sourceCode" id="cb758"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb758-1"><a href="generalized-linear-models.html#cb758-1" tabindex="-1"></a><span class="fu">avg_slopes</span>(mod4)</span></code></pre></div>
 <pre><code>## Warning: For this model type, `marginaleffects` only takes into account the
 ## uncertainty in fixed-effect parameters. This is often appropriate when
 ## `re.form=NA`, but may be surprising to users who set `re.form=NULL` (default)
@@ -968,7 +975,7 @@ p_i = \beta_0 + \beta_1 x_i
 ##      Term   Contrast Estimate Std. Error      z Pr(&gt;|z|)    S   2.5 %  97.5 %
 ##  agec     dY/dX       0.00772     0.0134  0.577    0.564  0.8 -0.0185  0.0339
 ##  anychild none - any -0.17687     0.0287 -6.154   &lt;0.001 30.3 -0.2332 -0.1205
-##  urban    Y - N       0.16334     0.0356  4.592   &lt;0.001 17.8  0.0936  0.2331
+##  urban    Y - N       0.16335     0.0356  4.592   &lt;0.001 17.8  0.0936  0.2331
 ## 
 ## Type: response</code></pre>
 <p>This indicates that having a child is associated with a 0.17687 increase in the probability scale; that is, an 18 percentage point increase in contraceptive use averaged across all data points, and urban areas are associated with a 16 percentage point increase in contraceptive use, averaging over the other covariates in the study.</p>
@@ -980,10 +987,10 @@ p_i = \beta_0 + \beta_1 x_i
 <div id="nested-random-effects" class="section level3 hasAnchor" number="7.2.1">
 <h3><span class="header-section-number">7.2.1</span> Nested random effects<a href="generalized-linear-models.html#nested-random-effects" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>In the data set <code>ardata::beethoven_tempos</code>, we had two categorical variables <code>symphony</code> and <code>movement</code>. Each symphony consisted of 4 movements, numbered 1-4. So, the data point <code>movement==1</code> could mean different things for each symphony. We day that <code>movement</code> is <strong>nested</strong> in <code>symphony</code>. If we want to correctly identify this in a mixed effect model, the random effect should be written as <code>(1|symphony/movement)</code>. This ensures that R understands that <code>movement</code> is <strong>nested</strong> inside of <code>symphony</code>. Let’s look at the <code>guImmun</code> data in the <code>mlmRev</code> package.</p>
-<div class="sourceCode" id="cb754"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb754-1"><a href="generalized-linear-models.html#cb754-1" tabindex="-1"></a>gg <span class="ot">&lt;-</span> mlmRev<span class="sc">::</span>guImmun <span class="sc">|&gt;</span> </span>
-<span id="cb754-2"><a href="generalized-linear-models.html#cb754-2" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb754-3"><a href="generalized-linear-models.html#cb754-3" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span>
-<span id="cb754-4"><a href="generalized-linear-models.html#cb754-4" tabindex="-1"></a><span class="fu">summary</span>(gg)</span></code></pre></div>
+<div class="sourceCode" id="cb761"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb761-1"><a href="generalized-linear-models.html#cb761-1" tabindex="-1"></a>gg <span class="ot">&lt;-</span> mlmRev<span class="sc">::</span>guImmun <span class="sc">|&gt;</span> </span>
+<span id="cb761-2"><a href="generalized-linear-models.html#cb761-2" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb761-3"><a href="generalized-linear-models.html#cb761-3" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span>
+<span id="cb761-4"><a href="generalized-linear-models.html#cb761-4" tabindex="-1"></a><span class="fu">summary</span>(gg)</span></code></pre></div>
 <pre><code>##       kid            mom            comm      immun    kid2p    mom25p  
 ##  2      :   1   310    :   3   185    :  55   N:1195   N: 493   N:1038  
 ##  269    :   1   384    :   3   210    :  50   Y: 964   Y:1666   Y:1121  
@@ -1021,13 +1028,13 @@ log E[Y] = log \lambda = \beta_0 + \beta_1 x_1 + \ldots + \beta_P x_P
 \Pi_{i = 1}^n \mathtext{dpois}(y_i, \beta_0 + \beta_1 x_i)
 \]</span>
 or taking logs, it is <code>sum(dpois(y, betao + beta1 x, log = T))</code>. This is the function we want to maximize for our MLE.</p>
-<div class="sourceCode" id="cb756"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb756-1"><a href="generalized-linear-models.html#cb756-1" tabindex="-1"></a>bb <span class="ot">&lt;-</span> pscl<span class="sc">::</span>bioChemists</span>
-<span id="cb756-2"><a href="generalized-linear-models.html#cb756-2" tabindex="-1"></a>nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
-<span id="cb756-3"><a href="generalized-linear-models.html#cb756-3" tabindex="-1"></a>  beta0 <span class="ot">&lt;-</span> par[<span class="dv">1</span>]</span>
-<span id="cb756-4"><a href="generalized-linear-models.html#cb756-4" tabindex="-1"></a>  beta1 <span class="ot">&lt;-</span> par[<span class="dv">2</span>]</span>
-<span id="cb756-5"><a href="generalized-linear-models.html#cb756-5" tabindex="-1"></a>  <span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> <span class="fu">sum</span>(<span class="fu">dpois</span>(bb<span class="sc">$</span>art, <span class="fu">exp</span>(beta0 <span class="sc">+</span> beta1 <span class="sc">*</span> bb<span class="sc">$</span>ment), <span class="at">log =</span> T))</span>
-<span id="cb756-6"><a href="generalized-linear-models.html#cb756-6" tabindex="-1"></a>}</span>
-<span id="cb756-7"><a href="generalized-linear-models.html#cb756-7" tabindex="-1"></a><span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">fn =</span> nll)</span></code></pre></div>
+<div class="sourceCode" id="cb763"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb763-1"><a href="generalized-linear-models.html#cb763-1" tabindex="-1"></a>bb <span class="ot">&lt;-</span> pscl<span class="sc">::</span>bioChemists</span>
+<span id="cb763-2"><a href="generalized-linear-models.html#cb763-2" tabindex="-1"></a>nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par) {</span>
+<span id="cb763-3"><a href="generalized-linear-models.html#cb763-3" tabindex="-1"></a>  beta0 <span class="ot">&lt;-</span> par[<span class="dv">1</span>]</span>
+<span id="cb763-4"><a href="generalized-linear-models.html#cb763-4" tabindex="-1"></a>  beta1 <span class="ot">&lt;-</span> par[<span class="dv">2</span>]</span>
+<span id="cb763-5"><a href="generalized-linear-models.html#cb763-5" tabindex="-1"></a>  <span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> <span class="fu">sum</span>(<span class="fu">dpois</span>(bb<span class="sc">$</span>art, <span class="fu">exp</span>(beta0 <span class="sc">+</span> beta1 <span class="sc">*</span> bb<span class="sc">$</span>ment), <span class="at">log =</span> T))</span>
+<span id="cb763-6"><a href="generalized-linear-models.html#cb763-6" tabindex="-1"></a>}</span>
+<span id="cb763-7"><a href="generalized-linear-models.html#cb763-7" tabindex="-1"></a><span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">fn =</span> nll)</span></code></pre></div>
 <pre><code>## $par
 ## [1] 0.25982271 0.02604641
 ## 
@@ -1044,7 +1051,7 @@ or taking logs, it is <code>sum(dpois(y, betao + beta1 x, log = T))</code>. This
 ## $message
 ## NULL</code></pre>
 <p>We get an estimate of 0.26 for <span class="math inline">\(\beta_0\)</span> and 0.026 for <span class="math inline">\(\beta_1\)</span>. Let’s compare with <code>glm</code>.</p>
-<div class="sourceCode" id="cb758"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb758-1"><a href="generalized-linear-models.html#cb758-1" tabindex="-1"></a><span class="fu">glm</span>(art <span class="sc">~</span> ment, <span class="at">data =</span> bb, <span class="at">family =</span> poisson)</span></code></pre></div>
+<div class="sourceCode" id="cb765"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb765-1"><a href="generalized-linear-models.html#cb765-1" tabindex="-1"></a><span class="fu">glm</span>(art <span class="sc">~</span> ment, <span class="at">data =</span> bb, <span class="at">family =</span> poisson)</span></code></pre></div>
 <pre><code>## 
 ## Call:  glm(formula = art ~ ment, family = poisson, data = bb)
 ## 
@@ -1056,8 +1063,8 @@ or taking logs, it is <code>sum(dpois(y, betao + beta1 x, log = T))</code>. This
 ## Null Deviance:       1817 
 ## Residual Deviance: 1670  AIC: 3341</code></pre>
 <p>Let’s now model the number of articles carefully on the other variables.</p>
-<div class="sourceCode" id="cb760"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb760-1"><a href="generalized-linear-models.html#cb760-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">glm</span>(art <span class="sc">~</span> fem <span class="sc">+</span> mar <span class="sc">+</span> kid5 <span class="sc">+</span> phd <span class="sc">+</span> ment, <span class="at">data =</span> bb, <span class="at">family =</span> poisson)</span>
-<span id="cb760-2"><a href="generalized-linear-models.html#cb760-2" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
+<div class="sourceCode" id="cb767"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb767-1"><a href="generalized-linear-models.html#cb767-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">glm</span>(art <span class="sc">~</span> fem <span class="sc">+</span> mar <span class="sc">+</span> kid5 <span class="sc">+</span> phd <span class="sc">+</span> ment, <span class="at">data =</span> bb, <span class="at">family =</span> poisson)</span>
+<span id="cb767-2"><a href="generalized-linear-models.html#cb767-2" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## glm(formula = art ~ fem + mar + kid5 + phd + ment, family = poisson, 
@@ -1083,19 +1090,19 @@ or taking logs, it is <code>sum(dpois(y, betao + beta1 x, log = T))</code>. This
 ## Number of Fisher Scoring iterations: 5</code></pre>
 <p>Recall that our model says that the <strong>expected value</strong> of the response is given by an affine combination of the predictors, and the <strong>observed value</strong> of the response is a sample from a Poisson random variable with that expected value. Poisson random variables have the property that their <em>variance</em> is equal to their <em>mean</em>. This will be one of our two primary diagnostics when seeing whether we have appropriately modeled a count variable.</p>
 <p>To intuitively test whether the expected value is equal to the variance, we can compute all of the expected values</p>
-<div class="sourceCode" id="cb762"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb762-1"><a href="generalized-linear-models.html#cb762-1" tabindex="-1"></a>evals <span class="ot">&lt;-</span> <span class="fu">predict</span>(mod, <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb769"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb769-1"><a href="generalized-linear-models.html#cb769-1" tabindex="-1"></a>evals <span class="ot">&lt;-</span> <span class="fu">predict</span>(mod, <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span></code></pre></div>
 <p>and then use these to estimate the variance:</p>
-<div class="sourceCode" id="cb763"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb763-1"><a href="generalized-linear-models.html#cb763-1" tabindex="-1"></a><span class="fu">mean</span>(evals)</span></code></pre></div>
+<div class="sourceCode" id="cb770"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb770-1"><a href="generalized-linear-models.html#cb770-1" tabindex="-1"></a><span class="fu">mean</span>(evals)</span></code></pre></div>
 <pre><code>## [1] 1.692896</code></pre>
-<div class="sourceCode" id="cb765"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb765-1"><a href="generalized-linear-models.html#cb765-1" tabindex="-1"></a><span class="fu">mean</span>((<span class="fu">mean</span>(evals) <span class="sc">-</span> bb<span class="sc">$</span>art)<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb772"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb772-1"><a href="generalized-linear-models.html#cb772-1" tabindex="-1"></a><span class="fu">mean</span>((<span class="fu">mean</span>(evals) <span class="sc">-</span> bb<span class="sc">$</span>art)<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div>
 <pre><code>## [1] 3.705687</code></pre>
 <p>We see that we have a <strong>rough</strong> estimate of 3.7 for the variance and 1.7 for the mean. This indicates that the variance might be larger than the mean, in which case we say the response is <strong>overdispersed</strong> or exhibits <strong>overdispersion</strong>.</p>
 <p>Here are three more principled approaches to estimating the dispersion:</p>
-<div class="sourceCode" id="cb767"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb767-1"><a href="generalized-linear-models.html#cb767-1" tabindex="-1"></a><span class="fu">mean</span>((evals <span class="sc">-</span> bb<span class="sc">$</span>art)<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>evals)</span></code></pre></div>
+<div class="sourceCode" id="cb774"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb774-1"><a href="generalized-linear-models.html#cb774-1" tabindex="-1"></a><span class="fu">mean</span>((evals <span class="sc">-</span> bb<span class="sc">$</span>art)<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>evals)</span></code></pre></div>
 <pre><code>## [1] 1.816991</code></pre>
-<div class="sourceCode" id="cb769"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb769-1"><a href="generalized-linear-models.html#cb769-1" tabindex="-1"></a>mod<span class="sc">$</span>deviance<span class="sc">/</span>mod<span class="sc">$</span>df.residual <span class="co">#this is very common in R, because you can read it directly off of summary(mod)</span></span></code></pre></div>
+<div class="sourceCode" id="cb776"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb776-1"><a href="generalized-linear-models.html#cb776-1" tabindex="-1"></a>mod<span class="sc">$</span>deviance<span class="sc">/</span>mod<span class="sc">$</span>df.residual <span class="co">#this is very common in R, because you can read it directly off of summary(mod)</span></span></code></pre></div>
 <pre><code>## [1] 1.797988</code></pre>
-<div class="sourceCode" id="cb771"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb771-1"><a href="generalized-linear-models.html#cb771-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_overdispersion</span>(mod)</span></code></pre></div>
+<div class="sourceCode" id="cb778"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb778-1"><a href="generalized-linear-models.html#cb778-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_overdispersion</span>(mod)</span></code></pre></div>
 <pre><code>## # Overdispersion test
 ## 
 ##        dispersion ratio =    1.829
@@ -1103,8 +1110,8 @@ or taking logs, it is <code>sum(dpois(y, betao + beta1 x, log = T))</code>. This
 ##                 p-value =  &lt; 0.001</code></pre>
 <pre><code>## Overdispersion detected.</code></pre>
 <p>However you slice it, it appears that the data is not well-modeled by Poisson regression. One option for proceeding is to use <em>quasipoisson</em>, and this is often done in base R.</p>
-<div class="sourceCode" id="cb774"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb774-1"><a href="generalized-linear-models.html#cb774-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">glm</span>(art <span class="sc">~</span> fem <span class="sc">+</span> mar <span class="sc">+</span> kid5 <span class="sc">+</span> phd <span class="sc">+</span> ment, <span class="at">data =</span> bb, <span class="at">family =</span> quasipoisson)</span>
-<span id="cb774-2"><a href="generalized-linear-models.html#cb774-2" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
+<div class="sourceCode" id="cb781"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb781-1"><a href="generalized-linear-models.html#cb781-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">glm</span>(art <span class="sc">~</span> fem <span class="sc">+</span> mar <span class="sc">+</span> kid5 <span class="sc">+</span> phd <span class="sc">+</span> ment, <span class="at">data =</span> bb, <span class="at">family =</span> quasipoisson)</span>
+<span id="cb781-2"><a href="generalized-linear-models.html#cb781-2" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## glm(formula = art ~ fem + mar + kid5 + phd + ment, family = quasipoisson, 
@@ -1129,7 +1136,7 @@ or taking logs, it is <code>sum(dpois(y, betao + beta1 x, log = T))</code>. This
 ## 
 ## Number of Fisher Scoring iterations: 5</code></pre>
 <p>The second common issue in count regression is <em>zero inflation</em>. That is when there are more zero values than would be expected from the model. The quick way to check that is”</p>
-<div class="sourceCode" id="cb776"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb776-1"><a href="generalized-linear-models.html#cb776-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_zeroinflation</span>(mod)</span></code></pre></div>
+<div class="sourceCode" id="cb783"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb783-1"><a href="generalized-linear-models.html#cb783-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_zeroinflation</span>(mod)</span></code></pre></div>
 <pre><code>## # Check for zero-inflation
 ## 
 ##    Observed zeros: 275
@@ -1137,14 +1144,18 @@ or taking logs, it is <code>sum(dpois(y, betao + beta1 x, log = T))</code>. This
 ##             Ratio: 0.69</code></pre>
 <pre><code>## Model is underfitting zeros (probable zero-inflation).</code></pre>
 <p>We can see that there are more observed zeros than predicted zeros, and we are likely underfitting the number of zeros. At this point, we want to fix that, and the cleanest way it so move away from base R and from <code>lme4</code> to use the <code>glmmTMB</code> package. Let’s start over.</p>
-<div class="sourceCode" id="cb779"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb779-1"><a href="generalized-linear-models.html#cb779-1" tabindex="-1"></a><span class="fu">library</span>(glmmTMB)</span></code></pre></div>
+<div class="sourceCode" id="cb786"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb786-1"><a href="generalized-linear-models.html#cb786-1" tabindex="-1"></a><span class="fu">library</span>(glmmTMB)</span></code></pre></div>
+<pre><code>## Warning in check_dep_version(dep_pkg = &quot;TMB&quot;): package version mismatch: 
+## glmmTMB was built with TMB package version 1.9.17
+## Current TMB package version is 1.9.18
+## Please re-install glmmTMB from source or restore original &#39;TMB&#39; package (see &#39;?reinstalling&#39; for more information)</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;glmmTMB&#39;</code></pre>
 <pre><code>## The following object is masked from &#39;package:marginaleffects&#39;:
 ## 
 ##     refit</code></pre>
-<div class="sourceCode" id="cb782"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb782-1"><a href="generalized-linear-models.html#cb782-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(art <span class="sc">~</span> fem <span class="sc">+</span> mar <span class="sc">+</span> kid5 <span class="sc">+</span> phd <span class="sc">+</span> ment, <span class="at">data =</span> bb, <span class="at">family =</span> poisson)</span>
-<span id="cb782-2"><a href="generalized-linear-models.html#cb782-2" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
+<div class="sourceCode" id="cb790"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb790-1"><a href="generalized-linear-models.html#cb790-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(art <span class="sc">~</span> fem <span class="sc">+</span> mar <span class="sc">+</span> kid5 <span class="sc">+</span> phd <span class="sc">+</span> ment, <span class="at">data =</span> bb, <span class="at">family =</span> poisson)</span>
+<span id="cb790-2"><a href="generalized-linear-models.html#cb790-2" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
 <pre><code>##  Family: poisson  ( log )
 ## Formula:          art ~ fem + mar + kid5 + phd + ment
 ## Data: bb
@@ -1163,7 +1174,7 @@ or taking logs, it is <code>sum(dpois(y, betao + beta1 x, log = T))</code>. This
 ## ment         0.025543   0.002006  12.736  &lt; 2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<div class="sourceCode" id="cb784"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb784-1"><a href="generalized-linear-models.html#cb784-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_overdispersion</span>(mod) </span></code></pre></div>
+<div class="sourceCode" id="cb792"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb792-1"><a href="generalized-linear-models.html#cb792-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_overdispersion</span>(mod) </span></code></pre></div>
 <pre><code>## # Overdispersion test
 ## 
 ##        dispersion ratio =    1.829
@@ -1187,8 +1198,8 @@ makes some sense.</p>
 <p>We can also try the variance being proportional to the mean itself (rather than <strong>equal</strong> to the mean itself). That is
 also implemented in <code>glmmTMB</code>.</p>
 <p>Let’s see how all of this works.</p>
-<div class="sourceCode" id="cb787"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb787-1"><a href="generalized-linear-models.html#cb787-1" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(art <span class="sc">~</span> fem <span class="sc">+</span> mar <span class="sc">+</span> kid5 <span class="sc">+</span> phd <span class="sc">+</span> ment, <span class="at">data =</span> bb, <span class="at">family =</span> nbinom2) <span class="co">#assumes variance = mu + mu^2/dispersion</span></span>
-<span id="cb787-2"><a href="generalized-linear-models.html#cb787-2" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
+<div class="sourceCode" id="cb795"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb795-1"><a href="generalized-linear-models.html#cb795-1" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(art <span class="sc">~</span> fem <span class="sc">+</span> mar <span class="sc">+</span> kid5 <span class="sc">+</span> phd <span class="sc">+</span> ment, <span class="at">data =</span> bb, <span class="at">family =</span> nbinom2) <span class="co">#assumes variance = mu + mu^2/dispersion</span></span>
+<span id="cb795-2"><a href="generalized-linear-models.html#cb795-2" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
 <pre><code>##  Family: nbinom2  ( log )
 ## Formula:          art ~ fem + mar + kid5 + phd + ment
 ## Data: bb
@@ -1209,13 +1220,13 @@ also implemented in <code>glmmTMB</code>.</p>
 ## ment         0.02908    0.00347   8.381  &lt; 2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<div class="sourceCode" id="cb789"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb789-1"><a href="generalized-linear-models.html#cb789-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_overdispersion</span>(mod2) <span class="co">#looks good</span></span></code></pre></div>
+<div class="sourceCode" id="cb797"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb797-1"><a href="generalized-linear-models.html#cb797-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_overdispersion</span>(mod2) <span class="co">#looks good</span></span></code></pre></div>
 <pre><code>## # Overdispersion test
 ## 
 ##  dispersion ratio = 1.044
 ##           p-value = 0.608</code></pre>
 <pre><code>## No overdispersion detected.</code></pre>
-<div class="sourceCode" id="cb792"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb792-1"><a href="generalized-linear-models.html#cb792-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_zeroinflation</span>(mod2)</span></code></pre></div>
+<div class="sourceCode" id="cb800"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb800-1"><a href="generalized-linear-models.html#cb800-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_zeroinflation</span>(mod2)</span></code></pre></div>
 <pre><code>## # Check for zero-inflation
 ## 
 ##    Observed zeros: 275
@@ -1224,14 +1235,14 @@ also implemented in <code>glmmTMB</code>.</p>
 <pre><code>## Model seems ok, ratio of observed and predicted zeros is within the
 ##   tolerance range (p = 0.752).</code></pre>
 <p>We notice that switching to a negative binomial random model fixed both the overdispersion and the zero inflation! That’s really nice; it looks like our data is pretty well modeled by negative binomial. We also could have tried:</p>
-<div class="sourceCode" id="cb795"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb795-1"><a href="generalized-linear-models.html#cb795-1" tabindex="-1"></a>mod3 <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(art <span class="sc">~</span> fem <span class="sc">+</span> mar <span class="sc">+</span> kid5 <span class="sc">+</span> phd <span class="sc">+</span> ment, <span class="at">data =</span> bb, <span class="at">family =</span> nbinom1) <span class="co">#assumes variance = mu + mu/dispersion</span></span>
-<span id="cb795-2"><a href="generalized-linear-models.html#cb795-2" tabindex="-1"></a><span class="fu">AIC</span>(mod2, mod3)</span></code></pre></div>
+<div class="sourceCode" id="cb803"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb803-1"><a href="generalized-linear-models.html#cb803-1" tabindex="-1"></a>mod3 <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(art <span class="sc">~</span> fem <span class="sc">+</span> mar <span class="sc">+</span> kid5 <span class="sc">+</span> phd <span class="sc">+</span> ment, <span class="at">data =</span> bb, <span class="at">family =</span> nbinom1) <span class="co">#assumes variance = mu + mu/dispersion</span></span>
+<span id="cb803-2"><a href="generalized-linear-models.html#cb803-2" tabindex="-1"></a><span class="fu">AIC</span>(mod2, mod3)</span></code></pre></div>
 <pre><code>##      df      AIC
 ## mod2  7 3135.917
 ## mod3  7 3143.397</code></pre>
 <p>We see that the model 2 is preferred. Now we can trust the <span class="math inline">\(p\)</span>-values a little bit better, so we can do some variable selection to get a parsimonious model. We remove <code>mar</code> and <code>phd</code> to get the following model.</p>
-<div class="sourceCode" id="cb797"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb797-1"><a href="generalized-linear-models.html#cb797-1" tabindex="-1"></a>mod4 <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(art <span class="sc">~</span> fem <span class="sc">+</span> kid5 <span class="sc">+</span> ment, <span class="at">data =</span> bb, <span class="at">family =</span> nbinom2) </span>
-<span id="cb797-2"><a href="generalized-linear-models.html#cb797-2" tabindex="-1"></a><span class="fu">summary</span>(mod4)</span></code></pre></div>
+<div class="sourceCode" id="cb805"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb805-1"><a href="generalized-linear-models.html#cb805-1" tabindex="-1"></a>mod4 <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(art <span class="sc">~</span> fem <span class="sc">+</span> kid5 <span class="sc">+</span> ment, <span class="at">data =</span> bb, <span class="at">family =</span> nbinom2) </span>
+<span id="cb805-2"><a href="generalized-linear-models.html#cb805-2" tabindex="-1"></a><span class="fu">summary</span>(mod4)</span></code></pre></div>
 <pre><code>##  Family: nbinom2  ( log )
 ## Formula:          art ~ fem + kid5 + ment
 ## Data: bb
@@ -1250,13 +1261,13 @@ also implemented in <code>glmmTMB</code>.</p>
 ## ment         0.029369   0.003385   8.677  &lt; 2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<div class="sourceCode" id="cb799"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb799-1"><a href="generalized-linear-models.html#cb799-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_overdispersion</span>(mod4)</span></code></pre></div>
+<div class="sourceCode" id="cb807"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb807-1"><a href="generalized-linear-models.html#cb807-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_overdispersion</span>(mod4)</span></code></pre></div>
 <pre><code>## # Overdispersion test
 ## 
 ##  dispersion ratio = 1.062
 ##           p-value = 0.488</code></pre>
 <pre><code>## No overdispersion detected.</code></pre>
-<div class="sourceCode" id="cb802"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb802-1"><a href="generalized-linear-models.html#cb802-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_zeroinflation</span>(mod4)</span></code></pre></div>
+<div class="sourceCode" id="cb810"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb810-1"><a href="generalized-linear-models.html#cb810-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_zeroinflation</span>(mod4)</span></code></pre></div>
 <pre><code>## # Check for zero-inflation
 ## 
 ##    Observed zeros: 275
@@ -1265,8 +1276,8 @@ also implemented in <code>glmmTMB</code>.</p>
 <pre><code>## Model seems ok, ratio of observed and predicted zeros is within the
 ##   tolerance range (p = 0.744).</code></pre>
 <p>As before, we can use <code>marginaleffects</code> to get easier interpretations of the coefficients.</p>
-<div class="sourceCode" id="cb805"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb805-1"><a href="generalized-linear-models.html#cb805-1" tabindex="-1"></a><span class="fu">library</span>(marginaleffects)</span>
-<span id="cb805-2"><a href="generalized-linear-models.html#cb805-2" tabindex="-1"></a><span class="fu">avg_comparisons</span>(mod4)</span></code></pre></div>
+<div class="sourceCode" id="cb813"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb813-1"><a href="generalized-linear-models.html#cb813-1" tabindex="-1"></a><span class="fu">library</span>(marginaleffects)</span>
+<span id="cb813-2"><a href="generalized-linear-models.html#cb813-2" tabindex="-1"></a><span class="fu">avg_comparisons</span>(mod4)</span></code></pre></div>
 <pre><code>## Warning: For this model type, `marginaleffects` only takes into account the
 ## uncertainty in fixed-effect parameters. This is often appropriate when
 ## `re.form=NA`, but may be surprising to users who set `re.form=NULL` (default)
@@ -1279,7 +1290,7 @@ also implemented in <code>glmmTMB</code>.</p>
 ##  ment +1            0.0508    0.00661  7.69  &lt; 0.001 45.9  0.0379  0.0638
 ## 
 ## Type: response</code></pre>
-<div class="sourceCode" id="cb808"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb808-1"><a href="generalized-linear-models.html#cb808-1" tabindex="-1"></a><span class="fu">summary</span>(bb)</span></code></pre></div>
+<div class="sourceCode" id="cb816"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb816-1"><a href="generalized-linear-models.html#cb816-1" tabindex="-1"></a><span class="fu">summary</span>(bb)</span></code></pre></div>
 <pre><code>##       art            fem           mar           kid5             phd       
 ##  Min.   : 0.000   Men  :494   Single :309   Min.   :0.0000   Min.   :0.755  
 ##  1st Qu.: 0.000   Women:421   Married:606   1st Qu.:0.0000   1st Qu.:2.260  
@@ -1294,7 +1305,7 @@ also implemented in <code>glmmTMB</code>.</p>
 ##  Mean   : 8.767  
 ##  3rd Qu.:12.000  
 ##  Max.   :77.000</code></pre>
-<div class="sourceCode" id="cb810"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb810-1"><a href="generalized-linear-models.html#cb810-1" tabindex="-1"></a><span class="fu">plot_predictions</span>(mod4, <span class="at">by =</span> <span class="st">&quot;ment&quot;</span>, <span class="at">newdata =</span> <span class="fu">datagrid</span>(<span class="at">ment =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">77</span>, <span class="at">by =</span> <span class="dv">1</span>), <span class="at">grid_type =</span> <span class="st">&quot;counterfactual&quot;</span>), <span class="at">vcov =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb818"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb818-1"><a href="generalized-linear-models.html#cb818-1" tabindex="-1"></a><span class="fu">plot_predictions</span>(mod4, <span class="at">by =</span> <span class="st">&quot;ment&quot;</span>, <span class="at">newdata =</span> <span class="fu">datagrid</span>(<span class="at">ment =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">77</span>, <span class="at">by =</span> <span class="dv">1</span>), <span class="at">grid_type =</span> <span class="st">&quot;counterfactual&quot;</span>), <span class="at">vcov =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## Warning: For this model type, `marginaleffects` only takes into account the
 ## uncertainty in fixed-effect parameters. This is often appropriate when
 ## `re.form=NA`, but may be surprising to users who set `re.form=NULL` (default)
@@ -1309,11 +1320,11 @@ also implemented in <code>glmmTMB</code>.</p>
 <div id="mixed-effects-model" class="section level3 hasAnchor" number="7.3.1">
 <h3><span class="header-section-number">7.3.1</span> Mixed Effects Model<a href="generalized-linear-models.html#mixed-effects-model" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>Consider the <code>Owls</code> data set in the <code>glmmTMB</code> package. The ChatGTP summary of the accompanying article is: Baby barn owls use loud calls to ask their parents for food, and these calls can show how hungry they are. The study found that chicks beg more loudly when their mother is present than when their father is there, even though they are just as hungry in both cases. Researchers think this happens because mothers and fathers act differently when feeding, so chicks adjust their behavior to get more food. This shows that young birds can tell their parents apart and change how they ask for food to improve their chances of being fed.</p>
-<div class="sourceCode" id="cb812"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb812-1"><a href="generalized-linear-models.html#cb812-1" tabindex="-1"></a><span class="fu">library</span>(glmmTMB)</span>
-<span id="cb812-2"><a href="generalized-linear-models.html#cb812-2" tabindex="-1"></a>oo <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span>Owls <span class="sc">|&gt;</span> </span>
-<span id="cb812-3"><a href="generalized-linear-models.html#cb812-3" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb812-4"><a href="generalized-linear-models.html#cb812-4" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span>
-<span id="cb812-5"><a href="generalized-linear-models.html#cb812-5" tabindex="-1"></a>oo</span></code></pre></div>
+<div class="sourceCode" id="cb820"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb820-1"><a href="generalized-linear-models.html#cb820-1" tabindex="-1"></a><span class="fu">library</span>(glmmTMB)</span>
+<span id="cb820-2"><a href="generalized-linear-models.html#cb820-2" tabindex="-1"></a>oo <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span>Owls <span class="sc">|&gt;</span> </span>
+<span id="cb820-3"><a href="generalized-linear-models.html#cb820-3" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb820-4"><a href="generalized-linear-models.html#cb820-4" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span>
+<span id="cb820-5"><a href="generalized-linear-models.html#cb820-5" tabindex="-1"></a>oo</span></code></pre></div>
 <pre><code>## # A tibble: 599 × 8
 ##    nest    food_treatment sex_parent arrival_time sibling_negotiation brood_size
 ##    &lt;fct&gt;   &lt;fct&gt;          &lt;fct&gt;             &lt;dbl&gt;               &lt;int&gt;      &lt;int&gt;
@@ -1330,8 +1341,8 @@ also implemented in <code>glmmTMB</code>.</p>
 ## # ℹ 589 more rows
 ## # ℹ 2 more variables: neg_per_chick &lt;dbl&gt;, log_brood_size &lt;dbl&gt;</code></pre>
 <p>We start by modeling <code>sibling_negotiation</code> by the other variables.</p>
-<div class="sourceCode" id="cb814"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb814-1"><a href="generalized-linear-models.html#cb814-1" tabindex="-1"></a>mod1 <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(sibling_negotiation <span class="sc">~</span> sex_parent <span class="sc">+</span> arrival_time <span class="sc">+</span> brood_size <span class="sc">+</span> food_treatment <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>nest), <span class="at">data =</span> oo, <span class="at">family =</span> poisson)</span>
-<span id="cb814-2"><a href="generalized-linear-models.html#cb814-2" tabindex="-1"></a><span class="fu">summary</span>(mod1)</span></code></pre></div>
+<div class="sourceCode" id="cb822"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb822-1"><a href="generalized-linear-models.html#cb822-1" tabindex="-1"></a>mod1 <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(sibling_negotiation <span class="sc">~</span> sex_parent <span class="sc">+</span> arrival_time <span class="sc">+</span> brood_size <span class="sc">+</span> food_treatment <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>nest), <span class="at">data =</span> oo, <span class="at">family =</span> poisson)</span>
+<span id="cb822-2"><a href="generalized-linear-models.html#cb822-2" tabindex="-1"></a><span class="fu">summary</span>(mod1)</span></code></pre></div>
 <pre><code>##  Family: poisson  ( log )
 ## Formula:          
 ## sibling_negotiation ~ sex_parent + arrival_time + brood_size +  
@@ -1357,7 +1368,7 @@ also implemented in <code>glmmTMB</code>.</p>
 ## food_treatmentSatiated -0.586289   0.036050 -16.263  &lt; 2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<div class="sourceCode" id="cb816"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb816-1"><a href="generalized-linear-models.html#cb816-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_overdispersion</span>(mod1)</span></code></pre></div>
+<div class="sourceCode" id="cb824"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb824-1"><a href="generalized-linear-models.html#cb824-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_overdispersion</span>(mod1)</span></code></pre></div>
 <pre><code>## # Overdispersion test
 ## 
 ##        dispersion ratio =    5.437
@@ -1365,8 +1376,8 @@ also implemented in <code>glmmTMB</code>.</p>
 ##                 p-value =  &lt; 0.001</code></pre>
 <pre><code>## Overdispersion detected.</code></pre>
 <p>We see that the model has significant overdispersion, so we switch to negative binomial.</p>
-<div class="sourceCode" id="cb819"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb819-1"><a href="generalized-linear-models.html#cb819-1" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(sibling_negotiation <span class="sc">~</span> sex_parent <span class="sc">+</span> arrival_time <span class="sc">+</span> brood_size <span class="sc">+</span> food_treatment <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>nest), <span class="at">data =</span> oo, <span class="at">family =</span> nbinom2)</span>
-<span id="cb819-2"><a href="generalized-linear-models.html#cb819-2" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
+<div class="sourceCode" id="cb827"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb827-1"><a href="generalized-linear-models.html#cb827-1" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(sibling_negotiation <span class="sc">~</span> sex_parent <span class="sc">+</span> arrival_time <span class="sc">+</span> brood_size <span class="sc">+</span> food_treatment <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>nest), <span class="at">data =</span> oo, <span class="at">family =</span> nbinom2)</span>
+<span id="cb827-2"><a href="generalized-linear-models.html#cb827-2" tabindex="-1"></a><span class="fu">summary</span>(mod2)</span></code></pre></div>
 <pre><code>##  Family: nbinom2  ( log )
 ## Formula:          
 ## sibling_negotiation ~ sex_parent + arrival_time + brood_size +  
@@ -1394,13 +1405,13 @@ also implemented in <code>glmmTMB</code>.</p>
 ## food_treatmentSatiated -0.65856    0.10805  -6.095 1.09e-09 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<div class="sourceCode" id="cb821"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb821-1"><a href="generalized-linear-models.html#cb821-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_overdispersion</span>(mod2)</span></code></pre></div>
+<div class="sourceCode" id="cb829"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb829-1"><a href="generalized-linear-models.html#cb829-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_overdispersion</span>(mod2)</span></code></pre></div>
 <pre><code>## # Overdispersion test
 ## 
 ##  dispersion ratio =   0.455
 ##           p-value = &lt; 0.001</code></pre>
 <pre><code>## Underdispersion detected.</code></pre>
-<div class="sourceCode" id="cb824"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb824-1"><a href="generalized-linear-models.html#cb824-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_zeroinflation</span>(mod2)</span></code></pre></div>
+<div class="sourceCode" id="cb832"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb832-1"><a href="generalized-linear-models.html#cb832-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_zeroinflation</span>(mod2)</span></code></pre></div>
 <pre><code>## # Check for zero-inflation
 ## 
 ##    Observed zeros: 156
@@ -1408,11 +1419,11 @@ also implemented in <code>glmmTMB</code>.</p>
 ##             Ratio: 0.67</code></pre>
 <pre><code>## Model is underfitting zeros (probable zero-inflation) (p &lt; .001).</code></pre>
 <p>This indicates that the model is not yet correctly specified. Let’s fix the zero inflation and see whether that also helps the <strong>underdispersion</strong>.</p>
-<div class="sourceCode" id="cb827"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb827-1"><a href="generalized-linear-models.html#cb827-1" tabindex="-1"></a>mod3 <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(sibling_negotiation <span class="sc">~</span> sex_parent <span class="sc">+</span> arrival_time <span class="sc">+</span> brood_size <span class="sc">+</span> food_treatment <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>nest), </span>
-<span id="cb827-2"><a href="generalized-linear-models.html#cb827-2" tabindex="-1"></a>                         <span class="at">ziformula =</span> <span class="sc">~</span><span class="dv">1</span>, </span>
-<span id="cb827-3"><a href="generalized-linear-models.html#cb827-3" tabindex="-1"></a>                         <span class="at">data =</span> oo, </span>
-<span id="cb827-4"><a href="generalized-linear-models.html#cb827-4" tabindex="-1"></a>                         <span class="at">family =</span> nbinom2)</span>
-<span id="cb827-5"><a href="generalized-linear-models.html#cb827-5" tabindex="-1"></a><span class="fu">summary</span>(mod3)</span></code></pre></div>
+<div class="sourceCode" id="cb835"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb835-1"><a href="generalized-linear-models.html#cb835-1" tabindex="-1"></a>mod3 <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(sibling_negotiation <span class="sc">~</span> sex_parent <span class="sc">+</span> arrival_time <span class="sc">+</span> brood_size <span class="sc">+</span> food_treatment <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>nest), </span>
+<span id="cb835-2"><a href="generalized-linear-models.html#cb835-2" tabindex="-1"></a>                         <span class="at">ziformula =</span> <span class="sc">~</span><span class="dv">1</span>, </span>
+<span id="cb835-3"><a href="generalized-linear-models.html#cb835-3" tabindex="-1"></a>                         <span class="at">data =</span> oo, </span>
+<span id="cb835-4"><a href="generalized-linear-models.html#cb835-4" tabindex="-1"></a>                         <span class="at">family =</span> nbinom2)</span>
+<span id="cb835-5"><a href="generalized-linear-models.html#cb835-5" tabindex="-1"></a><span class="fu">summary</span>(mod3)</span></code></pre></div>
 <pre><code>##  Family: nbinom2  ( log )
 ## Formula:          
 ## sibling_negotiation ~ sex_parent + arrival_time + brood_size +  
@@ -1447,13 +1458,13 @@ also implemented in <code>glmmTMB</code>.</p>
 ## (Intercept)  -1.2156     0.1133  -10.73   &lt;2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<div class="sourceCode" id="cb829"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb829-1"><a href="generalized-linear-models.html#cb829-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_overdispersion</span>(mod3)</span></code></pre></div>
+<div class="sourceCode" id="cb837"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb837-1"><a href="generalized-linear-models.html#cb837-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_overdispersion</span>(mod3)</span></code></pre></div>
 <pre><code>## # Overdispersion test
 ## 
 ##  dispersion ratio = 0.882
 ##           p-value =  0.32</code></pre>
 <pre><code>## No overdispersion detected.</code></pre>
-<div class="sourceCode" id="cb832"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb832-1"><a href="generalized-linear-models.html#cb832-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_zeroinflation</span>(mod3)</span></code></pre></div>
+<div class="sourceCode" id="cb840"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb840-1"><a href="generalized-linear-models.html#cb840-1" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_zeroinflation</span>(mod3)</span></code></pre></div>
 <pre><code>## # Check for zero-inflation
 ## 
 ##    Observed zeros: 156
@@ -1462,11 +1473,11 @@ also implemented in <code>glmmTMB</code>.</p>
 <pre><code>## Model seems ok, ratio of observed and predicted zeros is within the
 ##   tolerance range (p = 0.600).</code></pre>
 <p>Note that fixing the zero inflation also fixed the dispersion issues. So, this looks like it is pretty good. We note that there is no sex of parent effect on the number of calls. That is because sibling negotiation measures the number of calls that the siblings make <strong>before</strong> the parent arrives. We can also test to see whether there is an interaction between food treatment and sex of the parent that arrives.</p>
-<div class="sourceCode" id="cb835"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb835-1"><a href="generalized-linear-models.html#cb835-1" tabindex="-1"></a>mod4 <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(sibling_negotiation <span class="sc">~</span> sex_parent <span class="sc">*</span> food_treatment <span class="sc">+</span> arrival_time <span class="sc">+</span> brood_size <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>nest), </span>
-<span id="cb835-2"><a href="generalized-linear-models.html#cb835-2" tabindex="-1"></a>                         <span class="at">ziformula =</span> <span class="sc">~</span><span class="dv">1</span>, </span>
-<span id="cb835-3"><a href="generalized-linear-models.html#cb835-3" tabindex="-1"></a>                         <span class="at">data =</span> oo, </span>
-<span id="cb835-4"><a href="generalized-linear-models.html#cb835-4" tabindex="-1"></a>                         <span class="at">family =</span> nbinom2)</span>
-<span id="cb835-5"><a href="generalized-linear-models.html#cb835-5" tabindex="-1"></a><span class="fu">summary</span>(mod4)</span></code></pre></div>
+<div class="sourceCode" id="cb843"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb843-1"><a href="generalized-linear-models.html#cb843-1" tabindex="-1"></a>mod4 <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(sibling_negotiation <span class="sc">~</span> sex_parent <span class="sc">*</span> food_treatment <span class="sc">+</span> arrival_time <span class="sc">+</span> brood_size <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>nest), </span>
+<span id="cb843-2"><a href="generalized-linear-models.html#cb843-2" tabindex="-1"></a>                         <span class="at">ziformula =</span> <span class="sc">~</span><span class="dv">1</span>, </span>
+<span id="cb843-3"><a href="generalized-linear-models.html#cb843-3" tabindex="-1"></a>                         <span class="at">data =</span> oo, </span>
+<span id="cb843-4"><a href="generalized-linear-models.html#cb843-4" tabindex="-1"></a>                         <span class="at">family =</span> nbinom2)</span>
+<span id="cb843-5"><a href="generalized-linear-models.html#cb843-5" tabindex="-1"></a><span class="fu">summary</span>(mod4)</span></code></pre></div>
 <pre><code>##  Family: nbinom2  ( log )
 ## Formula:          
 ## sibling_negotiation ~ sex_parent * food_treatment + arrival_time +  
@@ -1517,14 +1528,14 @@ where <span class="math inline">\(\lambda_i\)</span> is the rate at which the co
 \]</span>
 where we are using the familiar <span class="math inline">\(\log \lambda_i = \beta_0 + \beta_1 x_{1i}\)</span> formulation when we have exactly one predictor. The theory specifies that the coefficient associated with <span class="math inline">\(\log t_i\)</span> will be exactly 1, even if a different coefficient has a higher likelihood or a lower loss function. In order to specify that the coefficient is exactly 1, we use the <code>offset</code> function.</p>
 <p>In our previous analysis of <code>Owls</code>, we modeled sibling negotiation on the other variables. Reading the paper, I believe that sibling negotiation is the total number of negotiations - not the number per chick. That means that we probably want to have an <em>offset</em>, which is the brood size. Let’s run this model to see what we get. Remember, doing this means that we believe that the number of negotiations is proportional to the number of chicks. There are no synergies (where multiple chicks produce more negotiations than the sum of the chicks) or competitions (where multiple chicks produce fewer negotiations). Let’s see how this model works.</p>
-<div class="sourceCode" id="cb837"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb837-1"><a href="generalized-linear-models.html#cb837-1" tabindex="-1"></a>mod5 <span class="ot">&lt;-</span> <span class="fu">glmmTMB</span>(</span>
-<span id="cb837-2"><a href="generalized-linear-models.html#cb837-2" tabindex="-1"></a>  sibling_negotiation <span class="sc">~</span> sex_parent <span class="sc">+</span> arrival_time <span class="sc">+</span> food_treatment <span class="sc">+</span> </span>
-<span id="cb837-3"><a href="generalized-linear-models.html#cb837-3" tabindex="-1"></a>    <span class="fu">offset</span>(<span class="fu">log</span>(brood_size)) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> nest),</span>
-<span id="cb837-4"><a href="generalized-linear-models.html#cb837-4" tabindex="-1"></a>  <span class="at">zif =</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb837-5"><a href="generalized-linear-models.html#cb837-5" tabindex="-1"></a>  <span class="at">family =</span> nbinom2,</span>
-<span id="cb837-6"><a href="generalized-linear-models.html#cb837-6" tabindex="-1"></a>  <span class="at">data =</span> oo</span>
-<span id="cb837-7"><a href="generalized-linear-models.html#cb837-7" tabindex="-1"></a>)</span>
-<span id="cb837-8"><a href="generalized-linear-models.html#cb837-8" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_zeroinflation</span>(mod5)</span></code></pre></div>
+<div class="sourceCode" id="cb845"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb845-1"><a href="generalized-linear-models.html#cb845-1" tabindex="-1"></a>mod5 <span class="ot">&lt;-</span> <span class="fu">glmmTMB</span>(</span>
+<span id="cb845-2"><a href="generalized-linear-models.html#cb845-2" tabindex="-1"></a>  sibling_negotiation <span class="sc">~</span> sex_parent <span class="sc">+</span> arrival_time <span class="sc">+</span> food_treatment <span class="sc">+</span> </span>
+<span id="cb845-3"><a href="generalized-linear-models.html#cb845-3" tabindex="-1"></a>    <span class="fu">offset</span>(<span class="fu">log</span>(brood_size)) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> nest),</span>
+<span id="cb845-4"><a href="generalized-linear-models.html#cb845-4" tabindex="-1"></a>  <span class="at">zif =</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb845-5"><a href="generalized-linear-models.html#cb845-5" tabindex="-1"></a>  <span class="at">family =</span> nbinom2,</span>
+<span id="cb845-6"><a href="generalized-linear-models.html#cb845-6" tabindex="-1"></a>  <span class="at">data =</span> oo</span>
+<span id="cb845-7"><a href="generalized-linear-models.html#cb845-7" tabindex="-1"></a>)</span>
+<span id="cb845-8"><a href="generalized-linear-models.html#cb845-8" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">check_zeroinflation</span>(mod5)</span></code></pre></div>
 <pre><code>## # Check for zero-inflation
 ## 
 ##    Observed zeros: 156
@@ -1532,7 +1543,7 @@ where we are using the familiar <span class="math inline">\(\log \lambda_i = \be
 ##             Ratio: 0.96</code></pre>
 <pre><code>## Model seems ok, ratio of observed and predicted zeros is within the
 ##   tolerance range (p = 0.496).</code></pre>
-<div class="sourceCode" id="cb840"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb840-1"><a href="generalized-linear-models.html#cb840-1" tabindex="-1"></a><span class="fu">summary</span>(mod5)</span></code></pre></div>
+<div class="sourceCode" id="cb848"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb848-1"><a href="generalized-linear-models.html#cb848-1" tabindex="-1"></a><span class="fu">summary</span>(mod5)</span></code></pre></div>
 <pre><code>##  Family: nbinom2  ( log )
 ## Formula:          
 ## sibling_negotiation ~ sex_parent + arrival_time + food_treatment +  
@@ -1567,14 +1578,14 @@ where we are using the familiar <span class="math inline">\(\log \lambda_i = \be
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p>Note that there is no estimate associated with <code>log(brood_size)</code>, because its coefficient is assumed to be one by the model. One way to test this (biological) assumption is to run the model with the log of brood size as a predictor, and see whether the coefficient is close to 1.</p>
-<div class="sourceCode" id="cb842"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb842-1"><a href="generalized-linear-models.html#cb842-1" tabindex="-1"></a>mod_test <span class="ot">&lt;-</span> <span class="fu">glmmTMB</span>(</span>
-<span id="cb842-2"><a href="generalized-linear-models.html#cb842-2" tabindex="-1"></a>  sibling_negotiation <span class="sc">~</span> sex_parent <span class="sc">+</span> arrival_time <span class="sc">+</span> food_treatment <span class="sc">+</span></span>
-<span id="cb842-3"><a href="generalized-linear-models.html#cb842-3" tabindex="-1"></a>    <span class="fu">log</span>(brood_size) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> nest),</span>
-<span id="cb842-4"><a href="generalized-linear-models.html#cb842-4" tabindex="-1"></a>  <span class="at">zif =</span> <span class="sc">~</span><span class="dv">1</span>,</span>
-<span id="cb842-5"><a href="generalized-linear-models.html#cb842-5" tabindex="-1"></a>  <span class="at">family =</span> nbinom2,</span>
-<span id="cb842-6"><a href="generalized-linear-models.html#cb842-6" tabindex="-1"></a>  <span class="at">data =</span> oo</span>
-<span id="cb842-7"><a href="generalized-linear-models.html#cb842-7" tabindex="-1"></a>)</span>
-<span id="cb842-8"><a href="generalized-linear-models.html#cb842-8" tabindex="-1"></a><span class="fu">summary</span>(mod_test)</span></code></pre></div>
+<div class="sourceCode" id="cb850"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb850-1"><a href="generalized-linear-models.html#cb850-1" tabindex="-1"></a>mod_test <span class="ot">&lt;-</span> <span class="fu">glmmTMB</span>(</span>
+<span id="cb850-2"><a href="generalized-linear-models.html#cb850-2" tabindex="-1"></a>  sibling_negotiation <span class="sc">~</span> sex_parent <span class="sc">+</span> arrival_time <span class="sc">+</span> food_treatment <span class="sc">+</span></span>
+<span id="cb850-3"><a href="generalized-linear-models.html#cb850-3" tabindex="-1"></a>    <span class="fu">log</span>(brood_size) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> nest),</span>
+<span id="cb850-4"><a href="generalized-linear-models.html#cb850-4" tabindex="-1"></a>  <span class="at">zif =</span> <span class="sc">~</span><span class="dv">1</span>,</span>
+<span id="cb850-5"><a href="generalized-linear-models.html#cb850-5" tabindex="-1"></a>  <span class="at">family =</span> nbinom2,</span>
+<span id="cb850-6"><a href="generalized-linear-models.html#cb850-6" tabindex="-1"></a>  <span class="at">data =</span> oo</span>
+<span id="cb850-7"><a href="generalized-linear-models.html#cb850-7" tabindex="-1"></a>)</span>
+<span id="cb850-8"><a href="generalized-linear-models.html#cb850-8" tabindex="-1"></a><span class="fu">summary</span>(mod_test)</span></code></pre></div>
 <pre><code>##  Family: nbinom2  ( log )
 ## Formula:          
 ## sibling_negotiation ~ sex_parent + arrival_time + food_treatment +  

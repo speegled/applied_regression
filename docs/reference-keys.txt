@@ -151,6 +151,7 @@ technical-details
 diagnostics
 pooling
 simulations
+sensitivity-analysis
 solutions
 chapter-2-solutions
 chapter-3-solutions
