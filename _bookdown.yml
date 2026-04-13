@@ -13,7 +13,7 @@ rmd_files: [
   "10-lecture-notes.Rmd",
   "11-mle.Rmd",
   "12-missing-data.Rmd",
-  "solutions.Rmd"
+  "13-causal-inference.Rmd"
   ]
 
 # Knit-then-Merge (KM) build renders each .Rmd file in its own session

@@ -1,0 +1,183 @@
+# Regression Adjustment and Causal Interpretation
+
+In this chapter, we begin our discussion of causal inference. We will not try to cover the subject in full here. Instead, we focus on a basic but important question: when we fit a regression model with a treatment variable, under what circumstances can we interpret the coefficient of that treatment variable causally?
+
+A useful place to start is with observational data. In observational studies, the treated and untreated groups are often different before the treatment occurs. This means that a simple comparison of outcomes can mix together two things: the effect of the treatment itself, and baseline differences between the groups. Regression adjustment is one way to address this problem, but it does not solve it automatically.
+
+We will work with the `lalonde` data set from the `MatchIt` package. The outcome variable is earnings in 1978 (`re78`), and the treatment variable `treat` indicates participation in a job-training program. The data also includes several pre-treatment covariates such as age, education, marital status, degree status, and earnings in 1974 and 1975.
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+library(MatchIt)
+library(broom)
+
+aa <- MatchIt::lalonde |> 
+  as_tibble()
+```
+
+We begin by looking at the structure of the data.
+
+```{r}
+aa |> 
+  select(treat, age, educ, married, nodegree, re74, re75, re78) |> 
+  summary()
+```
+
+We start with the simplest possible regression model,
+
+\[
+\texttt{re78} = \beta_0 + \beta_1 \texttt{treat} + \varepsilon.
+\]
+
+This model compares 1978 earnings between the treated and untreated groups without adjusting for any other variables.
+
+```{r}
+mod_naive <- lm(re78 ~ treat, data = aa)
+
+mod_naive |>
+  tidy(conf.int = TRUE)
+```
+
+It is also useful to look at the group means directly.
+
+```{r}
+aa |> 
+  group_by(treat) |> 
+  summarise(mean_re78 = mean(re78), .groups = "drop")
+```
+
+Note that getting the job training is not statistically significant, and the point estimate of the effect of training is **negative** 635 dollars. That means that the people who received traning had salaries on average *lower* than those who did not. One might conclude that the program did not help. However, this conclusion would be too quick. The data are observational, not randomized, so it is entirely possible that the treated and untreated groups differed before the program began.
+
+### Baseline Differences Between the Groups
+
+To investigate this, we compare some pre-treatment covariates across the two groups.
+
+```{r}
+aa |> 
+  group_by(treat) |> 
+  summarise(
+    across(c(age, educ, re74, re75), mean),
+    married = mean(married),
+    nodegree = mean(nodegree),
+    .groups = "drop"
+  )
+```
+
+We can also visualize one of the most important pre-treatment variables, namely earnings in 1975.
+
+```{r}
+aa |> 
+  mutate(treat = factor(treat, levels = c(0, 1), labels = c("Control", "Treated"))) |> 
+  ggplot(aes(x = treat, y = re75)) +
+  geom_boxplot() +
+  labs(x = NULL, y = "1975 earnings")
+```
+
+We see that the treated and untreated groups are not the same at baseline. In particular, prior earnings differ substantially. This matters because prior earnings are measured before treatment, and they are strongly related to later earnings. If the treated group started out at a disadvantage, then a raw treated-versus-control comparison is not isolating the effect of treatment. It is combining the effect of treatment with the fact that the treated and untreated groups were different to begin with.
+
+This is the basic idea of **confounding**. A confounder is a variable that is related both to treatment assignment and to the outcome. Prior earnings are a natural example in this setting.
+
+A natural first thing to do is to control for the observed pre-treatment covariates in a regression model. For example, we can fit
+
+\[
+\texttt{re78} = \beta_0 + \beta_1 \texttt{treat} + \beta_2 X + \varepsilon,
+\]
+
+where $X$ denotes the baseline covariates.
+
+```{r}
+mod_adj <- lm(
+  re78 ~ treat + age + educ + race + married + nodegree + re74 + re75,
+  data = aa
+)
+
+mod_adj |>
+  tidy(conf.int = TRUE)
+```
+
+The treatment coefficient changes noticeably after adjustment. Now, it is statistically significant and **positive**. Our estimate is that the job training program is associated with an increase of 1548 dollars after adjusting for the other covariates.
+
+Regression adjustment is therefore useful. It can remove bias due to **observed** baseline differences, at least when the model is doing a reasonable job of adjustment. At the same time, it is important not to say more than the model justifies. It would **not** be justified to say that participation in the pogram **increased** 1978 earnings, because that is assigning causality to the program. All we know is that it is **associated** with an increase after adjusting for the other covariates. In order to justify a causality claim, we would need to believe that after controlling for the observed pre-treatment covariates, the treated and untreated groups are comparable in all ways relevant to the outcome.
+
+This is a much stronger claim than simply saying that we included several variables in a regression. A regression coefficient is not automatically causal just because it comes from a multiple regression model. The causal interpretation comes from the assumptions we are willing to defend.
+
+A good way to summarize the distinction is the following:
+
+- The naive model compares treated and untreated units directly.
+- The adjusted model compares treated and untreated units after controlling for observed baseline covariates.
+- A causal interpretation requires that this adjusted comparison be a good stand-in for the missing *counterfactual* comparison, see below for details on counterfactuals.
+
+One way to formalize the causal question is through the potential outcomes framework. For each individual $i$, let
+
+- $Y_i(1)$ be the earnings that person $i$ would have if treated;
+- $Y_i(0)$ be the earnings that person $i$ would have if untreated.
+
+The individual causal effect is then
+
+\[
+Y_i(1) - Y_i(0).
+\]
+
+The difficulty is that we never observe both values for the same person. If person $i$ is treated, then we observe $Y_i(1)$ but not $Y_i(0)$. If person $i$ is untreated, then we observe $Y_i(0)$ but not $Y_i(1)$. The observed outcome can be written as
+
+\[
+Y_i = D_iY_i(1) + (1-D_i)Y_i(0),
+\]
+
+where $D_i$ is the treatment indicator. That is, $D_i = 1$ if treatment is received and $D_i = 0$ if no treatment is received.
+
+This is the fundamental problem of causal inference. For each person, one of the two relevant outcomes is missing. In observational data, we use untreated individuals as stand-ins for the missing untreated outcomes of the treated group, or treated individuals as stand-ins for the missing treated outcomes of the untreated group. The central question is whether those stand-ins are credible.
+
+In the present example, the raw comparison is not especially credible because the groups differ so much at baseline. The adjusted regression is more credible, but only to the extent that the included covariates capture the important differences between the two groups. In particular, there is nothing about the multiple regression that directly tries to make the two groups comparable; if it happens, it is fortuitous. 
+
+Later, we will study a different way to organize this comparability problem. Rather than putting all of the adjustment into a single outcome regression, we can first ask how likely each unit was to receive treatment based on the observed pre-treatment covariates.
+
+This leads to the **propensity score**, defined by
+
+\[
+e(X) = P(D = 1 \mid X).
+\]
+
+Here, $X$ denotes the observed pre-treatment covariates. Units with similar propensity scores have similar observed baseline characteristics, at least in the sense relevant for treatment assignment. The idea is then to compare treated and untreated units that were similarly likely to receive treatment in the first place.
+
+We will not develop propensity scores fully in this section, but we can at least estimate them and inspect the results. A common first step is to fit a logistic regression for treatment.
+
+```{r}
+ps_mod <- glm(
+  treat ~ age + educ + race + married + nodegree + re74 + re75,
+  data = aa,
+  family = binomial()
+)
+
+aa_ps <- ps_mod |>
+  augment(data = aa, type.predict = "response") |>
+  mutate(
+    treat = factor(treat, levels = c(0, 1), labels = c("Control", "Treated"))
+  )
+
+ps_mod |>
+  tidy()
+```
+
+We can now look at the estimated propensity scores by treatment group.
+
+```{r}
+aa_ps |> 
+  ggplot(aes(x = .fitted, fill = treat)) +
+  geom_histogram(alpha = 0.5, bins = 30, position = "identity") +
+  labs(x = "Estimated propensity score", y = "Count", fill = NULL)
+```
+
+The plot is not itself a causal analysis, but it begins to show us something that the outcome regression did not show directly: how much overlap there is between the treated and untreated groups on the observed baseline covariates. Later, this idea of overlap will become central. In this particular plot, notice that there is not a lot of overlap between control and treated in the low propensity score group. This means that there is some combination of covariates which almost uniformly led participants not to get job training. That is somewhat bad news for causal analysis in general, and certainly should lead to hesitancy in interpreting the multiple regression output causally. We expect to see some predictive power of the covariates on whether the treatment was received, but we are hoping to still see significant overlap for our causal analysis. There are techniques for dealing with data like this which we will discuss in later sections.
+
+### Summary
+
+This chapter makes three points.
+
+First, a simple regression of outcome on treatment can be misleading in observational data because treated and untreated groups often differ before treatment occurs.
+
+Second, regression adjustment can account for observed baseline differences and can change the treatment estimate substantially. In the job-training example, this is exactly what happens.
+
+Third, even an adjusted regression is not automatically causal. The causal interpretation requires additional assumptions about comparability between the treated and untreated groups after adjustment.
+
+Propensity scores give us another way to think about that comparability. They do not remove the need for assumptions, but they make the adjustment problem more explicit. In the next part of our causal inference discussion, we will use them to study matching and related methods.
