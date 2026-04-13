@@ -246,6 +246,13 @@ fit2 <- with(imp2, lm(bp ~ type))
 summary(pool(fit2))
 ```
 
+If we want to see confidence intervals after pooling, we use:
+
+```{r}
+summary(pool(fit), conf.int = T)
+```
+
+
 ## Pooling
 
 Now that we understand how the multiple imputations are produced, we need to understand how the results are pooled into a final answer. We only consider OLS. The coefficient values are easy: you estimate the coefficient for each imputed data set and take the mean.
@@ -450,6 +457,80 @@ tt |>
   arrange(method)
 ```
 
+## Sensitivity Analysis
+
+Let's return to the Pima blood pressure data set. Multiple imputation has an assumption about the missing data mechanism, and in our case that assumption is MAR. It is a good idea to ask how much our final conclusion would change if the missing blood pressure values tended to be systematically higher or lower than the MAR imputations suggest. For example, perhaps people with higher blood pressure than would be predicted by the other variables are more likely to refuse a blood pressure reading.
+
+One simple way to do this is with a \(\delta\)-adjustment. We let `mice` impute `bp` as usual, and then during each iteration we add a constant \(\delta\) to the imputed blood pressure values. The case \(\delta = 0\) is the original MAR analysis. Negative values of \(\delta\) force the missing blood pressure values to be lower than the MAR imputations, while positive values force them to be higher.
+
+We return to the `Pima.tr2` data and consider a range of values of \(\delta\).
+
+```{r}
+pp <- MASS::Pima.tr2 |> 
+  as_tibble()
+```
+
+The method for adjustment after each iteration is quite general, and is handled via a `post` argument to the `mice` function. Here is the syntax of what we will pass to `mice`:
+
+```{r}
+delta <- 5
+post <- make.post(pp)
+post["bp"] <- paste0("imp[[j]][, i] <- imp[[j]][, i] + ", delta) 
+post
+```
+
+This somewhat weird notation indicates that for each imputation chain, we add 5 to the ith observation after each time that it is imputed. Note that we do not wait until the imputation chain terminates to add 5, because the additional 5 could propogate through the other variables and make things vary more (or less) after propogation.
+
+We will not hard code `delta = 5` but write a function (with help from our friends at chat) to do this for general `delta`.
+
+```{r}
+run_delta <- function(delta) {
+  post <- make.post(pp)
+  post["bp"] <- paste0("imp[[j]][, i] <- imp[[j]][, i] + ", delta) 
+  
+  imp <- mice(pp, m = 20, maxit = 20, seed = 2026, 
+              post = post, printFlag = FALSE)
+  
+  with(imp, lm(bp ~ type)) |> 
+    pool() |> 
+    summary() |> 
+    filter(term == "typeYes") |> 
+    mutate(delta = delta,
+           conf.low = estimate - qt(0.975, df) * std.error,
+           conf.high = estimate + qt(0.975, df) * std.error) |> 
+    select(delta, estimate, std.error, conf.low, conf.high, p.value)
+}
+
+deltas <- c(-8, -4, 0, 4, 8)
+
+sens <- purrr::map_df(deltas, run_delta)
+
+sens |> 
+  as.data.frame() |> 
+  print(digits = 7)
+```
+
+The row with `delta = 0` is the original MAR analysis. The other rows tell us what happens if the missing blood pressure values are systematically lower or higher than the MAR model suggests. Note that in this case, the primary conclusion (that diabetes is associated with higher blood pressure) is not changed. It does change the point estimate of the effect as well as the confidence intervals. One might write that a $\delta$ sensitivity analysis was performed and the effect size exhibited moderate sensitivity to departure from MAR, ranging from 3.89 to 4.69. The direction and significance of the effect remained the same throughout the range of $\delta$ that were tested.
+
+A plot is sometimes easier to interpret than a table.
+
+```{r}
+sens |> 
+  ggplot(aes(x = delta, y = estimate)) +
+  geom_point() +
+  geom_line() +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.4) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  labs(
+    x = expression(delta),
+    y = "Estimated coefficient for typeYes",
+    title = "Sensitivity analysis for departures from MAR"
+  )
+```
+
+There is no single correct choice of \(\delta\); it should be guided by subject matter knowledge. The point of the analysis is to see whether our conclusion is stable over a range of plausible departures from MAR. If the estimated coefficient for `typeYes` stays roughly the same over a reasonable range of values of \(\delta\), then our conclusion is not especially sensitive to the missingness assumption. If it changes a great deal, or even changes sign, then the conclusion is more fragile than the original MAR analysis alone would suggest.
+
+This is not the only way to do a sensitivity analysis, but it is a simple and useful first approach.
 
 
 

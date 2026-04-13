@@ -1,0 +1,191 @@
+# Identification Assumptions for Causal Adjustment
+
+In the previous section, we saw that a naive regression of later earnings on treatment in the Lalonde data gave a different answer than a regression that adjusted for observed baseline covariates. That already tells us something important: the treated and control groups were different before treatment. In observational work, that is the rule rather than the exception.
+
+The next question is the more important one. When does an adjusted comparison deserve a causal interpretation? Regression adjustment can be part of a causal analysis, but the causal interpretation does not come from the software output. It comes from the assumptions that justify using treated and untreated units as stand-ins for one another's missing counterfactual outcomes.
+
+Throughout this section, we continue to use the Lalonde job-training data. The treatment is participation in the job-training program, and the outcome is earnings in 1978.
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+library(MatchIt)
+library(broom)
+
+data("lalonde")
+
+aa <- lalonde |>
+  as_tibble() |>
+  mutate(
+    treat = factor(treat, levels = c(0, 1), labels = c("Control", "Treated")),
+    black = factor(black, levels = c(0, 1), labels = c("No", "Yes")),
+    hispan = factor(hispan, levels = c(0, 1), labels = c("No", "Yes")),
+    married = factor(married, levels = c(0, 1), labels = c("No", "Yes")),
+    nodegree = factor(nodegree, levels = c(0, 1), labels = c("No", "Yes"))
+  )
+```
+
+We will use the following observed pre-treatment covariates throughout this section:
+
+- `age`
+- `educ`
+- `black`
+- `hispan`
+- `married`
+- `nodegree`
+- `re74`
+- `re75`
+
+## Assumptions for Causal Adjustment
+
+We continue to write the potential outcomes for person $i$ as $Y_i(1)$ and $Y_i(0)$, where these represent that person's 1978 earnings under treatment and under control, respectively. The observed outcome is
+
+$$
+Y_i = D_iY_i(1) + (1-D_i)Y_i(0).
+$$
+
+This is the formal statement of **consistency**. If a person is treated, then the observed outcome is the treated potential outcome; if a person is untreated, then the observed outcome is the untreated potential outcome. This sounds automatic, but it depends on the treatment being defined clearly enough that $Y(1)$ and $Y(0)$ are meaningful. If the treatment were simply coded as "exercise," then the treated condition might bundle together walking, weight lifting, marathon training, yoga, and many other interventions. In that situation, the meaning of $Y(1)$ becomes murky. Likewise, if "job training" bundled together many radically different programs, then the treated potential outcome would be less clearly defined.
+
+The most important assumption in observational work is **ignorability**:
+
+$$
+(Y(1), Y(0)) \perp D \mid X.
+$$
+
+In words, after conditioning on the observed pre-treatment covariates $X$, treatment assignment is independent of the potential outcomes. A slightly more informal version is often easier to remember: once we control for the relevant observed pre-treatment variables, treated and untreated units are comparable on average. This assumption is also called **no unmeasured confounding** or **selection on observables**.
+
+It is important to be clear about what ignorability does and does not say. It does not say that treatment is random in the raw data. It says that treatment is *as if random after conditioning on the chosen covariates*. That is why the choice of covariates matters so much.
+
+This connects directly to the informal **backdoor idea**. If a variable is a common cause of treatment and outcome, then failing to adjust for it creates a noncausal association between treatment and outcome. In the Lalonde data, prior earnings are a natural example. Someone's 1975 earnings may affect whether they enter the training program, and 1975 earnings will also help predict 1978 earnings. In that case, `re75` is a confounder, and adjusting for it blocks a noncausal path between treatment and outcome.
+
+A third important assumption is **positivity**, sometimes called **overlap**:
+
+$$
+0 < P(D = 1 \mid X = x) < 1
+$$
+
+for the values of $x$ we care about. In plain language, this means that for covariate profiles of interest, there must be some chance of both treatment and control. If units with certain covariates are always treated, or always untreated, then we do not have comparable treated and control units in that part of the covariate space. In practice, this means that causal adjustment requires overlap. No overlap means no apples-to-apples comparison.
+
+A final assumption that is worth stating is **SUTVA**, but in this chapter we will emphasize only the part that is genuinely new after consistency: **no interference**. One person's treatment should not directly affect another person's outcome. In the job-training setting, this could fail if treated and untreated workers are competing for the same jobs in the same market. We will not focus on interference in this chapter, but it is worth keeping in mind.
+
+These assumptions help explain why regression is not the opposite of causal inference. Regression is one tool that causal inference can use. The causal interpretation depends on whether the regression is implementing a defensible comparison.
+
+There is one more practical point to make before returning to the Lalonde data. A good control is generally a variable measured before treatment that affects both treatment assignment and the outcome. A bad control is a variable that is downstream of treatment or a collider. For example, if a job-search intervention improves later mental health partly by increasing job-search confidence, then controlling for job-search confidence would remove part of the very treatment effect we are trying to estimate. If the goal is the total effect of treatment, post-treatment mediators are bad controls.
+
+The `jobs` data in the `mediation` package give a nice example. The treatment variable is `treat`, the outcome is `depress2`, and `job_seek` is a plausible post-treatment mediator. In the code below, the third model adds `job_seek` after treatment has already occurred.
+
+```{r}
+library(mediation)
+
+data("jobs")
+
+jobs2 <- jobs |>
+  as_tibble()
+
+mod1 <- lm(depress2 ~ treat, data = jobs2)
+mod2 <- lm(depress2 ~ treat + econ_hard + sex + age, data = jobs2)
+mod3 <- lm(depress2 ~ treat + econ_hard + sex + age + job_seek, data = jobs2)
+
+bind_rows(
+  tidy(mod1) |> mutate(model = "Treatment only"),
+  tidy(mod2) |> mutate(model = "Baseline controls"),
+  tidy(mod3) |> mutate(model = "Adds post-treatment variable")
+) |>
+  filter(term == "treat") |>
+  select(model, estimate, std.error, statistic, p.value)
+```
+
+When the coefficient on treatment changes after `job_seek` is added, that is not automatically an improvement. If `job_seek` lies on the causal pathway from treatment to the outcome, then controlling for it changes the estimand. This is why "control for everything" is not safe advice.
+
+## The Lalonde Data Revisited
+
+We return now to the Lalonde data. The first thing to notice is that the treated and control groups differ on several observed pre-treatment covariates.
+
+```{r}
+aa |>
+  group_by(treat) |>
+  summarize(
+    n = n(),
+    age = mean(age),
+    educ = mean(educ),
+    re74 = mean(re74),
+    re75 = mean(re75),
+    .groups = "drop"
+  )
+```
+
+```{r}
+aa |>
+  group_by(treat) |>
+  summarize(
+    black = mean(black == "Yes"),
+    hispan = mean(hispan == "Yes"),
+    married = mean(married == "Yes"),
+    nodegree = mean(nodegree == "Yes"),
+    .groups = "drop"
+  )
+```
+
+These are all pre-treatment variables, so differences here are a warning sign for confounding rather than an effect of treatment. In particular, prior earnings differ between the groups, and prior earnings are highly relevant for later earnings.
+
+We can see again that the naive and adjusted regressions tell different stories.
+
+```{r}
+mod_naive <- lm(re78 ~ treat, data = aa)
+
+mod_adj <- lm(
+  re78 ~ treat + age + educ + black + hispan + married + nodegree + re74 + re75,
+  data = aa
+)
+
+bind_rows(
+  tidy(mod_naive, conf.int = TRUE) |> mutate(model = "Naive"),
+  tidy(mod_adj, conf.int = TRUE) |> mutate(model = "Adjusted")
+) |>
+  filter(term == "treatTreated") |>
+  select(model, estimate, conf.low, conf.high, p.value)
+```
+
+The sign change is a strong indication that the raw treatment comparison was confounded by observed baseline differences. This does not prove that the adjusted model is causal, but it does show that adjustment matters.
+
+It is useful to visualize overlap directly. We start with one important pre-treatment covariate, 1975 earnings.
+
+```{r fig.height=4}
+ggplot(aa, aes(x = re75, fill = treat)) +
+  geom_density(alpha = 0.4) +
+  labs(x = "1975 earnings", y = "Density", fill = NULL)
+```
+
+Where the two distributions overlap, comparison is more plausible. Where they are far apart, adjustment begins to rely on extrapolation. This same idea can be summarized more compactly by the **propensity score**, which we define as
+
+$$
+e(X) = P(D = 1 \mid X).
+$$
+
+For now, we use the propensity score only as a way to study overlap. We estimate it with logistic regression using the observed pre-treatment covariates.
+
+```{r}
+ps_mod <- glm(
+  treat ~ age + educ + black + hispan + married + nodegree + re74 + re75,
+  data = aa,
+  family = binomial()
+)
+
+aa_ps <- ps_mod |>
+  augment(data = aa, type.predict = "response") |>
+  mutate(ps = .fitted) |>
+  select(-.fitted)
+```
+
+Now we look at the distributions of the estimated propensity scores in the treated and control groups.
+
+```{r fig.height=4}
+ggplot(aa_ps, aes(x = ps, fill = treat)) +
+  geom_histogram(position = "identity", alpha = 0.5, bins = 20) +
+  labs(x = "Estimated propensity score", y = "Count", fill = NULL)
+```
+
+The treated units tend to have higher estimated probabilities of treatment than the control units. This is the expected direction. The issue is not that the graph is backwards. The issue is that the groups may be too separated. Good causal adjustment needs overlap, not simply a treatment model that predicts treatment well. If treated and control units have little overlap in propensity score, then there are few comparable units to compare.
+
+This is the main reason to introduce propensity scores in the first place. Regression adjustment hides the comparability problem inside a single coefficient. Propensity scores make it easier to inspect whether treated and untreated units are similar on the observed pre-treatment covariates and whether common support is adequate.
+
+The big lesson from this section is that adjusted comparisons only deserve a causal interpretation under assumptions. Consistency tells us that the treatment must be defined clearly enough for the potential outcomes to make sense. Ignorability says that after conditioning on the observed pre-treatment covariates, treatment assignment is as good as random. Positivity says that comparable treated and control units must exist. Finally, the discussion of bad controls reminds us that adjustment can go wrong when we condition on variables that are affected by treatment. The next section uses propensity scores more directly to organize causal comparisons in observational data.
