@@ -152,7 +152,9 @@ diagnostics
 pooling
 simulations
 sensitivity-analysis
-solutions
-chapter-2-solutions
-chapter-3-solutions
-chapter-5
+regression-adjustment-and-causal-interpretation
+baseline-differences-between-the-groups
+summary
+identification-assumptions-for-causal-adjustment
+assumptions-for-causal-adjustment
+the-lalonde-data-revisited

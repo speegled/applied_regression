@@ -1,0 +1,2000 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 11 Regression Adjustment and Causal Interpretation | Applied Regression with R</title>
+  <meta name="description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  <meta name="generator" content="bookdown 0.46 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 11 Regression Adjustment and Causal Interpretation | Applied Regression with R" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 11 Regression Adjustment and Causal Interpretation | Applied Regression with R" />
+  
+  <meta name="twitter:description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  
+
+<meta name="author" content="Darrin Speegle" />
+
+
+<meta name="date" content="2026-04-13" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon" />
+<link rel="prev" href="missing-data-1.html"/>
+
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<link href="libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet" />
+<script src="libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="libs/plotly-binding-4.11.0/plotly.js"></script>
+<script src="libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+<link href="libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+
+
+<style type="text/css">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Applied Regression with R<br />&nbsp; Notes From STAT 4870/5087</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Preface</a></li>
+<li class="chapter" data-level="2" data-path="classicaltheory.html"><a href="classicaltheory.html"><i class="fa fa-check"></i><b>2</b> Classical Theory of Simple Linear Regression</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="classicaltheory.html"><a href="classicaltheory.html#review"><i class="fa fa-check"></i><b>2.1</b> Review</a>
+<ul>
+<li class="chapter" data-level="2.1.1" data-path="classicaltheory.html"><a href="classicaltheory.html#estimating-means-and-standard-deviations"><i class="fa fa-check"></i><b>2.1.1</b> Estimating Means and standard deviations</a></li>
+<li class="chapter" data-level="2.1.2" data-path="classicaltheory.html"><a href="classicaltheory.html#estimating-the-density-of-an-rv"><i class="fa fa-check"></i><b>2.1.2</b> Estimating the density of an rv</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="classicaltheory.html"><a href="classicaltheory.html#linear-regression-overview"><i class="fa fa-check"></i><b>2.2</b> Linear Regression Overview</a></li>
+<li class="chapter" data-level="2.3" data-path="classicaltheory.html"><a href="classicaltheory.html#linear-regression-with-no-intercept"><i class="fa fa-check"></i><b>2.3</b> Linear Regression with no intercept</a></li>
+<li class="chapter" data-level="2.4" data-path="classicaltheory.html"><a href="classicaltheory.html#the-full-model"><i class="fa fa-check"></i><b>2.4</b> The full model</a>
+<ul>
+<li class="chapter" data-level="2.4.1" data-path="classicaltheory.html"><a href="classicaltheory.html#hypothesis-test-interlude"><i class="fa fa-check"></i><b>2.4.1</b> Hypothesis Test Interlude</a></li>
+</ul></li>
+<li class="chapter" data-level="2.5" data-path="classicaltheory.html"><a href="classicaltheory.html#using-different-loss-functions"><i class="fa fa-check"></i><b>2.5</b> Using different loss functions</a></li>
+<li class="chapter" data-level="" data-path="classicaltheory.html"><a href="classicaltheory.html#vignette-a-dplyr-primer"><i class="fa fa-check"></i>Vignette: A dplyr primer</a></li>
+<li class="chapter" data-level="2.6" data-path="classicaltheory.html"><a href="classicaltheory.html#exercises"><i class="fa fa-check"></i><b>2.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html"><i class="fa fa-check"></i><b>3</b> Multiple Linear Regression</a>
+<ul>
+<li class="chapter" data-level="3.0.1" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#anova"><i class="fa fa-check"></i><b>3.0.1</b> Aside on multiple R squared and ANOVA</a></li>
+<li class="chapter" data-level="3.1" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#more-variable-selection-anova"><i class="fa fa-check"></i><b>3.1</b> More Variable Selection: ANOVA</a></li>
+<li class="chapter" data-level="3.2" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#predictions"><i class="fa fa-check"></i><b>3.2</b> Predictions</a></li>
+<li class="chapter" data-level="3.3" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#using-aic"><i class="fa fa-check"></i><b>3.3</b> Using AIC</a>
+<ul>
+<li class="chapter" data-level="3.3.1" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#likelihood-functions"><i class="fa fa-check"></i><b>3.3.1</b> Likelihood functions</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#exercises-1"><i class="fa fa-check"></i><b>3.4</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html"><i class="fa fa-check"></i><b>4</b> Intro to Predictive Modeling</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#comparingtwomodels"><i class="fa fa-check"></i><b>4.1</b> Comparing Two Models</a></li>
+<li class="chapter" data-level="4.2" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#a-brief-return-to-inference"><i class="fa fa-check"></i><b>4.2</b> A Brief Return to Inference</a></li>
+<li class="chapter" data-level="4.3" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#simulations-of-expected-mse"><i class="fa fa-check"></i><b>4.3</b> Simulations of Expected MSE</a>
+<ul>
+<li class="chapter" data-level="4.3.1" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#estimating-mse-and-bias-variance-tradeoff"><i class="fa fa-check"></i><b>4.3.1</b> Estimating MSE and Bias-Variance Tradeoff</a></li>
+<li class="chapter" data-level="4.3.2" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#estimating-mse-for-new-predictors-uniformly-sampled"><i class="fa fa-check"></i><b>4.3.2</b> Estimating MSE for new predictors uniformly sampled</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#bias-variance-trade-off"><i class="fa fa-check"></i><b>4.4</b> Bias Variance Trade-off</a></li>
+<li class="chapter" data-level="4.5" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#exercises-2"><i class="fa fa-check"></i><b>4.5</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html"><i class="fa fa-check"></i><b>5</b> Regression Predictive Models</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#preprocessing"><i class="fa fa-check"></i><b>5.1</b> Preprocessing</a></li>
+<li class="chapter" data-level="5.2" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#missing-data"><i class="fa fa-check"></i><b>5.2</b> Missing Data</a>
+<ul>
+<li class="chapter" data-level="5.2.1" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#predicting-when-a-level-is-missing-from-the-training-set"><i class="fa fa-check"></i><b>5.2.1</b> Predicting when a level is missing from the training set</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#correlated-predictors"><i class="fa fa-check"></i><b>5.3</b> Correlated Predictors</a></li>
+<li class="chapter" data-level="5.4" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#aside-on-pca"><i class="fa fa-check"></i><b>5.4</b> Aside on PCA</a></li>
+<li class="chapter" data-level="5.5" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#johnson-lindenstrauss-dimension-reduction"><i class="fa fa-check"></i><b>5.5</b> Johnson-Lindenstrauss Dimension Reduction</a></li>
+<li class="chapter" data-level="5.6" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#exercises-3"><i class="fa fa-check"></i><b>5.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="variable-selection.html"><a href="variable-selection.html"><i class="fa fa-check"></i><b>6</b> Variable Selection</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="variable-selection.html"><a href="variable-selection.html#partial-least-squares"><i class="fa fa-check"></i><b>6.1</b> Partial Least Squares</a>
+<ul>
+<li class="chapter" data-level="6.1.1" data-path="variable-selection.html"><a href="variable-selection.html#optional-pls-stuff"><i class="fa fa-check"></i><b>6.1.1</b> Optional PLS Stuff</a></li>
+</ul></li>
+<li class="chapter" data-level="6.2" data-path="variable-selection.html"><a href="variable-selection.html#ridgelasso-and-elastic-net"><i class="fa fa-check"></i><b>6.2</b> Ridge/Lasso and Elastic Net</a>
+<ul>
+<li class="chapter" data-level="6.2.1" data-path="variable-selection.html"><a href="variable-selection.html#ridge-regression"><i class="fa fa-check"></i><b>6.2.1</b> Ridge Regression</a></li>
+<li class="chapter" data-level="6.2.2" data-path="variable-selection.html"><a href="variable-selection.html#lasso"><i class="fa fa-check"></i><b>6.2.2</b> LASSO</a></li>
+</ul></li>
+<li class="chapter" data-level="6.3" data-path="variable-selection.html"><a href="variable-selection.html#step-aic"><i class="fa fa-check"></i><b>6.3</b> Step AIC</a>
+<ul>
+<li class="chapter" data-level="6.3.1" data-path="variable-selection.html"><a href="variable-selection.html#doing-lgocv-with-preprocessing"><i class="fa fa-check"></i><b>6.3.1</b> Doing LGOCV with preprocessing</a></li>
+</ul></li>
+<li class="chapter" data-level="6.4" data-path="variable-selection.html"><a href="variable-selection.html#interactions"><i class="fa fa-check"></i><b>6.4</b> Interactions</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html"><i class="fa fa-check"></i><b>7</b> Generalized Linear Models</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#logistic-regression"><i class="fa fa-check"></i><b>7.1</b> Logistic Regression</a>
+<ul>
+<li class="chapter" data-level="7.1.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#malaria-example-intro"><i class="fa fa-check"></i><b>7.1.1</b> Malaria Example (Intro)</a></li>
+<li class="chapter" data-level="7.1.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#the-model-theory"><i class="fa fa-check"></i><b>7.1.2</b> The model (theory)</a></li>
+<li class="chapter" data-level="7.1.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#estimating-parameters-using-mle"><i class="fa fa-check"></i><b>7.1.3</b> Estimating parameters using MLE</a></li>
+<li class="chapter" data-level="7.1.4" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#estimating-parameters-via-loss-function"><i class="fa fa-check"></i><b>7.1.4</b> Estimating parameters via loss function</a></li>
+<li class="chapter" data-level="7.1.5" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#interpreting-summary"><i class="fa fa-check"></i><b>7.1.5</b> Interpreting summary</a></li>
+</ul></li>
+<li class="chapter" data-level="7.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#mixed-effects-logistic-regression"><i class="fa fa-check"></i><b>7.2</b> Mixed Effects Logistic Regression</a>
+<ul>
+<li class="chapter" data-level="7.2.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#nested-random-effects"><i class="fa fa-check"></i><b>7.2.1</b> Nested random effects</a></li>
+</ul></li>
+<li class="chapter" data-level="7.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#count-regression"><i class="fa fa-check"></i><b>7.3</b> Count Regression</a>
+<ul>
+<li class="chapter" data-level="7.3.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#mixed-effects-model"><i class="fa fa-check"></i><b>7.3.1</b> Mixed Effects Model</a></li>
+</ul></li>
+<li class="chapter" data-level="7.4" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#offsets"><i class="fa fa-check"></i><b>7.4</b> Offsets</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="lecture-notes.html"><a href="lecture-notes.html"><i class="fa fa-check"></i><b>8</b> Lecture Notes</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="lecture-notes.html"><a href="lecture-notes.html#january-27"><i class="fa fa-check"></i><b>8.1</b> January 27</a></li>
+<li class="chapter" data-level="8.2" data-path="lecture-notes.html"><a href="lecture-notes.html#february-3"><i class="fa fa-check"></i><b>8.2</b> February 3</a>
+<ul>
+<li class="chapter" data-level="8.2.1" data-path="lecture-notes.html"><a href="lecture-notes.html#simulating-data"><i class="fa fa-check"></i><b>8.2.1</b> Simulating Data</a></li>
+<li class="chapter" data-level="8.2.2" data-path="lecture-notes.html"><a href="lecture-notes.html#building-models"><i class="fa fa-check"></i><b>8.2.2</b> Building Models</a></li>
+</ul></li>
+<li class="chapter" data-level="8.3" data-path="lecture-notes.html"><a href="lecture-notes.html#february-5"><i class="fa fa-check"></i><b>8.3</b> February 5</a>
+<ul>
+<li class="chapter" data-level="8.3.1" data-path="lecture-notes.html"><a href="lecture-notes.html#using-broomaugment"><i class="fa fa-check"></i><b>8.3.1</b> Using <code>broom::augment</code></a></li>
+<li class="chapter" data-level="8.3.2" data-path="lecture-notes.html"><a href="lecture-notes.html#multicollinearity"><i class="fa fa-check"></i><b>8.3.2</b> Multicollinearity</a></li>
+</ul></li>
+<li class="chapter" data-level="8.4" data-path="lecture-notes.html"><a href="lecture-notes.html#february-10"><i class="fa fa-check"></i><b>8.4</b> February 10</a>
+<ul>
+<li class="chapter" data-level="8.4.1" data-path="lecture-notes.html"><a href="lecture-notes.html#anova-models"><i class="fa fa-check"></i><b>8.4.1</b> ANOVA Models</a></li>
+<li class="chapter" data-level="8.4.2" data-path="lecture-notes.html"><a href="lecture-notes.html#penguins"><i class="fa fa-check"></i><b>8.4.2</b> Penguins</a></li>
+</ul></li>
+<li class="chapter" data-level="8.5" data-path="lecture-notes.html"><a href="lecture-notes.html#february-12"><i class="fa fa-check"></i><b>8.5</b> February 12</a>
+<ul>
+<li class="chapter" data-level="8.5.1" data-path="lecture-notes.html"><a href="lecture-notes.html#an-example"><i class="fa fa-check"></i><b>8.5.1</b> An Example</a></li>
+</ul></li>
+<li class="chapter" data-level="8.6" data-path="lecture-notes.html"><a href="lecture-notes.html#february-17"><i class="fa fa-check"></i><b>8.6</b> February 17</a>
+<ul>
+<li class="chapter" data-level="8.6.1" data-path="lecture-notes.html"><a href="lecture-notes.html#adding-random-speaker-and-sentence-effects"><i class="fa fa-check"></i><b>8.6.1</b> Adding random speaker and sentence effects</a></li>
+<li class="chapter" data-level="8.6.2" data-path="lecture-notes.html"><a href="lecture-notes.html#random-intercepts-with-continuous-predictor"><i class="fa fa-check"></i><b>8.6.2</b> Random intercepts with continuous predictor</a></li>
+<li class="chapter" data-level="8.6.3" data-path="lecture-notes.html"><a href="lecture-notes.html#adding-random-slopes"><i class="fa fa-check"></i><b>8.6.3</b> Adding random slopes</a></li>
+</ul></li>
+<li class="chapter" data-level="8.7" data-path="lecture-notes.html"><a href="lecture-notes.html#february-19"><i class="fa fa-check"></i><b>8.7</b> February 19</a>
+<ul>
+<li class="chapter" data-level="8.7.1" data-path="lecture-notes.html"><a href="lecture-notes.html#random-slopes"><i class="fa fa-check"></i><b>8.7.1</b> Random Slopes</a></li>
+<li class="chapter" data-level="8.7.2" data-path="lecture-notes.html"><a href="lecture-notes.html#comparing-models"><i class="fa fa-check"></i><b>8.7.2</b> Comparing models</a></li>
+</ul></li>
+<li class="chapter" data-level="8.8" data-path="lecture-notes.html"><a href="lecture-notes.html#february-24"><i class="fa fa-check"></i><b>8.8</b> February 24</a>
+<ul>
+<li class="chapter" data-level="8.8.1" data-path="lecture-notes.html"><a href="lecture-notes.html#beethoven-tempo-example"><i class="fa fa-check"></i><b>8.8.1</b> Beethoven Tempo Example</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="maximum-likelihood-estimation.html"><a href="maximum-likelihood-estimation.html"><i class="fa fa-check"></i><b>9</b> Maximum Likelihood Estimation</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="maximum-likelihood-estimation.html"><a href="maximum-likelihood-estimation.html#mle-for-mixed-models"><i class="fa fa-check"></i><b>9.1</b> MLE for mixed models</a>
+<ul>
+<li class="chapter" data-level="9.1.1" data-path="maximum-likelihood-estimation.html"><a href="maximum-likelihood-estimation.html#what-does-z-tz-do"><i class="fa fa-check"></i><b>9.1.1</b> What does <code>Z %*% t(Z)</code> do?</a></li>
+<li class="chapter" data-level="9.1.2" data-path="maximum-likelihood-estimation.html"><a href="maximum-likelihood-estimation.html#what-does-multiplying-by-tau2-do"><i class="fa fa-check"></i><b>9.1.2</b> What does multiplying by <code>tau2</code> do?</a></li>
+<li class="chapter" data-level="9.1.3" data-path="maximum-likelihood-estimation.html"><a href="maximum-likelihood-estimation.html#what-does-sigma2-diagn-do"><i class="fa fa-check"></i><b>9.1.3</b> What does <code>sigma2 * diag(N)</code> do?</a></li>
+<li class="chapter" data-level="9.1.4" data-path="maximum-likelihood-estimation.html"><a href="maximum-likelihood-estimation.html#what-does-the-final-matrix-represent"><i class="fa fa-check"></i><b>9.1.4</b> What does the final matrix represent?</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="missing-data-1.html"><a href="missing-data-1.html"><i class="fa fa-check"></i><b>10</b> Missing Data</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="missing-data-1.html"><a href="missing-data-1.html#technical-details"><i class="fa fa-check"></i><b>10.1</b> Technical Details</a></li>
+<li class="chapter" data-level="10.2" data-path="missing-data-1.html"><a href="missing-data-1.html#diagnostics"><i class="fa fa-check"></i><b>10.2</b> Diagnostics</a></li>
+<li class="chapter" data-level="10.3" data-path="missing-data-1.html"><a href="missing-data-1.html#pooling"><i class="fa fa-check"></i><b>10.3</b> Pooling</a></li>
+<li class="chapter" data-level="10.4" data-path="missing-data-1.html"><a href="missing-data-1.html#simulations"><i class="fa fa-check"></i><b>10.4</b> Simulations</a></li>
+<li class="chapter" data-level="10.5" data-path="missing-data-1.html"><a href="missing-data-1.html#sensitivity-analysis"><i class="fa fa-check"></i><b>10.5</b> Sensitivity Analysis</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="regression-adjustment-and-causal-interpretation.html"><a href="regression-adjustment-and-causal-interpretation.html"><i class="fa fa-check"></i><b>11</b> Regression Adjustment and Causal Interpretation</a>
+<ul>
+<li class="chapter" data-level="11.0.1" data-path="regression-adjustment-and-causal-interpretation.html"><a href="regression-adjustment-and-causal-interpretation.html#baseline-differences-between-the-groups"><i class="fa fa-check"></i><b>11.0.1</b> Baseline Differences Between the Groups</a></li>
+<li class="chapter" data-level="11.0.2" data-path="regression-adjustment-and-causal-interpretation.html"><a href="regression-adjustment-and-causal-interpretation.html#summary"><i class="fa fa-check"></i><b>11.0.2</b> Summary</a></li>
+<li class="chapter" data-level="11.1" data-path="regression-adjustment-and-causal-interpretation.html"><a href="regression-adjustment-and-causal-interpretation.html#identification-assumptions-for-causal-adjustment"><i class="fa fa-check"></i><b>11.1</b> Identification Assumptions for Causal Adjustment</a>
+<ul>
+<li class="chapter" data-level="11.1.1" data-path="regression-adjustment-and-causal-interpretation.html"><a href="regression-adjustment-and-causal-interpretation.html#assumptions-for-causal-adjustment"><i class="fa fa-check"></i><b>11.1.1</b> Assumptions for Causal Adjustment</a></li>
+<li class="chapter" data-level="11.1.2" data-path="regression-adjustment-and-causal-interpretation.html"><a href="regression-adjustment-and-causal-interpretation.html#the-lalonde-data-revisited"><i class="fa fa-check"></i><b>11.1.2</b> The Lalonde Data Revisited</a></li>
+</ul></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Applied Regression with R</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="regression-adjustment-and-causal-interpretation" class="section level1 hasAnchor" number="11">
+<h1><span class="header-section-number">Chapter 11</span> Regression Adjustment and Causal Interpretation<a href="regression-adjustment-and-causal-interpretation.html#regression-adjustment-and-causal-interpretation" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>In this chapter, we begin our discussion of causal inference. We will not try to cover the subject in full here. Instead, we focus on a basic but important question: when we fit a regression model with a treatment variable, under what circumstances can we interpret the coefficient of that treatment variable causally?</p>
+<p>A useful place to start is with observational data. In observational studies, the treated and untreated groups are often different before the treatment occurs. This means that a simple comparison of outcomes can mix together two things: the effect of the treatment itself, and baseline differences between the groups. Regression adjustment is one way to address this problem, but it does not solve it automatically.</p>
+<p>We will work with the <code>lalonde</code> data set from the <code>MatchIt</code> package. The outcome variable is earnings in 1978 (<code>re78</code>), and the treatment variable <code>treat</code> indicates participation in a job-training program. The data also includes several pre-treatment covariates such as age, education, marital status, degree status, and earnings in 1974 and 1975.</p>
+<div class="sourceCode" id="cb1243"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1243-1"><a href="regression-adjustment-and-causal-interpretation.html#cb1243-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1243-2"><a href="regression-adjustment-and-causal-interpretation.html#cb1243-2" tabindex="-1"></a><span class="fu">library</span>(MatchIt)</span>
+<span id="cb1243-3"><a href="regression-adjustment-and-causal-interpretation.html#cb1243-3" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
+<span id="cb1243-4"><a href="regression-adjustment-and-causal-interpretation.html#cb1243-4" tabindex="-1"></a></span>
+<span id="cb1243-5"><a href="regression-adjustment-and-causal-interpretation.html#cb1243-5" tabindex="-1"></a>aa <span class="ot">&lt;-</span> MatchIt<span class="sc">::</span>lalonde <span class="sc">|&gt;</span> </span>
+<span id="cb1243-6"><a href="regression-adjustment-and-causal-interpretation.html#cb1243-6" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span></code></pre></div>
+<p>We begin by looking at the structure of the data.</p>
+<div class="sourceCode" id="cb1244"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1244-1"><a href="regression-adjustment-and-causal-interpretation.html#cb1244-1" tabindex="-1"></a>aa <span class="sc">|&gt;</span> </span>
+<span id="cb1244-2"><a href="regression-adjustment-and-causal-interpretation.html#cb1244-2" tabindex="-1"></a>  <span class="fu">select</span>(treat, age, educ, married, nodegree, re74, re75, re78) <span class="sc">|&gt;</span> </span>
+<span id="cb1244-3"><a href="regression-adjustment-and-causal-interpretation.html#cb1244-3" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code></pre></div>
+<pre><code>##      treat             age             educ          married      
+##  Min.   :0.0000   Min.   :16.00   Min.   : 0.00   Min.   :0.0000  
+##  1st Qu.:0.0000   1st Qu.:20.00   1st Qu.: 9.00   1st Qu.:0.0000  
+##  Median :0.0000   Median :25.00   Median :11.00   Median :0.0000  
+##  Mean   :0.3013   Mean   :27.36   Mean   :10.27   Mean   :0.4153  
+##  3rd Qu.:1.0000   3rd Qu.:32.00   3rd Qu.:12.00   3rd Qu.:1.0000  
+##  Max.   :1.0000   Max.   :55.00   Max.   :18.00   Max.   :1.0000  
+##     nodegree           re74            re75              re78        
+##  Min.   :0.0000   Min.   :    0   Min.   :    0.0   Min.   :    0.0  
+##  1st Qu.:0.0000   1st Qu.:    0   1st Qu.:    0.0   1st Qu.:  238.3  
+##  Median :1.0000   Median : 1042   Median :  601.5   Median : 4759.0  
+##  Mean   :0.6303   Mean   : 4558   Mean   : 2184.9   Mean   : 6792.8  
+##  3rd Qu.:1.0000   3rd Qu.: 7888   3rd Qu.: 3249.0   3rd Qu.:10893.6  
+##  Max.   :1.0000   Max.   :35040   Max.   :25142.2   Max.   :60307.9</code></pre>
+<p>We start with the simplest possible regression model,</p>
+<p><span class="math display">\[
+\texttt{re78} = \beta_0 + \beta_1 \texttt{treat} + \varepsilon.
+\]</span></p>
+<p>This model compares 1978 earnings between the treated and untreated groups without adjusting for any other variables.</p>
+<div class="sourceCode" id="cb1246"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1246-1"><a href="regression-adjustment-and-causal-interpretation.html#cb1246-1" tabindex="-1"></a>mod_naive <span class="ot">&lt;-</span> <span class="fu">lm</span>(re78 <span class="sc">~</span> treat, <span class="at">data =</span> aa)</span>
+<span id="cb1246-2"><a href="regression-adjustment-and-causal-interpretation.html#cb1246-2" tabindex="-1"></a></span>
+<span id="cb1246-3"><a href="regression-adjustment-and-causal-interpretation.html#cb1246-3" tabindex="-1"></a>mod_naive <span class="sc">|&gt;</span></span>
+<span id="cb1246-4"><a href="regression-adjustment-and-causal-interpretation.html#cb1246-4" tabindex="-1"></a>  <span class="fu">tidy</span>(<span class="at">conf.int =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## # A tibble: 2 × 7
+##   term        estimate std.error statistic  p.value conf.low conf.high
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)    6984.      361.    19.4   1.64e-65    6276.     7693.
+## 2 treat          -635.      657.    -0.966 3.34e- 1   -1926.      655.</code></pre>
+<p>It is also useful to look at the group means directly.</p>
+<div class="sourceCode" id="cb1248"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1248-1"><a href="regression-adjustment-and-causal-interpretation.html#cb1248-1" tabindex="-1"></a>aa <span class="sc">|&gt;</span> </span>
+<span id="cb1248-2"><a href="regression-adjustment-and-causal-interpretation.html#cb1248-2" tabindex="-1"></a>  <span class="fu">group_by</span>(treat) <span class="sc">|&gt;</span> </span>
+<span id="cb1248-3"><a href="regression-adjustment-and-causal-interpretation.html#cb1248-3" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean_re78 =</span> <span class="fu">mean</span>(re78), <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span>)</span></code></pre></div>
+<pre><code>## # A tibble: 2 × 2
+##   treat mean_re78
+##   &lt;int&gt;     &lt;dbl&gt;
+## 1     0     6984.
+## 2     1     6349.</code></pre>
+<p>Note that getting the job training is not statistically significant, and the point estimate of the effect of training is <strong>negative</strong> 635 dollars. That means that the people who received traning had salaries on average <em>lower</em> than those who did not. One might conclude that the program did not help. However, this conclusion would be too quick. The data are observational, not randomized, so it is entirely possible that the treated and untreated groups differed before the program began.</p>
+<div id="baseline-differences-between-the-groups" class="section level3 hasAnchor" number="11.0.1">
+<h3><span class="header-section-number">11.0.1</span> Baseline Differences Between the Groups<a href="regression-adjustment-and-causal-interpretation.html#baseline-differences-between-the-groups" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>To investigate this, we compare some pre-treatment covariates across the two groups.</p>
+<div class="sourceCode" id="cb1250"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1250-1"><a href="regression-adjustment-and-causal-interpretation.html#cb1250-1" tabindex="-1"></a>aa <span class="sc">|&gt;</span> </span>
+<span id="cb1250-2"><a href="regression-adjustment-and-causal-interpretation.html#cb1250-2" tabindex="-1"></a>  <span class="fu">group_by</span>(treat) <span class="sc">|&gt;</span> </span>
+<span id="cb1250-3"><a href="regression-adjustment-and-causal-interpretation.html#cb1250-3" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb1250-4"><a href="regression-adjustment-and-causal-interpretation.html#cb1250-4" tabindex="-1"></a>    <span class="fu">across</span>(<span class="fu">c</span>(age, educ, re74, re75), mean),</span>
+<span id="cb1250-5"><a href="regression-adjustment-and-causal-interpretation.html#cb1250-5" tabindex="-1"></a>    <span class="at">married =</span> <span class="fu">mean</span>(married),</span>
+<span id="cb1250-6"><a href="regression-adjustment-and-causal-interpretation.html#cb1250-6" tabindex="-1"></a>    <span class="at">nodegree =</span> <span class="fu">mean</span>(nodegree),</span>
+<span id="cb1250-7"><a href="regression-adjustment-and-causal-interpretation.html#cb1250-7" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb1250-8"><a href="regression-adjustment-and-causal-interpretation.html#cb1250-8" tabindex="-1"></a>  )</span></code></pre></div>
+<pre><code>## # A tibble: 2 × 7
+##   treat   age  educ  re74  re75 married nodegree
+##   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;
+## 1     0  28.0  10.2 5619. 2466.   0.513    0.597
+## 2     1  25.8  10.3 2096. 1532.   0.189    0.708</code></pre>
+<p>We can also visualize one of the most important pre-treatment variables, namely earnings in 1975.</p>
+<div class="sourceCode" id="cb1252"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1252-1"><a href="regression-adjustment-and-causal-interpretation.html#cb1252-1" tabindex="-1"></a>aa <span class="sc">|&gt;</span> </span>
+<span id="cb1252-2"><a href="regression-adjustment-and-causal-interpretation.html#cb1252-2" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">treat =</span> <span class="fu">factor</span>(treat, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Control&quot;</span>, <span class="st">&quot;Treated&quot;</span>))) <span class="sc">|&gt;</span> </span>
+<span id="cb1252-3"><a href="regression-adjustment-and-causal-interpretation.html#cb1252-3" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> treat, <span class="at">y =</span> re75)) <span class="sc">+</span></span>
+<span id="cb1252-4"><a href="regression-adjustment-and-causal-interpretation.html#cb1252-4" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb1252-5"><a href="regression-adjustment-and-causal-interpretation.html#cb1252-5" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">&quot;1975 earnings&quot;</span>)</span></code></pre></div>
+<p><img src="13-causal-inference_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>We see that the treated and untreated groups are not the same at baseline. In particular, prior earnings differ substantially. This matters because prior earnings are measured before treatment, and they are strongly related to later earnings. If the treated group started out at a disadvantage, then a raw treated-versus-control comparison is not isolating the effect of treatment. It is combining the effect of treatment with the fact that the treated and untreated groups were different to begin with.</p>
+<p>This is the basic idea of <strong>confounding</strong>. A confounder is a variable that is related both to treatment assignment and to the outcome. Prior earnings are a natural example in this setting.</p>
+<p>A natural first thing to do is to control for the observed pre-treatment covariates in a regression model. For example, we can fit</p>
+<p><span class="math display">\[
+\texttt{re78} = \beta_0 + \beta_1 \texttt{treat} + \beta_2 X + \varepsilon,
+\]</span></p>
+<p>where <span class="math inline">\(X\)</span> denotes the baseline covariates.</p>
+<div class="sourceCode" id="cb1253"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1253-1"><a href="regression-adjustment-and-causal-interpretation.html#cb1253-1" tabindex="-1"></a>mod_adj <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb1253-2"><a href="regression-adjustment-and-causal-interpretation.html#cb1253-2" tabindex="-1"></a>  re78 <span class="sc">~</span> treat <span class="sc">+</span> age <span class="sc">+</span> educ <span class="sc">+</span> race <span class="sc">+</span> married <span class="sc">+</span> nodegree <span class="sc">+</span> re74 <span class="sc">+</span> re75,</span>
+<span id="cb1253-3"><a href="regression-adjustment-and-causal-interpretation.html#cb1253-3" tabindex="-1"></a>  <span class="at">data =</span> aa</span>
+<span id="cb1253-4"><a href="regression-adjustment-and-causal-interpretation.html#cb1253-4" tabindex="-1"></a>)</span>
+<span id="cb1253-5"><a href="regression-adjustment-and-causal-interpretation.html#cb1253-5" tabindex="-1"></a></span>
+<span id="cb1253-6"><a href="regression-adjustment-and-causal-interpretation.html#cb1253-6" tabindex="-1"></a>mod_adj <span class="sc">|&gt;</span></span>
+<span id="cb1253-7"><a href="regression-adjustment-and-causal-interpretation.html#cb1253-7" tabindex="-1"></a>  <span class="fu">tidy</span>(<span class="at">conf.int =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## # A tibble: 10 × 7
+##    term         estimate std.error statistic     p.value   conf.low conf.high
+##    &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
+##  1 (Intercept) -1174.    2456.        -0.478 0.633       -5998.      3650.   
+##  2 treat        1548.     781.         1.98  0.0480         13.9     3083.   
+##  3 age            13.0     32.5        0.399 0.690         -50.8       76.8  
+##  4 educ          404.     159.         2.54  0.0113         91.9      716.   
+##  5 racehispan   1740.    1019.         1.71  0.0882       -261.      3740.   
+##  6 racewhite    1241.     769.         1.61  0.107        -269.      2750.   
+##  7 married       407.     695.         0.585 0.559        -959.      1772.   
+##  8 nodegree      260.     847.         0.307 0.759       -1404.      1924.   
+##  9 re74            0.296    0.0583     5.09  0.000000489     0.182      0.411
+## 10 re75            0.232    0.105      2.21  0.0273          0.0261     0.437</code></pre>
+<p>The treatment coefficient changes noticeably after adjustment. Now, it is statistically significant and <strong>positive</strong>. Our estimate is that the job training program is associated with an increase of 1548 dollars after adjusting for the other covariates.</p>
+<p>Regression adjustment is therefore useful. It can remove bias due to <strong>observed</strong> baseline differences, at least when the model is doing a reasonable job of adjustment. At the same time, it is important not to say more than the model justifies. It would <strong>not</strong> be justified to say that participation in the pogram <strong>increased</strong> 1978 earnings, because that is assigning causality to the program. All we know is that it is <strong>associated</strong> with an increase after adjusting for the other covariates. In order to justify a causality claim, we would need to believe that after controlling for the observed pre-treatment covariates, the treated and untreated groups are comparable in all ways relevant to the outcome.</p>
+<p>This is a much stronger claim than simply saying that we included several variables in a regression. A regression coefficient is not automatically causal just because it comes from a multiple regression model. The causal interpretation comes from the assumptions we are willing to defend.</p>
+<p>A good way to summarize the distinction is the following:</p>
+<ul>
+<li>The naive model compares treated and untreated units directly.</li>
+<li>The adjusted model compares treated and untreated units after controlling for observed baseline covariates.</li>
+<li>A causal interpretation requires that this adjusted comparison be a good stand-in for the missing <em>counterfactual</em> comparison, see below for details on counterfactuals.</li>
+</ul>
+<p>One way to formalize the causal question is through the potential outcomes framework. For each individual <span class="math inline">\(i\)</span>, let</p>
+<ul>
+<li><span class="math inline">\(Y_i(1)\)</span> be the earnings that person <span class="math inline">\(i\)</span> would have if treated;</li>
+<li><span class="math inline">\(Y_i(0)\)</span> be the earnings that person <span class="math inline">\(i\)</span> would have if untreated.</li>
+</ul>
+<p>The individual causal effect is then</p>
+<p><span class="math display">\[
+Y_i(1) - Y_i(0).
+\]</span></p>
+<p>The difficulty is that we never observe both values for the same person. If person <span class="math inline">\(i\)</span> is treated, then we observe <span class="math inline">\(Y_i(1)\)</span> but not <span class="math inline">\(Y_i(0)\)</span>. If person <span class="math inline">\(i\)</span> is untreated, then we observe <span class="math inline">\(Y_i(0)\)</span> but not <span class="math inline">\(Y_i(1)\)</span>. The observed outcome can be written as</p>
+<p><span class="math display">\[
+Y_i = D_iY_i(1) + (1-D_i)Y_i(0),
+\]</span></p>
+<p>where <span class="math inline">\(D_i\)</span> is the treatment indicator. That is, <span class="math inline">\(D_i = 1\)</span> if treatment is received and <span class="math inline">\(D_i = 0\)</span> if no treatment is received.</p>
+<p>This is the fundamental problem of causal inference. For each person, one of the two relevant outcomes is missing. In observational data, we use untreated individuals as stand-ins for the missing untreated outcomes of the treated group, or treated individuals as stand-ins for the missing treated outcomes of the untreated group. The central question is whether those stand-ins are credible.</p>
+<p>In the present example, the raw comparison is not especially credible because the groups differ so much at baseline. The adjusted regression is more credible, but only to the extent that the included covariates capture the important differences between the two groups. In particular, there is nothing about the multiple regression that directly tries to make the two groups comparable; if it happens, it is fortuitous.</p>
+<p>Later, we will study a different way to organize this comparability problem. Rather than putting all of the adjustment into a single outcome regression, we can first ask how likely each unit was to receive treatment based on the observed pre-treatment covariates.</p>
+<p>This leads to the <strong>propensity score</strong>, defined by</p>
+<p><span class="math display">\[
+e(X) = P(D = 1 \mid X).
+\]</span></p>
+<p>Here, <span class="math inline">\(X\)</span> denotes the observed pre-treatment covariates. Units with similar propensity scores have similar observed baseline characteristics, at least in the sense relevant for treatment assignment. The idea is then to compare treated and untreated units that were similarly likely to receive treatment in the first place.</p>
+<p>We will not develop propensity scores fully in this section, but we can at least estimate them and inspect the results. A common first step is to fit a logistic regression for treatment.</p>
+<div class="sourceCode" id="cb1255"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1255-1"><a href="regression-adjustment-and-causal-interpretation.html#cb1255-1" tabindex="-1"></a>ps_mod <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb1255-2"><a href="regression-adjustment-and-causal-interpretation.html#cb1255-2" tabindex="-1"></a>  treat <span class="sc">~</span> age <span class="sc">+</span> educ <span class="sc">+</span> race <span class="sc">+</span> married <span class="sc">+</span> nodegree <span class="sc">+</span> re74 <span class="sc">+</span> re75,</span>
+<span id="cb1255-3"><a href="regression-adjustment-and-causal-interpretation.html#cb1255-3" tabindex="-1"></a>  <span class="at">data =</span> aa,</span>
+<span id="cb1255-4"><a href="regression-adjustment-and-causal-interpretation.html#cb1255-4" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>()</span>
+<span id="cb1255-5"><a href="regression-adjustment-and-causal-interpretation.html#cb1255-5" tabindex="-1"></a>)</span>
+<span id="cb1255-6"><a href="regression-adjustment-and-causal-interpretation.html#cb1255-6" tabindex="-1"></a></span>
+<span id="cb1255-7"><a href="regression-adjustment-and-causal-interpretation.html#cb1255-7" tabindex="-1"></a>aa_ps <span class="ot">&lt;-</span> ps_mod <span class="sc">|&gt;</span></span>
+<span id="cb1255-8"><a href="regression-adjustment-and-causal-interpretation.html#cb1255-8" tabindex="-1"></a>  <span class="fu">augment</span>(<span class="at">data =</span> aa, <span class="at">type.predict =</span> <span class="st">&quot;response&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1255-9"><a href="regression-adjustment-and-causal-interpretation.html#cb1255-9" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb1255-10"><a href="regression-adjustment-and-causal-interpretation.html#cb1255-10" tabindex="-1"></a>    <span class="at">treat =</span> <span class="fu">factor</span>(treat, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Control&quot;</span>, <span class="st">&quot;Treated&quot;</span>))</span>
+<span id="cb1255-11"><a href="regression-adjustment-and-causal-interpretation.html#cb1255-11" tabindex="-1"></a>  )</span>
+<span id="cb1255-12"><a href="regression-adjustment-and-causal-interpretation.html#cb1255-12" tabindex="-1"></a></span>
+<span id="cb1255-13"><a href="regression-adjustment-and-causal-interpretation.html#cb1255-13" tabindex="-1"></a>ps_mod <span class="sc">|&gt;</span></span>
+<span id="cb1255-14"><a href="regression-adjustment-and-causal-interpretation.html#cb1255-14" tabindex="-1"></a>  <span class="fu">tidy</span>()</span></code></pre></div>
+<pre><code>## # A tibble: 9 × 5
+##   term          estimate std.error statistic  p.value
+##   &lt;chr&gt;            &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept) -1.66      0.971         -1.71 8.67e- 2
+## 2 age          0.0158    0.0136         1.16 2.45e- 1
+## 3 educ         0.161     0.0651         2.48 1.33e- 2
+## 4 racehispan  -2.08      0.367         -5.67 1.44e- 8
+## 5 racewhite   -3.07      0.287        -10.7  1.03e-26
+## 6 married     -0.832     0.290         -2.87 4.15e- 3
+## 7 nodegree     0.707     0.338          2.09 3.62e- 2
+## 8 re74        -0.0000718 0.0000287     -2.50 1.25e- 2
+## 9 re75         0.0000534 0.0000463      1.15 2.49e- 1</code></pre>
+<p>We can now look at the estimated propensity scores by treatment group.</p>
+<div class="sourceCode" id="cb1257"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1257-1"><a href="regression-adjustment-and-causal-interpretation.html#cb1257-1" tabindex="-1"></a>aa_ps <span class="sc">|&gt;</span> </span>
+<span id="cb1257-2"><a href="regression-adjustment-and-causal-interpretation.html#cb1257-2" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .fitted, <span class="at">fill =</span> treat)) <span class="sc">+</span></span>
+<span id="cb1257-3"><a href="regression-adjustment-and-causal-interpretation.html#cb1257-3" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">bins =</span> <span class="dv">30</span>, <span class="at">position =</span> <span class="st">&quot;identity&quot;</span>) <span class="sc">+</span></span>
+<span id="cb1257-4"><a href="regression-adjustment-and-causal-interpretation.html#cb1257-4" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Estimated propensity score&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Count&quot;</span>, <span class="at">fill =</span> <span class="cn">NULL</span>)</span></code></pre></div>
+<p><img src="13-causal-inference_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>The plot is not itself a causal analysis, but it begins to show us something that the outcome regression did not show directly: how much overlap there is between the treated and untreated groups on the observed baseline covariates. Later, this idea of overlap will become central. In this particular plot, notice that there is not a lot of overlap between control and treated in the low propensity score group. This means that there is some combination of covariates which almost uniformly led participants not to get job training. That is somewhat bad news for causal analysis in general, and certainly should lead to hesitancy in interpreting the multiple regression output causally. We expect to see some predictive power of the covariates on whether the treatment was received, but we are hoping to still see significant overlap for our causal analysis. There are techniques for dealing with data like this which we will discuss in later sections.</p>
+</div>
+<div id="summary" class="section level3 hasAnchor" number="11.0.2">
+<h3><span class="header-section-number">11.0.2</span> Summary<a href="regression-adjustment-and-causal-interpretation.html#summary" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>This section makes three points.</p>
+<p>First, a simple regression of outcome on treatment can be misleading in observational data because treated and untreated groups often differ before treatment occurs.</p>
+<p>Second, regression adjustment can account for observed baseline differences and can change the treatment estimate substantially. In the job-training example, this is exactly what happens.</p>
+<p>Third, even an adjusted regression is not automatically causal. The causal interpretation requires additional assumptions about comparability between the treated and untreated groups after adjustment.</p>
+<p>Propensity scores give us another way to think about that comparability. They do not remove the need for assumptions, but they make the adjustment problem more explicit. In the next part of our causal inference discussion, we will use them to study matching and related methods.</p>
+</div>
+<div id="identification-assumptions-for-causal-adjustment" class="section level2 hasAnchor" number="11.1">
+<h2><span class="header-section-number">11.1</span> Identification Assumptions for Causal Adjustment<a href="regression-adjustment-and-causal-interpretation.html#identification-assumptions-for-causal-adjustment" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>In the previous section, we saw that a naive regression of later earnings on treatment in the Lalonde data gave a different answer than a regression that adjusted for observed baseline covariates. That already tells us something important: the treated and control groups were different before treatment. In observational work, that is the rule rather than the exception.</p>
+<p>The next question is the more important one. When does an adjusted comparison deserve a causal interpretation? Regression adjustment can be part of a causal analysis, but the causal interpretation does not come from the software output. It comes from the assumptions that justify using treated and untreated units as stand-ins for one another’s missing counterfactual outcomes.</p>
+<p>Throughout this section, we continue to use the Lalonde job-training data. The treatment is participation in the job-training program, and the outcome is earnings in 1978.</p>
+<div class="sourceCode" id="cb1258"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1258-1"><a href="regression-adjustment-and-causal-interpretation.html#cb1258-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1258-2"><a href="regression-adjustment-and-causal-interpretation.html#cb1258-2" tabindex="-1"></a><span class="fu">library</span>(MatchIt)</span>
+<span id="cb1258-3"><a href="regression-adjustment-and-causal-interpretation.html#cb1258-3" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
+<span id="cb1258-4"><a href="regression-adjustment-and-causal-interpretation.html#cb1258-4" tabindex="-1"></a></span>
+<span id="cb1258-5"><a href="regression-adjustment-and-causal-interpretation.html#cb1258-5" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;lalonde&quot;</span>)</span>
+<span id="cb1258-6"><a href="regression-adjustment-and-causal-interpretation.html#cb1258-6" tabindex="-1"></a>lalonde</span></code></pre></div>
+<pre><code>##         treat age educ   race married nodegree        re74        re75
+## NSW1        1  37   11  black       1        1     0.00000     0.00000
+## NSW2        1  22    9 hispan       0        1     0.00000     0.00000
+## NSW3        1  30   12  black       0        0     0.00000     0.00000
+## NSW4        1  27   11  black       0        1     0.00000     0.00000
+## NSW5        1  33    8  black       0        1     0.00000     0.00000
+## NSW6        1  22    9  black       0        1     0.00000     0.00000
+## NSW7        1  23   12  black       0        0     0.00000     0.00000
+## NSW8        1  32   11  black       0        1     0.00000     0.00000
+## NSW9        1  22   16  black       0        0     0.00000     0.00000
+## NSW10       1  33   12  white       1        0     0.00000     0.00000
+## NSW11       1  19    9  black       0        1     0.00000     0.00000
+## NSW12       1  21   13  black       0        0     0.00000     0.00000
+## NSW13       1  18    8  black       0        1     0.00000     0.00000
+## NSW14       1  27   10  black       1        1     0.00000     0.00000
+## NSW15       1  17    7  black       0        1     0.00000     0.00000
+## NSW16       1  19   10  black       0        1     0.00000     0.00000
+## NSW17       1  27   13  black       0        0     0.00000     0.00000
+## NSW18       1  23   10  black       0        1     0.00000     0.00000
+## NSW19       1  40   12  black       0        0     0.00000     0.00000
+## NSW20       1  26   12  black       0        0     0.00000     0.00000
+## NSW21       1  23   11  black       0        1     0.00000     0.00000
+## NSW22       1  41   14  white       0        0     0.00000     0.00000
+## NSW23       1  38    9  white       0        1     0.00000     0.00000
+## NSW24       1  24   11  black       0        1     0.00000     0.00000
+## NSW25       1  18   10  black       0        1     0.00000     0.00000
+## NSW26       1  29   11  black       1        1     0.00000     0.00000
+## NSW27       1  25   11  black       0        1     0.00000     0.00000
+## NSW28       1  27   10 hispan       0        1     0.00000     0.00000
+## NSW29       1  17   10  black       0        1     0.00000     0.00000
+## NSW30       1  24   11  black       0        1     0.00000     0.00000
+## NSW31       1  17   10  black       0        1     0.00000     0.00000
+## NSW32       1  48    4  black       0        1     0.00000     0.00000
+## NSW33       1  25   11  black       1        1     0.00000     0.00000
+## NSW34       1  20   12  black       0        0     0.00000     0.00000
+## NSW35       1  25   12  black       0        0     0.00000     0.00000
+## NSW36       1  42   14  black       0        0     0.00000     0.00000
+## NSW37       1  25    5  black       0        1     0.00000     0.00000
+## NSW38       1  23   12  black       1        0     0.00000     0.00000
+## NSW39       1  46    8  black       1        1     0.00000     0.00000
+## NSW40       1  24   10  black       0        1     0.00000     0.00000
+## NSW41       1  21   12  black       0        0     0.00000     0.00000
+## NSW42       1  19    9  white       0        1     0.00000     0.00000
+## NSW43       1  17    8  black       0        1     0.00000     0.00000
+## NSW44       1  18    8 hispan       1        1     0.00000     0.00000
+## NSW45       1  20   11  black       0        1     0.00000     0.00000
+## NSW46       1  25   11  black       1        1     0.00000     0.00000
+## NSW47       1  17    8  black       0        1     0.00000     0.00000
+## NSW48       1  17    9  black       0        1     0.00000     0.00000
+## NSW49       1  25    5  black       0        1     0.00000     0.00000
+## NSW50       1  23   12  black       0        0     0.00000     0.00000
+## NSW51       1  28    8  black       0        1     0.00000     0.00000
+## NSW52       1  31   11  black       1        1     0.00000     0.00000
+## NSW53       1  18   11  black       0        1     0.00000     0.00000
+## NSW54       1  25   12  black       0        0     0.00000     0.00000
+## NSW55       1  30   11  black       1        1     0.00000     0.00000
+## NSW56       1  17   10  black       0        1     0.00000     0.00000
+## NSW57       1  37    9  black       0        1     0.00000     0.00000
+## NSW58       1  41    4  black       1        1     0.00000     0.00000
+## NSW59       1  42   14  black       1        0     0.00000     0.00000
+## NSW60       1  22   11  white       0        1     0.00000     0.00000
+## NSW61       1  17    8  black       0        1     0.00000     0.00000
+## NSW62       1  29    8  black       0        1     0.00000     0.00000
+## NSW63       1  35   10  black       0        1     0.00000     0.00000
+## NSW64       1  27   11  black       0        1     0.00000     0.00000
+## NSW65       1  29    4  black       0        1     0.00000     0.00000
+## NSW66       1  28    9  black       0        1     0.00000     0.00000
+## NSW67       1  27   11  black       0        1     0.00000     0.00000
+## NSW68       1  23    7  white       0        1     0.00000     0.00000
+## NSW69       1  45    5  black       1        1     0.00000     0.00000
+## NSW70       1  29   13  black       0        0     0.00000     0.00000
+## NSW71       1  27    9  black       0        1     0.00000     0.00000
+## NSW72       1  46   13  black       0        0     0.00000     0.00000
+## NSW73       1  18    6  black       0        1     0.00000     0.00000
+## NSW74       1  25   12  black       0        0     0.00000     0.00000
+## NSW75       1  28   15  black       0        0     0.00000     0.00000
+## NSW76       1  25   11  white       0        1     0.00000     0.00000
+## NSW77       1  22   12  black       0        0     0.00000     0.00000
+## NSW78       1  21    9  black       0        1     0.00000     0.00000
+## NSW79       1  40   11  black       0        1     0.00000     0.00000
+## NSW80       1  22   11  black       0        1     0.00000     0.00000
+## NSW81       1  25   12  black       0        0     0.00000     0.00000
+## NSW82       1  18   12  black       0        0     0.00000     0.00000
+## NSW83       1  38   12  white       0        0     0.00000     0.00000
+## NSW84       1  27   13  black       0        0     0.00000     0.00000
+## NSW85       1  27    8  black       0        1     0.00000     0.00000
+## NSW86       1  38   11  black       0        1     0.00000     0.00000
+## NSW87       1  23    8 hispan       0        1     0.00000     0.00000
+## NSW88       1  26   11  black       0        1     0.00000     0.00000
+## NSW89       1  21   12  white       0        0     0.00000     0.00000
+## NSW90       1  25    8  black       0        1     0.00000     0.00000
+## NSW91       1  31   11  black       1        1     0.00000     0.00000
+## NSW92       1  17   10  black       0        1     0.00000     0.00000
+## NSW93       1  25   11  black       0        1     0.00000     0.00000
+## NSW94       1  21   12  black       0        0     0.00000     0.00000
+## NSW95       1  44   11  black       0        1     0.00000     0.00000
+## NSW96       1  25   12  white       0        0     0.00000     0.00000
+## NSW97       1  18    9  black       0        1     0.00000     0.00000
+## NSW98       1  42   12  black       0        0     0.00000     0.00000
+## NSW99       1  25   10  black       0        1     0.00000     0.00000
+## NSW100      1  31    9 hispan       0        1     0.00000     0.00000
+## NSW101      1  24   10  black       0        1     0.00000     0.00000
+## NSW102      1  26   10  black       0        1     0.00000     0.00000
+## NSW103      1  25   11  black       0        1     0.00000     0.00000
+## NSW104      1  18   11  black       0        1     0.00000     0.00000
+## NSW105      1  19   11  black       0        1     0.00000     0.00000
+## NSW106      1  43    9  black       0        1     0.00000     0.00000
+## NSW107      1  27   13  black       0        0     0.00000     0.00000
+## NSW108      1  17    9  black       0        1     0.00000     0.00000
+## NSW109      1  30   11  black       0        1     0.00000     0.00000
+## NSW110      1  26   10  black       1        1  2027.99900     0.00000
+## NSW111      1  20    9  black       0        1  6083.99400     0.00000
+## NSW112      1  17    9 hispan       0        1   445.17040    74.34345
+## NSW113      1  20   12  black       0        0   989.26780   165.20770
+## NSW114      1  18   11  black       0        1   858.25430   214.56360
+## NSW115      1  27   12  black       1        0  3670.87200   334.04930
+## NSW116      1  21   12  white       0        0  3670.87200   334.04940
+## NSW117      1  27   12  black       0        0  2143.41300   357.94990
+## NSW118      1  20   12  black       0        0     0.00000   377.56860
+## NSW119      1  19   10  black       0        1     0.00000   385.27410
+## NSW120      1  23   12  black       0        0  5506.30800   501.07410
+## NSW121      1  29   14  black       0        0     0.00000   679.67340
+## NSW122      1  18   10  black       0        1     0.00000   798.90790
+## NSW123      1  19    9  black       0        1     0.00000   798.90790
+## NSW124      1  27   13  white       1        0  9381.56600   853.72250
+## NSW125      1  18   11  white       0        1  3678.23100   919.55790
+## NSW126      1  27    9  black       1        1     0.00000   934.44540
+## NSW127      1  22   12  black       0        0  5605.85200   936.17730
+## NSW128      1  23   10  black       1        1     0.00000   936.43860
+## NSW129      1  23   12 hispan       0        0  9385.74000  1117.43900
+## NSW130      1  20   11  black       0        1  3637.49800  1220.83600
+## NSW131      1  17    9  black       0        1  1716.50900  1253.43900
+## NSW132      1  28   11  black       0        1     0.00000  1284.07900
+## NSW133      1  26   11  black       1        1     0.00000  1392.85300
+## NSW134      1  20   11  black       0        1 16318.62000  1484.99400
+## NSW135      1  24   11  black       1        1   824.38860  1666.11300
+## NSW136      1  31    9  black       0        1     0.00000  1698.60700
+## NSW137      1  23    8  white       1        1     0.00000  1713.15000
+## NSW138      1  18   10  black       0        1  2143.41100  1784.27400
+## NSW139      1  29   12  black       0        0 10881.94000  1817.28400
+## NSW140      1  26   11  white       0        1     0.00000  2226.26600
+## NSW141      1  24    9  black       0        1  9154.70000  2288.67500
+## NSW142      1  25   12  black       0        0 14426.79000  2409.27400
+## NSW143      1  24   10  black       0        1  4250.40200  2421.94700
+## NSW144      1  46    8  black       0        1  3165.65800  2594.72300
+## NSW145      1  31   12  white       0        0     0.00000  2611.21800
+## NSW146      1  19   11  black       0        1  2305.02600  2615.27600
+## NSW147      1  19    8  black       0        1     0.00000  2657.05700
+## NSW148      1  27   11  black       0        1  2206.94000  2666.27400
+## NSW149      1  26   11  black       1        1     0.00000  2754.64600
+## NSW150      1  20   10  black       0        1  5005.73100  2777.35500
+## NSW151      1  28   10  black       0        1     0.00000  2836.50600
+## NSW152      1  24   12  black       0        0 13765.75000  2842.76400
+## NSW153      1  19    8  black       0        1  2636.35300  2937.26400
+## NSW154      1  23   12  black       0        0  6269.34100  3039.96000
+## NSW155      1  42    9  black       1        1     0.00000  3058.53100
+## NSW156      1  25   13  black       0        0 12362.93000  3090.73200
+## NSW157      1  18    9  black       0        1     0.00000  3287.37500
+## NSW158      1  21   12  black       0        0  6473.68300  3332.40900
+## NSW159      1  27   10  black       0        1  1001.14600  3550.07500
+## NSW160      1  21    8  black       0        1   989.26780  3695.89700
+## NSW161      1  22    9  black       0        1  2192.87700  3836.98600
+## NSW162      1  31    4  black       0        1  8517.58900  4023.21100
+## NSW163      1  24   10  black       1        1 11703.20000  4078.15200
+## NSW164      1  29   10  black       0        1     0.00000  4398.95000
+## NSW165      1  29   12  black       0        0  9748.38700  4878.93700
+## NSW166      1  19   10  white       0        1     0.00000  5324.10900
+## NSW167      1  19   11 hispan       1        1  5424.48500  5463.80300
+## NSW168      1  31    9  black       0        1 10717.03000  5517.84100
+## NSW169      1  22   10  black       1        1  1468.34800  5588.66400
+## NSW170      1  21    9  black       0        1  6416.47000  5749.33100
+## NSW171      1  17   10  black       0        1  1291.46800  5793.85200
+## NSW172      1  26   12  black       1        0  8408.76200  5794.83100
+## NSW173      1  20    9 hispan       0        1 12260.78000  5875.04900
+## NSW174      1  19   10  black       0        1  4121.94900  6056.75400
+## NSW175      1  26   10  black       0        1 25929.68000  6788.95800
+## NSW176      1  28   11  black       0        1  1929.02900  6871.85600
+## NSW177      1  22   12 hispan       1        0   492.23050  7055.70200
+## NSW178      1  33   11  black       0        1     0.00000  7867.91600
+## NSW179      1  22   12  white       0        0  6759.99400  8455.50400
+## NSW180      1  29   10 hispan       0        1     0.00000  8853.67400
+## NSW181      1  33   12  black       1        0 20279.95000 10941.35000
+## NSW182      1  25   14  black       1        0 35040.07000 11536.57000
+## NSW183      1  35    9  black       1        1 13602.43000 13830.64000
+## NSW184      1  35    8  black       1        1 13732.07000 17976.15000
+## NSW185      1  33   11  black       1        1 14660.71000 25142.24000
+## PSID1       0  30   12  white       1        0 20166.73000 18347.23000
+## PSID2       0  26   12  white       1        0 25862.32000 17806.55000
+## PSID3       0  25   16  white       1        0 25862.32000 15316.21000
+## PSID4       0  42   11  white       1        1 21787.05000 14265.29000
+## PSID5       0  25    9  black       1        1 14829.69000 13776.53000
+## PSID6       0  37    9  black       1        1 13685.48000 12756.05000
+## PSID7       0  32   12  white       1        0 19067.58000 12625.35000
+## PSID8       0  20   12  black       0        0  7392.31400 12396.19000
+## PSID9       0  38    9 hispan       1        1 16826.18000 12029.18000
+## PSID10      0  39   10  white       1        1 16767.41000 12022.02000
+## PSID11      0  41    5  white       1        1 10785.76000 11991.58000
+## PSID12      0  31   14  white       1        0 17831.29000 11563.69000
+## PSID13      0  34    8  white       1        1  8038.87200 11404.35000
+## PSID14      0  29   12  white       1        0 14768.95000 11146.55000
+## PSID15      0  22   14  black       1        0   748.43990 11105.37000
+## PSID16      0  42    0 hispan       1        1  2797.83300 10929.92000
+## PSID17      0  25    9 hispan       0        1  5460.47700 10589.76000
+## PSID18      0  28    9  white       1        1 11091.41000 10357.02000
+## PSID19      0  40   13  white       1        0  3577.62100 10301.52000
+## PSID20      0  35    9  white       1        1 11475.43000  9397.40300
+## PSID21      0  27   10 hispan       1        1 15711.36000  9098.41900
+## PSID22      0  27    6 hispan       1        1  7831.18900  9071.56500
+## PSID23      0  36   12  white       1        0 25535.12000  8695.59700
+## PSID24      0  47    8  black       1        1  9275.16900  8543.41900
+## PSID25      0  40   11  white       1        1 20666.35000  8502.24200
+## PSID26      0  27    7  white       1        1  3064.29300  8461.06500
+## PSID27      0  36    9  black       1        1 13256.40000  8457.48400
+## PSID28      0  39    6 hispan       1        1 13279.91000  8441.37100
+## PSID29      0  21    9  white       1        1 11156.07000  8441.37100
+## PSID30      0  29   12  white       1        0 11199.17000  8081.51600
+## PSID31      0  22   13 hispan       0        0  6404.84300  7882.79000
+## PSID32      0  25   10  white       1        1 13634.54000  7793.27400
+## PSID33      0  27   12  white       1        0 12270.89000  7709.12900
+## PSID34      0  45    8  white       1        1 22415.97000  7635.72600
+## PSID35      0  26   12  white       1        0  2345.24200  7565.90300
+## PSID36      0  27   12  white       1        0  9788.49700  7496.08100
+## PSID37      0  33    8  white       1        1 12312.03000  7474.59700
+## PSID38      0  25   12  white       1        0 11381.38000  7467.43500
+## PSID39      0  49    8  white       1        1  6459.70300  7431.62900
+## PSID40      0  40    3 hispan       1        1  7576.48500  7426.25800
+## PSID41      0  22   12  black       1        0  9729.71900  7372.54800
+## PSID42      0  25    5  white       1        1  7891.92700  7293.77400
+## PSID43      0  25   12  white       1        0 11516.57000  7263.33900
+## PSID44      0  21   12  white       1        0 13601.23000  7202.46800
+## PSID45      0  33    9 hispan       1        1 11959.36000  7087.88700
+## PSID46      0  20   12  black       1        0  9555.34400  7055.66100
+## PSID47      0  19   11  white       1        1  4306.46800  6978.67700
+## PSID48      0  25   12  black       1        0   295.84930  6942.87100
+## PSID49      0  29   12  white       1        0 15303.83000  6932.12900
+## PSID50      0  20   12  white       1        0  3558.02900  6797.85500
+## PSID51      0  29    6 hispan       1        1  8542.40300  6701.17700
+## PSID52      0  25   13  white       1        0 19259.59000  6652.83900
+## PSID53      0  41   15  white       1        0 25862.32000  6563.32300
+## PSID54      0  39   10  white       1        1 22745.13000  6493.50000
+## PSID55      0  33   12  white       1        0 10819.07000  6369.96800
+## PSID56      0  29    8  white       1        1  9169.36900  6352.06500
+## PSID57      0  21   11  white       1        1 10679.96000  6276.87100
+## PSID58      0  31   12  white       1        0 23652.27000  6228.53200
+## PSID59      0  36   12  black       1        0 11040.47000  6221.37100
+## PSID60      0  25    7  white       1        1  5597.62500  6099.62900
+## PSID61      0  35    7  white       1        1 10715.23000  6087.09700
+## PSID62      0  22    9  white       1        1  5683.83300  6038.75800
+## PSID63      0  31    2 hispan       1        1  3262.17900  5965.35500
+## PSID64      0  40   15  white       1        0 10907.24000  5922.38700
+## PSID65      0  47    3  white       1        1  9047.89400  5911.64500
+## PSID66      0  26    8 hispan       0        1  3168.13400  5872.25800
+## PSID67      0  42    7  white       1        1 10971.89000  5806.01600
+## PSID68      0  53   12  white       0        0 17104.40000  5775.58100
+## PSID69      0  30   17  black       0        0 17827.37000  5546.41900
+## PSID70      0  28   10  white       1        1 10415.46000  5544.62900
+## PSID71      0  46   11  white       1        1 14753.28000  5299.35500
+## PSID72      0  28   12  white       0        0  8256.35000  5279.66100
+## PSID73      0  27   12 hispan       1        0 17604.01000  5222.37100
+## PSID74      0  25   10  white       1        1  4335.85700  5181.19400
+## PSID75      0  38    8  white       1        1 11242.27000  5174.03200
+## PSID76      0  26   12 hispan       0        0  7968.33800  5109.58100
+## PSID77      0  54   12  white       0        0  7165.03900  5012.90300
+## PSID78      0  38    8 hispan       1        1 22606.02000  4978.88700
+## PSID79      0  23   17  white       0        0     0.00000  4876.83900
+## PSID80      0  23    8  white       1        1  3595.25500  4866.09700
+## PSID81      0  23   12  white       1        0 11690.95000  4764.04800
+## PSID82      0  25   12 hispan       1        0  8746.16700  4762.25800
+## PSID83      0  25   15  white       1        0  7386.43600  4738.98400
+## PSID84      0  37   11 hispan       0        1   615.20980  4713.91900
+## PSID85      0  40   12  white       1        0 18389.68000  4688.85500
+## PSID86      0  19   10  white       0        1  5777.87800  4672.74200
+## PSID87      0  48    7  white       1        1 13326.93000  4636.93500
+## PSID88      0  19   12  white       0        0  8530.64800  4620.82300
+## PSID89      0  16    9  white       0        1  2539.21000  4579.64500
+## PSID90      0  29   10  white       1        1   713.17310  4542.04800
+## PSID91      0  30   16  white       0        0  3093.68200  4468.64500
+## PSID92      0  22   11  white       1        1  8761.84100  4463.27400
+## PSID93      0  22   10  white       0        1 17268.98000  4400.61300
+## PSID94      0  47   10  black       1        1 13311.26000  4397.03200
+## PSID95      0  25   12 hispan       1        0  2266.87200  4361.22600
+## PSID96      0  47   10  black       0        1 21918.32000  4323.62900
+## PSID97      0  24   12  black       1        0  8573.75200  4293.19400
+## PSID98      0  20   12  black       1        0  2648.92900  4273.50000
+## PSID99      0  28   12  black       0        0 16722.34000  4253.80600
+## PSID100     0  47   11  white       0        1  8060.42400  4232.32300
+## PSID101     0  50    0  white       1        1 10162.72000  4218.00000
+## PSID102     0  18   12  white       0        0  2217.89000  4191.14500
+## PSID103     0  21   12  white       0        0  9665.06300  4110.58100
+## PSID104     0  47   11  white       1        1 23924.61000  4096.25800
+## PSID105     0  21   12  white       0        0  2827.22200  4056.87100
+## PSID106     0  34   11  white       1        1     0.00000  4010.32300
+## PSID107     0  19   12  white       1        0  5817.06300  3919.01600
+## PSID108     0  44   13  white       1        0  8032.99400  3881.41900
+## PSID109     0  21   15  white       1        0  6951.47900  3879.62900
+## PSID110     0  20   12  black       0        0  5099.97100  3842.03200
+## PSID111     0  51   11  white       0        1    48.98167  3813.38700
+## PSID112     0  28   13  white       0        0  5260.63100  3790.11300
+## PSID113     0  24   15  white       0        0 12746.99000  3743.56500
+## PSID114     0  28    8 hispan       1        1  8305.33200  3718.50000
+## PSID115     0  20   11  white       1        1  5822.94100  3532.30600
+## PSID116     0  29   12  white       1        0 14288.93000  3503.66100
+## PSID117     0  23   12  white       1        0 14347.71000  3482.17700
+## PSID118     0  20   11  black       0        1     0.00000  3480.38700
+## PSID119     0  42    7  white       1        1  4324.10200  3457.11300
+## PSID120     0  43   12  white       1        0 14328.12000  3453.53200
+## PSID121     0  27   13  white       0        0 16406.90000  3426.67700
+## PSID122     0  27    4 hispan       1        1   626.96540  3410.56500
+## PSID123     0  25   12  white       1        0 21469.65000  3405.19400
+## PSID124     0  18   12  white       0        0  4729.67000  3328.21000
+## PSID125     0  31   16  white       1        0 25862.32000  3254.80600
+## PSID126     0  27   12  white       1        0  4043.92700  3231.53200
+## PSID127     0  18   11  white       0        1     0.00000  3226.16100
+## PSID128     0  24    7  white       1        1  7860.57800  3213.62900
+## PSID129     0  23   12  white       1        0  7856.66000  3213.62900
+## PSID130     0  50   12  white       1        0 19929.66000  3190.35500
+## PSID131     0  19   12  white       0        0    99.92261  3172.45200
+## PSID132     0  23   10  white       1        1 15811.28000  3145.59700
+## PSID133     0  51   12  white       1        0 21001.38000  3140.22600
+## PSID134     0  19   11  black       0        1  5607.42200  3054.29000
+## PSID135     0  20   10  white       1        1  3099.56000  2970.14500
+## PSID136     0  20   11 hispan       0        1  2868.36700  2968.35500
+## PSID137     0  21   12  white       0        0  8128.99800  2939.71000
+## PSID138     0  39   10  white       1        1     0.00000  2886.00000
+## PSID139     0  36    5  white       0        1  3814.69200  2873.46800
+## PSID140     0  19    9  black       0        1  1079.55600  2873.46800
+## PSID141     0  42    6 hispan       1        1  2425.57200  2832.29000
+## PSID142     0  20    7  white       0        1  1902.44800  2792.90300
+## PSID143     0  23   12  white       1        0  4954.98600  2771.41900
+## PSID144     0  35   12  white       1        0  1469.45000  2719.50000
+## PSID145     0  18   12  white       0        0   881.67010  2696.22600
+## PSID146     0  43    8  white       1        1 18338.74000  2674.74200
+## PSID147     0  37   14  white       1        0 18501.36000  2638.93500
+## PSID148     0  24   10  white       1        1  4719.87400  2565.53200
+## PSID149     0  51   12  white       0        0 20742.76000  2538.67700
+## PSID150     0  22   11 hispan       0        1  7341.37300  2535.09700
+## PSID151     0  19   12  white       0        0   336.99390  2518.98400
+## PSID152     0  52    0 hispan       1        1   773.91040  2506.45200
+## PSID153     0  21   12  white       0        0  2903.63300  2456.32300
+## PSID154     0  24   12  white       0        0  9784.57800  2413.35500
+## PSID155     0  35    8  white       1        1  2241.40100  2399.03200
+## PSID156     0  20   13  white       0        0     0.00000  2352.48400
+## PSID157     0  17    7  black       0        1  1054.08600  2286.24200
+## PSID158     0  18   10  black       0        1   311.52340  2284.45200
+## PSID159     0  28   12  black       0        0  6285.32800  2255.80600
+## PSID160     0  25   14 hispan       1        0  1622.27300  2239.69400
+## PSID161     0  40   12 hispan       0        0 13616.90000  2228.95200
+## PSID162     0  50    3  white       1        1  3136.78600  2203.88700
+## PSID163     0  48    8  white       1        1 16050.31000  2116.16100
+## PSID164     0  17    7 hispan       0        1     0.00000  2082.14500
+## PSID165     0  30   12  white       1        0  7347.25100  2080.35500
+## PSID166     0  30    7  white       1        1   574.06520  2010.53200
+## PSID167     0  22   11  white       1        1  3030.98600  1976.51600
+## PSID168     0  27   12  white       1        0 11493.06000  1906.69400
+## PSID169     0  25    9  white       1        1 23377.97000  1901.32300
+## PSID170     0  21   14  white       0        0    80.32994  1890.58100
+## PSID171     0  17   10  white       0        1     0.00000  1888.79000
+## PSID172     0  39    7  white       0        1  7786.12600  1844.03200
+## PSID173     0  18    9  black       0        1  1183.39700  1822.54800
+## PSID174     0  25   12  white       1        0  2721.42200  1754.51600
+## PSID175     0  20    8  white       1        1  2360.91600  1741.98400
+## PSID176     0  19   13  white       0        0  2366.79400  1709.75800
+## PSID177     0  19   11  white       0        1     0.00000  1693.64500
+## PSID178     0  22   12  white       0        0 10137.25000  1679.32300
+## PSID179     0  18   11  black       0        1  2068.98600  1623.82300
+## PSID180     0  21   10  white       0        1  1767.25900  1555.79000
+## PSID181     0  24   12  white       1        0  7643.10000  1546.83900
+## PSID182     0  18   11  white       0        1  1273.52300  1532.51600
+## PSID183     0  17   10  white       0        1   568.18740  1525.35500
+## PSID184     0  17   10  white       0        1     0.00000  1503.87100
+## PSID185     0  18   10  white       0        1     0.00000  1491.33900
+## PSID186     0  53   10 hispan       0        1  7878.21200  1489.54800
+## PSID187     0  18   11  black       0        1  1191.23400  1478.80600
+## PSID188     0  17   10 hispan       0        1     0.00000  1453.74200
+## PSID189     0  26   12  black       0        0     0.00000  1448.37100
+## PSID190     0  39    5  white       1        1 13082.02000  1434.04800
+## PSID191     0  18   12  black       0        0  1579.16900  1408.98400
+## PSID192     0  23   13  white       0        0   601.49490  1394.66100
+## PSID193     0  18    8  white       0        1  5023.56000  1391.08100
+## PSID194     0  28   10  white       1        1  7578.44400  1383.91900
+## PSID195     0  32    4  white       1        1     0.00000  1378.54800
+## PSID196     0  18   11  black       0        1     0.00000  1367.80600
+## PSID197     0  40   10  white       1        1  1543.90200  1342.74200
+## PSID198     0  21   14  white       0        0  8456.19600  1330.21000
+## PSID199     0  29   10 hispan       0        1  3732.40300  1323.04800
+## PSID200     0  31    6  white       0        1  2666.56200  1321.25800
+## PSID201     0  46    7  white       1        1 19171.43000  1317.67700
+## PSID202     0  20    9 hispan       1        1     0.00000  1283.66100
+## PSID203     0  36   18  white       1        0  3273.93500  1269.33900
+## PSID204     0  45   12  white       1        0 16559.72000  1265.75800
+## PSID205     0  16   10  white       0        1  1026.65600  1224.58100
+## PSID206     0  18   12  white       0        0   818.97350  1208.46800
+## PSID207     0  40   12 hispan       0        0 11867.28000  1195.93500
+## PSID208     0  16    9  white       0        1     0.00000  1188.77400
+## PSID209     0  16   10  white       0        1   574.06520  1181.61300
+## PSID210     0  28    5 hispan       1        1 10967.98000  1178.03200
+## PSID211     0  20   12  white       0        0     0.00000  1147.59700
+## PSID212     0  19    8  white       1        1    39.18534  1136.85500
+## PSID213     0  16    8  white       0        1     0.00000  1113.58100
+## PSID214     0  20   11  white       1        1  2547.04700  1099.25800
+## PSID215     0  35   10  white       1        1  4964.78200  1086.72600
+## PSID216     0  32    6 hispan       1        1   979.63340  1036.59700
+## PSID217     0  32   16  black       0        0 17135.75000  1031.22600
+## PSID218     0  17    9  black       0        1     0.00000   981.09680
+## PSID219     0  16    7  white       0        1     0.00000   975.72580
+## PSID220     0  32   15  white       0        0   489.81670   968.56450
+## PSID221     0  19   12  white       0        0   815.05500   964.98390
+## PSID222     0  40   12  white       1        0 16851.65000   961.40320
+## PSID223     0  50    7  white       1        1 11473.47000   956.03230
+## PSID224     0  39   11  white       0        1     0.00000   930.96770
+## PSID225     0  18    8 hispan       0        1     0.00000   902.32260
+## PSID226     0  39   10  black       0        1   844.44400   889.79030
+## PSID227     0  17   11 hispan       0        1     0.00000   873.67740
+## PSID228     0  17    5  black       0        1    96.00407   868.30650
+## PSID229     0  19   12  white       0        0  2425.57200   861.14520
+## PSID230     0  27   15  white       0        0     0.00000   857.56450
+## PSID231     0  18   11  black       0        1   587.78000   841.45160
+## PSID232     0  20   14  white       1        0     0.00000   805.64520
+## PSID233     0  20   12  white       1        0 12145.49000   791.32260
+## PSID234     0  19   13  black       0        0  1714.35800   785.95160
+## PSID235     0  24    8  white       1        1   213.56010   760.88710
+## PSID236     0  27   12  white       1        0  4222.22000   751.93550
+## PSID237     0  19    9  white       0        1   773.91040   676.74190
+## PSID238     0  52    8  black       1        1  5454.59900   666.00000
+## PSID239     0  18   11 hispan       0        1     0.00000   630.19350
+## PSID240     0  16   10 hispan       0        1     0.00000   630.19350
+## PSID241     0  18   12 hispan       0        0     0.00000   630.19350
+## PSID242     0  45   12  white       0        0  4473.00600   608.70970
+## PSID243     0  21   14  white       0        0  9708.16700   594.38710
+## PSID244     0  36    8  white       1        1  2715.54400   585.43550
+## PSID245     0  21   13  white       0        0   513.32790   578.27420
+## PSID246     0  41    7  white       1        1 19573.08000   565.74190
+## PSID247     0  18    7  white       0        1   491.77600   558.58060
+## PSID248     0  39    9  white       0        1 11230.52000   537.09680
+## PSID249     0  19    3  white       1        1     0.00000   537.09680
+## PSID250     0  32   13  white       1        0 12553.02000   524.56450
+## PSID251     0  16    9  white       0        1     0.00000   485.17740
+## PSID252     0  16    7  white       0        1   658.31360   479.80650
+## PSID253     0  21    9  black       0        1  1030.57400   470.85480
+## PSID254     0  22   12  white       1        0 12096.51000   469.06450
+## PSID255     0  23   11 hispan       1        1  8946.01200   469.06450
+## PSID256     0  17    8  black       0        1     0.00000   451.16130
+## PSID257     0  21    8  white       1        1  5699.50700   388.50000
+## PSID258     0  18   10  white       0        1     0.00000   386.70970
+## PSID259     0  24   12  white       1        0  9051.81300   327.62900
+## PSID260     0  24   12  black       1        0  4232.01600   320.46770
+## PSID261     0  16    9  white       0        1     0.00000   320.46770
+## PSID262     0  20    8  white       1        1   621.08760   306.14520
+## PSID263     0  42    8  white       0        1 17925.33000   300.77420
+## PSID264     0  17    8 hispan       0        1   391.85340   300.77420
+## PSID265     0  19    8 hispan       0        1   368.34220   300.77420
+## PSID266     0  17    9  black       0        1     0.00000   297.19350
+## PSID267     0  21   14  white       0        0   107.75970   293.61290
+## PSID268     0  16    9  black       0        1     0.00000   277.50000
+## PSID269     0  23   13  black       0        0   172.41550   272.12900
+## PSID270     0  16    9  white       0        1   411.44600   254.22580
+## PSID271     0  17   11 hispan       0        1   803.29940   248.85480
+## PSID272     0  46    7  white       0        1  1081.51500   245.27420
+## PSID273     0  32   10  white       1        1  4145.80900   238.11290
+## PSID274     0  18   11  white       0        1   131.27090   218.41940
+## PSID275     0  23   12 hispan       1        0     0.00000   216.62900
+## PSID276     0  18   10  white       1        1     0.00000   211.25810
+## PSID277     0  19   10  black       0        1  1056.04500   205.88710
+## PSID278     0  16    7  black       0        1   133.23010   205.88710
+## PSID279     0  26    7  white       1        1  1538.02400   189.77420
+## PSID280     0  16   10  white       0        1     0.00000   189.77420
+## PSID281     0  17   10  white       0        1     0.00000   182.61290
+## PSID282     0  17   10  white       0        1     0.00000   171.87100
+## PSID283     0  23    8  white       1        1    33.30754   166.50000
+## PSID284     0  29   12  white       1        0 14641.60000   162.91940
+## PSID285     0  17   10  white       0        1     0.00000   152.17740
+## PSID286     0  49    8  white       1        1 14684.70000   136.06450
+## PSID287     0  20   10  white       1        1  6563.54400   134.27420
+## PSID288     0  40   16  white       1        0     0.00000   114.58060
+## PSID289     0  19   10  white       0        1  1933.79600   112.79030
+## PSID290     0  18   11  white       0        1  1481.20600    57.29032
+## PSID291     0  16    6  black       0        1     0.00000    44.75806
+## PSID292     0  22    8  white       1        1   105.80040    42.96774
+## PSID293     0  31   12  black       1        0     0.00000    42.96774
+## PSID294     0  20   11  white       1        1  4478.88400    39.38710
+## PSID295     0  17   11 hispan       0        1   601.49490    10.74194
+## PSID296     0  50   12  white       1        0 25862.32000     0.00000
+## PSID297     0  49   14  white       1        0 25862.32000     0.00000
+## PSID298     0  47    9  white       1        1 25862.32000     0.00000
+## PSID299     0  34   11 hispan       1        1 22198.49000     0.00000
+## PSID300     0  22    8  black       1        1 16961.37000     0.00000
+## PSID301     0  27   12  white       1        0 15509.56000     0.00000
+## PSID302     0  30   10  white       1        1 14913.94000     0.00000
+## PSID303     0  52   12  white       1        0 14780.71000     0.00000
+## PSID304     0  43   12  white       1        0 13321.05000     0.00000
+## PSID305     0  27    9 hispan       1        1 12829.28000     0.00000
+## PSID306     0  35   13  white       0        0  9537.71100     0.00000
+## PSID307     0  45   12  white       1        0  9277.12800     0.00000
+## PSID308     0  22   11  black       1        1  9049.85300     0.00000
+## PSID309     0  22   12  white       1        0  9022.42400     0.00000
+## PSID310     0  23   11  white       1        1  8910.74500     0.00000
+## PSID311     0  55    7  white       1        1  8832.37500     0.00000
+## PSID312     0  26   14  white       0        0  8411.13200     0.00000
+## PSID313     0  34   12  white       0        0  8125.07900     0.00000
+## PSID314     0  22   11  white       0        1  8013.40100     0.00000
+## PSID315     0  31   12  white       0        0  6156.01600     0.00000
+## PSID316     0  19   12  white       0        0  5797.47000     0.00000
+## PSID317     0  24   10  white       1        1  5523.17300     0.00000
+## PSID318     0  36   12  white       1        0  5374.26900     0.00000
+## PSID319     0  20    9  white       1        1  5229.28300     0.00000
+## PSID320     0  23    8  white       1        1  4610.15500     0.00000
+## PSID321     0  35   11  white       1        1  3975.35200     0.00000
+## PSID322     0  23   12  white       0        0  3893.06300     0.00000
+## PSID323     0  29   10  white       0        1  3751.99600     0.00000
+## PSID324     0  24    9  white       1        1  3438.51300     0.00000
+## PSID325     0  18   10  white       0        1  3360.14300     0.00000
+## PSID326     0  45    8  black       0        1  3299.40500     0.00000
+## PSID327     0  21   13 hispan       0        0  3015.31200     0.00000
+## PSID328     0  29   13  white       1        0  2780.20000     0.00000
+## PSID329     0  21   15  white       0        0  2629.33600     0.00000
+## PSID330     0  22   16  black       0        0  2564.68000     0.00000
+## PSID331     0  24   12  black       1        0  2355.03900     0.00000
+## PSID332     0  20   14  white       0        0  2210.05300     0.00000
+## PSID333     0  19    6  black       0        1  1955.34800     0.00000
+## PSID334     0  19    9 hispan       0        1  1822.11800     0.00000
+## PSID335     0  19   12  black       0        0  1681.05100     0.00000
+## PSID336     0  20   13  white       0        0  1657.54000     0.00000
+## PSID337     0  19   12  black       0        0  1655.58000     0.00000
+## PSID338     0  26    5  white       1        1  1573.29100     0.00000
+## PSID339     0  26    9 hispan       0        1  1563.49500     0.00000
+## PSID340     0  23   12  white       0        0  1504.71700     0.00000
+## PSID341     0  20    9 hispan       0        1  1500.79800     0.00000
+## PSID342     0  20   10  white       0        1  1412.63100     0.00000
+## PSID343     0  36   11  white       1        1  1404.79400     0.00000
+## PSID344     0  39   12  white       1        0  1289.19800     0.00000
+## PSID345     0  17    9  black       0        1  1222.58200     0.00000
+## PSID346     0  55    3  white       0        1  1208.86800     0.00000
+## PSID347     0  28    8  white       1        1  1202.99000     0.00000
+## PSID348     0  19   12 hispan       0        0  1058.00400     0.00000
+## PSID349     0  37    7  white       1        1   963.95930     0.00000
+## PSID350     0  16    9  white       1        1   920.85540     0.00000
+## PSID351     0  17   10  white       0        1   646.55800     0.00000
+## PSID352     0  24   12  black       0        0   566.22810     0.00000
+## PSID353     0  19   11  white       0        1   540.75760     0.00000
+## PSID354     0  50    5  black       1        1   411.44600     0.00000
+## PSID355     0  19    9  black       0        1   384.01630     0.00000
+## PSID356     0  36    1  black       0        1   348.74950     0.00000
+## PSID357     0  18   11  white       0        1   321.31980     0.00000
+## PSID358     0  16    7 hispan       0        1   289.97150     0.00000
+## PSID359     0  21   11  white       1        1   246.86760     0.00000
+## PSID360     0  55    6  white       1        1   111.67820     0.00000
+## PSID361     0  37   12  white       0        0    48.98167     0.00000
+## PSID362     0  26   12 hispan       1        0    47.02240     0.00000
+## PSID363     0  54   12  white       1        0     0.00000     0.00000
+## PSID364     0  50   12  white       1        0     0.00000     0.00000
+## PSID365     0  16    8  white       0        1     0.00000     0.00000
+## PSID366     0  16    9 hispan       0        1     0.00000     0.00000
+## PSID367     0  18   10  black       0        1     0.00000     0.00000
+## PSID368     0  40   11  black       1        1     0.00000     0.00000
+## PSID369     0  16    8  white       0        1     0.00000     0.00000
+## PSID370     0  16    9  black       0        1     0.00000     0.00000
+## PSID371     0  26   14  white       0        0     0.00000     0.00000
+## PSID372     0  20    9  black       0        1     0.00000     0.00000
+## PSID373     0  20   12  black       0        0     0.00000     0.00000
+## PSID374     0  18   11  black       0        1     0.00000     0.00000
+## PSID375     0  46   11  black       1        1     0.00000     0.00000
+## PSID376     0  17    8  black       0        1     0.00000     0.00000
+## PSID377     0  16    9  white       0        1     0.00000     0.00000
+## PSID378     0  30   10  white       1        1     0.00000     0.00000
+## PSID379     0  33   12 hispan       1        0     0.00000     0.00000
+## PSID380     0  34   12  black       1        0     0.00000     0.00000
+## PSID381     0  21   13  black       0        0     0.00000     0.00000
+## PSID382     0  29   11  white       1        1     0.00000     0.00000
+## PSID383     0  19   12  white       0        0     0.00000     0.00000
+## PSID384     0  31    4 hispan       0        1     0.00000     0.00000
+## PSID385     0  19   12 hispan       0        0     0.00000     0.00000
+## PSID386     0  20   12  black       0        0     0.00000     0.00000
+## PSID387     0  55    4  black       0        1     0.00000     0.00000
+## PSID388     0  19   11  black       0        1     0.00000     0.00000
+## PSID389     0  18   11  black       0        1     0.00000     0.00000
+## PSID390     0  48   13  white       1        0     0.00000     0.00000
+## PSID391     0  16    9 hispan       1        1     0.00000     0.00000
+## PSID392     0  17   10  black       0        1     0.00000     0.00000
+## PSID393     0  38   12  white       1        0     0.00000     0.00000
+## PSID394     0  34    8  white       1        1     0.00000     0.00000
+## PSID395     0  53   12  white       0        0     0.00000     0.00000
+## PSID396     0  48   14  white       1        0     0.00000     0.00000
+## PSID397     0  16    9  white       0        1     0.00000     0.00000
+## PSID398     0  17    8  black       0        1     0.00000     0.00000
+## PSID399     0  27   14  black       0        0     0.00000     0.00000
+## PSID400     0  37    8  black       0        1     0.00000     0.00000
+## PSID401     0  17   10  black       0        1     0.00000     0.00000
+## PSID402     0  16    8  white       0        1     0.00000     0.00000
+## PSID403     0  48   12  white       1        0     0.00000     0.00000
+## PSID404     0  55    7  white       0        1     0.00000     0.00000
+## PSID405     0  21   15  white       0        0     0.00000     0.00000
+## PSID406     0  16   10  black       0        1     0.00000     0.00000
+## PSID407     0  23   12  white       0        0     0.00000     0.00000
+## PSID408     0  46   11  black       1        1     0.00000     0.00000
+## PSID409     0  17   10  white       0        1     0.00000     0.00000
+## PSID410     0  42   16  white       0        0     0.00000     0.00000
+## PSID411     0  18   10  black       0        1     0.00000     0.00000
+## PSID412     0  53   12  black       0        0     0.00000     0.00000
+## PSID413     0  17   10  white       1        1     0.00000     0.00000
+## PSID414     0  17    6  white       0        1     0.00000     0.00000
+## PSID415     0  43    6  white       1        1     0.00000     0.00000
+## PSID416     0  34   12  black       0        0     0.00000     0.00000
+## PSID417     0  16    8 hispan       0        1     0.00000     0.00000
+## PSID418     0  27   12  white       1        0     0.00000     0.00000
+## PSID419     0  51    4  black       0        1     0.00000     0.00000
+## PSID420     0  39    2  black       1        1     0.00000     0.00000
+## PSID421     0  55    8  white       1        1     0.00000     0.00000
+## PSID422     0  16    9  white       0        1     0.00000     0.00000
+## PSID423     0  27   10  black       0        1     0.00000     0.00000
+## PSID424     0  25   14  white       0        0     0.00000     0.00000
+## PSID425     0  18   11  white       0        1     0.00000     0.00000
+## PSID426     0  24    1 hispan       1        1     0.00000     0.00000
+## PSID427     0  21   18  white       0        0     0.00000     0.00000
+## PSID428     0  32    5  black       1        1     0.00000     0.00000
+## PSID429     0  16    9  white       0        1     0.00000     0.00000
+##                re78
+## NSW1     9930.04600
+## NSW2     3595.89400
+## NSW3    24909.45000
+## NSW4     7506.14600
+## NSW5      289.78990
+## NSW6     4056.49400
+## NSW7        0.00000
+## NSW8     8472.15800
+## NSW9     2164.02200
+## NSW10   12418.07000
+## NSW11    8173.90800
+## NSW12   17094.64000
+## NSW13       0.00000
+## NSW14   18739.93000
+## NSW15    3023.87900
+## NSW16    3228.50300
+## NSW17   14581.86000
+## NSW18    7693.40000
+## NSW19   10804.32000
+## NSW20   10747.35000
+## NSW21       0.00000
+## NSW22    5149.50100
+## NSW23    6408.95000
+## NSW24    1991.40000
+## NSW25   11163.17000
+## NSW26    9642.99900
+## NSW27    9897.04900
+## NSW28   11142.87000
+## NSW29   16218.04000
+## NSW30     995.70020
+## NSW31       0.00000
+## NSW32    6551.59200
+## NSW33    1574.42400
+## NSW34       0.00000
+## NSW35    3191.75300
+## NSW36   20505.93000
+## NSW37    6181.88000
+## NSW38    5911.55100
+## NSW39    3094.15600
+## NSW40       0.00000
+## NSW41    1254.58200
+## NSW42   13188.83000
+## NSW43    8061.48500
+## NSW44    2787.96000
+## NSW45    3972.54000
+## NSW46       0.00000
+## NSW47       0.00000
+## NSW48       0.00000
+## NSW49   12187.41000
+## NSW50    4843.17600
+## NSW51       0.00000
+## NSW52    8087.48700
+## NSW53       0.00000
+## NSW54    2348.97300
+## NSW55     590.78180
+## NSW56       0.00000
+## NSW57    1067.50600
+## NSW58    7284.98600
+## NSW59   13167.52000
+## NSW60    1048.43200
+## NSW61       0.00000
+## NSW62    1923.93800
+## NSW63    4666.23600
+## NSW64     549.29840
+## NSW65     762.91460
+## NSW66   10694.29000
+## NSW67       0.00000
+## NSW68       0.00000
+## NSW69    8546.71500
+## NSW70    7479.65600
+## NSW71       0.00000
+## NSW72     647.20460
+## NSW73       0.00000
+## NSW74   11965.81000
+## NSW75    9598.54100
+## NSW76   18783.35000
+## NSW77   18678.08000
+## NSW78       0.00000
+## NSW79   23005.60000
+## NSW80    6456.69700
+## NSW81       0.00000
+## NSW82    2321.10700
+## NSW83    4941.84900
+## NSW84       0.00000
+## NSW85       0.00000
+## NSW86       0.00000
+## NSW87    3881.28400
+## NSW88   17230.96000
+## NSW89    8048.60300
+## NSW90       0.00000
+## NSW91   14509.93000
+## NSW92       0.00000
+## NSW93       0.00000
+## NSW94    9983.78400
+## NSW95       0.00000
+## NSW96    5587.50300
+## NSW97    4482.84500
+## NSW98    2456.15300
+## NSW99       0.00000
+## NSW100  26817.60000
+## NSW101      0.00000
+## NSW102   9265.78800
+## NSW103    485.22980
+## NSW104   4814.62700
+## NSW105   7458.10500
+## NSW106      0.00000
+## NSW107  34099.28000
+## NSW108   1953.26800
+## NSW109      0.00000
+## NSW110      0.00000
+## NSW111   8881.66500
+## NSW112   6210.67000
+## NSW113      0.00000
+## NSW114    929.88390
+## NSW115      0.00000
+## NSW116  12558.02000
+## NSW117  22163.25000
+## NSW118   1652.63700
+## NSW119   8124.71500
+## NSW120    671.33180
+## NSW121  17814.98000
+## NSW122   9737.15400
+## NSW123  17685.18000
+## NSW124      0.00000
+## NSW125   4321.70500
+## NSW126   1773.42300
+## NSW127      0.00000
+## NSW128  11233.26000
+## NSW129    559.44320
+## NSW130   1085.44000
+## NSW131   5445.20000
+## NSW132  60307.93000
+## NSW133   1460.36000
+## NSW134   6943.34200
+## NSW135   4032.70800
+## NSW136  10363.27000
+## NSW137   4232.30900
+## NSW138  11141.39000
+## NSW139      0.00000
+## NSW140  13385.86000
+## NSW141   4849.55900
+## NSW142      0.00000
+## NSW143   1660.50800
+## NSW144      0.00000
+## NSW145   2484.54900
+## NSW146   4146.60300
+## NSW147   9970.68100
+## NSW148      0.00000
+## NSW149  26372.28000
+## NSW150   5615.18900
+## NSW151   3196.57100
+## NSW152   6167.68100
+## NSW153   7535.94200
+## NSW154   8484.23900
+## NSW155   1294.40900
+## NSW156      0.00000
+## NSW157   5010.34200
+## NSW158   9371.03700
+## NSW159      0.00000
+## NSW160   4279.61300
+## NSW161   3462.56400
+## NSW162   7382.54900
+## NSW163      0.00000
+## NSW164      0.00000
+## NSW165  10976.51000
+## NSW166  13829.62000
+## NSW167   6788.46300
+## NSW168   9558.50100
+## NSW169  13228.28000
+## NSW170    743.66660
+## NSW171   5522.78800
+## NSW172   1424.94400
+## NSW173   1358.64300
+## NSW174      0.00000
+## NSW175    672.87730
+## NSW176      0.00000
+## NSW177  10092.83000
+## NSW178   6281.43300
+## NSW179  12590.71000
+## NSW180   5112.01400
+## NSW181  15952.60000
+## NSW182  36646.95000
+## NSW183  12803.97000
+## NSW184   3786.62800
+## NSW185   4181.94200
+## PSID1   25564.67000
+## PSID2   25564.67000
+## PSID3   25564.67000
+## PSID4   15491.01000
+## PSID5       0.00000
+## PSID6   17833.20000
+## PSID7   14146.28000
+## PSID8   17765.23000
+## PSID9       0.00000
+## PSID10   4433.18000
+## PSID11  19451.31000
+## PSID12  22094.97000
+## PSID13   5486.79900
+## PSID14   6420.72200
+## PSID15  18208.55000
+## PSID16   9922.93400
+## PSID17   7539.36100
+## PSID18  15406.78000
+## PSID19  11911.95000
+## PSID20  11087.38000
+## PSID21  17023.41000
+## PSID22   5661.17100
+## PSID23  21905.82000
+## PSID24      0.00000
+## PSID25  25564.67000
+## PSID26  11149.45000
+## PSID27      0.00000
+## PSID28  25048.94000
+## PSID29   1213.21400
+## PSID30      0.00000
+## PSID31   9453.01700
+## PSID32  11688.82000
+## PSID33   7806.82900
+## PSID34  15931.37000
+## PSID35   2838.71300
+## PSID36  14038.40000
+## PSID37  25514.43000
+## PSID38   4162.75600
+## PSID39   7503.89600
+## PSID40  12104.06000
+## PSID41   2231.36700
+## PSID42  14617.67000
+## PSID43  19588.74000
+## PSID44  10746.03000
+## PSID45  25564.67000
+## PSID46      0.00000
+## PSID47    837.87100
+## PSID48    461.05070
+## PSID49  24290.87000
+## PSID50   6680.80200
+## PSID51   7196.52800
+## PSID52  13015.82000
+## PSID53  24647.00000
+## PSID54  25564.67000
+## PSID55   2936.24300
+## PSID56  20575.86000
+## PSID57  10923.35000
+## PSID58  22403.81000
+## PSID59   7215.73900
+## PSID60    122.65130
+## PSID61  15177.73000
+## PSID62   4742.02500
+## PSID63   9732.30700
+## PSID64   6238.96200
+## PSID65   6145.86500
+## PSID66  11136.15000
+## PSID67   9241.70200
+## PSID68  19965.56000
+## PSID69  14421.13000
+## PSID70  10289.41000
+## PSID71      0.00000
+## PSID72  21602.88000
+## PSID73  25564.67000
+## PSID74  12418.81000
+## PSID75      0.00000
+## PSID76   4181.96600
+## PSID77      0.00000
+## PSID78   8720.06500
+## PSID79  16747.08000
+## PSID80   2782.55900
+## PSID81  14065.00000
+## PSID82    379.77570
+## PSID83  12705.49000
+## PSID84      0.00000
+## PSID85  21857.05000
+## PSID86    135.95080
+## PSID87      0.00000
+## PSID88      0.00000
+## PSID89      0.00000
+## PSID90   7781.70800
+## PSID91  15538.29000
+## PSID92  10642.59000
+## PSID93   2453.02600
+## PSID94  19330.14000
+## PSID95   3020.47300
+## PSID96  19438.02000
+## PSID97      0.00000
+## PSID98      0.00000
+## PSID99   7314.74700
+## PSID100  3358.87300
+## PSID101   220.18130
+## PSID102  8957.97800
+## PSID103  1687.56400
+## PSID104 17358.85000
+## PSID105  5937.50500
+## PSID106 18133.18000
+## PSID107  1066.91900
+## PSID108  3104.70400
+## PSID109     0.00000
+## PSID110 12718.79000
+## PSID111  1525.01400
+## PSID112  9253.52400
+## PSID113     0.00000
+## PSID114     0.00000
+## PSID115 11075.56000
+## PSID116  8133.40700
+## PSID117  3818.44500
+## PSID118  5495.66500
+## PSID119  9856.43600
+## PSID120 18781.90000
+## PSID121  5344.93700
+## PSID122  3367.73900
+## PSID123  7981.20100
+## PSID124 12602.05000
+## PSID125 25564.67000
+## PSID126  7240.86000
+## PSID127 15814.63000
+## PSID128     0.00000
+## PSID129  5535.56400
+## PSID130 18597.19000
+## PSID131 15436.33000
+## PSID132  6398.55600
+## PSID133 16015.60000
+## PSID134    94.57450
+## PSID135 21141.83000
+## PSID136  7403.41000
+## PSID137     0.00000
+## PSID138 18761.22000
+## PSID139  2751.52700
+## PSID140 14344.29000
+## PSID141  1907.74500
+## PSID142  6098.57800
+## PSID143     0.00000
+## PSID144     0.00000
+## PSID145 12120.31000
+## PSID146  6395.60100
+## PSID147 13429.58000
+## PSID148  2173.73600
+## PSID149  1019.63100
+## PSID150 14187.65000
+## PSID151  7118.20900
+## PSID152     0.00000
+## PSID153  4787.83400
+## PSID154     0.00000
+## PSID155  9460.40600
+## PSID156     0.00000
+## PSID157  1613.67700
+## PSID158  8154.09500
+## PSID159  7310.31300
+## PSID160  1892.96800
+## PSID161   876.29190
+## PSID162 13976.34000
+## PSID163 11600.15000
+## PSID164  6460.62100
+## PSID165 14475.81000
+## PSID166   366.47620
+## PSID167     0.00000
+## PSID168 13419.24000
+## PSID169  1898.87900
+## PSID170  6389.69000
+## PSID171 19993.64000
+## PSID172  9206.23700
+## PSID173   803.88330
+## PSID174  1037.36400
+## PSID175     0.00000
+## PSID176     0.00000
+## PSID177  9853.48100
+## PSID178 25564.67000
+## PSID179 20243.38000
+## PSID180  7675.31200
+## PSID181  3262.82000
+## PSID182 12489.75000
+## PSID183  6231.57300
+## PSID184  7843.77300
+## PSID185   237.91400
+## PSID186 13170.98000
+## PSID187  3683.97200
+## PSID188  6918.71600
+## PSID189     0.00000
+## PSID190 18323.81000
+## PSID191  3057.41600
+## PSID192  4975.50500
+## PSID193  6756.16600
+## PSID194  2404.26100
+## PSID195     0.00000
+## PSID196    33.98771
+## PSID197     0.00000
+## PSID198 16967.26000
+## PSID199  6694.10100
+## PSID200     0.00000
+## PSID201     0.00000
+## PSID202     0.00000
+## PSID203 18227.76000
+## PSID204  7987.11200
+## PSID205  6847.78500
+## PSID206  2232.84500
+## PSID207  3873.12100
+## PSID208  2451.54800
+## PSID209  5578.41800
+## PSID210   239.39170
+## PSID211 15554.55000
+## PSID212  5327.20400
+## PSID213   542.32570
+## PSID214     0.00000
+## PSID215  1745.19500
+## PSID216     0.00000
+## PSID217     0.00000
+## PSID218  8900.34700
+## PSID219  4728.72500
+## PSID220  7684.17800
+## PSID221 12059.73000
+## PSID222 17717.94000
+## PSID223     0.00000
+## PSID224     0.00000
+## PSID225  1306.31000
+## PSID226   701.92010
+## PSID227  7759.54200
+## PSID228     0.00000
+## PSID229  2587.49900
+## PSID230  3392.86000
+## PSID231  7933.91400
+## PSID232  1454.08300
+## PSID233 13683.75000
+## PSID234  9067.33000
+## PSID235  2340.71900
+## PSID236     0.00000
+## PSID237  5647.87100
+## PSID238     0.00000
+## PSID239     0.00000
+## PSID240  3892.33200
+## PSID241  4843.98800
+## PSID242     0.00000
+## PSID243  2256.48800
+## PSID244     0.00000
+## PSID245     0.00000
+## PSID246     0.00000
+## PSID247   642.81110
+## PSID248  5752.79000
+## PSID249     0.00000
+## PSID250 15353.58000
+## PSID251  4112.51300
+## PSID252  6210.88500
+## PSID253  1223.55800
+## PSID254 14289.62000
+## PSID255  4776.01200
+## PSID256     0.00000
+## PSID257  8844.19400
+## PSID258     0.00000
+## PSID259  8547.17100
+## PSID260  1273.80000
+## PSID261  3707.61600
+## PSID262  5551.81900
+## PSID263 14116.72000
+## PSID264 18891.26000
+## PSID265 18510.00000
+## PSID266    54.67588
+## PSID267  7698.95500
+## PSID268  3983.95100
+## PSID269   582.22430
+## PSID270  1725.98500
+## PSID271  5173.52100
+## PSID272     0.00000
+## PSID273  8245.71400
+## PSID274  7503.89600
+## PSID275     0.00000
+## PSID276 14053.18000
+## PSID277     0.00000
+## PSID278  6145.86500
+## PSID279   650.19970
+## PSID280  2136.79300
+## PSID281  6423.67700
+## PSID282  1483.63700
+## PSID283     0.00000
+## PSID284  9473.70500
+## PSID285 10301.23000
+## PSID286 14963.46000
+## PSID287 15363.92000
+## PSID288     0.00000
+## PSID289   675.32100
+## PSID290  1421.57300
+## PSID291     0.00000
+## PSID292   209.83720
+## PSID293 11023.84000
+## PSID294  6280.33800
+## PSID295  1913.65600
+## PSID296 25564.67000
+## PSID297 25564.67000
+## PSID298 25564.67000
+## PSID299     0.00000
+## PSID300   959.04450
+## PSID301 12593.19000
+## PSID302 11563.21000
+## PSID303 25564.67000
+## PSID304 16860.86000
+## PSID305     0.00000
+## PSID306 11269.14000
+## PSID307 12108.49000
+## PSID308  9088.01800
+## PSID309  3342.61800
+## PSID310  4183.44400
+## PSID311     0.00000
+## PSID312     0.00000
+## PSID313  6032.08000
+## PSID314  5748.35600
+## PSID315  4094.78000
+## PSID316  2160.43600
+## PSID317  5040.52500
+## PSID318     0.00000
+## PSID319 15892.95000
+## PSID320     0.00000
+## PSID321 21963.45000
+## PSID322 16324.45000
+## PSID323   251.21350
+## PSID324   818.66050
+## PSID325     0.00000
+## PSID326    31.03226
+## PSID327 17627.80000
+## PSID328 14339.86000
+## PSID329  1717.11800
+## PSID330   116.74040
+## PSID331  2448.59300
+## PSID332  2813.59100
+## PSID333 14998.92000
+## PSID334  3372.17200
+## PSID335     0.00000
+## PSID336   913.23500
+## PSID337     0.00000
+## PSID338  3700.22700
+## PSID339  2862.35600
+## PSID340     0.00000
+## PSID341 12618.31000
+## PSID342  6290.68200
+## PSID343     0.00000
+## PSID344  1202.86900
+## PSID345   422.62980
+## PSID346     0.00000
+## PSID347 19516.33000
+## PSID348  8923.99100
+## PSID349     0.00000
+## PSID350 15997.87000
+## PSID351  9438.24000
+## PSID352  2284.56500
+## PSID353  3406.16000
+## PSID354  9166.33800
+## PSID355     0.00000
+## PSID356     0.00000
+## PSID357  7722.59900
+## PSID358  7515.71700
+## PSID359  6708.87900
+## PSID360     0.00000
+## PSID361   877.76960
+## PSID362     0.00000
+## PSID363     0.00000
+## PSID364     0.00000
+## PSID365  2559.42200
+## PSID366     0.00000
+## PSID367  2281.61000
+## PSID368     0.00000
+## PSID369     0.00000
+## PSID370  2158.95900
+## PSID371  6717.74500
+## PSID372  6083.80000
+## PSID373     0.00000
+## PSID374     0.00000
+## PSID375  2820.98000
+## PSID376 12760.17000
+## PSID377  4974.02800
+## PSID378  3151.99100
+## PSID379  5841.45300
+## PSID380 18716.88000
+## PSID381 17941.08000
+## PSID382     0.00000
+## PSID383     0.00000
+## PSID384  1161.49300
+## PSID385 18573.55000
+## PSID386 11594.24000
+## PSID387     0.00000
+## PSID388 16485.52000
+## PSID389  7146.28600
+## PSID390     0.00000
+## PSID391  6821.18600
+## PSID392     0.00000
+## PSID393 18756.78000
+## PSID394  2664.34100
+## PSID395     0.00000
+## PSID396  7236.42700
+## PSID397  6494.60800
+## PSID398  4520.36600
+## PSID399 10122.43000
+## PSID400   648.72200
+## PSID401  1053.61900
+## PSID402     0.00000
+## PSID403  1491.02600
+## PSID404     0.00000
+## PSID405     0.00000
+## PSID406  1730.41800
+## PSID407  3902.67600
+## PSID408     0.00000
+## PSID409 14942.77000
+## PSID410 23764.80000
+## PSID411  5306.51600
+## PSID412     0.00000
+## PSID413  3859.82200
+## PSID414     0.00000
+## PSID415     0.00000
+## PSID416     0.00000
+## PSID417 12242.96000
+## PSID418  1533.88000
+## PSID419     0.00000
+## PSID420   964.95550
+## PSID421     0.00000
+## PSID422  5551.81900
+## PSID423  7543.79400
+## PSID424     0.00000
+## PSID425 10150.50000
+## PSID426 19464.61000
+## PSID427     0.00000
+## PSID428   187.67130
+## PSID429  1495.45900</code></pre>
+<div class="sourceCode" id="cb1260"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1260-1"><a href="regression-adjustment-and-causal-interpretation.html#cb1260-1" tabindex="-1"></a>aa <span class="ot">&lt;-</span> lalonde <span class="sc">|&gt;</span></span>
+<span id="cb1260-2"><a href="regression-adjustment-and-causal-interpretation.html#cb1260-2" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
+<span id="cb1260-3"><a href="regression-adjustment-and-causal-interpretation.html#cb1260-3" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb1260-4"><a href="regression-adjustment-and-causal-interpretation.html#cb1260-4" tabindex="-1"></a>    <span class="at">treat =</span> <span class="fu">factor</span>(treat, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Control&quot;</span>, <span class="st">&quot;Treated&quot;</span>)),</span>
+<span id="cb1260-5"><a href="regression-adjustment-and-causal-interpretation.html#cb1260-5" tabindex="-1"></a>    <span class="at">race =</span> <span class="fu">factor</span>(race),</span>
+<span id="cb1260-6"><a href="regression-adjustment-and-causal-interpretation.html#cb1260-6" tabindex="-1"></a>    <span class="at">married =</span> <span class="fu">factor</span>(married, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;No&quot;</span>, <span class="st">&quot;Yes&quot;</span>)),</span>
+<span id="cb1260-7"><a href="regression-adjustment-and-causal-interpretation.html#cb1260-7" tabindex="-1"></a>    <span class="at">nodegree =</span> <span class="fu">factor</span>(nodegree, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;No&quot;</span>, <span class="st">&quot;Yes&quot;</span>))</span>
+<span id="cb1260-8"><a href="regression-adjustment-and-causal-interpretation.html#cb1260-8" tabindex="-1"></a>  )</span></code></pre></div>
+<p>We will use the following observed pre-treatment covariates throughout this section:</p>
+<ul>
+<li><code>age</code></li>
+<li><code>educ</code></li>
+<li>`race``</li>
+<li><code>married</code></li>
+<li><code>nodegree</code></li>
+<li><code>re74</code></li>
+<li><code>re75</code></li>
+</ul>
+<div id="assumptions-for-causal-adjustment" class="section level3 hasAnchor" number="11.1.1">
+<h3><span class="header-section-number">11.1.1</span> Assumptions for Causal Adjustment<a href="regression-adjustment-and-causal-interpretation.html#assumptions-for-causal-adjustment" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>We continue to write the potential outcomes for person <span class="math inline">\(i\)</span> as <span class="math inline">\(Y_i(1)\)</span> and <span class="math inline">\(Y_i(0)\)</span>, where these represent that person’s 1978 earnings under treatment and under control, respectively. The observed outcome is</p>
+<p><span class="math display">\[
+Y_i = D_iY_i(1) + (1-D_i)Y_i(0).
+\]</span></p>
+<p>This is the formal statement of <strong>consistency</strong>. If a person is treated, then the observed outcome is the treated potential outcome; if a person is untreated, then the observed outcome is the untreated potential outcome. This sounds automatic, but it depends on the treatment being defined clearly enough that <span class="math inline">\(Y(1)\)</span> and <span class="math inline">\(Y(0)\)</span> are meaningful. If the treatment were simply coded as “exercise,” then the treated condition might bundle together walking, weight lifting, marathon training, yoga, and many other interventions. In that situation, the meaning of <span class="math inline">\(Y(1)\)</span> becomes murky. Likewise, if “job training” bundled together many radically different programs, then the treated potential outcome would be less clearly defined.</p>
+<p>The most important assumption in observational work is <strong>ignorability</strong>:</p>
+<p><span class="math display">\[
+(Y(1), Y(0)) \perp D \mid X.
+\]</span></p>
+<p>In words, after conditioning on the observed pre-treatment covariates <span class="math inline">\(X\)</span>, treatment assignment is independent of the potential outcomes. A slightly more informal version is often easier to remember: once we control for the relevant observed pre-treatment variables, treated and untreated units are comparable on average. This assumption is also called <strong>no unmeasured confounding</strong> or <strong>selection on observables</strong>.</p>
+<p>It is important to be clear about what ignorability does and does not say. It does not say that treatment is random in the raw data. It says that treatment is <em>as if random after conditioning on the chosen covariates</em>. That is why the choice of covariates matters so much.</p>
+<p>This connects directly to the informal <strong>backdoor idea</strong>. If a variable is a common cause of treatment and outcome, then failing to adjust for it creates a noncausal association between treatment and outcome. In the Lalonde data, prior earnings are a natural example. Someone’s 1975 earnings may affect whether they enter the training program, and 1975 earnings will also help predict 1978 earnings. In that case, <code>re75</code> is a confounder, and adjusting for it blocks a noncausal path between treatment and outcome.</p>
+<p>A third important assumption is <strong>positivity</strong>, sometimes called <strong>overlap</strong>:</p>
+<p><span class="math display">\[
+0 &lt; P(D = 1 \mid X = x) &lt; 1
+\]</span></p>
+<p>for the values of <span class="math inline">\(x\)</span> we care about. In plain language, this means that for covariate profiles of interest, there must be some chance of both treatment and control. If units with certain covariates are always treated, or always untreated, then we do not have comparable treated and control units in that part of the covariate space. In practice, this means that causal adjustment requires overlap. No overlap means no apples-to-apples comparison.</p>
+<p>A final assumption that is worth stating is <strong>SUTVA</strong>, but in this chapter we will emphasize only the part that is genuinely new after consistency: <strong>no interference</strong>. One person’s treatment should not directly affect another person’s outcome. In the job-training setting, this could fail if treated and untreated workers are competing for the same jobs in the same market. We will not focus on interference in this chapter, but it is worth keeping in mind.</p>
+<p>These assumptions help explain why regression is not the opposite of causal inference. Regression is one tool that causal inference can use. The causal interpretation depends on whether the regression is implementing a defensible comparison.</p>
+<p>There is one more practical point to make before returning to the Lalonde data. A good control is generally a variable measured before treatment that affects both treatment assignment and the outcome. A bad control is a variable that is downstream of treatment or a collider. For example, if a job-search intervention improves later mental health partly by increasing job-search confidence, then controlling for job-search confidence would remove part of the very treatment effect we are trying to estimate. If the goal is the total effect of treatment, post-treatment mediators are bad controls.</p>
+<p>The <code>jobs</code> data in the <code>mediation</code> package give a nice example. The treatment variable is <code>treat</code>, the outcome is <code>depress2</code>, and <code>job_seek</code> is a plausible post-treatment mediator. In the code below, the third model adds <code>job_seek</code> after treatment has already occurred.</p>
+<div class="sourceCode" id="cb1261"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1261-1"><a href="regression-adjustment-and-causal-interpretation.html#cb1261-1" tabindex="-1"></a><span class="fu">library</span>(mediation)</span></code></pre></div>
+<pre><code>## Loading required package: MASS</code></pre>
+<pre><code>## 
+## Attaching package: &#39;MASS&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     select</code></pre>
+<pre><code>## Loading required package: Matrix</code></pre>
+<pre><code>## 
+## Attaching package: &#39;Matrix&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:tidyr&#39;:
+## 
+##     expand, pack, unpack</code></pre>
+<pre><code>## Loading required package: mvtnorm</code></pre>
+<pre><code>## Loading required package: sandwich</code></pre>
+<pre><code>## mediation: Causal Mediation Analysis
+## Version: 4.5.1</code></pre>
+<div class="sourceCode" id="cb1271"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1271-1"><a href="regression-adjustment-and-causal-interpretation.html#cb1271-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;jobs&quot;</span>)</span>
+<span id="cb1271-2"><a href="regression-adjustment-and-causal-interpretation.html#cb1271-2" tabindex="-1"></a></span>
+<span id="cb1271-3"><a href="regression-adjustment-and-causal-interpretation.html#cb1271-3" tabindex="-1"></a>jobs2 <span class="ot">&lt;-</span> jobs <span class="sc">|&gt;</span></span>
+<span id="cb1271-4"><a href="regression-adjustment-and-causal-interpretation.html#cb1271-4" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span>
+<span id="cb1271-5"><a href="regression-adjustment-and-causal-interpretation.html#cb1271-5" tabindex="-1"></a></span>
+<span id="cb1271-6"><a href="regression-adjustment-and-causal-interpretation.html#cb1271-6" tabindex="-1"></a>mod1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(depress2 <span class="sc">~</span> treat, <span class="at">data =</span> jobs2)</span>
+<span id="cb1271-7"><a href="regression-adjustment-and-causal-interpretation.html#cb1271-7" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(depress2 <span class="sc">~</span> treat <span class="sc">+</span> econ_hard <span class="sc">+</span> sex <span class="sc">+</span> age, <span class="at">data =</span> jobs2)</span>
+<span id="cb1271-8"><a href="regression-adjustment-and-causal-interpretation.html#cb1271-8" tabindex="-1"></a>mod3 <span class="ot">&lt;-</span> <span class="fu">lm</span>(depress2 <span class="sc">~</span> treat <span class="sc">+</span> econ_hard <span class="sc">+</span> sex <span class="sc">+</span> age <span class="sc">+</span> job_seek, <span class="at">data =</span> jobs2)</span>
+<span id="cb1271-9"><a href="regression-adjustment-and-causal-interpretation.html#cb1271-9" tabindex="-1"></a></span>
+<span id="cb1271-10"><a href="regression-adjustment-and-causal-interpretation.html#cb1271-10" tabindex="-1"></a><span class="fu">bind_rows</span>(</span>
+<span id="cb1271-11"><a href="regression-adjustment-and-causal-interpretation.html#cb1271-11" tabindex="-1"></a>  <span class="fu">tidy</span>(mod1) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">&quot;Treatment only&quot;</span>),</span>
+<span id="cb1271-12"><a href="regression-adjustment-and-causal-interpretation.html#cb1271-12" tabindex="-1"></a>  <span class="fu">tidy</span>(mod2) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">&quot;Baseline controls&quot;</span>),</span>
+<span id="cb1271-13"><a href="regression-adjustment-and-causal-interpretation.html#cb1271-13" tabindex="-1"></a>  <span class="fu">tidy</span>(mod3) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">&quot;Adds post-treatment variable&quot;</span>)</span>
+<span id="cb1271-14"><a href="regression-adjustment-and-causal-interpretation.html#cb1271-14" tabindex="-1"></a>) <span class="sc">|&gt;</span> </span>
+<span id="cb1271-15"><a href="regression-adjustment-and-causal-interpretation.html#cb1271-15" tabindex="-1"></a>  <span class="fu">filter</span>(term <span class="sc">==</span> <span class="st">&quot;treat&quot;</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb1271-16"><a href="regression-adjustment-and-causal-interpretation.html#cb1271-16" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(model, estimate, std.error, statistic, p.value)</span></code></pre></div>
+<pre><code>## # A tibble: 3 × 5
+##   model                        estimate std.error statistic p.value
+##   &lt;chr&gt;                           &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
+## 1 Treatment only                -0.0633    0.0461    -1.37    0.170
+## 2 Baseline controls             -0.0560    0.0452    -1.24    0.215
+## 3 Adds post-treatment variable  -0.0403    0.0435    -0.926   0.355</code></pre>
+<p>When the coefficient on treatment changes after <code>job_seek</code> is added, that is not automatically an improvement. If <code>job_seek</code> lies on the causal pathway from treatment to the outcome, then controlling for it changes the estimand. This is why “control for everything” is not safe advice.</p>
+</div>
+<div id="the-lalonde-data-revisited" class="section level3 hasAnchor" number="11.1.2">
+<h3><span class="header-section-number">11.1.2</span> The Lalonde Data Revisited<a href="regression-adjustment-and-causal-interpretation.html#the-lalonde-data-revisited" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>We return now to the Lalonde data. The first thing to notice is that the treated and control groups differ on several observed pre-treatment covariates.</p>
+<div class="sourceCode" id="cb1273"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1273-1"><a href="regression-adjustment-and-causal-interpretation.html#cb1273-1" tabindex="-1"></a>aa <span class="sc">|&gt;</span></span>
+<span id="cb1273-2"><a href="regression-adjustment-and-causal-interpretation.html#cb1273-2" tabindex="-1"></a>  <span class="fu">group_by</span>(treat) <span class="sc">|&gt;</span></span>
+<span id="cb1273-3"><a href="regression-adjustment-and-causal-interpretation.html#cb1273-3" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb1273-4"><a href="regression-adjustment-and-causal-interpretation.html#cb1273-4" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb1273-5"><a href="regression-adjustment-and-causal-interpretation.html#cb1273-5" tabindex="-1"></a>    <span class="at">age =</span> <span class="fu">mean</span>(age),</span>
+<span id="cb1273-6"><a href="regression-adjustment-and-causal-interpretation.html#cb1273-6" tabindex="-1"></a>    <span class="at">educ =</span> <span class="fu">mean</span>(educ),</span>
+<span id="cb1273-7"><a href="regression-adjustment-and-causal-interpretation.html#cb1273-7" tabindex="-1"></a>    <span class="at">re74 =</span> <span class="fu">mean</span>(re74),</span>
+<span id="cb1273-8"><a href="regression-adjustment-and-causal-interpretation.html#cb1273-8" tabindex="-1"></a>    <span class="at">re75 =</span> <span class="fu">mean</span>(re75),</span>
+<span id="cb1273-9"><a href="regression-adjustment-and-causal-interpretation.html#cb1273-9" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb1273-10"><a href="regression-adjustment-and-causal-interpretation.html#cb1273-10" tabindex="-1"></a>  )</span></code></pre></div>
+<pre><code>## # A tibble: 2 × 6
+##   treat       n   age  educ  re74  re75
+##   &lt;fct&gt;   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 Control   429  28.0  10.2 5619. 2466.
+## 2 Treated   185  25.8  10.3 2096. 1532.</code></pre>
+<div class="sourceCode" id="cb1275"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1275-1"><a href="regression-adjustment-and-causal-interpretation.html#cb1275-1" tabindex="-1"></a>aa <span class="sc">|&gt;</span></span>
+<span id="cb1275-2"><a href="regression-adjustment-and-causal-interpretation.html#cb1275-2" tabindex="-1"></a>  <span class="fu">group_by</span>(treat) <span class="sc">|&gt;</span></span>
+<span id="cb1275-3"><a href="regression-adjustment-and-causal-interpretation.html#cb1275-3" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb1275-4"><a href="regression-adjustment-and-causal-interpretation.html#cb1275-4" tabindex="-1"></a>    <span class="at">percent_black =</span> <span class="fu">mean</span>(race <span class="sc">==</span> <span class="st">&quot;black&quot;</span>),</span>
+<span id="cb1275-5"><a href="regression-adjustment-and-causal-interpretation.html#cb1275-5" tabindex="-1"></a>    <span class="at">percent_hispanic =</span> <span class="fu">mean</span>(race <span class="sc">==</span> <span class="st">&quot;hispan&quot;</span>),</span>
+<span id="cb1275-6"><a href="regression-adjustment-and-causal-interpretation.html#cb1275-6" tabindex="-1"></a>    <span class="at">percent_white =</span> <span class="fu">mean</span>(race <span class="sc">==</span> <span class="st">&quot;white&quot;</span>),</span>
+<span id="cb1275-7"><a href="regression-adjustment-and-causal-interpretation.html#cb1275-7" tabindex="-1"></a>    <span class="at">married =</span> <span class="fu">mean</span>(married <span class="sc">==</span> <span class="st">&quot;Yes&quot;</span>),</span>
+<span id="cb1275-8"><a href="regression-adjustment-and-causal-interpretation.html#cb1275-8" tabindex="-1"></a>    <span class="at">nodegree =</span> <span class="fu">mean</span>(nodegree <span class="sc">==</span> <span class="st">&quot;Yes&quot;</span>),</span>
+<span id="cb1275-9"><a href="regression-adjustment-and-causal-interpretation.html#cb1275-9" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb1275-10"><a href="regression-adjustment-and-causal-interpretation.html#cb1275-10" tabindex="-1"></a>  )</span></code></pre></div>
+<pre><code>## # A tibble: 2 × 6
+##   treat   percent_black percent_hispanic percent_white married nodegree
+##   &lt;fct&gt;           &lt;dbl&gt;            &lt;dbl&gt;         &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;
+## 1 Control         0.203           0.142         0.655    0.513    0.597
+## 2 Treated         0.843           0.0595        0.0973   0.189    0.708</code></pre>
+<p>These are all pre-treatment variables, so differences here are a warning sign for confounding rather than an effect of treatment. In particular, prior earnings differ between the groups, and prior earnings are highly relevant for later earnings.</p>
+<p>We can see again that the naive and adjusted regressions tell different stories.</p>
+<div class="sourceCode" id="cb1277"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1277-1"><a href="regression-adjustment-and-causal-interpretation.html#cb1277-1" tabindex="-1"></a>mod_naive <span class="ot">&lt;-</span> <span class="fu">lm</span>(re78 <span class="sc">~</span> treat, <span class="at">data =</span> aa)</span>
+<span id="cb1277-2"><a href="regression-adjustment-and-causal-interpretation.html#cb1277-2" tabindex="-1"></a></span>
+<span id="cb1277-3"><a href="regression-adjustment-and-causal-interpretation.html#cb1277-3" tabindex="-1"></a>mod_adj <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb1277-4"><a href="regression-adjustment-and-causal-interpretation.html#cb1277-4" tabindex="-1"></a>  re78 <span class="sc">~</span> treat <span class="sc">+</span> age <span class="sc">+</span> educ <span class="sc">+</span> race <span class="sc">+</span> married <span class="sc">+</span> nodegree <span class="sc">+</span> re74 <span class="sc">+</span> re75,</span>
+<span id="cb1277-5"><a href="regression-adjustment-and-causal-interpretation.html#cb1277-5" tabindex="-1"></a>  <span class="at">data =</span> aa</span>
+<span id="cb1277-6"><a href="regression-adjustment-and-causal-interpretation.html#cb1277-6" tabindex="-1"></a>)</span>
+<span id="cb1277-7"><a href="regression-adjustment-and-causal-interpretation.html#cb1277-7" tabindex="-1"></a></span>
+<span id="cb1277-8"><a href="regression-adjustment-and-causal-interpretation.html#cb1277-8" tabindex="-1"></a><span class="fu">bind_rows</span>(</span>
+<span id="cb1277-9"><a href="regression-adjustment-and-causal-interpretation.html#cb1277-9" tabindex="-1"></a>  <span class="fu">tidy</span>(mod_naive, <span class="at">conf.int =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">&quot;Naive&quot;</span>),</span>
+<span id="cb1277-10"><a href="regression-adjustment-and-causal-interpretation.html#cb1277-10" tabindex="-1"></a>  <span class="fu">tidy</span>(mod_adj, <span class="at">conf.int =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">&quot;Adjusted&quot;</span>)</span>
+<span id="cb1277-11"><a href="regression-adjustment-and-causal-interpretation.html#cb1277-11" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb1277-12"><a href="regression-adjustment-and-causal-interpretation.html#cb1277-12" tabindex="-1"></a>  <span class="fu">filter</span>(term <span class="sc">==</span> <span class="st">&quot;treatTreated&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1277-13"><a href="regression-adjustment-and-causal-interpretation.html#cb1277-13" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(model, estimate, conf.low, conf.high, p.value)</span></code></pre></div>
+<pre><code>## # A tibble: 2 × 5
+##   model    estimate conf.low conf.high p.value
+##   &lt;chr&gt;       &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
+## 1 Naive       -635.  -1926.       655.  0.334 
+## 2 Adjusted    1548.     13.9     3083.  0.0480</code></pre>
+<p>The sign change is a strong indication that the raw treatment comparison was confounded by observed baseline differences. This does not prove that the adjusted model is causal, but it does show that adjustment matters.</p>
+<p>It is useful to visualize overlap directly. We start with one important pre-treatment covariate, 1975 earnings.</p>
+<div class="sourceCode" id="cb1279"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1279-1"><a href="regression-adjustment-and-causal-interpretation.html#cb1279-1" tabindex="-1"></a><span class="fu">ggplot</span>(aa, <span class="fu">aes</span>(<span class="at">x =</span> re75, <span class="at">fill =</span> treat)) <span class="sc">+</span></span>
+<span id="cb1279-2"><a href="regression-adjustment-and-causal-interpretation.html#cb1279-2" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb1279-3"><a href="regression-adjustment-and-causal-interpretation.html#cb1279-3" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;1975 earnings&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Density&quot;</span>, <span class="at">fill =</span> <span class="cn">NULL</span>)</span></code></pre></div>
+<p><img src="13-causal-inference_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>Where the two distributions overlap, comparison is more plausible. Where they are far apart, adjustment begins to rely on extrapolation. This same idea can be summarized more compactly by the <strong>propensity score</strong>, which we define as</p>
+<p><span class="math display">\[
+e(X) = P(D = 1 \mid X).
+\]</span></p>
+<p>For now, we use the propensity score only as a way to study overlap. We estimate it with logistic regression using the observed pre-treatment covariates.</p>
+<div class="sourceCode" id="cb1280"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1280-1"><a href="regression-adjustment-and-causal-interpretation.html#cb1280-1" tabindex="-1"></a>ps_mod <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb1280-2"><a href="regression-adjustment-and-causal-interpretation.html#cb1280-2" tabindex="-1"></a>  treat <span class="sc">~</span> age <span class="sc">+</span> educ <span class="sc">+</span> race <span class="sc">+</span> married <span class="sc">+</span> nodegree <span class="sc">+</span> re74 <span class="sc">+</span> re75,</span>
+<span id="cb1280-3"><a href="regression-adjustment-and-causal-interpretation.html#cb1280-3" tabindex="-1"></a>  <span class="at">data =</span> aa,</span>
+<span id="cb1280-4"><a href="regression-adjustment-and-causal-interpretation.html#cb1280-4" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>()</span>
+<span id="cb1280-5"><a href="regression-adjustment-and-causal-interpretation.html#cb1280-5" tabindex="-1"></a>)</span>
+<span id="cb1280-6"><a href="regression-adjustment-and-causal-interpretation.html#cb1280-6" tabindex="-1"></a></span>
+<span id="cb1280-7"><a href="regression-adjustment-and-causal-interpretation.html#cb1280-7" tabindex="-1"></a>aa_ps <span class="ot">&lt;-</span> ps_mod <span class="sc">|&gt;</span></span>
+<span id="cb1280-8"><a href="regression-adjustment-and-causal-interpretation.html#cb1280-8" tabindex="-1"></a>  <span class="fu">augment</span>(<span class="at">data =</span> aa, <span class="at">type.predict =</span> <span class="st">&quot;response&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1280-9"><a href="regression-adjustment-and-causal-interpretation.html#cb1280-9" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ps =</span> .fitted) <span class="sc">|&gt;</span></span>
+<span id="cb1280-10"><a href="regression-adjustment-and-causal-interpretation.html#cb1280-10" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>.fitted)</span></code></pre></div>
+<p>Now we look at the distributions of the estimated propensity scores in the treated and control groups.</p>
+<div class="sourceCode" id="cb1281"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1281-1"><a href="regression-adjustment-and-causal-interpretation.html#cb1281-1" tabindex="-1"></a><span class="fu">ggplot</span>(aa_ps, <span class="fu">aes</span>(<span class="at">x =</span> ps, <span class="at">fill =</span> treat)) <span class="sc">+</span></span>
+<span id="cb1281-2"><a href="regression-adjustment-and-causal-interpretation.html#cb1281-2" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">position =</span> <span class="st">&quot;identity&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">bins =</span> <span class="dv">20</span>) <span class="sc">+</span></span>
+<span id="cb1281-3"><a href="regression-adjustment-and-causal-interpretation.html#cb1281-3" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Estimated propensity score&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Count&quot;</span>, <span class="at">fill =</span> <span class="cn">NULL</span>)</span></code></pre></div>
+<p><img src="13-causal-inference_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p>The treated units tend to have higher estimated probabilities of treatment than the control units. This is the expected direction. The issue is not that the graph is backwards. The issue is that the groups may be too separated. Good causal adjustment needs overlap, not simply a treatment model that predicts treatment well. If treated and control units have little overlap in propensity score, then there are few comparable units to compare.</p>
+<p>This is the main reason to introduce propensity scores in the first place. Regression adjustment hides the comparability problem inside a single coefficient. Propensity scores make it easier to inspect whether treated and untreated units are similar on the observed pre-treatment covariates and whether common support is adequate.</p>
+<p>The big lesson from this section is that adjusted comparisons only deserve a causal interpretation under assumptions. Consistency tells us that the treatment must be defined clearly enough for the potential outcomes to make sense. Ignorability says that after conditioning on the observed pre-treatment covariates, treatment assignment is as good as random. Positivity says that comparable treated and control units must exist. Finally, the discussion of bad controls reminds us that adjustment can go wrong when we condition on variables that are affected by treatment. The next section uses propensity scores more directly to organize causal comparisons in observational data.</p>
+
+</div>
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="missing-data-1.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": {
+    "github": false,
+    "facebook": true,
+    "twitter": true,
+    "linkedin": false,
+    "weibo": false,
+    "instapaper": false,
+    "vk": false,
+    "whatsapp": false,
+    "all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+  },
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": null,
+    "text": null
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": null,
+    "text": null
+  },
+  "download": null,
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "subsection"
+  }
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
