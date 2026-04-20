@@ -7,8 +7,8 @@ A useful place to start is with observational data. In observational studies, th
 We will work with the `lalonde` data set from the `MatchIt` package. The outcome variable is earnings in 1978 (`re78`), and the treatment variable `treat` indicates participation in a job-training program. The data also includes several pre-treatment covariates such as age, education, marital status, degree status, and earnings in 1974 and 1975.
 
 ```{r warning=FALSE, message=FALSE}
-library(tidyverse)
 library(MatchIt)
+library(tidyverse)
 library(broom)
 
 aa <- MatchIt::lalonde |> 
@@ -196,7 +196,7 @@ library(MatchIt)
 library(broom)
 
 data("lalonde")
-lalonde
+
 
 aa <- lalonde |>
   as_tibble() |>
@@ -248,7 +248,7 @@ $$
 
 for the values of $x$ we care about. In plain language, this means that for covariate profiles of interest, there must be some chance of both treatment and control. If units with certain covariates are always treated, or always untreated, then we do not have comparable treated and control units in that part of the covariate space. In practice, this means that causal adjustment requires overlap. No overlap means no apples-to-apples comparison.
 
-A final assumption that is worth stating is **SUTVA**, but in this chapter we will emphasize only the part that is genuinely new after consistency: **no interference**. One person's treatment should not directly affect another person's outcome. In the job-training setting, this could fail if treated and untreated workers are competing for the same jobs in the same market. We will not focus on interference in this chapter, but it is worth keeping in mind.
+A final assumption that is worth stating **no interference**. One person's treatment should not directly affect another person's outcome. In the job-training setting, this could fail if treated and untreated workers are competing for the same jobs in the same market. We will not focus on interference in this chapter, but it is worth keeping in mind.
 
 These assumptions help explain why regression is not the opposite of causal inference. Regression is one tool that causal inference can use. The causal interpretation depends on whether the regression is implementing a defensible comparison.
 
