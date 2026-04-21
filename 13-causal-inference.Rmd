@@ -1,4 +1,4 @@
-# Regression Adjustment and Causal Interpretation
+# Causal Inference
 
 In this chapter, we begin our discussion of causal inference. We will not try to cover the subject in full here. Instead, we focus on a basic but important question: when we fit a regression model with a treatment variable, under what circumstances can we interpret the coefficient of that treatment variable causally?
 
