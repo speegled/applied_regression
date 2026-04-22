@@ -416,3 +416,330 @@ Finally, let's look at **colliders**. We claim that `followupresponse` is a coll
 \]
 
 This creates a path between treatment and income that allows them to be correlated in a noncausal way. Note that treatment does not directly affect real income via this path, but it could still be correlated with real income via this path.
+=======
+### Vocabulary and an Example
+
+In causal inference, we imagine that each unit has more than one possible outcome. For a household in the `retrofit` study, one outcome is the amount of gas it would use if it received the retrofit, and another is the amount it would use if it did not. These are called the **potential outcomes**. We never observe both outcomes for the same household, which is why causal inference is difficult in the first place. The whole enterprise is an attempt to learn something about the missing counterfactual outcome from the data we do observe.
+
+**Consistency** says that the observed outcome under the treatment actually received is the corresponding potential outcome. If a household received the retrofit, then its observed gas use is its treated potential outcome; if it did not, then its observed gas use is its untreated potential outcome. This sounds automatic, but it depends on the treatment being defined clearly enough that the phrase “received the retrofit” has a reasonably stable meaning. If treated households received wildly different interventions, then the treated potential outcome $Y(1)$ would be less clearly defined.
+
+**Ignorability** means that after we condition on the observed pre-treatment covariates, treatment assignment is independent of the potential outcomes. In practice, this is the assumption that after adjusting for the right observed baseline variables, treated and untreated units are comparable on average. This is also called **no unmeasured confounding** or **selection on observables**. It is the key assumption that turns an adjusted observational comparison into a candidate causal estimate.
+
+A **confounder** is a variable that affects both treatment assignment and the outcome. Confounders are the reason naive treated-versus-control comparisons can be misleading. A good confounder to keep in mind is a variable that helps explain both who receives treatment and what the outcome would have looked like anyway. In the `retrofit` example, prior gas use is a natural candidate because households with high prior gas use may be more likely to receive the retrofit and also more likely to have high future gas use.
+
+The informal **backdoor idea** is a way to think about confounding without too much notation. If a variable is a common cause of treatment and outcome, then it creates a noncausal path between them. Adjusting for that variable blocks that path. This gives a practical way to think about which variables belong in an adjustment set: we look for pre-treatment variables that help explain why treated and untreated units differ before treatment begins.
+
+**Positivity**, also called **overlap**, means that for the covariate values we care about, there must be some chance of both treatment and control. In plain language, the treated and untreated groups must actually contain comparable units. Even if we measure many sensible covariates, a causal analysis becomes difficult if some kinds of units are almost always treated and others are almost always untreated. Lack of overlap is not something that adjustment can solve; it is a limitation of the data.
+
+A **propensity score** is the probability of treatment given the observed pre-treatment covariates. It summarizes many baseline covariates into a single number that describes how likely treatment was, based on what we observed before treatment began. Propensity scores do not remove unmeasured confounding, but they are useful for checking overlap and organizing comparisons among units that look similar on the observed covariates.
+
+A **mediator** is a variable that lies on the causal pathway from treatment to outcome. Mediators are important if we want to understand *how* treatment works, but they are usually bad controls if the goal is the **total effect** of treatment. Controlling for a mediator blocks part of the very effect we are trying to estimate.
+
+A **collider** is a variable that is caused by two other variables. Conditioning on a collider can create a spurious association between those causes, which is why colliders are bad controls. This is different from the mediator problem. A mediator is bad because it blocks part of a real causal effect. A collider is bad because conditioning on it can open a false path and induce bias. Note that often a collider is caused by one variable in the data (such as treatment) and one unmeasured variable (such as organization or motivation). Colliders can be hard to see, but it is important not to condition on them.
+
+A **bad control** is a variable that should not be conditioned on in a causal analysis. Two common kinds of bad controls are mediators and colliders. The main lesson is that “control for everything” is not a safe rule. Some variables help create comparability; others distort the comparison.
+
+One last idea is that of **no interference**: one unit’s treatment should not directly affect another unit’s outcome. In the `retrofit` study, this would mean that one household’s retrofit does not directly change another household’s gas use.
+
+# The `retrofit` study
+
+The `retrofit` study is a hypothetical observational study of a city-run home weatherization program. The city offers subsidies for attic and wall insulation, air sealing, duct repair, and minor furnace improvements to households with high energy burdens. Some households apply directly, while others are identified through neighborhood outreach or energy audits. Some households receive the retrofit before the winter heating season, and some do not. There is no random assignment. Participation depends on a mixture of household choice, city targeting, contractor availability, and administrative prioritization.
+
+The treatment variable is `retrofit`, equal to 1 if the household received the weatherization package before winter 2024--25 and 0 otherwise. The outcome is `gas_use_2025`, the household’s total natural-gas use during winter 2024--25. Lower values are better. Because treatment is not randomized, treated and untreated households are likely to differ in many ways before treatment begins. Some live in older homes, some have larger families, some have higher energy burdens, and some have homes that are much less energy efficient than others. Those pre-treatment differences are exactly what make causal adjustment necessary.
+
+It is useful to imagine what `?retrofit` might look like in R.
+
+```text
+retrofit {causalexamples} R Documentation
+
+Home Weatherization Program Study
+
+Description
+Observational study of a city-run home weatherization program. The dataset follows
+5,000 owner-occupied households over two winters. Treated households received a
+subsidized weatherization package before winter 2024--25. The main outcome is
+natural-gas use during winter 2024--25. The data were assembled from utility bills,
+program records, property records, and a follow-up survey.
+
+Usage
+retrofit
+
+Format
+A data frame with 5000 rows and 27 variables:
+
+retrofit
+    Treatment indicator equal to 1 if the household received the retrofit package
+    before winter 2024--25 and 0 otherwise.
+
+gas_use_2025
+    Outcome: total natural-gas use during winter 2024--25, measured in therms.
+
+gas_use_2024
+    Baseline variable measured before treatment: total natural-gas use during
+    winter 2023--24, measured in therms.
+
+electric_use_2024
+    Baseline variable measured before treatment: total electricity use during
+    calendar year 2024 before retrofit work began, measured in kWh.
+
+sqft
+    Baseline variable measured before treatment: interior square footage of the
+    home from property records.
+
+home_age
+    Baseline variable measured before treatment: age of the home in years at the
+    start of winter 2024--25.
+
+building_type
+    Baseline variable measured before treatment: detached, duplex, rowhouse, or
+    small multifamily.
+
+insulation_baseline
+    Baseline variable measured before treatment: insulation score from the
+    pre-treatment energy audit.
+
+furnace_age
+    Baseline variable measured before treatment: age of the primary heating system
+    in years at intake.
+
+income
+    Baseline variable measured before treatment: household income in thousands of
+    dollars, recorded at intake.
+
+arrears_balance
+    Baseline variable measured before treatment: amount owed on utility bills at
+    intake or referral.
+
+credit_score
+    Baseline variable measured before treatment: household credit-score category
+    at intake, before any retrofit work begins.
+
+owner_occupied
+    Baseline variable measured before treatment: indicator for owner occupancy at
+    intake.
+
+years_in_home
+    Baseline variable measured before treatment: number of years the household had
+    lived in the home at intake.
+
+occupants
+    Baseline variable measured before treatment: number of people living in the
+    home at intake.
+
+children
+    Baseline variable measured before treatment: number of children in the
+    household at intake.
+
+elderly_resident
+    Baseline variable measured before treatment: indicator for whether at least
+    one resident was age 65 or older at intake.
+
+work_from_home_days
+    Baseline variable measured before treatment: average number of days per week
+    at least one adult worked from home at intake.
+
+energy_audit_score
+    Baseline variable measured before treatment: audit score summarizing energy
+    inefficiency before treatment.
+
+energy_burden
+    Baseline variable measured before treatment: share of household income spent
+    on home energy before treatment.
+
+neighborhood
+    Baseline variable measured before treatment: neighborhood identifier from the
+    city's administrative records.
+
+application_month
+    Baseline variable measured before treatment: month in 2024 when the household
+    applied or was referred to the program.
+
+insulation_added
+    Post-treatment variable: amount of new insulation installed after treatment
+    assignment as part of the retrofit intervention.
+
+contractor_visits
+    Post-treatment variable: number of contractor visits after treatment began.
+
+coaching_sessions
+    Post-treatment variable: number of energy coaching sessions completed after
+    treatment began.
+
+thermostat_setting_2025
+    Post-treatment variable: average winter thermostat setting during 2024--25.
+
+inspection_passed
+    Post-treatment variable: indicator for whether the household passed the
+    post-installation inspection.
+
+followup_survey_response
+    Post-treatment variable: indicator for whether the household completed the
+    spring 2025 follow-up survey.
+```
+
+
+### Worksheet
+
+After you read the vocabulary and the `retrofit` description, switch to the worksheet. The goal is not to produce the one perfect answer. The goal is to practice naming the roles variables can play in an observational causal study and to justify those choices in words. 
+
+Consult the reference handout while you work. First answer the questions on your own. Then compare answers with a partner or small group.
+
+#### Part A: Core roles
+
+1. What is the treatment variable?
+
+2. What is the outcome variable?
+
+#### Part B: Variable classification
+
+Fill in each line with several variable names (unless otherwise instructed) from the `retrofit` study.
+
+- **Strong pre-treatment confounders:**
+
+- **Other useful pre-treatment covariates:**
+
+- **One post-treatment mediator (best choice):**
+
+- **One possible collider (best choice):**
+
+- **Other bad controls (not including your mediator or collider choice):**
+
+- **Variables or combinations of variables that raise an overlap concern:**
+
+- **Variables that raise a consistency concern:**
+
+#### Part C: One step back
+
+In two or three sentences, explain the difference between these two problems:
+
+- unmeasured confounding
+- limited overlap
+
+Your answer should make clear why one is something we try to reduce through adjustment, while the other is a limitation of the data themselves.
+
+### Solutions
+
+This key is not completely unique. Several answers are defensible if the explanation is good. The main goal is that students classify variables according to their causal role and justify the harder cases clearly.
+
+#### Part A: Core roles
+
+1. **Treatment variable:** `retrofit`
+
+2. **Outcome variable:** `gas_use_2025`
+
+#### Part B: Variable classification
+
+- **Strong pre-treatment confounders:**  
+  `gas_use_2024`, `sqft`, `home_age`, `insulation_baseline`, `furnace_age`, `income`, `arrears_balance`, `energy_burden`, `energy_audit_score`, `neighborhood`
+
+- **Other useful pre-treatment covariates:**  
+  `electric_use_2024`, `building_type`, `owner_occupied`, `years_in_home`, `occupants`, `children`, `elderly_resident`, `work_from_home_days`, `credit_score`, `application_month`
+
+- **One post-treatment mediator (best choice):**  
+  `thermostat_setting_2025`
+
+- **One possible collider (best choice):**  
+  `followup_survey_response`
+
+- **Other bad controls (not including your mediator or collider choice):**  
+  `coaching_sessions`, `contractor_visits`  
+  A reasonable additional answer is `inspection_passed` if students explain that conditioning on it may induce selection bias or open a noncausal path. I would usually not count `insulation_added` here if the goal is to keep the roles clean, since it is more useful for the consistency discussion.
+
+- **Variables or combinations of variables that raise an overlap concern:**  
+  Extreme combinations are the main idea here. Good answers include things like:
+  
+  - very high `income` together with low `energy_burden`
+  - very new homes with strong `insulation_baseline`
+  - very old homes with high `gas_use_2024`, poor `insulation_baseline`, and high `energy_burden`
+  - combinations of `neighborhood`, `income`, and `home_age`
+  
+  The point is that some treated and untreated households may be scarce in these parts of the covariate space.
+
+- **Variables that raise a consistency concern:**  
+  `insulation_added` is the best single answer. Stronger answers may note that `insulation_added` together with `contractor_visits` or `coaching_sessions` suggests that `retrofit = 1` may bundle together substantially different interventions.
+
+#### Part C: One step back
+
+A good answer would say something like this:
+
+> Unmeasured confounding means that there may still be variables affecting both treatment assignment and the outcome that are not included in the data, so adjustment may fail to make treated and control units truly comparable. Limited overlap is different: it means that even after choosing the covariates, there may be parts of the covariate space where treated and control units are too different to compare directly. Adjustment is meant to reduce confounding by observed variables, but it cannot repair a lack of overlap, which is a limitation of the data themselves.
+
+## Collid3rs
+
+A variable can be a **collider** without automatically being a bad control for the causal effect of interest. A collider is simply a variable with two arrows pointing into it on some path. For example, if both `home_age` and `furnace_age` affect `energy_burden`, then `energy_burden` is a collider relative to those two variables. That fact alone does **not** imply that controlling for `energy_burden` will bias the estimated effect of `retrofit` on `gas_use_2025`.
+
+What matters for causal inference is whether conditioning on the collider opens a **noncausal path between treatment and outcome**. This is the key distinction. A variable may be locally a collider, yet still be harmless for the treatment effect if conditioning on it does not create a new path from `retrofit` to `gas_use_2025`. In that case the variable might still cause ordinary modeling problems such as redundancy, multicollinearity, or interpretability issues, but not collider bias in the treatment effect.
+
+A collider is **not** automatically a bad control. It becomes a bad control when conditioning on it opens a spurious path from treatment to outcome.
+
+A good way to separate the ideas is to compare two cases.
+
+In a relatively harmless case, suppose
+
+\[
+\text{home\_age} \rightarrow \text{energy\_burden} \leftarrow \text{furnace\_age}.
+\]
+
+Here `energy_burden` is indeed a collider of `home_age` and `furnace_age`. But unless conditioning on `energy_burden` opens some new route from `retrofit` to `gas_use_2025`, this local collider structure does not itself create causal bias in the treatment effect. The issue is mostly statistical rather than causal.
+
+In a harmful case, suppose a pre-treatment variable such as `finalist_pool` behaves like this:
+
+\[
+\text{retrofit} \leftarrow U_1 \rightarrow \text{finalist\_pool} \leftarrow U_2 \rightarrow \text{gas\_use\_2025},
+\]
+
+where `U_1` is an unmeasured factor such as household persistence in the application process, and `U_2` is an unmeasured factor such as hidden housing damage. If we condition on `finalist_pool`, then treatment can become associated with hidden housing damage through the opened path. Since hidden housing damage affects later gas use, the estimated treatment effect becomes biased. This is the classic collider problem.
+
+One important intuition is that before conditioning on the collider, `U_2` is not associated with treatment along that path because the path is blocked. After conditioning on the collider, `U_2` may become associated with treatment. That is why conditioning on a collider can create a confounding-like problem that was not there before.
+
+## Post-treatment variables do not always fit neatly into one box
+
+Some bad controls do not fit neatly into the simple mediator-versus-collider classification. A good example is `sqft` measured **after** treatment. Baseline square footage is a sensible pre-treatment covariate. But if post-treatment `sqft` reflects later additions to the home, then it is no longer just a baseline housing characteristic. Instead, it may reflect changes that happened after treatment or later household decisions influenced by treatment.
+
+That means post-treatment `sqft` is usually best described as a **messy post-treatment bad control**. It is not the cleanest flagship example of a mediator, and it is not naturally a collider either. The main problem is simply that it is measured after treatment and may itself reflect downstream changes. A useful sentence is: not every bad control falls neatly into the mediator/collider taxonomy; some are problematic simply because they reflect post-treatment developments.
+
+## Variables measured after treatment are not automatically bad controls
+
+The crucial issue is not just whether a variable is measured after treatment in calendar time. The real question is whether the variable is **downstream of the treatment variable in the causal question of interest**. This is why `heating_degree_days` is different from post-treatment square footage.
+
+If `heating_degree_days` measures how cold the winter was, then it is not caused by the retrofit. Even if it is recorded during the same winter as the outcome, it is not downstream of treatment. For that reason, it is not a bad control in the same way a post-treatment mediator would be. It may still or may not be useful, depending on whether households face different weather conditions, but it is not problematic merely because of timing.
+
+So the better rule is this: be very careful with variables measured after treatment, but the real danger comes from variables that are affected by treatment or otherwise lie on the treatment pathway.
+
+## Why `insulation_added` and `thermostat_setting_2025` play different roles
+
+The variable `insulation_added` is best used in the retrofit example to illustrate a **consistency** concern. If treated households receive very different amounts of insulation or very different bundles of work, then the label `retrofit` may hide important versions of treatment. In that case the treated potential outcome is less clearly defined, and consistency becomes less plausible unless treatment is described more precisely.
+
+The variable `thermostat_setting_2025` is a cleaner example of a **mediator**. If the retrofit makes the home easier or cheaper to heat, households may change how warm they keep the house, and that changed thermostat behavior may affect `gas_use_2025`. Then
+
+\[
+\text{retrofit} \rightarrow \text{thermostat\_setting\_2025} \rightarrow \text{gas\_use\_2025}
+\]
+
+is a plausible part of the causal story. If the goal is to estimate the **total effect** of retrofit on gas use, then controlling for `thermostat_setting_2025` would be a mistake because it would block part of the treatment effect.
+
+## Why `finalist_pool` or `special_review` can be problematic in more than one way
+
+Variables such as `finalist_pool` or `special_review` are not only potential colliders. They can also cause trouble because they often function as **selection variables**. If the analysis is restricted to households in the finalist pool, then the study is no longer describing the original applicant population. Even apart from collider bias, this restriction changes the population being studied.
+
+These variables may also be poor modeling choices because they are often **opaque composite variables**. A status such as `finalist_pool` may bundle together income, energy burden, application quality, housing problems, and city rules into one summary indicator. Even if it were not creating collider bias, it could still be unhelpful because it hides the underlying sources of variation rather than representing a clean pre-treatment characteristic.
+
+So there are three distinct concerns worth separating:
+
+- **Collider problem:** conditioning on the variable may open a false treatment--outcome path.
+- **Selection problem:** restricting the sample using the variable may change the target population.
+- **Modeling problem:** the variable may bundle together several processes and be hard to interpret causally.
+
+## A compact summary
+
+The retrofit discussion suggests four practical lessons.
+
+1. A variable can be a collider somewhere in the graph without being a bad control for the treatment effect.
+2. A collider becomes a causal problem when conditioning on it opens a noncausal path from treatment to outcome.
+3. Not every bad control is a clean mediator or collider; some post-treatment variables are simply messy because they reflect downstream changes.
+4. Variables such as `finalist_pool` can be problematic for more than one reason: collider bias, selection bias, and opacity in the adjustment set.
+
+These distinctions are worth making slowly, because people often hear "collider" or "post-treatment variable" as if those labels automatically settle the matter. The more careful rule is always the same: ask whether conditioning on the variable helps or harms the treatment--outcome comparison that the causal question actually requires.
+
+
+
