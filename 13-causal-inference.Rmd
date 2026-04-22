@@ -753,3 +753,100 @@ The key point is that `finalist_pool` is a collider, but it is **not** downstrea
 
 We contrast that with the following collider which is not a bad control. This is different from the earlier `energy_burden` example. There, the idea was that `energy_burden` might be a collider relative to two other baseline housing variables, such as `home_age` and `furnace_age`, if both of those affect energy burden. But that fact alone does not make `energy_burden` a bad control for estimating the effect of `retrofit` on `gas_use_2025`. The reason is that conditioning on `energy_burden` does not necessarily open any important new noncausal path from treatment to outcome. In that case, the main concerns are more ordinary modeling issues, such as redundancy with other baseline controls or difficulty interpreting coefficients, rather than collider bias in the treatment effect. However, if you could come up with a different story about how `energy_burden` collides with variables to create a noncausal path between treatment and response, then it could be a bad control.
 
+## Matching
+
+## Propensity scores and matching in the Lalonde data
+
+We now use propensity scores and nearest-neighbor matching to estimate the effect of participation in the training program on `re78`, real earnings in 1978. The goal is to compare treated and untreated individuals who look similar on the observed pre-treatment covariates. This is useful because the training and control groups differ in important baseline ways, so a raw comparison of 1978 earnings is not automatically credible as a causal estimate.
+
+The basic idea is simple. First, we estimate each individual's **propensity score**, which is the probability of treatment given the observed baseline covariates. Then we use those scores to match treated and control individuals with similar covariate profiles. This does not solve the problem of unmeasured confounding, but it can improve comparability on the observed covariates and reduce reliance on extrapolation.
+
+```{r}
+library(tidyverse)
+library(MatchIt)
+library(broom)
+
+aa <- MatchIt::lalonde |>
+  as_tibble() |>
+  mutate(
+    treat = factor(treat, levels = c(0, 1), labels = c("Control", "Treated")),
+    race = factor(race),
+    married = factor(married, levels = c(0, 1), labels = c("No", "Yes")),
+    nodegree = factor(nodegree, levels = c(0, 1), labels = c("No", "Yes"))
+  )
+```
+
+We begin by estimating propensity scores using a logistic regression for treatment assignment. The covariates here are all measured before treatment and are plausible common causes of treatment and later earnings.
+
+```{r}
+ps_mod <- glm(
+  treat ~ age + educ + race + married + nodegree + re74 + re75,
+  data = aa,
+  family = binomial()
+)
+
+aa_ps <- ps_mod |>
+  augment(data = aa, type.predict = "response") |>
+  mutate(ps = .fitted) |>
+  select(-.fitted)
+```
+
+We can now inspect the estimated propensity scores. The main issue is **overlap**. Where the treated and control groups overlap, there are plausible treated-versus-control comparisons. Where they do not overlap, the analysis becomes more dependent on extrapolation.
+
+```{r}
+aa_ps |>
+  ggplot(aes(x = ps, fill = treat)) +
+  geom_histogram(position = "identity", alpha = 0.5, bins = 20) +
+  labs(
+    x = "Estimated propensity score",
+    y = "Count",
+    fill = NULL
+  )
+```
+
+If the treated group tends to have much higher propensity scores than the control group, that tells us treatment assignment is strongly related to the observed baseline covariates. That is exactly why a naive comparison can be misleading. At the same time, if there is at least some substantial overlap, then matching may allow us to compare treated and control individuals who were similarly likely to receive treatment.
+
+Next, we use nearest-neighbor matching based on the estimated propensity scores. The basic algorithm for this is that we pick a treated unit and find the control that has the nearest propensity score. We then remove the treated and control unit from the data and put them into a new data set. We go to the next treated unit and repeat until either there are no more controls or no more treated units.  
+
+```{r}
+m_out <- matchit(
+  treat ~ age + educ + race + married + nodegree + re74 + re75,
+  data = aa,
+  method = "nearest",
+  distance = "glm"
+)
+
+summary(m_out)
+```
+
+The matching summary is useful because it reports balance before and after matching. The main question is whether the treated and control groups become more similar on the observed covariates after matching. In a good matching analysis, we care more about improved balance than about how well the treatment model predicts treatment. Here, we can see that several variables are not well balanced even after matching. We focus only on the first three colums and we see that while the mean of `age` (for example) is well balanced with 25.8 for treatment and 25.3 for control, the racial balance is poor with 84% of the treated population is black while only 47% of the matched control population is black. For each variable, we want the standardized mean difference to be less than, say 0.2, in absolute value to be well-balanced. Here, we see that the race variables are not well matched, nor is distance, which is the raw propensity score.
+
+Despite these warning signs, we now extract the matched data and estimate the treatment effect in the matched sample.
+
+```{r}
+aa_match <- match.data(m_out)
+
+mod_match <- lm(re78 ~ treat, data = aa_match, weights = weights)
+
+tidy(mod_match, conf.int = TRUE)
+```
+
+This matched regression is much simpler than the earlier adjusted regression because the covariate adjustment has largely been moved into the design stage. After matching, we estimate the effect of treatment by comparing outcomes in the matched sample, where treated and control individuals are intended to be more comparable on the observed baseline covariates.
+
+For comparison, it is helpful to look at the naive estimate from the unmatched data.
+
+```{r}
+mod_naive <- lm(re78 ~ treat, data = aa)
+
+bind_rows(
+  tidy(mod_naive, conf.int = TRUE) |> mutate(model = "Naive"),
+  tidy(mod_match, conf.int = TRUE) |> mutate(model = "Matched")
+) |>
+  filter(term == "treatTreated") |>
+  select(model, estimate, conf.low, conf.high, p.value)
+```
+
+The comparison between the naive and matched estimates shows how much the answer changes once we restrict attention to more comparable treated and control individuals. If the two estimates differ substantially, that is evidence that baseline differences between the groups mattered.
+
+
+
