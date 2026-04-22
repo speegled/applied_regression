@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 12 The retrofit study | Applied Regression with R</title>
+  <meta name="description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  <meta name="generator" content="bookdown 0.46 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 12 The retrofit study | Applied Regression with R" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 12 The retrofit study | Applied Regression with R" />
+  
+  <meta name="twitter:description" content="Applied Regression With R by Darrin Speegle. This book is based on the notes for my Applied Regression course taught at Saint Louis University. We cover the basics of descriptive modeling, predictive modeling and causal inference." />
+  
+
+<meta name="author" content="Darrin Speegle" />
+
+
+<meta name="date" content="2026-04-22" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon" />
+<link rel="prev" href="causal-inference.html"/>
+
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<link href="libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet" />
+<script src="libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="libs/plotly-binding-4.11.0/plotly.js"></script>
+<script src="libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+<link href="libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Applied Regression with R<br />&nbsp; Notes From STAT 4870/5087</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Preface</a></li>
+<li class="chapter" data-level="2" data-path="classicaltheory.html"><a href="classicaltheory.html"><i class="fa fa-check"></i><b>2</b> Classical Theory of Simple Linear Regression</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="classicaltheory.html"><a href="classicaltheory.html#review"><i class="fa fa-check"></i><b>2.1</b> Review</a>
+<ul>
+<li class="chapter" data-level="2.1.1" data-path="classicaltheory.html"><a href="classicaltheory.html#estimating-means-and-standard-deviations"><i class="fa fa-check"></i><b>2.1.1</b> Estimating Means and standard deviations</a></li>
+<li class="chapter" data-level="2.1.2" data-path="classicaltheory.html"><a href="classicaltheory.html#estimating-the-density-of-an-rv"><i class="fa fa-check"></i><b>2.1.2</b> Estimating the density of an rv</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="classicaltheory.html"><a href="classicaltheory.html#linear-regression-overview"><i class="fa fa-check"></i><b>2.2</b> Linear Regression Overview</a></li>
+<li class="chapter" data-level="2.3" data-path="classicaltheory.html"><a href="classicaltheory.html#linear-regression-with-no-intercept"><i class="fa fa-check"></i><b>2.3</b> Linear Regression with no intercept</a></li>
+<li class="chapter" data-level="2.4" data-path="classicaltheory.html"><a href="classicaltheory.html#the-full-model"><i class="fa fa-check"></i><b>2.4</b> The full model</a>
+<ul>
+<li class="chapter" data-level="2.4.1" data-path="classicaltheory.html"><a href="classicaltheory.html#hypothesis-test-interlude"><i class="fa fa-check"></i><b>2.4.1</b> Hypothesis Test Interlude</a></li>
+</ul></li>
+<li class="chapter" data-level="2.5" data-path="classicaltheory.html"><a href="classicaltheory.html#using-different-loss-functions"><i class="fa fa-check"></i><b>2.5</b> Using different loss functions</a></li>
+<li class="chapter" data-level="" data-path="classicaltheory.html"><a href="classicaltheory.html#vignette-a-dplyr-primer"><i class="fa fa-check"></i>Vignette: A dplyr primer</a></li>
+<li class="chapter" data-level="2.6" data-path="classicaltheory.html"><a href="classicaltheory.html#exercises"><i class="fa fa-check"></i><b>2.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html"><i class="fa fa-check"></i><b>3</b> Multiple Linear Regression</a>
+<ul>
+<li class="chapter" data-level="3.0.1" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#anova"><i class="fa fa-check"></i><b>3.0.1</b> Aside on multiple R squared and ANOVA</a></li>
+<li class="chapter" data-level="3.1" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#more-variable-selection-anova"><i class="fa fa-check"></i><b>3.1</b> More Variable Selection: ANOVA</a></li>
+<li class="chapter" data-level="3.2" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#predictions"><i class="fa fa-check"></i><b>3.2</b> Predictions</a></li>
+<li class="chapter" data-level="3.3" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#using-aic"><i class="fa fa-check"></i><b>3.3</b> Using AIC</a>
+<ul>
+<li class="chapter" data-level="3.3.1" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#likelihood-functions"><i class="fa fa-check"></i><b>3.3.1</b> Likelihood functions</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="multiple-linear-regression.html"><a href="multiple-linear-regression.html#exercises-1"><i class="fa fa-check"></i><b>3.4</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html"><i class="fa fa-check"></i><b>4</b> Intro to Predictive Modeling</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#comparingtwomodels"><i class="fa fa-check"></i><b>4.1</b> Comparing Two Models</a></li>
+<li class="chapter" data-level="4.2" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#a-brief-return-to-inference"><i class="fa fa-check"></i><b>4.2</b> A Brief Return to Inference</a></li>
+<li class="chapter" data-level="4.3" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#simulations-of-expected-mse"><i class="fa fa-check"></i><b>4.3</b> Simulations of Expected MSE</a>
+<ul>
+<li class="chapter" data-level="4.3.1" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#estimating-mse-and-bias-variance-tradeoff"><i class="fa fa-check"></i><b>4.3.1</b> Estimating MSE and Bias-Variance Tradeoff</a></li>
+<li class="chapter" data-level="4.3.2" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#estimating-mse-for-new-predictors-uniformly-sampled"><i class="fa fa-check"></i><b>4.3.2</b> Estimating MSE for new predictors uniformly sampled</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#bias-variance-trade-off"><i class="fa fa-check"></i><b>4.4</b> Bias Variance Trade-off</a></li>
+<li class="chapter" data-level="4.5" data-path="intro-to-predictive-modeling.html"><a href="intro-to-predictive-modeling.html#exercises-2"><i class="fa fa-check"></i><b>4.5</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html"><i class="fa fa-check"></i><b>5</b> Regression Predictive Models</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#preprocessing"><i class="fa fa-check"></i><b>5.1</b> Preprocessing</a></li>
+<li class="chapter" data-level="5.2" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#missing-data"><i class="fa fa-check"></i><b>5.2</b> Missing Data</a>
+<ul>
+<li class="chapter" data-level="5.2.1" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#predicting-when-a-level-is-missing-from-the-training-set"><i class="fa fa-check"></i><b>5.2.1</b> Predicting when a level is missing from the training set</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#correlated-predictors"><i class="fa fa-check"></i><b>5.3</b> Correlated Predictors</a></li>
+<li class="chapter" data-level="5.4" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#aside-on-pca"><i class="fa fa-check"></i><b>5.4</b> Aside on PCA</a></li>
+<li class="chapter" data-level="5.5" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#johnson-lindenstrauss-dimension-reduction"><i class="fa fa-check"></i><b>5.5</b> Johnson-Lindenstrauss Dimension Reduction</a></li>
+<li class="chapter" data-level="5.6" data-path="regression-predictive-models.html"><a href="regression-predictive-models.html#exercises-3"><i class="fa fa-check"></i><b>5.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="variable-selection.html"><a href="variable-selection.html"><i class="fa fa-check"></i><b>6</b> Variable Selection</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="variable-selection.html"><a href="variable-selection.html#partial-least-squares"><i class="fa fa-check"></i><b>6.1</b> Partial Least Squares</a>
+<ul>
+<li class="chapter" data-level="6.1.1" data-path="variable-selection.html"><a href="variable-selection.html#optional-pls-stuff"><i class="fa fa-check"></i><b>6.1.1</b> Optional PLS Stuff</a></li>
+</ul></li>
+<li class="chapter" data-level="6.2" data-path="variable-selection.html"><a href="variable-selection.html#ridgelasso-and-elastic-net"><i class="fa fa-check"></i><b>6.2</b> Ridge/Lasso and Elastic Net</a>
+<ul>
+<li class="chapter" data-level="6.2.1" data-path="variable-selection.html"><a href="variable-selection.html#ridge-regression"><i class="fa fa-check"></i><b>6.2.1</b> Ridge Regression</a></li>
+<li class="chapter" data-level="6.2.2" data-path="variable-selection.html"><a href="variable-selection.html#lasso"><i class="fa fa-check"></i><b>6.2.2</b> LASSO</a></li>
+</ul></li>
+<li class="chapter" data-level="6.3" data-path="variable-selection.html"><a href="variable-selection.html#step-aic"><i class="fa fa-check"></i><b>6.3</b> Step AIC</a>
+<ul>
+<li class="chapter" data-level="6.3.1" data-path="variable-selection.html"><a href="variable-selection.html#doing-lgocv-with-preprocessing"><i class="fa fa-check"></i><b>6.3.1</b> Doing LGOCV with preprocessing</a></li>
+</ul></li>
+<li class="chapter" data-level="6.4" data-path="variable-selection.html"><a href="variable-selection.html#interactions"><i class="fa fa-check"></i><b>6.4</b> Interactions</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html"><i class="fa fa-check"></i><b>7</b> Generalized Linear Models</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#logistic-regression"><i class="fa fa-check"></i><b>7.1</b> Logistic Regression</a>
+<ul>
+<li class="chapter" data-level="7.1.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#malaria-example-intro"><i class="fa fa-check"></i><b>7.1.1</b> Malaria Example (Intro)</a></li>
+<li class="chapter" data-level="7.1.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#the-model-theory"><i class="fa fa-check"></i><b>7.1.2</b> The model (theory)</a></li>
+<li class="chapter" data-level="7.1.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#estimating-parameters-using-mle"><i class="fa fa-check"></i><b>7.1.3</b> Estimating parameters using MLE</a></li>
+<li class="chapter" data-level="7.1.4" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#estimating-parameters-via-loss-function"><i class="fa fa-check"></i><b>7.1.4</b> Estimating parameters via loss function</a></li>
+<li class="chapter" data-level="7.1.5" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#interpreting-summary"><i class="fa fa-check"></i><b>7.1.5</b> Interpreting summary</a></li>
+</ul></li>
+<li class="chapter" data-level="7.2" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#mixed-effects-logistic-regression"><i class="fa fa-check"></i><b>7.2</b> Mixed Effects Logistic Regression</a>
+<ul>
+<li class="chapter" data-level="7.2.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#nested-random-effects"><i class="fa fa-check"></i><b>7.2.1</b> Nested random effects</a></li>
+</ul></li>
+<li class="chapter" data-level="7.3" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#count-regression"><i class="fa fa-check"></i><b>7.3</b> Count Regression</a>
+<ul>
+<li class="chapter" data-level="7.3.1" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#mixed-effects-model"><i class="fa fa-check"></i><b>7.3.1</b> Mixed Effects Model</a></li>
+</ul></li>
+<li class="chapter" data-level="7.4" data-path="generalized-linear-models.html"><a href="generalized-linear-models.html#offsets"><i class="fa fa-check"></i><b>7.4</b> Offsets</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="lecture-notes.html"><a href="lecture-notes.html"><i class="fa fa-check"></i><b>8</b> Lecture Notes</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="lecture-notes.html"><a href="lecture-notes.html#january-27"><i class="fa fa-check"></i><b>8.1</b> January 27</a></li>
+<li class="chapter" data-level="8.2" data-path="lecture-notes.html"><a href="lecture-notes.html#february-3"><i class="fa fa-check"></i><b>8.2</b> February 3</a>
+<ul>
+<li class="chapter" data-level="8.2.1" data-path="lecture-notes.html"><a href="lecture-notes.html#simulating-data"><i class="fa fa-check"></i><b>8.2.1</b> Simulating Data</a></li>
+<li class="chapter" data-level="8.2.2" data-path="lecture-notes.html"><a href="lecture-notes.html#building-models"><i class="fa fa-check"></i><b>8.2.2</b> Building Models</a></li>
+</ul></li>
+<li class="chapter" data-level="8.3" data-path="lecture-notes.html"><a href="lecture-notes.html#february-5"><i class="fa fa-check"></i><b>8.3</b> February 5</a>
+<ul>
+<li class="chapter" data-level="8.3.1" data-path="lecture-notes.html"><a href="lecture-notes.html#using-broomaugment"><i class="fa fa-check"></i><b>8.3.1</b> Using <code>broom::augment</code></a></li>
+<li class="chapter" data-level="8.3.2" data-path="lecture-notes.html"><a href="lecture-notes.html#multicollinearity"><i class="fa fa-check"></i><b>8.3.2</b> Multicollinearity</a></li>
+</ul></li>
+<li class="chapter" data-level="8.4" data-path="lecture-notes.html"><a href="lecture-notes.html#february-10"><i class="fa fa-check"></i><b>8.4</b> February 10</a>
+<ul>
+<li class="chapter" data-level="8.4.1" data-path="lecture-notes.html"><a href="lecture-notes.html#anova-models"><i class="fa fa-check"></i><b>8.4.1</b> ANOVA Models</a></li>
+<li class="chapter" data-level="8.4.2" data-path="lecture-notes.html"><a href="lecture-notes.html#penguins"><i class="fa fa-check"></i><b>8.4.2</b> Penguins</a></li>
+</ul></li>
+<li class="chapter" data-level="8.5" data-path="lecture-notes.html"><a href="lecture-notes.html#february-12"><i class="fa fa-check"></i><b>8.5</b> February 12</a>
+<ul>
+<li class="chapter" data-level="8.5.1" data-path="lecture-notes.html"><a href="lecture-notes.html#an-example"><i class="fa fa-check"></i><b>8.5.1</b> An Example</a></li>
+</ul></li>
+<li class="chapter" data-level="8.6" data-path="lecture-notes.html"><a href="lecture-notes.html#february-17"><i class="fa fa-check"></i><b>8.6</b> February 17</a>
+<ul>
+<li class="chapter" data-level="8.6.1" data-path="lecture-notes.html"><a href="lecture-notes.html#adding-random-speaker-and-sentence-effects"><i class="fa fa-check"></i><b>8.6.1</b> Adding random speaker and sentence effects</a></li>
+<li class="chapter" data-level="8.6.2" data-path="lecture-notes.html"><a href="lecture-notes.html#random-intercepts-with-continuous-predictor"><i class="fa fa-check"></i><b>8.6.2</b> Random intercepts with continuous predictor</a></li>
+<li class="chapter" data-level="8.6.3" data-path="lecture-notes.html"><a href="lecture-notes.html#adding-random-slopes"><i class="fa fa-check"></i><b>8.6.3</b> Adding random slopes</a></li>
+</ul></li>
+<li class="chapter" data-level="8.7" data-path="lecture-notes.html"><a href="lecture-notes.html#february-19"><i class="fa fa-check"></i><b>8.7</b> February 19</a>
+<ul>
+<li class="chapter" data-level="8.7.1" data-path="lecture-notes.html"><a href="lecture-notes.html#random-slopes"><i class="fa fa-check"></i><b>8.7.1</b> Random Slopes</a></li>
+<li class="chapter" data-level="8.7.2" data-path="lecture-notes.html"><a href="lecture-notes.html#comparing-models"><i class="fa fa-check"></i><b>8.7.2</b> Comparing models</a></li>
+</ul></li>
+<li class="chapter" data-level="8.8" data-path="lecture-notes.html"><a href="lecture-notes.html#february-24"><i class="fa fa-check"></i><b>8.8</b> February 24</a>
+<ul>
+<li class="chapter" data-level="8.8.1" data-path="lecture-notes.html"><a href="lecture-notes.html#beethoven-tempo-example"><i class="fa fa-check"></i><b>8.8.1</b> Beethoven Tempo Example</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="maximum-likelihood-estimation.html"><a href="maximum-likelihood-estimation.html"><i class="fa fa-check"></i><b>9</b> Maximum Likelihood Estimation</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="maximum-likelihood-estimation.html"><a href="maximum-likelihood-estimation.html#mle-for-mixed-models"><i class="fa fa-check"></i><b>9.1</b> MLE for mixed models</a>
+<ul>
+<li class="chapter" data-level="9.1.1" data-path="maximum-likelihood-estimation.html"><a href="maximum-likelihood-estimation.html#what-does-z-tz-do"><i class="fa fa-check"></i><b>9.1.1</b> What does <code>Z %*% t(Z)</code> do?</a></li>
+<li class="chapter" data-level="9.1.2" data-path="maximum-likelihood-estimation.html"><a href="maximum-likelihood-estimation.html#what-does-multiplying-by-tau2-do"><i class="fa fa-check"></i><b>9.1.2</b> What does multiplying by <code>tau2</code> do?</a></li>
+<li class="chapter" data-level="9.1.3" data-path="maximum-likelihood-estimation.html"><a href="maximum-likelihood-estimation.html#what-does-sigma2-diagn-do"><i class="fa fa-check"></i><b>9.1.3</b> What does <code>sigma2 * diag(N)</code> do?</a></li>
+<li class="chapter" data-level="9.1.4" data-path="maximum-likelihood-estimation.html"><a href="maximum-likelihood-estimation.html#what-does-the-final-matrix-represent"><i class="fa fa-check"></i><b>9.1.4</b> What does the final matrix represent?</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="missing-data-1.html"><a href="missing-data-1.html"><i class="fa fa-check"></i><b>10</b> Missing Data</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="missing-data-1.html"><a href="missing-data-1.html#technical-details"><i class="fa fa-check"></i><b>10.1</b> Technical Details</a></li>
+<li class="chapter" data-level="10.2" data-path="missing-data-1.html"><a href="missing-data-1.html#diagnostics"><i class="fa fa-check"></i><b>10.2</b> Diagnostics</a></li>
+<li class="chapter" data-level="10.3" data-path="missing-data-1.html"><a href="missing-data-1.html#pooling"><i class="fa fa-check"></i><b>10.3</b> Pooling</a></li>
+<li class="chapter" data-level="10.4" data-path="missing-data-1.html"><a href="missing-data-1.html#simulations"><i class="fa fa-check"></i><b>10.4</b> Simulations</a></li>
+<li class="chapter" data-level="10.5" data-path="missing-data-1.html"><a href="missing-data-1.html#sensitivity-analysis"><i class="fa fa-check"></i><b>10.5</b> Sensitivity Analysis</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="causal-inference.html"><a href="causal-inference.html"><i class="fa fa-check"></i><b>11</b> Causal Inference</a>
+<ul>
+<li class="chapter" data-level="11.0.1" data-path="causal-inference.html"><a href="causal-inference.html#baseline-differences-between-the-groups"><i class="fa fa-check"></i><b>11.0.1</b> Baseline Differences Between the Groups</a></li>
+<li class="chapter" data-level="11.0.2" data-path="causal-inference.html"><a href="causal-inference.html#summary"><i class="fa fa-check"></i><b>11.0.2</b> Summary</a></li>
+<li class="chapter" data-level="11.1" data-path="causal-inference.html"><a href="causal-inference.html#identification-assumptions-for-causal-adjustment"><i class="fa fa-check"></i><b>11.1</b> Identification Assumptions for Causal Adjustment</a>
+<ul>
+<li class="chapter" data-level="11.1.1" data-path="causal-inference.html"><a href="causal-inference.html#assumptions-for-causal-adjustment"><i class="fa fa-check"></i><b>11.1.1</b> Assumptions for Causal Adjustment</a></li>
+<li class="chapter" data-level="11.1.2" data-path="causal-inference.html"><a href="causal-inference.html#the-lalonde-data-revisited"><i class="fa fa-check"></i><b>11.1.2</b> The Lalonde Data Revisited</a></li>
+<li class="chapter" data-level="11.1.3" data-path="causal-inference.html"><a href="causal-inference.html#vocabulary-and-an-example"><i class="fa fa-check"></i><b>11.1.3</b> Vocabulary and an Example</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html"><i class="fa fa-check"></i><b>12</b> The <code>retrofit</code> study</a>
+<ul>
+<li class="chapter" data-level="12.0.1" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#worksheet"><i class="fa fa-check"></i><b>12.0.1</b> Worksheet</a></li>
+<li class="chapter" data-level="12.0.2" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#solutions"><i class="fa fa-check"></i><b>12.0.2</b> Solutions</a></li>
+<li class="chapter" data-level="12.1" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#collid3rs"><i class="fa fa-check"></i><b>12.1</b> Collid3rs</a></li>
+<li class="chapter" data-level="12.2" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#post-treatment-variables-do-not-always-fit-neatly-into-one-box"><i class="fa fa-check"></i><b>12.2</b> Post-treatment variables do not always fit neatly into one box</a></li>
+<li class="chapter" data-level="12.3" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#variables-measured-after-treatment-are-not-automatically-bad-controls"><i class="fa fa-check"></i><b>12.3</b> Variables measured after treatment are not automatically bad controls</a></li>
+<li class="chapter" data-level="12.4" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#why-insulation_added-and-thermostat_setting_2025-play-different-roles"><i class="fa fa-check"></i><b>12.4</b> Why <code>insulation_added</code> and <code>thermostat_setting_2025</code> play different roles</a></li>
+<li class="chapter" data-level="12.5" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#why-finalist_pool-or-special_review-can-be-problematic-in-more-than-one-way"><i class="fa fa-check"></i><b>12.5</b> Why <code>finalist_pool</code> or <code>special_review</code> can be problematic in more than one way</a></li>
+<li class="chapter" data-level="12.6" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#a-compact-summary"><i class="fa fa-check"></i><b>12.6</b> A compact summary</a></li>
+<li class="chapter" data-level="12.7" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#directed-acyclic-graphs-dags"><i class="fa fa-check"></i><b>12.7</b> Directed Acyclic Graphs (DAGs)</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Applied Regression with R</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="the-retrofit-study" class="section level1 hasAnchor" number="12">
+<h1><span class="header-section-number">Chapter 12</span> The <code>retrofit</code> study<a href="the-retrofit-study.html#the-retrofit-study" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>The <code>retrofit</code> study is a hypothetical observational study of a city-run home weatherization program. The city offers subsidies for attic and wall insulation, air sealing, duct repair, and minor furnace improvements to households with high energy burdens. Some households apply directly, while others are identified through neighborhood outreach or energy audits. Some households receive the retrofit before the winter heating season, and some do not. There is no random assignment. Participation depends on a mixture of household choice, city targeting, contractor availability, and administrative prioritization.</p>
+<p>The treatment variable is <code>retrofit</code>, equal to 1 if the household received the weatherization package before winter 2024–25 and 0 otherwise. The outcome is <code>gas_use_2025</code>, the household’s total natural-gas use during winter 2024–25. Lower values are better. Because treatment is not randomized, treated and untreated households are likely to differ in many ways before treatment begins. Some live in older homes, some have larger families, some have higher energy burdens, and some have homes that are much less energy efficient than others. Those pre-treatment differences are exactly what make causal adjustment necessary.</p>
+<p>It is useful to imagine what <code>?retrofit</code> might look like in R.</p>
+<pre class="text"><code>retrofit {causalexamples} R Documentation
+
+Home Weatherization Program Study
+
+Description
+Observational study of a city-run home weatherization program. The dataset follows
+5,000 owner-occupied households over two winters. Treated households received a
+subsidized weatherization package before winter 2024--25. The main outcome is
+natural-gas use during winter 2024--25. The data were assembled from utility bills,
+program records, property records, and a follow-up survey.
+
+Usage
+retrofit
+
+Format
+A data frame with 5000 rows and 27 variables:
+
+retrofit
+    Treatment indicator equal to 1 if the household received the retrofit package
+    before winter 2024--25 and 0 otherwise.
+
+gas_use_2025
+    Outcome: total natural-gas use during winter 2024--25, measured in therms.
+
+gas_use_2024
+    Baseline variable measured before treatment: total natural-gas use during
+    winter 2023--24, measured in therms.
+
+electric_use_2024
+    Baseline variable measured before treatment: total electricity use during
+    calendar year 2024 before retrofit work began, measured in kWh.
+
+sqft
+    Baseline variable measured before treatment: interior square footage of the
+    home from property records.
+
+home_age
+    Baseline variable measured before treatment: age of the home in years at the
+    start of winter 2024--25.
+
+building_type
+    Baseline variable measured before treatment: detached, duplex, rowhouse, or
+    small multifamily.
+
+insulation_baseline
+    Baseline variable measured before treatment: insulation score from the
+    pre-treatment energy audit.
+
+furnace_age
+    Baseline variable measured before treatment: age of the primary heating system
+    in years at intake.
+
+income
+    Baseline variable measured before treatment: household income in thousands of
+    dollars, recorded at intake.
+
+arrears_balance
+    Baseline variable measured before treatment: amount owed on utility bills at
+    intake or referral.
+
+credit_score
+    Baseline variable measured before treatment: household credit-score category
+    at intake, before any retrofit work begins.
+
+owner_occupied
+    Baseline variable measured before treatment: indicator for owner occupancy at
+    intake.
+
+years_in_home
+    Baseline variable measured before treatment: number of years the household had
+    lived in the home at intake.
+
+occupants
+    Baseline variable measured before treatment: number of people living in the
+    home at intake.
+
+children
+    Baseline variable measured before treatment: number of children in the
+    household at intake.
+
+elderly_resident
+    Baseline variable measured before treatment: indicator for whether at least
+    one resident was age 65 or older at intake.
+
+work_from_home_days
+    Baseline variable measured before treatment: average number of days per week
+    at least one adult worked from home at intake.
+
+energy_audit_score
+    Baseline variable measured before treatment: audit score summarizing energy
+    inefficiency before treatment.
+
+energy_burden
+    Baseline variable measured before treatment: share of household income spent
+    on home energy before treatment.
+
+neighborhood
+    Baseline variable measured before treatment: neighborhood identifier from the
+    city&#39;s administrative records.
+
+application_month
+    Baseline variable measured before treatment: month in 2024 when the household
+    applied or was referred to the program.
+
+insulation_added
+    Post-treatment variable: amount of new insulation installed after treatment
+    assignment as part of the retrofit intervention.
+
+contractor_visits
+    Post-treatment variable: number of contractor visits after treatment began.
+
+coaching_sessions
+    Post-treatment variable: number of energy coaching sessions completed after
+    treatment began.
+
+thermostat_setting_2025
+    Post-treatment variable: average winter thermostat setting during 2024--25.
+
+inspection_passed
+    Post-treatment variable: indicator for whether the household passed the
+    post-installation inspection.
+
+followup_survey_response
+    Post-treatment variable: indicator for whether the household completed the
+    spring 2025 follow-up survey.</code></pre>
+<div id="worksheet" class="section level3 hasAnchor" number="12.0.1">
+<h3><span class="header-section-number">12.0.1</span> Worksheet<a href="the-retrofit-study.html#worksheet" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>After you read the vocabulary and the <code>retrofit</code> description, switch to the worksheet. The goal is not to produce the one perfect answer. The goal is to practice naming the roles variables can play in an observational causal study and to justify those choices in words.</p>
+<p>Consult the reference handout while you work. First answer the questions on your own. Then compare answers with a partner or small group.</p>
+<div id="part-a-core-roles" class="section level4 hasAnchor" number="12.0.1.1">
+<h4><span class="header-section-number">12.0.1.1</span> Part A: Core roles<a href="the-retrofit-study.html#part-a-core-roles" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ol style="list-style-type: decimal">
+<li><p>What is the treatment variable?</p></li>
+<li><p>What is the outcome variable?</p></li>
+</ol>
+</div>
+<div id="part-b-variable-classification" class="section level4 hasAnchor" number="12.0.1.2">
+<h4><span class="header-section-number">12.0.1.2</span> Part B: Variable classification<a href="the-retrofit-study.html#part-b-variable-classification" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>Fill in each line with several variable names (unless otherwise instructed) from the <code>retrofit</code> study.</p>
+<ul>
+<li><p><strong>Strong pre-treatment confounders:</strong></p></li>
+<li><p><strong>Other useful pre-treatment covariates:</strong></p></li>
+<li><p><strong>One post-treatment mediator (best choice):</strong></p></li>
+<li><p><strong>One possible collider (best choice):</strong></p></li>
+<li><p><strong>Other bad controls (not including your mediator or collider choice):</strong></p></li>
+<li><p><strong>Variables or combinations of variables that raise an overlap concern:</strong></p></li>
+<li><p><strong>Variables that raise a consistency concern:</strong></p></li>
+</ul>
+</div>
+<div id="part-c-one-step-back" class="section level4 hasAnchor" number="12.0.1.3">
+<h4><span class="header-section-number">12.0.1.3</span> Part C: One step back<a href="the-retrofit-study.html#part-c-one-step-back" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>In two or three sentences, explain the difference between these two problems:</p>
+<ul>
+<li>unmeasured confounding</li>
+<li>limited overlap</li>
+</ul>
+<p>Your answer should make clear why one is something we try to reduce through adjustment, while the other is a limitation of the data themselves.</p>
+</div>
+</div>
+<div id="solutions" class="section level3 hasAnchor" number="12.0.2">
+<h3><span class="header-section-number">12.0.2</span> Solutions<a href="the-retrofit-study.html#solutions" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>This key is not completely unique. Several answers are defensible if the explanation is good. The main goal is that students classify variables according to their causal role and justify the harder cases clearly.</p>
+<div id="part-a-core-roles-1" class="section level4 hasAnchor" number="12.0.2.1">
+<h4><span class="header-section-number">12.0.2.1</span> Part A: Core roles<a href="the-retrofit-study.html#part-a-core-roles-1" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ol style="list-style-type: decimal">
+<li><p><strong>Treatment variable:</strong> <code>retrofit</code></p></li>
+<li><p><strong>Outcome variable:</strong> <code>gas_use_2025</code></p></li>
+</ol>
+</div>
+<div id="part-b-variable-classification-1" class="section level4 hasAnchor" number="12.0.2.2">
+<h4><span class="header-section-number">12.0.2.2</span> Part B: Variable classification<a href="the-retrofit-study.html#part-b-variable-classification-1" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><p><strong>Strong pre-treatment confounders:</strong><br />
+<code>gas_use_2024</code>, <code>sqft</code>, <code>home_age</code>, <code>insulation_baseline</code>, <code>furnace_age</code>, <code>income</code>, <code>arrears_balance</code>, <code>energy_burden</code>, <code>energy_audit_score</code>, <code>neighborhood</code></p></li>
+<li><p><strong>Other useful pre-treatment covariates:</strong><br />
+<code>electric_use_2024</code>, <code>building_type</code>, <code>owner_occupied</code>, <code>years_in_home</code>, <code>occupants</code>, <code>children</code>, <code>elderly_resident</code>, <code>work_from_home_days</code>, <code>credit_score</code>, <code>application_month</code></p></li>
+<li><p><strong>One post-treatment mediator (best choice):</strong><br />
+<code>thermostat_setting_2025</code></p></li>
+<li><p><strong>One possible collider (best choice):</strong><br />
+<code>followup_survey_response</code></p></li>
+<li><p><strong>Other bad controls (not including your mediator or collider choice):</strong><br />
+<code>coaching_sessions</code>, <code>contractor_visits</code><br />
+A reasonable additional answer is <code>inspection_passed</code> if students explain that conditioning on it may induce selection bias or open a noncausal path. I would usually not count <code>insulation_added</code> here if the goal is to keep the roles clean, since it is more useful for the consistency discussion.</p></li>
+<li><p><strong>Variables or combinations of variables that raise an overlap concern:</strong><br />
+Extreme combinations are the main idea here. Good answers include things like:</p>
+<ul>
+<li>very high <code>income</code> together with low <code>energy_burden</code></li>
+<li>very new homes with strong <code>insulation_baseline</code></li>
+<li>very old homes with high <code>gas_use_2024</code>, poor <code>insulation_baseline</code>, and high <code>energy_burden</code></li>
+<li>combinations of <code>neighborhood</code>, <code>income</code>, and <code>home_age</code></li>
+</ul>
+<p>The point is that some treated and untreated households may be scarce in these parts of the covariate space.</p></li>
+<li><p><strong>Variables that raise a consistency concern:</strong><br />
+<code>insulation_added</code> is the best single answer. Stronger answers may note that <code>insulation_added</code> together with <code>contractor_visits</code> or <code>coaching_sessions</code> suggests that <code>retrofit = 1</code> may bundle together substantially different interventions.</p></li>
+</ul>
+</div>
+<div id="part-c-one-step-back-1" class="section level4 hasAnchor" number="12.0.2.3">
+<h4><span class="header-section-number">12.0.2.3</span> Part C: One step back<a href="the-retrofit-study.html#part-c-one-step-back-1" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>A good answer would say something like this:</p>
+<blockquote>
+<p>Unmeasured confounding means that there may still be variables affecting both treatment assignment and the outcome that are not included in the data, so adjustment may fail to make treated and control units truly comparable. Limited overlap is different: it means that even after choosing the covariates, there may be parts of the covariate space where treated and control units are too different to compare directly. Adjustment is meant to reduce confounding by observed variables, but it cannot repair a lack of overlap, which is a limitation of the data themselves.</p>
+</blockquote>
+</div>
+</div>
+<div id="collid3rs" class="section level2 hasAnchor" number="12.1">
+<h2><span class="header-section-number">12.1</span> Collid3rs<a href="the-retrofit-study.html#collid3rs" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>A variable can be a <strong>collider</strong> without automatically being a bad control for the causal effect of interest. A collider is simply a variable with two arrows pointing into it on some path. For example, if both <code>home_age</code> and <code>furnace_age</code> affect <code>energy_burden</code>, then <code>energy_burden</code> is a collider relative to those two variables. That fact alone does <strong>not</strong> imply that controlling for <code>energy_burden</code> will bias the estimated effect of <code>retrofit</code> on <code>gas_use_2025</code>.</p>
+<p>What matters for causal inference is whether conditioning on the collider opens a <strong>noncausal path between treatment and outcome</strong>. This is the key distinction. A variable may be locally a collider, yet still be harmless for the treatment effect if conditioning on it does not create a new path from <code>retrofit</code> to <code>gas_use_2025</code>. In that case the variable might still cause ordinary modeling problems such as redundancy, multicollinearity, or interpretability issues, but not collider bias in the treatment effect.</p>
+<p>A collider is <strong>not</strong> automatically a bad control. It becomes a bad control when conditioning on it opens a spurious path from treatment to outcome.</p>
+<p>A good way to separate the ideas is to compare two cases.</p>
+<p>In a relatively harmless case, suppose</p>
+<p><span class="math display">\[
+\text{home\_age} \rightarrow \text{energy\_burden} \leftarrow \text{furnace\_age}.
+\]</span></p>
+<p>Here <code>energy_burden</code> is indeed a collider of <code>home_age</code> and <code>furnace_age</code>. But unless conditioning on <code>energy_burden</code> opens some new route from <code>retrofit</code> to <code>gas_use_2025</code>, this local collider structure does not itself create causal bias in the treatment effect. The issue is mostly statistical rather than causal.</p>
+<p>In a harmful case, suppose a pre-treatment variable such as <code>finalist_pool</code> behaves like this:</p>
+<p><span class="math display">\[
+\text{retrofit} \leftarrow U_1 \rightarrow \text{finalist\_pool} \leftarrow U_2 \rightarrow \text{gas\_use\_2025},
+\]</span></p>
+<p>where <code>U_1</code> is an unmeasured factor such as household persistence in the application process, and <code>U_2</code> is an unmeasured factor such as hidden housing damage. If we condition on <code>finalist_pool</code>, then treatment can become associated with hidden housing damage through the opened path. Since hidden housing damage affects later gas use, the estimated treatment effect becomes biased. This is the classic collider problem.</p>
+<p>One important intuition is that before conditioning on the collider, <code>U_2</code> is not associated with treatment along that path because the path is blocked. After conditioning on the collider, <code>U_2</code> may become associated with treatment. That is why conditioning on a collider can create a confounding-like problem that was not there before.</p>
+</div>
+<div id="post-treatment-variables-do-not-always-fit-neatly-into-one-box" class="section level2 hasAnchor" number="12.2">
+<h2><span class="header-section-number">12.2</span> Post-treatment variables do not always fit neatly into one box<a href="the-retrofit-study.html#post-treatment-variables-do-not-always-fit-neatly-into-one-box" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Some bad controls do not fit neatly into the simple mediator-versus-collider classification. A good example is <code>sqft</code> measured <strong>after</strong> treatment. Baseline square footage is a sensible pre-treatment covariate. But if post-treatment <code>sqft</code> reflects later additions to the home, then it is no longer just a baseline housing characteristic. Instead, it may reflect changes that happened after treatment or later household decisions influenced by treatment.</p>
+<p>That means post-treatment <code>sqft</code> is usually best described as a <strong>messy post-treatment bad control</strong>. It is not the cleanest flagship example of a mediator, and it is not naturally a collider either. The main problem is simply that it is measured after treatment and may itself reflect downstream changes. A useful sentence is: not every bad control falls neatly into the mediator/collider taxonomy; some are problematic simply because they reflect post-treatment developments.</p>
+</div>
+<div id="variables-measured-after-treatment-are-not-automatically-bad-controls" class="section level2 hasAnchor" number="12.3">
+<h2><span class="header-section-number">12.3</span> Variables measured after treatment are not automatically bad controls<a href="the-retrofit-study.html#variables-measured-after-treatment-are-not-automatically-bad-controls" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The crucial issue is not just whether a variable is measured after treatment in calendar time. The real question is whether the variable is <strong>downstream of the treatment variable in the causal question of interest</strong>. This is why <code>heating_degree_days</code> is different from post-treatment square footage.</p>
+<p>If <code>heating_degree_days</code> measures how cold the winter was, then it is not caused by the retrofit. Even if it is recorded during the same winter as the outcome, it is not downstream of treatment. For that reason, it is not a bad control in the same way a post-treatment mediator would be. It may still or may not be useful, depending on whether households face different weather conditions, but it is not problematic merely because of timing.</p>
+<p>So the better rule is this: be very careful with variables measured after treatment, but the real danger comes from variables that are affected by treatment or otherwise lie on the treatment pathway.</p>
+</div>
+<div id="why-insulation_added-and-thermostat_setting_2025-play-different-roles" class="section level2 hasAnchor" number="12.4">
+<h2><span class="header-section-number">12.4</span> Why <code>insulation_added</code> and <code>thermostat_setting_2025</code> play different roles<a href="the-retrofit-study.html#why-insulation_added-and-thermostat_setting_2025-play-different-roles" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The variable <code>insulation_added</code> is best used in the retrofit example to illustrate a <strong>consistency</strong> concern. If treated households receive very different amounts of insulation or very different bundles of work, then the label <code>retrofit</code> may hide important versions of treatment. In that case the treated potential outcome is less clearly defined, and consistency becomes less plausible unless treatment is described more precisely.</p>
+<p>The variable <code>thermostat_setting_2025</code> is a cleaner example of a <strong>mediator</strong>. If the retrofit makes the home easier or cheaper to heat, households may change how warm they keep the house, and that changed thermostat behavior may affect <code>gas_use_2025</code>. Then</p>
+<p><span class="math display">\[
+\text{retrofit} \rightarrow \text{thermostat\_setting\_2025} \rightarrow \text{gas\_use\_2025}
+\]</span></p>
+<p>is a plausible part of the causal story. If the goal is to estimate the <strong>total effect</strong> of retrofit on gas use, then controlling for <code>thermostat_setting_2025</code> would be a mistake because it would block part of the treatment effect.</p>
+</div>
+<div id="why-finalist_pool-or-special_review-can-be-problematic-in-more-than-one-way" class="section level2 hasAnchor" number="12.5">
+<h2><span class="header-section-number">12.5</span> Why <code>finalist_pool</code> or <code>special_review</code> can be problematic in more than one way<a href="the-retrofit-study.html#why-finalist_pool-or-special_review-can-be-problematic-in-more-than-one-way" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Variables such as <code>finalist_pool</code> or <code>special_review</code> are not only potential colliders. They can also cause trouble because they often function as <strong>selection variables</strong>. If the analysis is restricted to households in the finalist pool, then the study is no longer describing the original applicant population. Even apart from collider bias, this restriction changes the population being studied.</p>
+<p>These variables may also be poor modeling choices because they are often <strong>opaque composite variables</strong>. A status such as <code>finalist_pool</code> may bundle together income, energy burden, application quality, housing problems, and city rules into one summary indicator. Even if it were not creating collider bias, it could still be unhelpful because it hides the underlying sources of variation rather than representing a clean pre-treatment characteristic.</p>
+<p>So there are three distinct concerns worth separating:</p>
+<ul>
+<li><strong>Collider problem:</strong> conditioning on the variable may open a false treatment–outcome path.</li>
+<li><strong>Selection problem:</strong> restricting the sample using the variable may change the target population.</li>
+<li><strong>Modeling problem:</strong> the variable may bundle together several processes and be hard to interpret causally.</li>
+</ul>
+</div>
+<div id="a-compact-summary" class="section level2 hasAnchor" number="12.6">
+<h2><span class="header-section-number">12.6</span> A compact summary<a href="the-retrofit-study.html#a-compact-summary" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The retrofit discussion suggests four practical lessons.</p>
+<ol style="list-style-type: decimal">
+<li>A variable can be a collider somewhere in the graph without being a bad control for the treatment effect.</li>
+<li>A collider becomes a causal problem when conditioning on it opens a noncausal path from treatment to outcome.</li>
+<li>Not every bad control is a clean mediator or collider; some post-treatment variables are simply messy because they reflect downstream changes.</li>
+<li>Variables such as <code>finalist_pool</code> can be problematic for more than one reason: collider bias, selection bias, and opacity in the adjustment set.</li>
+</ol>
+<p>These distinctions are worth making slowly, because people often hear “collider” or “post-treatment variable” as if those labels automatically settle the matter. The more careful rule is always the same: ask whether conditioning on the variable helps or harms the treatment–outcome comparison that the causal question actually requires.</p>
+</div>
+<div id="directed-acyclic-graphs-dags" class="section level2 hasAnchor" number="12.7">
+<h2><span class="header-section-number">12.7</span> Directed Acyclic Graphs (DAGs)<a href="the-retrofit-study.html#directed-acyclic-graphs-dags" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>DAGs can be used to help understand the relationship between variables in a causal analysis. In its simplest form, we put an arrow bewteen two variables if there is or could be (we believe) a causal effect between the two variables. As a basic example, if <span class="math inline">\(D\)</span> is the 0/1 treatment variable and <span class="math inline">\(R\)</span> is the response variable, then we would normally put an arrow between <span class="math inline">\(D\)</span> and <span class="math inline">\(R\)</span>. In the context of the <code>lalonde</code> data, we believe that there is or could be a causal effect between <code>treat</code> and <code>re78</code>, so we would write</p>
+<p><span class="math display">\[
+\text{treat} \to \text{re78}
+\]</span></p>
+<p>We also believe that <code>re75</code> has a causal effect on <code>re78</code>, so we would write</p>
+<p><span class="math display">\[
+\text{re75}\to \text{re78}
+\]</span></p>
+<p>At this point, <code>re75</code> is not yet identified as a confounder, merely a variable that could have a causal effect on <code>re78</code>. However, we also believe that income in 1975 could have a causal effect on whether a candidate participates in the job training program, so we would have:</p>
+<p><span class="math display">\[
+\text{treat} \leftarrow \text{re75}\rightarrow \text{re78}
+\]</span>
+This is the classic DAG for a confounder. It is a variable that has a causal effect on both treatment and the response variable. This creates a <strong>backdoor path</strong> so that if we do not adjust for income in 1975, then we could have non-causal correlation between treatment and income in 1978. In other words, <code>re75</code> is a good control because it helps block a noncausal association between <code>treat</code> and <code>re78</code>.</p>
+<p>Now let’s look at <strong>mediators</strong>. Suppose we also had the variable <code>jobsearcheffort</code>. This would be a mediator. The reason is that we can imagine that the training could have a causal effect on the job search effort. Job search effort also has a causal effect on income. So we get the DAG</p>
+<p><span class="math display">\[
+\text{treat} \rightarrow \text{jobsearch} \rightarrow \text{re78}
+\]</span></p>
+<p>This is the traditional mediator DAG. If we control on <code>jobsearch</code>, then part of the effect of <code>treat</code> will be swallowed up by the <code>jobsearch</code> estimate, when in fact the <code>jobsearch</code> usage was <strong>caused</strong> by the <code>treat</code>. Note that the difference between a confounder and a mediator is whether the variable is caused by the treatment (mediator) or causes the treatment (confounder).</p>
+<p>Finally, let’s look at <strong>colliders</strong>. We claim that <code>followupresponse</code> is a collider. The causal story is that the training can affect whether someone completes the follow-up, and organizational skill (which is unmeasured) can also affect whether someone follows up. Organizational skill may also affect later income. This gives the DAG</p>
+<p><span class="math display">\[
+\text{treat} \rightarrow \text{followupresponse} \leftarrow \text{organization} \rightarrow \text{re78}.
+\]</span></p>
+<p>By itself, this path isn’t a problem. But if we condition on <code>followupresponse</code> for example, by controlling for it in a regression or by restricting attention to those who respond, we open a noncausal path between treatment and income. Treatment does not affect real income along this path, but conditioning on the collider can still induce a correlation between treatment and income.</p>
+<p>Although many colliders which are bad controls are downstream of treatment, that is not always the case. Here is a slightly more complicated collider example in which the collider is <strong>not</strong> downstream of treatment. Suppose <code>retrofit</code> is our treatment and <code>gas\_use\_2025</code> is the outcome. Now imagine two unmeasured variables. The first is household persistence: some households are better at completing paperwork, meeting deadlines, and following through with the application process. That can increase the chance that they ultimately receive the retrofit. The second is hidden housing damage: some homes have serious but partly unrecorded problems, such as leaky ducts or damaged window seals, and those problems can increase later gas use. Suppose also that a household enters the city’s <code>finalist\_pool</code> either because it has a very persistent application or because the home appears complicated enough to merit special attention. Then we have the DAG</p>
+<p><span class="math display">\[
+\text{retrofit} \leftarrow \text{persistence} \rightarrow \text{finalist\_pool} \leftarrow \text{hidden damage} \rightarrow \text{gas\_use\_2025}.
+\]</span></p>
+<p>The key point is that <code>finalist_pool</code> is a collider, but it is <strong>not</strong> downstream of treatment. By itself, this path is not a problem. However, if we condition on <code>finalist_pool</code>, for example, by controlling for it in a regression or by restricting the analysis only to households in the finalist pool, we open a noncausal path between treatment and outcome. Intuitively, once we hold finalist status fixed, treatment begins to carry information about hidden housing damage through the induced association created at the collider. That means <code>finalist_pool</code> is a bad control even though it is not caused by treatment.</p>
+<p>We contrast that with the following collider which is not a bad control. This is different from the earlier <code>energy_burden</code> example. There, the idea was that <code>energy_burden</code> might be a collider relative to two other baseline housing variables, such as <code>home_age</code> and <code>furnace_age</code>, if both of those affect energy burden. But that fact alone does not make <code>energy_burden</code> a bad control for estimating the effect of <code>retrofit</code> on <code>gas_use_2025</code>. The reason is that conditioning on <code>energy_burden</code> does not necessarily open any important new noncausal path from treatment to outcome. In that case, the main concerns are more ordinary modeling issues, such as redundancy with other baseline controls or difficulty interpreting coefficients, rather than collider bias in the treatment effect. However, if you could come up with a different story about how <code>energy_burden</code> collides with variables to create a noncausal path between treatment and response, then it could be a bad control.</p>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="causal-inference.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": {
+    "github": false,
+    "facebook": true,
+    "twitter": true,
+    "linkedin": false,
+    "weibo": false,
+    "instapaper": false,
+    "vk": false,
+    "whatsapp": false,
+    "all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+  },
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": null,
+    "text": null
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": null,
+    "text": null
+  },
+  "download": null,
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "subsection"
+  }
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

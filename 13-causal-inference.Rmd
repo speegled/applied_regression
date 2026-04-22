@@ -380,43 +380,6 @@ This is the main reason to introduce propensity scores in the first place. Regre
 
 The big lesson from this section is that adjusted comparisons only deserve a causal interpretation under assumptions. Consistency tells us that the treatment must be defined clearly enough for the potential outcomes to make sense. Ignorability says that after conditioning on the observed pre-treatment covariates, treatment assignment is as good as random. Positivity says that comparable treated and control units must exist. Finally, the discussion of bad controls reminds us that adjustment can go wrong when we condition on variables that are affected by treatment. The next section uses propensity scores more directly to organize causal comparisons in observational data.
 
-## Directed Acyclic Graphs (DAGs)
-
-DAGs can be used to help understand the relationship between variables in a causal analysis. In its simplest form, we put an arrow bewteen two variables if there is or could be (we believe) a causal effect between the two variables. As a basic example, if $D$ is the 0/1 treatment variable and $R$ is the response variable, then we would normally put an arrow between $D$ and $R$. In the context of the `lalonde` data, we believe that there is or could be a causal effect between `treat` and `re78`, so we would write
-
-\[
-\text{treat} \to \text{re78}
-\]
-
-We also believe that `re75` has a causal effect on `re78`, so we would write
-
-\[
-\text{re75}\to \text{re78}
-\]
-
-At this point, `re75` is not yet identified as a confounder, merely a variable that could have a causal effect on `re78`. However, we also believe that income in 1975 could have a causal effect on whether a candidate participates in the job training program, so we would have:
-
-\[
-\text{treat} \leftarrow \text{re75}\rightarrow \text{re78}
-\]
-This is the classic DAG for a confounder. It is a variable that has a causal effect on both treatment and the response variable. This creates a **backdoor path** so that if we do not adjust for income in 1975, then we could have non-causal correlation between treatment and income in 1978. In other words, `re75` is a good control because it helps block a noncausal association between `treat` and `re78`.
-
-Now let's look at **mediators**. Suppose we also had the variable `jobsearcheffort`. This would be a mediator. The reason is that we can imagine that the training could have a causal effect on the job search effort. Job search effort also has a causal effect on income. So we get the DAG
-
-\[
-\text{treat} \rightarrow \text{jobsearch} \rightarrow \text{re78}
-\]
-
-This is the traditional mediator DAG. If we control on `jobsearch`, then part of the effect of `treat` will be swallowed up by the `jobsearch` estimate, when in fact the `jobsearch` usage was **caused** by the `treat`. Note that the difference between a confounder and a mediator is whether the variable is caused by the treatment (mediator) or causes the treatment (confounder). 
-
-Finally, let's look at **colliders**. We claim that `followupresponse` is a collider. We have the causal story that the training can have a causal effect on whether someone follows up, and organiziational skill (unmeasured) can also have an effect on whether someone follows up. Organizational skill also can have an effect on income. So we get the DAG
-
-\[
-\text{treat} \rightarrow \text{followup} \leftarrow{organization} \rightarrow{re78}
-\]
-
-This creates a path between treatment and income that allows them to be correlated in a noncausal way. Note that treatment does not directly affect real income via this path, but it could still be correlated with real income via this path.
-=======
 ### Vocabulary and an Example
 
 In causal inference, we imagine that each unit has more than one possible outcome. For a household in the `retrofit` study, one outcome is the amount of gas it would use if it received the retrofit, and another is the amount it would use if it did not. These are called the **potential outcomes**. We never observe both outcomes for the same household, which is why causal inference is difficult in the first place. The whole enterprise is an attempt to learn something about the missing counterfactual outcome from the data we do observe.
@@ -742,4 +705,51 @@ The retrofit discussion suggests four practical lessons.
 These distinctions are worth making slowly, because people often hear "collider" or "post-treatment variable" as if those labels automatically settle the matter. The more careful rule is always the same: ask whether conditioning on the variable helps or harms the treatment--outcome comparison that the causal question actually requires.
 
 
+
+## Directed Acyclic Graphs (DAGs)
+
+DAGs can be used to help understand the relationship between variables in a causal analysis. In its simplest form, we put an arrow bewteen two variables if there is or could be (we believe) a causal effect between the two variables. As a basic example, if $D$ is the 0/1 treatment variable and $R$ is the response variable, then we would normally put an arrow between $D$ and $R$. In the context of the `lalonde` data, we believe that there is or could be a causal effect between `treat` and `re78`, so we would write
+
+\[
+\text{treat} \to \text{re78}
+\]
+
+We also believe that `re75` has a causal effect on `re78`, so we would write
+
+\[
+\text{re75}\to \text{re78}
+\]
+
+At this point, `re75` is not yet identified as a confounder, merely a variable that could have a causal effect on `re78`. However, we also believe that income in 1975 could have a causal effect on whether a candidate participates in the job training program, so we would have:
+
+\[
+\text{treat} \leftarrow \text{re75}\rightarrow \text{re78}
+\]
+This is the classic DAG for a confounder. It is a variable that has a causal effect on both treatment and the response variable. This creates a **backdoor path** so that if we do not adjust for income in 1975, then we could have non-causal correlation between treatment and income in 1978. In other words, `re75` is a good control because it helps block a noncausal association between `treat` and `re78`.
+
+Now let's look at **mediators**. Suppose we also had the variable `jobsearcheffort`. This would be a mediator. The reason is that we can imagine that the training could have a causal effect on the job search effort. Job search effort also has a causal effect on income. So we get the DAG
+
+\[
+\text{treat} \rightarrow \text{jobsearch} \rightarrow \text{re78}
+\]
+
+This is the traditional mediator DAG. If we control on `jobsearch`, then part of the effect of `treat` will be swallowed up by the `jobsearch` estimate, when in fact the `jobsearch` usage was **caused** by the `treat`. Note that the difference between a confounder and a mediator is whether the variable is caused by the treatment (mediator) or causes the treatment (confounder). 
+
+Finally, let’s look at **colliders**. We claim that `followupresponse` is a collider. The causal story is that the training can affect whether someone completes the follow-up, and organizational skill (which is unmeasured) can also affect whether someone follows up. Organizational skill may also affect later income. This gives the DAG
+
+\[
+\text{treat} \rightarrow \text{followupresponse} \leftarrow \text{organization} \rightarrow \text{re78}.
+\]
+
+By itself, this path isn't a problem. But if we condition on `followupresponse` for example, by controlling for it in a regression or by restricting attention to those who respond, we open a noncausal path between treatment and income. Treatment does not affect real income along this path, but conditioning on the collider can still induce a correlation between treatment and income.
+
+Although many colliders which are bad controls are downstream of treatment, that is not always the case. Here is a slightly more complicated collider example in which the collider is **not** downstream of treatment. Suppose `retrofit` is our treatment and `gas\_use\_2025` is the outcome. Now imagine two unmeasured variables. The first is household persistence: some households are better at completing paperwork, meeting deadlines, and following through with the application process. That can increase the chance that they ultimately receive the retrofit. The second is hidden housing damage: some homes have serious but partly unrecorded problems, such as leaky ducts or damaged window seals, and those problems can increase later gas use. Suppose also that a household enters the city's `finalist\_pool` either because it has a very persistent application or because the home appears complicated enough to merit special attention. Then we have the DAG
+
+\[
+\text{retrofit} \leftarrow \text{persistence} \rightarrow \text{finalist\_pool} \leftarrow \text{hidden damage} \rightarrow \text{gas\_use\_2025}.
+\]
+
+The key point is that `finalist_pool` is a collider, but it is **not** downstream of treatment. By itself, this path is not a problem. However, if we condition on `finalist_pool`, for example, by controlling for it in a regression or by restricting the analysis only to households in the finalist pool, we open a noncausal path between treatment and outcome. Intuitively, once we hold finalist status fixed, treatment begins to carry information about hidden housing damage through the induced association created at the collider. That means `finalist_pool` is a bad control even though it is not caused by treatment.
+
+We contrast that with the following collider which is not a bad control. This is different from the earlier `energy_burden` example. There, the idea was that `energy_burden` might be a collider relative to two other baseline housing variables, such as `home_age` and `furnace_age`, if both of those affect energy burden. But that fact alone does not make `energy_burden` a bad control for estimating the effect of `retrofit` on `gas_use_2025`. The reason is that conditioning on `energy_burden` does not necessarily open any important new noncausal path from treatment to outcome. In that case, the main concerns are more ordinary modeling issues, such as redundancy with other baseline controls or difficulty interpreting coefficients, rather than collider bias in the treatment effect. However, if you could come up with a different story about how `energy_burden` collides with variables to create a noncausal path between treatment and response, then it could be a bad control.
 
