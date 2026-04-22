@@ -379,3 +379,40 @@ The treated units tend to have higher estimated probabilities of treatment than 
 This is the main reason to introduce propensity scores in the first place. Regression adjustment hides the comparability problem inside a single coefficient. Propensity scores make it easier to inspect whether treated and untreated units are similar on the observed pre-treatment covariates and whether common support is adequate.
 
 The big lesson from this section is that adjusted comparisons only deserve a causal interpretation under assumptions. Consistency tells us that the treatment must be defined clearly enough for the potential outcomes to make sense. Ignorability says that after conditioning on the observed pre-treatment covariates, treatment assignment is as good as random. Positivity says that comparable treated and control units must exist. Finally, the discussion of bad controls reminds us that adjustment can go wrong when we condition on variables that are affected by treatment. The next section uses propensity scores more directly to organize causal comparisons in observational data.
+
+## Directed Acyclic Graphs (DAGs)
+
+DAGs can be used to help understand the relationship between variables in a causal analysis. In its simplest form, we put an arrow bewteen two variables if there is or could be (we believe) a causal effect between the two variables. As a basic example, if $D$ is the 0/1 treatment variable and $R$ is the response variable, then we would normally put an arrow between $D$ and $R$. In the context of the `lalonde` data, we believe that there is or could be a causal effect between `treat` and `re78`, so we would write
+
+\[
+\text{treat} \to \text{re78}
+\]
+
+We also believe that `re75` has a causal effect on `re78`, so we would write
+
+\[
+\text{re75}\to \text{re78}
+\]
+
+At this point, `re75` is not yet identified as a confounder, merely a variable that could have a causal effect on `re78`. However, we also believe that income in 1975 could have a causal effect on whether a candidate participates in the job training program, so we would have:
+
+\[
+\text{treat} \leftarrow \text{re75}\rightarrow \text{re78}
+\]
+This is the classic DAG for a confounder. It is a variable that has a causal effect on both treatment and the response variable. This creates a **backdoor path** so that if we do not adjust for income in 1975, then we could have non-causal correlation between treatment and income in 1978. In other words, `re75` is a good control because it helps block a noncausal association between `treat` and `re78`.
+
+Now let's look at **mediators**. Suppose we also had the variable `jobsearcheffort`. This would be a mediator. The reason is that we can imagine that the training could have a causal effect on the job search effort. Job search effort also has a causal effect on income. So we get the DAG
+
+\[
+\text{treat} \rightarrow \text{jobsearch} \rightarrow \text{re78}
+\]
+
+This is the traditional mediator DAG. If we control on `jobsearch`, then part of the effect of `treat` will be swallowed up by the `jobsearch` estimate, when in fact the `jobsearch` usage was **caused** by the `treat`. Note that the difference between a confounder and a mediator is whether the variable is caused by the treatment (mediator) or causes the treatment (confounder). 
+
+Finally, let's look at **colliders**. We claim that `followupresponse` is a collider. We have the causal story that the training can have a causal effect on whether someone follows up, and organiziational skill (unmeasured) can also have an effect on whether someone follows up. Organizational skill also can have an effect on income. So we get the DAG
+
+\[
+\text{treat} \rightarrow \text{followup} \leftarrow{organization} \rightarrow{re78}
+\]
+
+This creates a path between treatment and income that allows them to be correlated in a noncausal way. Note that treatment does not directly affect real income via this path, but it could still be correlated with real income via this path.
