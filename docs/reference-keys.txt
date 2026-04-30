@@ -175,3 +175,11 @@ why-insulation_added-and-thermostat_setting_2025-play-different-roles
 why-finalist_pool-or-special_review-can-be-problematic-in-more-than-one-way
 a-compact-summary
 directed-acyclic-graphs-dags
+matching
+propensity-scores-and-matching-in-the-lalonde-data
+bernoulli-outcomes
+rhc
+format
+variables
+details
+source

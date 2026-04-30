@@ -23,7 +23,7 @@
 <meta name="author" content="Darrin Speegle" />
 
 
-<meta name="date" content="2026-04-22" />
+<meta name="date" content="2026-04-30" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -63,8 +63,9 @@
 
 
 <style type="text/css">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -74,7 +75,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -316,6 +317,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="12.5" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#why-finalist_pool-or-special_review-can-be-problematic-in-more-than-one-way"><i class="fa fa-check"></i><b>12.5</b> Why <code>finalist_pool</code> or <code>special_review</code> can be problematic in more than one way</a></li>
 <li class="chapter" data-level="12.6" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#a-compact-summary"><i class="fa fa-check"></i><b>12.6</b> A compact summary</a></li>
 <li class="chapter" data-level="12.7" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#directed-acyclic-graphs-dags"><i class="fa fa-check"></i><b>12.7</b> Directed Acyclic Graphs (DAGs)</a></li>
+<li class="chapter" data-level="12.8" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#matching"><i class="fa fa-check"></i><b>12.8</b> Matching</a></li>
+<li class="chapter" data-level="12.9" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#propensity-scores-and-matching-in-the-lalonde-data"><i class="fa fa-check"></i><b>12.9</b> Propensity scores and matching in the Lalonde data</a></li>
+<li class="chapter" data-level="12.10" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#bernoulli-outcomes"><i class="fa fa-check"></i><b>12.10</b> Bernoulli outcomes</a>
+<ul>
+<li class="chapter" data-level="12.10.1" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#rhc"><i class="fa fa-check"></i><b>12.10.1</b> <code>rhc</code></a></li>
+</ul></li>
 </ul></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
@@ -637,7 +644,737 @@ This is the classic DAG for a confounder. It is a variable that has a causal eff
 \]</span></p>
 <p>The key point is that <code>finalist_pool</code> is a collider, but it is <strong>not</strong> downstream of treatment. By itself, this path is not a problem. However, if we condition on <code>finalist_pool</code>, for example, by controlling for it in a regression or by restricting the analysis only to households in the finalist pool, we open a noncausal path between treatment and outcome. Intuitively, once we hold finalist status fixed, treatment begins to carry information about hidden housing damage through the induced association created at the collider. That means <code>finalist_pool</code> is a bad control even though it is not caused by treatment.</p>
 <p>We contrast that with the following collider which is not a bad control. This is different from the earlier <code>energy_burden</code> example. There, the idea was that <code>energy_burden</code> might be a collider relative to two other baseline housing variables, such as <code>home_age</code> and <code>furnace_age</code>, if both of those affect energy burden. But that fact alone does not make <code>energy_burden</code> a bad control for estimating the effect of <code>retrofit</code> on <code>gas_use_2025</code>. The reason is that conditioning on <code>energy_burden</code> does not necessarily open any important new noncausal path from treatment to outcome. In that case, the main concerns are more ordinary modeling issues, such as redundancy with other baseline controls or difficulty interpreting coefficients, rather than collider bias in the treatment effect. However, if you could come up with a different story about how <code>energy_burden</code> collides with variables to create a noncausal path between treatment and response, then it could be a bad control.</p>
+</div>
+<div id="matching" class="section level2 hasAnchor" number="12.8">
+<h2><span class="header-section-number">12.8</span> Matching<a href="the-retrofit-study.html#matching" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+</div>
+<div id="propensity-scores-and-matching-in-the-lalonde-data" class="section level2 hasAnchor" number="12.9">
+<h2><span class="header-section-number">12.9</span> Propensity scores and matching in the Lalonde data<a href="the-retrofit-study.html#propensity-scores-and-matching-in-the-lalonde-data" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We now use propensity scores and nearest-neighbor matching to estimate the effect of participation in the training program on <code>re78</code>, real earnings in 1978. The goal is to compare treated and untreated individuals who look similar on the observed pre-treatment covariates. This is useful because the training and control groups differ in important baseline ways, so a raw comparison of 1978 earnings is not automatically credible as a causal estimate.</p>
+<p>The basic idea is simple. First, we estimate each individual’s <strong>propensity score</strong>, which is the probability of treatment given the observed baseline covariates. Then we use those scores to match treated and control individuals with similar covariate profiles. This does not solve the problem of unmeasured confounding, but it can improve comparability on the observed covariates and reduce reliance on extrapolation.</p>
+<div class="sourceCode" id="cb1271"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1271-1"><a href="the-retrofit-study.html#cb1271-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1271-2"><a href="the-retrofit-study.html#cb1271-2" tabindex="-1"></a><span class="fu">library</span>(MatchIt)</span>
+<span id="cb1271-3"><a href="the-retrofit-study.html#cb1271-3" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
+<span id="cb1271-4"><a href="the-retrofit-study.html#cb1271-4" tabindex="-1"></a></span>
+<span id="cb1271-5"><a href="the-retrofit-study.html#cb1271-5" tabindex="-1"></a>aa <span class="ot">&lt;-</span> MatchIt<span class="sc">::</span>lalonde <span class="sc">|&gt;</span></span>
+<span id="cb1271-6"><a href="the-retrofit-study.html#cb1271-6" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
+<span id="cb1271-7"><a href="the-retrofit-study.html#cb1271-7" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb1271-8"><a href="the-retrofit-study.html#cb1271-8" tabindex="-1"></a>    <span class="at">treat =</span> <span class="fu">factor</span>(treat, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Control&quot;</span>, <span class="st">&quot;Treated&quot;</span>)),</span>
+<span id="cb1271-9"><a href="the-retrofit-study.html#cb1271-9" tabindex="-1"></a>    <span class="at">race =</span> <span class="fu">factor</span>(race),</span>
+<span id="cb1271-10"><a href="the-retrofit-study.html#cb1271-10" tabindex="-1"></a>    <span class="at">married =</span> <span class="fu">factor</span>(married, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;No&quot;</span>, <span class="st">&quot;Yes&quot;</span>)),</span>
+<span id="cb1271-11"><a href="the-retrofit-study.html#cb1271-11" tabindex="-1"></a>    <span class="at">nodegree =</span> <span class="fu">factor</span>(nodegree, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;No&quot;</span>, <span class="st">&quot;Yes&quot;</span>))</span>
+<span id="cb1271-12"><a href="the-retrofit-study.html#cb1271-12" tabindex="-1"></a>  )</span></code></pre></div>
+<p>We begin by estimating propensity scores using a logistic regression for treatment assignment. The covariates here are all measured before treatment and are plausible common causes of treatment and later earnings.</p>
+<div class="sourceCode" id="cb1272"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1272-1"><a href="the-retrofit-study.html#cb1272-1" tabindex="-1"></a>ps_mod <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb1272-2"><a href="the-retrofit-study.html#cb1272-2" tabindex="-1"></a>  treat <span class="sc">~</span> age <span class="sc">+</span> educ <span class="sc">+</span> race <span class="sc">+</span> married <span class="sc">+</span> nodegree <span class="sc">+</span> re74 <span class="sc">+</span> re75,</span>
+<span id="cb1272-3"><a href="the-retrofit-study.html#cb1272-3" tabindex="-1"></a>  <span class="at">data =</span> aa,</span>
+<span id="cb1272-4"><a href="the-retrofit-study.html#cb1272-4" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>()</span>
+<span id="cb1272-5"><a href="the-retrofit-study.html#cb1272-5" tabindex="-1"></a>)</span>
+<span id="cb1272-6"><a href="the-retrofit-study.html#cb1272-6" tabindex="-1"></a></span>
+<span id="cb1272-7"><a href="the-retrofit-study.html#cb1272-7" tabindex="-1"></a>aa_ps <span class="ot">&lt;-</span> ps_mod <span class="sc">|&gt;</span></span>
+<span id="cb1272-8"><a href="the-retrofit-study.html#cb1272-8" tabindex="-1"></a>  <span class="fu">augment</span>(<span class="at">data =</span> aa, <span class="at">type.predict =</span> <span class="st">&quot;response&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1272-9"><a href="the-retrofit-study.html#cb1272-9" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ps =</span> .fitted) <span class="sc">|&gt;</span></span>
+<span id="cb1272-10"><a href="the-retrofit-study.html#cb1272-10" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>.fitted)</span></code></pre></div>
+<p>We can now inspect the estimated propensity scores. The main issue is <strong>overlap</strong>. Where the treated and control groups overlap, there are plausible treated-versus-control comparisons. Where they do not overlap, the analysis becomes more dependent on extrapolation.</p>
+<div class="sourceCode" id="cb1273"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1273-1"><a href="the-retrofit-study.html#cb1273-1" tabindex="-1"></a>aa_ps <span class="sc">|&gt;</span></span>
+<span id="cb1273-2"><a href="the-retrofit-study.html#cb1273-2" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> ps, <span class="at">fill =</span> treat)) <span class="sc">+</span></span>
+<span id="cb1273-3"><a href="the-retrofit-study.html#cb1273-3" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">position =</span> <span class="st">&quot;identity&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">bins =</span> <span class="dv">20</span>) <span class="sc">+</span></span>
+<span id="cb1273-4"><a href="the-retrofit-study.html#cb1273-4" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb1273-5"><a href="the-retrofit-study.html#cb1273-5" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;Estimated propensity score&quot;</span>,</span>
+<span id="cb1273-6"><a href="the-retrofit-study.html#cb1273-6" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;Count&quot;</span>,</span>
+<span id="cb1273-7"><a href="the-retrofit-study.html#cb1273-7" tabindex="-1"></a>    <span class="at">fill =</span> <span class="cn">NULL</span></span>
+<span id="cb1273-8"><a href="the-retrofit-study.html#cb1273-8" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img src="13-causal-inference_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<p>If the treated group tends to have much higher propensity scores than the control group, that tells us treatment assignment is strongly related to the observed baseline covariates. That is exactly why a naive comparison can be misleading. At the same time, if there is at least some substantial overlap, then matching may allow us to compare treated and control individuals who were similarly likely to receive treatment.</p>
+<p>Next, we use nearest-neighbor matching based on the estimated propensity scores. The basic algorithm for this is that we pick a treated unit and find the control that has the nearest propensity score. We then remove the treated and control unit from the data and put them into a new data set. We go to the next treated unit and repeat until either there are no more controls or no more treated units.</p>
+<div class="sourceCode" id="cb1274"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1274-1"><a href="the-retrofit-study.html#cb1274-1" tabindex="-1"></a>m_out <span class="ot">&lt;-</span> <span class="fu">matchit</span>(</span>
+<span id="cb1274-2"><a href="the-retrofit-study.html#cb1274-2" tabindex="-1"></a>  treat <span class="sc">~</span> age <span class="sc">+</span> educ <span class="sc">+</span> race <span class="sc">+</span> married <span class="sc">+</span> nodegree <span class="sc">+</span> re74 <span class="sc">+</span> re75,</span>
+<span id="cb1274-3"><a href="the-retrofit-study.html#cb1274-3" tabindex="-1"></a>  <span class="at">data =</span> aa,</span>
+<span id="cb1274-4"><a href="the-retrofit-study.html#cb1274-4" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;nearest&quot;</span>,</span>
+<span id="cb1274-5"><a href="the-retrofit-study.html#cb1274-5" tabindex="-1"></a>  <span class="at">distance =</span> <span class="st">&quot;glm&quot;</span></span>
+<span id="cb1274-6"><a href="the-retrofit-study.html#cb1274-6" tabindex="-1"></a>)</span>
+<span id="cb1274-7"><a href="the-retrofit-study.html#cb1274-7" tabindex="-1"></a></span>
+<span id="cb1274-8"><a href="the-retrofit-study.html#cb1274-8" tabindex="-1"></a><span class="fu">summary</span>(m_out)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## matchit(formula = treat ~ age + educ + race + married + nodegree + 
+##     re74 + re75, data = aa, method = &quot;nearest&quot;, distance = &quot;glm&quot;)
+## 
+## Summary of Balance for All Data:
+##             Means Treated Means Control Std. Mean Diff. Var. Ratio eCDF Mean
+## distance           0.5774        0.1822          1.7941     0.9211    0.3774
+## age               25.8162       28.0303         -0.3094     0.4400    0.0813
+## educ              10.3459       10.2354          0.0550     0.4959    0.0347
+## raceblack          0.8432        0.2028          1.7615          .    0.6404
+## racehispan         0.0595        0.1422         -0.3498          .    0.0827
+## racewhite          0.0973        0.6550         -1.8819          .    0.5577
+## marriedNo          0.8108        0.4872          0.8263          .    0.3236
+## marriedYes         0.1892        0.5128         -0.8263          .    0.3236
+## nodegreeNo         0.2919        0.4033         -0.2450          .    0.1114
+## nodegreeYes        0.7081        0.5967          0.2450          .    0.1114
+## re74            2095.5737     5619.2365         -0.7211     0.5181    0.2248
+## re75            1532.0553     2466.4844         -0.2903     0.9563    0.1342
+##             eCDF Max
+## distance      0.6444
+## age           0.1577
+## educ          0.1114
+## raceblack     0.6404
+## racehispan    0.0827
+## racewhite     0.5577
+## marriedNo     0.3236
+## marriedYes    0.3236
+## nodegreeNo    0.1114
+## nodegreeYes   0.1114
+## re74          0.4470
+## re75          0.2876
+## 
+## Summary of Balance for Matched Data:
+##             Means Treated Means Control Std. Mean Diff. Var. Ratio eCDF Mean
+## distance           0.5774        0.3629          0.9739     0.7566    0.1321
+## age               25.8162       25.3027          0.0718     0.4568    0.0847
+## educ              10.3459       10.6054         -0.1290     0.5721    0.0239
+## raceblack          0.8432        0.4703          1.0259          .    0.3730
+## racehispan         0.0595        0.2162         -0.6629          .    0.1568
+## racewhite          0.0973        0.3135         -0.7296          .    0.2162
+## marriedNo          0.8108        0.7892          0.0552          .    0.0216
+## marriedYes         0.1892        0.2108         -0.0552          .    0.0216
+## nodegreeNo         0.2919        0.3622         -0.1546          .    0.0703
+## nodegreeYes        0.7081        0.6378          0.1546          .    0.0703
+## re74            2095.5737     2342.1076         -0.0505     1.3289    0.0469
+## re75            1532.0553     1614.7451         -0.0257     1.4956    0.0452
+##             eCDF Max Std. Pair Dist.
+## distance      0.4216          0.9740
+## age           0.2541          1.3938
+## educ          0.0757          1.2474
+## raceblack     0.3730          1.0259
+## racehispan    0.1568          1.0743
+## racewhite     0.2162          0.8390
+## marriedNo     0.0216          0.8281
+## marriedYes    0.0216          0.8281
+## nodegreeNo    0.0703          1.0106
+## nodegreeYes   0.0703          1.0106
+## re74          0.2757          0.7965
+## re75          0.2054          0.7381
+## 
+## Sample Sizes:
+##           Control Treated
+## All           429     185
+## Matched       185     185
+## Unmatched     244       0
+## Discarded       0       0</code></pre>
+<p>The matching summary is useful because it reports balance before and after matching. The main question is whether the treated and control groups become more similar on the observed covariates after matching. In a good matching analysis, we care more about improved balance than about how well the treatment model predicts treatment. Here, we can see that several variables are not well balanced even after matching. We focus only on the first three colums and we see that while the mean of <code>age</code> (for example) is well balanced with 25.8 for treatment and 25.3 for control, the racial balance is poor with 84% of the treated population is black while only 47% of the matched control population is black. For each variable, we want the standardized mean difference to be less than, say 0.2, in absolute value to be well-balanced. Here, we see that the race variables are not well matched, nor is distance, which is the raw propensity score.</p>
+<p>Despite these warning signs, we now extract the matched data and estimate the treatment effect in the matched sample.</p>
+<div class="sourceCode" id="cb1276"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1276-1"><a href="the-retrofit-study.html#cb1276-1" tabindex="-1"></a>aa_match <span class="ot">&lt;-</span> <span class="fu">match.data</span>(m_out)</span>
+<span id="cb1276-2"><a href="the-retrofit-study.html#cb1276-2" tabindex="-1"></a></span>
+<span id="cb1276-3"><a href="the-retrofit-study.html#cb1276-3" tabindex="-1"></a>mod_match <span class="ot">&lt;-</span> <span class="fu">lm</span>(re78 <span class="sc">~</span> treat, <span class="at">data =</span> aa_match, <span class="at">weights =</span> weights) <span class="co">#not recommended</span></span>
+<span id="cb1276-4"><a href="the-retrofit-study.html#cb1276-4" tabindex="-1"></a></span>
+<span id="cb1276-5"><a href="the-retrofit-study.html#cb1276-5" tabindex="-1"></a><span class="fu">tidy</span>(mod_match, <span class="at">conf.int =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## # A tibble: 2 × 7
+##   term         estimate std.error statistic  p.value conf.low conf.high
+##   &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)     5455.      516.     10.6  5.88e-23    4439.     6470.
+## 2 treatTreated     894.      730.      1.22 2.21e- 1    -542.     2330.</code></pre>
+<p>This matched regression is much simpler than the earlier adjusted regression because the covariate adjustment has largely been moved into the design stage. After matching, we estimate the effect of treatment by comparing outcomes in the matched sample, where treated and control individuals are intended to be more comparable on the observed baseline covariates. Note that the matched data is now paired, which introduces some dependence structure on the data and puts the usage of <code>lm</code> on the paired observations into question. We would want to analyze the matched data set taking into account the paired nature of the data. You already know one way of doing that - paired <span class="math inline">\(t\)</span>-tests. These are not central to modern causal inference, but for the sake of time, we use them here.</p>
+<div class="sourceCode" id="cb1278"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1278-1"><a href="the-retrofit-study.html#cb1278-1" tabindex="-1"></a>aa_wide <span class="ot">&lt;-</span> aa_match <span class="sc">|&gt;</span> </span>
+<span id="cb1278-2"><a href="the-retrofit-study.html#cb1278-2" tabindex="-1"></a>  <span class="fu">select</span>(treat, re78, subclass) <span class="sc">|&gt;</span> </span>
+<span id="cb1278-3"><a href="the-retrofit-study.html#cb1278-3" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> treat, <span class="at">values_from =</span> re78) </span>
+<span id="cb1278-4"><a href="the-retrofit-study.html#cb1278-4" tabindex="-1"></a>  </span>
+<span id="cb1278-5"><a href="the-retrofit-study.html#cb1278-5" tabindex="-1"></a>aa_wide <span class="sc">|&gt;</span> </span>
+<span id="cb1278-6"><a href="the-retrofit-study.html#cb1278-6" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">mu_treated =</span> <span class="fu">mean</span>(Treated),</span>
+<span id="cb1278-7"><a href="the-retrofit-study.html#cb1278-7" tabindex="-1"></a>            <span class="at">mu_control =</span> <span class="fu">mean</span>(Control))</span></code></pre></div>
+<pre><code>## # A tibble: 1 × 2
+##   mu_treated mu_control
+##        &lt;dbl&gt;      &lt;dbl&gt;
+## 1      6349.      5455.</code></pre>
+<div class="sourceCode" id="cb1280"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1280-1"><a href="the-retrofit-study.html#cb1280-1" tabindex="-1"></a><span class="fu">t.test</span>(aa_wide<span class="sc">$</span>Treated, aa_wide<span class="sc">$</span>Control, <span class="at">paired =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## 
+##  Paired t-test
+## 
+## data:  aa_wide$Treated and aa_wide$Control
+## t = 1.2699, df = 184, p-value = 0.2057
+## alternative hypothesis: true mean difference is not equal to 0
+## 95 percent confidence interval:
+##  -495.1223 2283.8573
+## sample estimates:
+## mean difference 
+##        894.3675</code></pre>
+<p>We see that we have an estimate of 894 dollars higher salary based on the paired data, with a confidence interval of <span class="math inline">\([-495, 2284]\)</span>. This is not statistically significant (<span class="math inline">\(p = .2057\)</span>).</p>
+<p>Note that our matching was not very good - in particular the racial profile of the treated and untreated groups are different. We can try to fix that by forcing an exact match on race, rather than allowing a dubious close enough match to someone of a different race. However, doint so causes other variables to become poorly balanced.</p>
+<div class="sourceCode" id="cb1282"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1282-1"><a href="the-retrofit-study.html#cb1282-1" tabindex="-1"></a>m_out2 <span class="ot">&lt;-</span> <span class="fu">matchit</span>(treat <span class="sc">~</span> age <span class="sc">+</span> educ <span class="sc">+</span> race <span class="sc">+</span> married <span class="sc">+</span> nodegree <span class="sc">+</span> re74 <span class="sc">+</span> re75, <span class="at">data =</span> aa, <span class="at">method =</span> <span class="st">&quot;nearest&quot;</span>, <span class="at">distance =</span> <span class="st">&quot;glm&quot;</span>, <span class="at">exact =</span> <span class="sc">~</span>race)</span>
+<span id="cb1282-2"><a href="the-retrofit-study.html#cb1282-2" tabindex="-1"></a></span>
+<span id="cb1282-3"><a href="the-retrofit-study.html#cb1282-3" tabindex="-1"></a><span class="fu">summary</span>(m_out2)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## matchit(formula = treat ~ age + educ + race + married + nodegree + 
+##     re74 + re75, data = aa, method = &quot;nearest&quot;, distance = &quot;glm&quot;, 
+##     exact = ~race)
+## 
+## Summary of Balance for All Data:
+##             Means Treated Means Control Std. Mean Diff. Var. Ratio eCDF Mean
+## distance           0.5774        0.1822          1.7941     0.9211    0.3774
+## age               25.8162       28.0303         -0.3094     0.4400    0.0813
+## educ              10.3459       10.2354          0.0550     0.4959    0.0347
+## raceblack          0.8432        0.2028          1.7615          .    0.6404
+## racehispan         0.0595        0.1422         -0.3498          .    0.0827
+## racewhite          0.0973        0.6550         -1.8819          .    0.5577
+## marriedNo          0.8108        0.4872          0.8263          .    0.3236
+## marriedYes         0.1892        0.5128         -0.8263          .    0.3236
+## nodegreeNo         0.2919        0.4033         -0.2450          .    0.1114
+## nodegreeYes        0.7081        0.5967          0.2450          .    0.1114
+## re74            2095.5737     5619.2365         -0.7211     0.5181    0.2248
+## re75            1532.0553     2466.4844         -0.2903     0.9563    0.1342
+##             eCDF Max
+## distance      0.6444
+## age           0.1577
+## educ          0.1114
+## raceblack     0.6404
+## racehispan    0.0827
+## racewhite     0.5577
+## marriedNo     0.3236
+## marriedYes    0.3236
+## nodegreeNo    0.1114
+## nodegreeYes   0.1114
+## re74          0.4470
+## re75          0.2876
+## 
+## Summary of Balance for Matched Data:
+##             Means Treated Means Control Std. Mean Diff. Var. Ratio eCDF Mean
+## distance           0.5851        0.4899          0.4319     1.2527    0.0902
+## age               25.5517       26.4397         -0.1241     0.4439    0.0804
+## educ              10.4914       10.3879          0.0515     0.3517    0.0417
+## raceblack          0.7500        0.7500          0.0000          .    0.0000
+## racehispan         0.0948        0.0948          0.0000          .    0.0000
+## racewhite          0.1552        0.1552          0.0000          .    0.0000
+## marriedNo          0.9397        0.7241          0.5503          .    0.2155
+## marriedYes         0.0603        0.2759         -0.5503          .    0.2155
+## nodegreeNo         0.2155        0.3879         -0.3792          .    0.1724
+## nodegreeYes        0.7845        0.6121          0.3792          .    0.1724
+## re74             887.7150     3090.7096         -0.4508     0.2353    0.1553
+## re75            1293.6827     1924.4269         -0.1959     1.0263    0.0941
+##             eCDF Max Std. Pair Dist.
+## distance      0.4224          0.4338
+## age           0.1724          1.4085
+## educ          0.1724          1.1405
+## raceblack     0.0000          0.0000
+## racehispan    0.0000          0.0000
+## racewhite     0.0000          0.0000
+## marriedNo     0.2155          0.5943
+## marriedYes    0.2155          0.5943
+## nodegreeNo    0.1724          0.8722
+## nodegreeYes   0.1724          0.8722
+## re74          0.3879          0.7036
+## re75          0.2155          0.7532
+## 
+## Sample Sizes:
+##           Control Treated
+## All           429     185
+## Matched       116     116
+## Unmatched     313      69
+## Discarded       0       0</code></pre>
+<p>This matching is arguably better (based on the distance score), but still does not pass the rule of thumb that standardized differences should be between -0.2 and 0.2. Realistically, it doesn’t make a lot of sense to keep trying to get a good match here, when we already know of unmeasured confounders (<code>sex</code> for example). As an exercise, compute the estimated effect of treatment among the treated based on this new matching, and see whether it is significant.</p>
+</div>
+<div id="bernoulli-outcomes" class="section level2 hasAnchor" number="12.10">
+<h2><span class="header-section-number">12.10</span> Bernoulli outcomes<a href="the-retrofit-study.html#bernoulli-outcomes" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>In this section, we consider Bernoulli outcomes. We will use the data set <code>rhc</code> in the <code>causaldef</code> package. Let’s start by examining it.</p>
+<div class="sourceCode" id="cb1284"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1284-1"><a href="the-retrofit-study.html#cb1284-1" tabindex="-1"></a>aa <span class="ot">&lt;-</span> causaldef<span class="sc">::</span>rhc <span class="sc">|&gt;</span> </span>
+<span id="cb1284-2"><a href="the-retrofit-study.html#cb1284-2" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span></code></pre></div>
+<p>The help page doesn’t provide a whole lot of information about the variables. Note that for causal inference, understanding exactly what the variables are measuring (and when) is essential. We cannot proceed without a better understanding of the variables. I downloaded the original paper and asked ChatGPT to provide more information on the variables based on the descriptions in the paper. Here is what it gave:</p>
+<div id="rhc" class="section level3 hasAnchor" number="12.10.1">
+<h3><span class="header-section-number">12.10.1</span> <code>rhc</code><a href="the-retrofit-study.html#rhc" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>A dataset containing 5,735 critically ill adult patients from the SUPPORT study. The treatment variable is <code>swang1</code>, indicating whether the patient received right heart catheterization (RHC, Swan-Ganz catheterization) within the first 24 hours of ICU care. Common outcome variables include <code>dth30</code> (30-day mortality), <code>death</code> (longer-term mortality indicator), and <code>t3d30</code> (survival time up to 30 days).</p>
+<div id="format" class="section level4 hasAnchor" number="12.10.1.1">
+<h4><span class="header-section-number">12.10.1.1</span> Format<a href="the-retrofit-study.html#format" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>A tibble with 5,735 rows and 63 variables.</p>
+</div>
+<div id="variables" class="section level4 hasAnchor" number="12.10.1.2">
+<h4><span class="header-section-number">12.10.1.2</span> Variables<a href="the-retrofit-study.html#variables" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><code>X</code>: row index carried over from the imported data set.</li>
+<li><code>cat1</code>: primary disease category used by the study.</li>
+<li><code>cat2</code>: secondary disease category, when applicable.</li>
+<li><code>ca</code>: cancer status, typically coded as no cancer, localized cancer, or metastatic cancer.</li>
+<li><code>sadmdte</code>: study admission date, stored as an integer date code.</li>
+<li><code>dschdte</code>: hospital discharge date, stored as an integer date code.</li>
+<li><code>dthdte</code>: date of death, stored as an integer date code.</li>
+<li><code>lstctdte</code>: date of last contact, stored as an integer date code.</li>
+<li><code>death</code>: indicator for death by the longer-term follow-up window.</li>
+<li><code>cardiohx</code>: indicator for prior cardiovascular disease history.</li>
+<li><code>chfhx</code>: indicator for prior congestive heart failure history.</li>
+<li><code>dementhx</code>: indicator for prior dementia or related neurologic functional impairment.</li>
+<li><code>psychhx</code>: indicator for prior psychiatric history.</li>
+<li><code>chrpulhx</code>: indicator for prior chronic pulmonary disease history.</li>
+<li><code>renalhx</code>: indicator for prior chronic renal disease history.</li>
+<li><code>liverhx</code>: indicator for prior liver disease history.</li>
+<li><code>gibledhx</code>: indicator for prior gastrointestinal bleeding history.</li>
+<li><code>malighx</code>: indicator for prior malignancy history.</li>
+<li><code>immunhx</code>: indicator for prior immunocompromised status.</li>
+<li><code>transhx</code>: indicator for prior transfer from another hospital or prior major transfer history.</li>
+<li><code>amihx</code>: indicator for prior acute myocardial infarction history.</li>
+<li><code>age</code>: age in years.</li>
+<li><code>sex</code>: sex.</li>
+<li><code>edu</code>: years of education.</li>
+<li><code>surv2md1</code>: model-based estimate of the probability of surviving 2 months, computed at day 1.</li>
+<li><code>das2d3pc</code>: Duke Activity Status Index or a closely related baseline functional-status measure.</li>
+<li><code>t3d30</code>: survival time up to 30 days.</li>
+<li><code>dth30</code>: indicator for death within 30 days.</li>
+<li><code>aps1</code>: APACHE III severity score on day 1.</li>
+<li><code>scoma1</code>: Glasgow Coma Score on day 1.</li>
+<li><code>meanbp1</code>: mean blood pressure on day 1.</li>
+<li><code>wblc1</code>: white blood cell count on day 1.</li>
+<li><code>hrt1</code>: heart rate on day 1.</li>
+<li><code>resp1</code>: respiratory rate on day 1.</li>
+<li><code>temp1</code>: body temperature on day 1.</li>
+<li><code>pafi1</code>: ratio of arterial oxygen pressure to fraction of inspired oxygen (PaO2/FiO2) on day 1.</li>
+<li><code>alb1</code>: albumin on day 1.</li>
+<li><code>hema1</code>: hematocrit on day 1.</li>
+<li><code>bili1</code>: bilirubin on day 1.</li>
+<li><code>crea1</code>: creatinine on day 1.</li>
+<li><code>sod1</code>: sodium on day 1.</li>
+<li><code>pot1</code>: potassium on day 1.</li>
+<li><code>paco21</code>: arterial PaCO2 on day 1.</li>
+<li><code>ph1</code>: arterial pH on day 1.</li>
+<li><code>swang1</code>: treatment indicator for receipt of right heart catheterization within the first 24 hours.</li>
+<li><code>wtkilo1</code>: weight in kilograms on day 1.</li>
+<li><code>dnr1</code>: do-not-resuscitate status on day 1.</li>
+<li><code>ninsclas</code>: insurance class.</li>
+<li><code>resp</code>: indicator for a respiratory admission diagnosis.</li>
+<li><code>card</code>: indicator for a cardiovascular admission diagnosis.</li>
+<li><code>neuro</code>: indicator for a neurologic admission diagnosis.</li>
+<li><code>gastr</code>: indicator for a gastrointestinal admission diagnosis.</li>
+<li><code>renal</code>: indicator for a renal admission diagnosis.</li>
+<li><code>meta</code>: indicator for a metabolic admission diagnosis.</li>
+<li><code>hema</code>: indicator for a hematologic admission diagnosis.</li>
+<li><code>seps</code>: indicator for sepsis.</li>
+<li><code>trauma</code>: indicator for trauma.</li>
+<li><code>ortho</code>: indicator for an orthopedic diagnosis.</li>
+<li><code>adld3p</code>: activities-of-daily-living measure recorded later in the study period, typically around day 3.</li>
+<li><code>urin1</code>: urine output on day 1.</li>
+<li><code>race</code>: race category.</li>
+<li><code>income</code>: income category.</li>
+<li><code>ptid</code>: patient identifier.</li>
+</ul>
+</div>
+<div id="details" class="section level4 hasAnchor" number="12.10.1.3">
+<h4><span class="header-section-number">12.10.1.3</span> Details<a href="the-retrofit-study.html#details" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>For causal inference, it is useful to think of these variables in broad groups. The treatment is <code>swang1</code>. The most common binary outcome is <code>dth30</code>, though <code>death</code> and <code>t3d30</code> are also used. Variables such as <code>age</code>, <code>sex</code>, <code>race</code>, <code>income</code>, <code>cat1</code>, <code>cat2</code>, and the <code>*hx</code> variables are the clearest baseline covariates. The day-1 physiology variables, such as <code>aps1</code>, <code>meanbp1</code>, <code>hrt1</code>, <code>resp1</code>, and the laboratory measures, are clinically important but raise timing questions because treatment also occurs within the first 24 hours. Variables such as <code>dth30</code>, <code>death</code>, <code>t3d30</code>, and <code>adld3p</code> should be treated as outcomes or downstream variables rather than ordinary baseline controls.</p>
+</div>
+<div id="source" class="section level4 hasAnchor" number="12.10.1.4">
+<h4><span class="header-section-number">12.10.1.4</span> Source<a href="the-retrofit-study.html#source" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>SUPPORT (Study to Understand Prognoses and Preferences for Outcomes and Risks of Treatments), as used in observational analyses of right heart catheterization in critically ill ICU patients.</p>
+<p>OK, let’s modify the data a little bit to make sure things are working correctly, then we’ll start with propensity scores.</p>
+<div class="sourceCode" id="cb1285"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1285-1"><a href="the-retrofit-study.html#cb1285-1" tabindex="-1"></a>aa <span class="ot">&lt;-</span> aa <span class="sc">|&gt;</span></span>
+<span id="cb1285-2"><a href="the-retrofit-study.html#cb1285-2" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
+<span id="cb1285-3"><a href="the-retrofit-study.html#cb1285-3" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb1285-4"><a href="the-retrofit-study.html#cb1285-4" tabindex="-1"></a>    <span class="fu">across</span>(</span>
+<span id="cb1285-5"><a href="the-retrofit-study.html#cb1285-5" tabindex="-1"></a>      <span class="fu">c</span>(cardiohx, chfhx, dementhx, psychhx, chrpulhx, renalhx,</span>
+<span id="cb1285-6"><a href="the-retrofit-study.html#cb1285-6" tabindex="-1"></a>        liverhx, gibledhx, malighx, immunhx, transhx, amihx),</span>
+<span id="cb1285-7"><a href="the-retrofit-study.html#cb1285-7" tabindex="-1"></a>      <span class="sc">~</span> <span class="fu">factor</span>(.x, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;No&quot;</span>, <span class="st">&quot;Yes&quot;</span>))</span>
+<span id="cb1285-8"><a href="the-retrofit-study.html#cb1285-8" tabindex="-1"></a>    )</span>
+<span id="cb1285-9"><a href="the-retrofit-study.html#cb1285-9" tabindex="-1"></a>  )</span></code></pre></div>
+<p>We now perform a logistic regression and estimate the overlap. We choose controls of the following type:</p>
+<ol style="list-style-type: decimal">
+<li>General demographics: <code>age</code>, <code>sex</code>, <code>race</code>, <code>edu</code>, <code>income</code>, and <code>ninsclas</code></li>
+<li>General health history before treatment: <code>cat1</code>, <code>ca</code>, <code>cardiohx</code>, <code>chfhx</code>, <code>dementhx</code>, <code>psychhx</code>, <code>chrpulhx</code>, <code>renalhx</code>, <code>liverhx</code>, <code>gibledhx</code>, <code>malighx</code>, <code>immunhx</code>, <code>transhx</code>, <code>amihx</code></li>
+<li>Day of treatment health indicator that cannot reasonably be influenced by choice of treatment: <code>dnr1</code></li>
+</ol>
+<p>It would be helpful if we knew which of the day of treatment variables were <strong>before</strong> the treatment and which were <strong>after</strong> the treatment, but absent that information we leave out these potential bad controls. We do not include <code>cat2</code> because it contains many missing values. If we knew that these were missing becuase that meant there <strong>isn’t</strong> a second disease category, then we could replace it with “None” and add it.</p>
+<div class="sourceCode" id="cb1286"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1286-1"><a href="the-retrofit-study.html#cb1286-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">glm</span>(swang1 <span class="sc">~</span> age <span class="sc">+</span> sex <span class="sc">+</span> race <span class="sc">+</span> edu <span class="sc">+</span> income <span class="sc">+</span> ninsclas <span class="sc">+</span> cat1 <span class="sc">+</span> ca <span class="sc">+</span></span>
+<span id="cb1286-2"><a href="the-retrofit-study.html#cb1286-2" tabindex="-1"></a>    cardiohx <span class="sc">+</span> chfhx <span class="sc">+</span> dementhx <span class="sc">+</span> psychhx <span class="sc">+</span> chrpulhx <span class="sc">+</span> renalhx <span class="sc">+</span></span>
+<span id="cb1286-3"><a href="the-retrofit-study.html#cb1286-3" tabindex="-1"></a>    liverhx <span class="sc">+</span> gibledhx <span class="sc">+</span> malighx <span class="sc">+</span> immunhx <span class="sc">+</span> transhx <span class="sc">+</span> amihx <span class="sc">+</span> dnr1, <span class="at">data =</span> aa, <span class="at">family =</span> binomial)</span>
+<span id="cb1286-4"><a href="the-retrofit-study.html#cb1286-4" tabindex="-1"></a><span class="fu">summary</span>(mod)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## glm(formula = swang1 ~ age + sex + race + edu + income + ninsclas + 
+##     cat1 + ca + cardiohx + chfhx + dementhx + psychhx + chrpulhx + 
+##     renalhx + liverhx + gibledhx + malighx + immunhx + transhx + 
+##     amihx + dnr1, family = binomial, data = aa)
+## 
+## Coefficients:
+##                              Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)                 -1.731890   0.471998  -3.669 0.000243 ***
+## age                          0.002777   0.002380   1.167 0.243387    
+## sexMale                      0.169146   0.059511   2.842 0.004479 ** 
+## raceother                    0.040291   0.136778   0.295 0.768320    
+## racewhite                    0.058324   0.083989   0.694 0.487418    
+## edu                          0.019977   0.010588   1.887 0.059207 .  
+## income$11-$25k              -0.051560   0.124638  -0.414 0.679108    
+## income$25-$50k               0.060185   0.124556   0.483 0.628955    
+## incomeUnder $11k             0.013798   0.123752   0.111 0.911225    
+## ninsclasMedicare             0.188941   0.122550   1.542 0.123135    
+## ninsclasMedicare &amp; Medicaid  0.209621   0.153686   1.364 0.172582    
+## ninsclasNo insurance         0.413173   0.150452   2.746 0.006029 ** 
+## ninsclasPrivate              0.378736   0.112462   3.368 0.000758 ***
+## ninsclasPrivate &amp; Medicare   0.323499   0.126064   2.566 0.010283 *  
+## cat1CHF                      0.103493   0.130686   0.792 0.428406    
+## cat1Cirrhosis               -0.942597   0.218943  -4.305 1.67e-05 ***
+## cat1Colon Cancer            -0.927949   1.094764  -0.848 0.396647    
+## cat1Coma                    -0.665925   0.126532  -5.263 1.42e-07 ***
+## cat1COPD                    -1.285997   0.165518  -7.770 7.88e-15 ***
+## cat1Lung Cancer             -1.207561   0.502498  -2.403 0.016256 *  
+## cat1MOSF w/Malignancy        0.363687   0.136515   2.664 0.007720 ** 
+## cat1MOSF w/Sepsis            0.849876   0.073744  11.525  &lt; 2e-16 ***
+## caNo                         0.435257   0.398095   1.093 0.274240    
+## caYes                       -0.050606   0.143720  -0.352 0.724753    
+## cardiohxYes                  0.133110   0.086428   1.540 0.123529    
+## chfhxYes                     0.140010   0.093593   1.496 0.134671    
+## dementhxYes                 -0.534149   0.107611  -4.964 6.92e-07 ***
+## psychhxYes                  -0.504803   0.126850  -3.980 6.91e-05 ***
+## chrpulhxYes                 -0.103179   0.090695  -1.138 0.255265    
+## renalhxYes                  -0.122353   0.141512  -0.865 0.387252    
+## liverhxYes                   0.233900   0.162963   1.435 0.151203    
+## gibledhxYes                 -0.220111   0.213684  -1.030 0.302972    
+## malighxYes                   0.187896   0.357715   0.525 0.599396    
+## immunhxYes                   0.072910   0.066425   1.098 0.272366    
+## transhxYes                   0.451930   0.089002   5.078 3.82e-07 ***
+## amihxYes                     0.503990   0.155191   3.248 0.001164 ** 
+## dnr1Yes                     -0.591689   0.104392  -5.668 1.45e-08 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 7621.4  on 5734  degrees of freedom
+## Residual deviance: 6974.7  on 5698  degrees of freedom
+## AIC: 7048.7
+## 
+## Number of Fisher Scoring iterations: 4</code></pre>
+<div class="sourceCode" id="cb1288"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1288-1"><a href="the-retrofit-study.html#cb1288-1" tabindex="-1"></a>broom<span class="sc">::</span><span class="fu">augment</span>(mod) <span class="sc">|&gt;</span> </span>
+<span id="cb1288-2"><a href="the-retrofit-study.html#cb1288-2" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">propensity =</span> <span class="fu">plogis</span>(.fitted)) <span class="sc">|&gt;</span> </span>
+<span id="cb1288-3"><a href="the-retrofit-study.html#cb1288-3" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> propensity, <span class="at">fill =</span> swang1)) <span class="sc">+</span> </span>
+<span id="cb1288-4"><a href="the-retrofit-study.html#cb1288-4" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">position =</span> <span class="st">&quot;identity&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">bins =</span> <span class="dv">20</span>) </span></code></pre></div>
+<p><img src="13-causal-inference_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
+<p>Let’s also count the number of treated and untreated.</p>
+<div class="sourceCode" id="cb1289"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1289-1"><a href="the-retrofit-study.html#cb1289-1" tabindex="-1"></a><span class="fu">summary</span>(aa<span class="sc">$</span>swang1)</span></code></pre></div>
+<pre><code>## No RHC    RHC 
+##   3551   2184</code></pre>
+<p>Since we considering RHC as the treatment and we will do 1:1 matching of the treated, this looks pretty good. We don’t need there to be many RHC treated people on the lower tail, but we do like to see no RHC people in the upper tail, and we do for the most part.</p>
+<div class="sourceCode" id="cb1291"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1291-1"><a href="the-retrofit-study.html#cb1291-1" tabindex="-1"></a>match_mod <span class="ot">&lt;-</span> <span class="fu">matchit</span>(swang1 <span class="sc">~</span> age <span class="sc">+</span> sex <span class="sc">+</span> race <span class="sc">+</span> edu <span class="sc">+</span> income <span class="sc">+</span> ninsclas <span class="sc">+</span> cat1 <span class="sc">+</span> ca <span class="sc">+</span></span>
+<span id="cb1291-2"><a href="the-retrofit-study.html#cb1291-2" tabindex="-1"></a>    cardiohx <span class="sc">+</span> chfhx <span class="sc">+</span> dementhx <span class="sc">+</span> psychhx <span class="sc">+</span> chrpulhx <span class="sc">+</span> renalhx <span class="sc">+</span></span>
+<span id="cb1291-3"><a href="the-retrofit-study.html#cb1291-3" tabindex="-1"></a>    liverhx <span class="sc">+</span> gibledhx <span class="sc">+</span> malighx <span class="sc">+</span> immunhx <span class="sc">+</span> transhx <span class="sc">+</span> amihx <span class="sc">+</span> dnr1, </span>
+<span id="cb1291-4"><a href="the-retrofit-study.html#cb1291-4" tabindex="-1"></a>    <span class="at">data =</span> aa,</span>
+<span id="cb1291-5"><a href="the-retrofit-study.html#cb1291-5" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">&quot;nearest&quot;</span>,</span>
+<span id="cb1291-6"><a href="the-retrofit-study.html#cb1291-6" tabindex="-1"></a>    <span class="at">distance =</span> <span class="st">&quot;glm&quot;</span>)</span>
+<span id="cb1291-7"><a href="the-retrofit-study.html#cb1291-7" tabindex="-1"></a></span>
+<span id="cb1291-8"><a href="the-retrofit-study.html#cb1291-8" tabindex="-1"></a>aa_dat <span class="ot">&lt;-</span> <span class="fu">match.data</span>(match_mod)</span>
+<span id="cb1291-9"><a href="the-retrofit-study.html#cb1291-9" tabindex="-1"></a></span>
+<span id="cb1291-10"><a href="the-retrofit-study.html#cb1291-10" tabindex="-1"></a><span class="fu">summary</span>(match_mod)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## matchit(formula = swang1 ~ age + sex + race + edu + income + 
+##     ninsclas + cat1 + ca + cardiohx + chfhx + dementhx + psychhx + 
+##     chrpulhx + renalhx + liverhx + gibledhx + malighx + immunhx + 
+##     transhx + amihx + dnr1, data = aa, method = &quot;nearest&quot;, distance = &quot;glm&quot;)
+## 
+## Summary of Balance for All Data:
+##                             Means Treated Means Control Std. Mean Diff.
+## distance                           0.4466        0.3404          0.7284
+## age                               60.7498       61.7609         -0.0647
+## sexFemale                          0.4148        0.4610         -0.0937
+## sexMale                            0.5852        0.5390          0.0937
+## raceblack                          0.1534        0.1647         -0.0315
+## raceother                          0.0650        0.0600          0.0204
+## racewhite                          0.7816        0.7753          0.0153
+## edu                               11.8564       11.5690          0.0910
+## income&gt; $50k                       0.0888        0.0724          0.0578
+## income$11-$25k                     0.2070        0.2008          0.0152
+## income$25-$50k                     0.1799        0.1408          0.1019
+## incomeUnder $11k                   0.5243        0.5860         -0.1237
+## ninsclasMedicaid                   0.0884        0.1279         -0.1391
+## ninsclasMedicare                   0.2340        0.2667         -0.0773
+## ninsclasMedicare &amp; Medicaid        0.0563        0.0707         -0.0623
+## ninsclasNo insurance               0.0623        0.0524          0.0409
+## ninsclasPrivate                    0.3347        0.2723          0.1322
+## ninsclasPrivate &amp; Medicare         0.2244        0.2101          0.0342
+## cat1ARF                            0.4162        0.4452         -0.0589
+## cat1CHF                            0.0957        0.0696          0.0889
+## cat1Cirrhosis                      0.0224        0.0493         -0.1813
+## cat1Colon Cancer                   0.0005        0.0017         -0.0576
+## cat1Coma                           0.0435        0.0960         -0.2575
+## cat1COPD                           0.0266        0.1124         -0.5337
+## cat1Lung Cancer                    0.0023        0.0096         -0.1524
+## cat1MOSF w/Malignancy              0.0723        0.0679          0.0173
+## cat1MOSF w/Sepsis                  0.3205        0.1484          0.3688
+## caMetastatic                       0.0563        0.0735         -0.0745
+## caNo                               0.7908        0.7468          0.1080
+## caYes                              0.1529        0.1797         -0.0743
+## cardiohxNo                         0.7958        0.8403         -0.1105
+## cardiohxYes                        0.2042        0.1597          0.1105
+## chfhxNo                            0.8054        0.8322         -0.0676
+## chfhxYes                           0.1946        0.1678          0.0676
+## dementhxNo                         0.9309        0.8837          0.1859
+## dementhxYes                        0.0691        0.1163         -0.1859
+## psychhxNo                          0.9542        0.9195          0.1663
+## psychhxYes                         0.0458        0.0805         -0.1663
+## chrpulhxNo                         0.8558        0.7820          0.2099
+## chrpulhxYes                        0.1442        0.2180         -0.2099
+## renalhxNo                          0.9515        0.9580         -0.0306
+## renalhxYes                         0.0485        0.0420          0.0306
+## liverhxNo                          0.9377        0.9254          0.0511
+## liverhxYes                         0.0623        0.0746         -0.0511
+## gibledhxNo                         0.9753        0.9631          0.0783
+## gibledhxYes                        0.0247        0.0369         -0.0783
+## malighxNo                          0.7967        0.7544          0.1050
+## malighxYes                         0.2033        0.2456         -0.1050
+## immunhxNo                          0.7088        0.7446         -0.0788
+## immunhxYes                         0.2912        0.2554          0.0788
+## transhxNo                          0.8503        0.9057         -0.1552
+## transhxYes                         0.1497        0.0943          0.1552
+## amihxNo                            0.9565        0.9704         -0.0683
+## amihxYes                           0.0435        0.0296          0.0683
+## dnr1No                             0.9290        0.8595          0.2709
+## dnr1Yes                            0.0710        0.1405         -0.2709
+##                             Var. Ratio eCDF Mean eCDF Max
+## distance                        0.9173    0.1917   0.2749
+## age                             0.8175    0.0285   0.0703
+## sexFemale                            .    0.0462   0.0462
+## sexMale                              .    0.0462   0.0462
+## raceblack                            .    0.0114   0.0114
+## raceother                            .    0.0050   0.0050
+## racewhite                            .    0.0063   0.0063
+## edu                             1.0147    0.0181   0.0511
+## income&gt; $50k                         .    0.0165   0.0165
+## income$11-$25k                       .    0.0062   0.0062
+## income$25-$50k                       .    0.0391   0.0391
+## incomeUnder $11k                     .    0.0618   0.0618
+## ninsclasMedicaid                     .    0.0395   0.0395
+## ninsclasMedicare                     .    0.0327   0.0327
+## ninsclasMedicare &amp; Medicaid          .    0.0144   0.0144
+## ninsclasNo insurance                 .    0.0099   0.0099
+## ninsclasPrivate                      .    0.0624   0.0624
+## ninsclasPrivate &amp; Medicare           .    0.0143   0.0143
+## cat1ARF                              .    0.0290   0.0290
+## cat1CHF                              .    0.0261   0.0261
+## cat1Cirrhosis                        .    0.0268   0.0268
+## cat1Colon Cancer                     .    0.0012   0.0012
+## cat1Coma                             .    0.0525   0.0525
+## cat1COPD                             .    0.0858   0.0858
+## cat1Lung Cancer                      .    0.0073   0.0073
+## cat1MOSF w/Malignancy                .    0.0045   0.0045
+## cat1MOSF w/Sepsis                    .    0.1721   0.1721
+## caMetastatic                         .    0.0172   0.0172
+## caNo                                 .    0.0439   0.0439
+## caYes                                .    0.0267   0.0267
+## cardiohxNo                           .    0.0445   0.0445
+## cardiohxYes                          .    0.0445   0.0445
+## chfhxNo                              .    0.0268   0.0268
+## chfhxYes                             .    0.0268   0.0268
+## dementhxNo                           .    0.0472   0.0472
+## dementhxYes                          .    0.0472   0.0472
+## psychhxNo                            .    0.0348   0.0348
+## psychhxYes                           .    0.0348   0.0348
+## chrpulhxNo                           .    0.0737   0.0737
+## chrpulhxYes                          .    0.0737   0.0737
+## renalhxNo                            .    0.0066   0.0066
+## renalhxYes                           .    0.0066   0.0066
+## liverhxNo                            .    0.0124   0.0124
+## liverhxYes                           .    0.0124   0.0124
+## gibledhxNo                           .    0.0122   0.0122
+## gibledhxYes                          .    0.0122   0.0122
+## malighxNo                            .    0.0423   0.0423
+## malighxYes                           .    0.0423   0.0423
+## immunhxNo                            .    0.0358   0.0358
+## immunhxYes                           .    0.0358   0.0358
+## transhxNo                            .    0.0554   0.0554
+## transhxYes                           .    0.0554   0.0554
+## amihxNo                              .    0.0139   0.0139
+## amihxYes                             .    0.0139   0.0139
+## dnr1No                               .    0.0696   0.0696
+## dnr1Yes                              .    0.0696   0.0696
+## 
+## Summary of Balance for Matched Data:
+##                             Means Treated Means Control Std. Mean Diff.
+## distance                           0.4466        0.4201          0.1817
+## age                               60.7498       61.0777         -0.0210
+## sexFemale                          0.4148        0.4295         -0.0297
+## sexMale                            0.5852        0.5705          0.0297
+## raceblack                          0.1534        0.1621         -0.0241
+## raceother                          0.0650        0.0600          0.0204
+## racewhite                          0.7816        0.7779          0.0089
+## edu                               11.8564       11.8039          0.0166
+## income&gt; $50k                       0.0888        0.0824          0.0225
+## income$11-$25k                     0.2070        0.2111         -0.0102
+## income$25-$50k                     0.1799        0.1712          0.0226
+## incomeUnder $11k                   0.5243        0.5353         -0.0220
+## ninsclasMedicaid                   0.0884        0.0920         -0.0129
+## ninsclasMedicare                   0.2340        0.2477         -0.0324
+## ninsclasMedicare &amp; Medicaid        0.0563        0.0623         -0.0258
+## ninsclasNo insurance               0.0623        0.0595          0.0114
+## ninsclasPrivate                    0.3347        0.3164          0.0388
+## ninsclasPrivate &amp; Medicare         0.2244        0.2221          0.0055
+## cat1ARF                            0.4162        0.4904         -0.1505
+## cat1CHF                            0.0957        0.0962         -0.0016
+## cat1Cirrhosis                      0.0224        0.0201          0.0155
+## cat1Colon Cancer                   0.0005        0.0000          0.0214
+## cat1Coma                           0.0435        0.0412          0.0112
+## cat1COPD                           0.0266        0.0261          0.0028
+## cat1Lung Cancer                    0.0023        0.0018          0.0096
+## cat1MOSF w/Malignancy              0.0723        0.0907         -0.0707
+## cat1MOSF w/Sepsis                  0.3205        0.2335          0.1864
+## caMetastatic                       0.0563        0.0641         -0.0338
+## caNo                               0.7908        0.7633          0.0675
+## caYes                              0.1529        0.1726         -0.0547
+## cardiohxNo                         0.7958        0.7981         -0.0057
+## cardiohxYes                        0.2042        0.2019          0.0057
+## chfhxNo                            0.8054        0.8059         -0.0012
+## chfhxYes                           0.1946        0.1941          0.0012
+## dementhxNo                         0.9309        0.9240          0.0271
+## dementhxYes                        0.0691        0.0760         -0.0271
+## psychhxNo                          0.9542        0.9473          0.0329
+## psychhxYes                         0.0458        0.0527         -0.0329
+## chrpulhxNo                         0.8558        0.8512          0.0130
+## chrpulhxYes                        0.1442        0.1488         -0.0130
+## renalhxNo                          0.9515        0.9496          0.0085
+## renalhxYes                         0.0485        0.0504         -0.0085
+## liverhxNo                          0.9377        0.9437         -0.0246
+## liverhxYes                         0.0623        0.0563          0.0246
+## gibledhxNo                         0.9753        0.9753          0.0000
+## gibledhxYes                        0.0247        0.0247          0.0000
+## malighxNo                          0.7967        0.7711          0.0637
+## malighxYes                         0.2033        0.2289         -0.0637
+## immunhxNo                          0.7088        0.7106         -0.0040
+## immunhxYes                         0.2912        0.2894          0.0040
+## transhxNo                          0.8503        0.8796         -0.0821
+## transhxYes                         0.1497        0.1204          0.0821
+## amihxNo                            0.9565        0.9643         -0.0382
+## amihxYes                           0.0435        0.0357          0.0382
+## dnr1No                             0.9290        0.9226          0.0250
+## dnr1Yes                            0.0710        0.0774         -0.0250
+##                             Var. Ratio eCDF Mean eCDF Max Std. Pair Dist.
+## distance                        1.3098    0.0424   0.1282          0.1818
+## age                             0.7847    0.0283   0.0632          1.1822
+## sexFemale                            .    0.0147   0.0147          0.9702
+## sexMale                              .    0.0147   0.0147          0.9702
+## raceblack                            .    0.0087   0.0087          0.7306
+## raceother                            .    0.0050   0.0050          0.4661
+## racewhite                            .    0.0037   0.0037          0.8090
+## edu                             1.0232    0.0058   0.0169          1.0730
+## income&gt; $50k                         .    0.0064   0.0064          0.5376
+## income$11-$25k                       .    0.0041   0.0041          0.7991
+## income$25-$50k                       .    0.0087   0.0087          0.7330
+## incomeUnder $11k                     .    0.0110   0.0110          0.9865
+## ninsclasMedicaid                     .    0.0037   0.0037          0.5356
+## ninsclasMedicare                     .    0.0137   0.0137          0.8371
+## ninsclasMedicare &amp; Medicaid          .    0.0060   0.0060          0.4826
+## ninsclasNo insurance                 .    0.0027   0.0027          0.4699
+## ninsclasPrivate                      .    0.0183   0.0183          0.8869
+## ninsclasPrivate &amp; Medicare           .    0.0023   0.0023          0.8331
+## cat1ARF                              .    0.0742   0.0742          0.7450
+## cat1CHF                              .    0.0005   0.0005          0.5837
+## cat1Cirrhosis                        .    0.0023   0.0023          0.2813
+## cat1Colon Cancer                     .    0.0005   0.0005          0.0214
+## cat1Coma                             .    0.0023   0.0023          0.3165
+## cat1COPD                             .    0.0005   0.0005          0.1737
+## cat1Lung Cancer                      .    0.0005   0.0005          0.0862
+## cat1MOSF w/Malignancy                .    0.0183   0.0183          0.5373
+## cat1MOSF w/Sepsis                    .    0.0870   0.0870          0.4710
+## caMetastatic                         .    0.0078   0.0078          0.4826
+## caNo                                 .    0.0275   0.0275          0.7947
+## caYes                                .    0.0197   0.0197          0.7162
+## cardiohxNo                           .    0.0023   0.0023          0.7394
+## cardiohxYes                          .    0.0023   0.0023          0.7394
+## chfhxNo                              .    0.0005   0.0005          0.7529
+## chfhxYes                             .    0.0005   0.0005          0.7529
+## dementhxNo                           .    0.0069   0.0069          0.4927
+## dementhxYes                          .    0.0069   0.0069          0.4927
+## psychhxNo                            .    0.0069   0.0069          0.4272
+## psychhxYes                           .    0.0069   0.0069          0.4272
+## chrpulhxNo                           .    0.0046   0.0046          0.6595
+## chrpulhxYes                          .    0.0046   0.0046          0.6595
+## renalhxNo                            .    0.0018   0.0018          0.4432
+## renalhxYes                           .    0.0018   0.0018          0.4432
+## liverhxNo                            .    0.0060   0.0060          0.4718
+## liverhxYes                           .    0.0060   0.0060          0.4718
+## gibledhxNo                           .    0.0000   0.0000          0.0458
+## gibledhxYes                          .    0.0000   0.0000          0.0458
+## malighxNo                            .    0.0256   0.0256          0.7919
+## malighxYes                           .    0.0256   0.0256          0.7919
+## immunhxNo                            .    0.0018   0.0018          0.8929
+## immunhxYes                           .    0.0018   0.0018          0.8929
+## transhxNo                            .    0.0293   0.0293          0.5775
+## transhxYes                           .    0.0293   0.0293          0.5775
+## amihxNo                              .    0.0078   0.0078          0.3704
+## amihxYes                             .    0.0078   0.0078          0.3704
+## dnr1No                               .    0.0064   0.0064          0.4743
+## dnr1Yes                              .    0.0064   0.0064          0.4743
+## 
+## Sample Sizes:
+##           Control Treated
+## All          3551    2184
+## Matched      2184    2184
+## Unmatched    1367       0
+## Discarded       0       0</code></pre>
+<p>We can see that the balance between treated and untreated is better after matching. Now, we want to examine the outcome for the two groups. We consider the <code>dth30</code> as our outcome. We note that we have two balanced, paired groups; one corresponding to RHC and one corresponding to no RHC. To analyze this, we first compute the number of concordant and discordant pairs in the paired sample. Let’s start by computing the percentage of patients that survived in each treatment.</p>
+<div class="sourceCode" id="cb1293"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1293-1"><a href="the-retrofit-study.html#cb1293-1" tabindex="-1"></a>aa_dat <span class="sc">|&gt;</span> </span>
+<span id="cb1293-2"><a href="the-retrofit-study.html#cb1293-2" tabindex="-1"></a>  <span class="fu">group_by</span>(swang1) <span class="sc">|&gt;</span> </span>
+<span id="cb1293-3"><a href="the-retrofit-study.html#cb1293-3" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">surv =</span> <span class="fu">mean</span>(dth30<span class="sc">==</span><span class="st">&quot;No&quot;</span>))</span></code></pre></div>
+<pre><code>## # A tibble: 2 × 2
+##   swang1  surv
+##   &lt;fct&gt;  &lt;dbl&gt;
+## 1 No RHC 0.723
+## 2 RHC    0.620</code></pre>
+<p>Since we have paired data, the natural test is McNemar’s test, which is really just a special version of a chi-squared test. We start by counting the discordant and concordant pairs. Pairs are discordant if the outcomes are different and they are concordant if the outcomes are the same.</p>
+<div class="sourceCode" id="cb1295"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1295-1"><a href="the-retrofit-study.html#cb1295-1" tabindex="-1"></a>aa_dat <span class="sc">|&gt;</span> </span>
+<span id="cb1295-2"><a href="the-retrofit-study.html#cb1295-2" tabindex="-1"></a>  <span class="fu">select</span>(subclass, swang1, dth30) <span class="sc">|&gt;</span> </span>
+<span id="cb1295-3"><a href="the-retrofit-study.html#cb1295-3" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> swang1, <span class="at">values_from =</span> dth30) <span class="sc">|&gt;</span> </span>
+<span id="cb1295-4"><a href="the-retrofit-study.html#cb1295-4" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb1295-5"><a href="the-retrofit-study.html#cb1295-5" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">d30_success =</span> <span class="fu">case_when</span>(</span>
+<span id="cb1295-6"><a href="the-retrofit-study.html#cb1295-6" tabindex="-1"></a>    rhc <span class="sc">==</span> <span class="st">&quot;No&quot;</span> <span class="sc">&amp;</span> no_rhc <span class="sc">==</span> <span class="st">&quot;No&quot;</span> <span class="sc">~</span> <span class="st">&quot;both&quot;</span>,</span>
+<span id="cb1295-7"><a href="the-retrofit-study.html#cb1295-7" tabindex="-1"></a>    rhc <span class="sc">==</span> <span class="st">&quot;Yes&quot;</span> <span class="sc">&amp;</span> no_rhc <span class="sc">==</span> <span class="st">&quot;No&quot;</span> <span class="sc">~</span> <span class="st">&quot;no_rhc&quot;</span>,</span>
+<span id="cb1295-8"><a href="the-retrofit-study.html#cb1295-8" tabindex="-1"></a>    rhc <span class="sc">==</span> <span class="st">&quot;No&quot;</span> <span class="sc">&amp;</span> no_rhc <span class="sc">==</span> <span class="st">&quot;Yes&quot;</span> <span class="sc">~</span> <span class="st">&quot;rhc&quot;</span>,</span>
+<span id="cb1295-9"><a href="the-retrofit-study.html#cb1295-9" tabindex="-1"></a>    rhc <span class="sc">==</span> <span class="st">&quot;Yes&quot;</span> <span class="sc">&amp;</span> no_rhc <span class="sc">==</span> <span class="st">&quot;Yes&quot;</span> <span class="sc">~</span> <span class="st">&quot;neither&quot;</span>,</span>
+<span id="cb1295-10"><a href="the-retrofit-study.html#cb1295-10" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">&quot;uhoh&quot;</span></span>
+<span id="cb1295-11"><a href="the-retrofit-study.html#cb1295-11" tabindex="-1"></a>  )) <span class="sc">|&gt;</span> </span>
+<span id="cb1295-12"><a href="the-retrofit-study.html#cb1295-12" tabindex="-1"></a>  <span class="fu">pull</span>(d30_success) <span class="sc">|&gt;</span> </span>
+<span id="cb1295-13"><a href="the-retrofit-study.html#cb1295-13" tabindex="-1"></a>  <span class="fu">table</span>()</span></code></pre></div>
+<pre><code>## 
+##    both neither  no_rhc     rhc 
+##     987     239     591     367</code></pre>
+<p>We see that 987 paired patients were both successes, in 591 of the pairs only the no RHC was successful, in 367 of the pairs only RHC was successful, and 239 of the pairs neither was successful. McNemar’s test does a chi-squared test on the items that are <strong>different</strong>, so in other words:</p>
+<div class="sourceCode" id="cb1297"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1297-1"><a href="the-retrofit-study.html#cb1297-1" tabindex="-1"></a><span class="fu">chisq.test</span>(<span class="fu">c</span>(<span class="dv">591</span>, <span class="dv">367</span>), <span class="at">correct =</span> T)</span></code></pre></div>
+<pre><code>## 
+##  Chi-squared test for given probabilities
+## 
+## data:  c(591, 367)
+## X-squared = 52.376, df = 1, p-value = 4.583e-13</code></pre>
+<p>There is also a built in R function for this test, which works for more general things:</p>
+<div class="sourceCode" id="cb1299"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1299-1"><a href="the-retrofit-study.html#cb1299-1" tabindex="-1"></a><span class="fu">mcnemar.test</span>(<span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">987</span>, <span class="dv">591</span>, <span class="dv">367</span>, <span class="dv">239</span>), <span class="at">nrow =</span> <span class="dv">2</span>))</span></code></pre></div>
+<pre><code>## 
+##  McNemar&#39;s Chi-squared test with continuity correction
+## 
+## data:  matrix(c(987, 591, 367, 239), nrow = 2)
+## McNemar&#39;s chi-squared = 51.909, df = 1, p-value = 5.813e-13</code></pre>
+<p>It is a good idea to provide an effect size and confidence interval where possible, in order to make the difference between RHC and no RHC more clear. For this case, we recommend the <em>paired risk difference</em>, which is computed by</p>
+<div class="sourceCode" id="cb1301"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1301-1"><a href="the-retrofit-study.html#cb1301-1" tabindex="-1"></a>(<span class="dv">591</span> <span class="sc">-</span> <span class="dv">367</span>)<span class="sc">/</span><span class="fu">sum</span>(<span class="fu">c</span>(<span class="dv">987</span>, <span class="dv">591</span>, <span class="dv">367</span>, <span class="dv">239</span>))</span></code></pre></div>
+<pre><code>## [1] 0.1025641</code></pre>
+<p>This says that there is about a 10 percentage point better chance of success overall using the no RHC technique than the RHC technique. In order to get a simple CI, we can use <code>t.test</code> on the raw data:</p>
+<div class="sourceCode" id="cb1303"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1303-1"><a href="the-retrofit-study.html#cb1303-1" tabindex="-1"></a>aa_dat <span class="sc">|&gt;</span> </span>
+<span id="cb1303-2"><a href="the-retrofit-study.html#cb1303-2" tabindex="-1"></a>  <span class="fu">select</span>(subclass, swang1, dth30) <span class="sc">|&gt;</span> </span>
+<span id="cb1303-3"><a href="the-retrofit-study.html#cb1303-3" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> swang1, <span class="at">values_from =</span> dth30) <span class="sc">|&gt;</span> </span>
+<span id="cb1303-4"><a href="the-retrofit-study.html#cb1303-4" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb1303-5"><a href="the-retrofit-study.html#cb1303-5" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">rhc =</span> <span class="fu">as.integer</span>(rhc) <span class="sc">-</span> <span class="dv">1</span>,</span>
+<span id="cb1303-6"><a href="the-retrofit-study.html#cb1303-6" tabindex="-1"></a>         <span class="at">no_rhc =</span> <span class="fu">as.integer</span>(no_rhc) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb1303-7"><a href="the-retrofit-study.html#cb1303-7" tabindex="-1"></a>  <span class="fu">with</span>(<span class="fu">t.test</span>(rhc, no_rhc, <span class="at">paired =</span> T))</span></code></pre></div>
+<pre><code>## 
+##  Paired t-test
+## 
+## data:  rhc and no_rhc
+## t = 7.3238, df = 2183, p-value = 3.374e-13
+## alternative hypothesis: true mean difference is not equal to 0
+## 95 percent confidence interval:
+##  0.07510113 0.13002707
+## sample estimates:
+## mean difference 
+##       0.1025641</code></pre>
+<p>We see that we have a 95 percent CI of 0.075 to 0.13. Let’s compare our results to those of the paper. I asked ChatGPT to read the original paper and compare its results to ours, and this is what it said:</p>
+<p>Our basic matched analysis and the original paper point in the same direction, but our estimated effect is much larger. In our analysis, after 1:1 nearest-neighbor matching, the estimated 30-day survival rate was 72.3% for the No RHC group and 62.0% for the RHC group. Equivalently, this corresponds to about a 10.3 percentage point higher 30-day mortality rate in the RHC group, with a paired risk difference of 0.103 and a 95% confidence interval from about 0.075 to 0.130. McNemar’s test also gave a very small p-value, suggesting a strong difference between the matched groups.</p>
+<p>The paper’s matched analysis was less dramatic. Connors et al. reported 1008 matched pairs, with 30-day survival of 67.2% in the No RHC group and 62.5% in the RHC group. That is still worse for RHC, but the absolute difference is only about 4.7 percentage points rather than the roughly 10 percentage points we found. They reported a matched-pair odds ratio of 1.24 with a 95% confidence interval from 1.03 to 1.49 and a p-value of .03. So the qualitative conclusion is the same—RHC is associated with worse short-term outcomes—but the paper’s estimated effect is smaller and much less statistically overwhelming than the effect from our simplified analysis.</p>
+<p>There are several reasons for this difference. First, our propensity score model is much simpler than the one in the paper. We used a conservative set of baseline demographic, diagnostic, comorbidity, and DNR variables, while the paper used a much richer adjustment set that included many additional measures of illness severity and prognosis. In particular, the paper incorporated variables such as APACHE-based severity information, physiologic measurements, laboratory values, functional status, and a model-based estimate of 2-month survival. The point of including those variables was to make the RHC and No RHC patients more comparable in how sick they were at baseline. Since sicker patients were more likely to receive RHC and also more likely to die, leaving out some of those severity variables can make RHC look more harmful than it really is.</p>
+<p>Second, the matching strategy in the paper was more selective than the one we used. Our analysis used the default greedy nearest-neighbor matching and kept all 2184 treated patients, pairing each with a control. The paper instead matched patients within disease category and required propensity scores to be very close. As a result, they ended up with only 1008 matched pairs rather than using all treated patients. In other words, the paper was willing to discard many patients in order to create a cleaner comparison. Our analysis uses more data, but it also allows weaker matches, and that can make the estimated treatment effect look larger if the remaining imbalance still favors the No RHC group.</p>
+<p>Third, the paper did not rely only on one matched-pair comparison. The authors also fit multivariable outcome models after propensity-score adjustment, looked at survival over multiple time horizons, examined subgroups, and carried out sensitivity analyses asking how large an omitted confounder would have to be to explain away the observed association. These extra analyses do not prove causality, but they do make the overall argument more careful. Our analysis is a good first pass because it shows the basic logic of propensity scores, matching, and paired outcome analysis. The paper’s analysis is more sophisticated because it tries harder to address the possibility that the RHC patients were simply sicker in ways not fully captured by a simpler model.</p>
+<p>So the right takeaway is not that one analysis is “correct” and the other is “wrong.” Rather, the simpler analysis is useful for illustrating the method, while the paper shows what a more serious observational analysis looks like. The fact that both analyses point in the same direction is reassuring. The fact that the paper’s estimated effect is smaller is also informative: it suggests that some of the very large difference we saw in the simplified analysis was probably due to the fact that our matching model did not control as fully for severity of illness as the original study did.</p>
 
+</div>
+</div>
 </div>
 </div>
 

@@ -1,0 +1,199 @@
+# A Larger Example: The `retrofit` Study
+
+The vocabulary of causal inference becomes much easier to follow once it is tied to a single, reasonably rich study. The Lalonde data are useful for that purpose, but it is also helpful to have a second example in which the roles of many variables can be seen at once. In this section we introduce a larger hypothetical dataset called `retrofit`. The dataset is not real, but the study design is meant to be realistic. The goal is to have one setting where we can talk slowly and concretely about treatment, outcome, confounders, overlap, bad controls, and the difference between design problems and modeling problems.
+
+The setting is a city-run home weatherization program. The city offers subsidies for attic and wall insulation, air sealing, duct repair, and minor furnace improvements to households with high energy burdens. Households can apply for the program, but the city also targets certain neighborhoods and gives priority to homes judged to be especially inefficient or financially vulnerable. Some households receive the retrofit before the winter heating season, and some do not. There is no random assignment. Participation depends on a mixture of household choice, city targeting, contractor availability, and administrative prioritization. That is what makes the study observational.
+
+The main causal question is whether receiving the retrofit lowers winter natural-gas use. The treatment variable is `retrofit`, which equals 1 if the household received the weatherization package before the start of winter 2024--25 and 0 otherwise. The primary outcome is `gas_use_2025`, the household's total natural-gas consumption during winter 2024--25. A lower value is better. Because the study is observational, treated and untreated households are likely to differ in many ways before treatment begins. Some live in older homes, some have larger families, some were already behind on utility payments, and some have homes that are much less energy efficient than others. Those pre-treatment differences are exactly what make causal adjustment necessary.
+
+The study is also useful because it contains several kinds of variables that students often find confusing at first. Some variables are measured before treatment and look like clear confounders. Others are measured after treatment and are tempting to control for, even though doing so would be a mistake if the goal is the total effect of the retrofit. Still others are variables that might quietly create selection bias if we condition on them. In other words, this single setting gives us a place to practice the whole vocabulary section from start to finish.
+
+Before discussing the variables in detail, it is helpful to imagine what the help page for such a dataset might look like. The following is a pretend version of what `?retrofit` might show in R.
+
+```text
+retrofit {causalexamples} R Documentation
+
+Home Weatherization Program Study
+
+Description
+Observational study of a city-run home weatherization program. The dataset follows
+5,000 owner-occupied households over two winters. Treated households received a
+subsidized weatherization package before winter 2024--25. The main outcome is
+natural-gas use during winter 2024--25. The data were assembled from utility bills,
+program records, property records, and a follow-up survey.
+
+Usage
+retrofit
+
+Format
+A data frame with 5000 rows and 27 variables:
+
+retrofit
+    Treatment indicator equal to 1 if the household received the retrofit package
+    before winter 2024--25 and 0 otherwise.
+
+gas_use_2025
+    Outcome: total natural-gas use during winter 2024--25, measured in therms.
+
+gas_use_2024
+    Baseline variable measured before treatment: total natural-gas use during
+    winter 2023--24, measured in therms.
+
+electric_use_2024
+    Baseline variable measured before treatment: total electricity use during
+    calendar year 2024 before retrofit work began, measured in kWh.
+
+sqft
+    Baseline variable measured before treatment: interior square footage of the
+    home from property records.
+
+home_age
+    Baseline variable measured before treatment: age of the home in years at the
+    start of winter 2024--25.
+
+building_type
+    Baseline variable measured before treatment: detached, duplex, rowhouse, or
+    small multifamily.
+
+insulation_baseline
+    Baseline variable measured before treatment: insulation score from the
+    pre-treatment energy audit.
+
+furnace_age
+    Baseline variable measured before treatment: age of the primary heating system
+    in years at intake.
+
+income
+    Baseline variable measured before treatment: household income in thousands of
+    dollars, recorded at intake.
+
+arrears_balance
+    Baseline variable measured before treatment: amount owed on utility bills at
+    intake or referral.
+
+credit_score
+    Baseline variable measured before treatment: household credit-score category
+    at intake, before any retrofit work begins.
+
+owner_occupied
+    Baseline variable measured before treatment: indicator for owner occupancy at
+    intake.
+
+years_in_home
+    Baseline variable measured before treatment: number of years the household had
+    lived in the home at intake.
+
+occupants
+    Baseline variable measured before treatment: number of people living in the
+    home at intake.
+
+children
+    Baseline variable measured before treatment: number of children in the
+    household at intake.
+
+elderly_resident
+    Baseline variable measured before treatment: indicator for whether at least
+    one resident was age 65 or older at intake.
+
+work_from_home_days
+    Baseline variable measured before treatment: average number of days per week
+    at least one adult worked from home at intake.
+
+energy_audit_score
+    Baseline variable measured before treatment: audit score summarizing energy
+    inefficiency before treatment.
+
+energy_burden
+    Baseline variable measured before treatment: share of household income spent
+    on home energy before treatment.
+
+neighborhood
+    Baseline variable measured before treatment: neighborhood identifier from the
+    city's administrative records.
+
+application_month
+    Baseline variable measured before treatment: month in 2024 when the household
+    applied or was referred to the program.
+
+insulation_added
+    Post-treatment variable: amount of new insulation installed after treatment
+    assignment as part of the retrofit intervention.
+
+contractor_visits
+    Post-treatment variable: number of contractor visits after treatment began.
+
+coaching_sessions
+    Post-treatment variable: number of energy coaching sessions completed after
+    treatment began.
+
+thermostat_setting_2025
+    Post-treatment variable: average winter thermostat setting during 2024--25.
+
+inspection_passed
+    Post-treatment variable: indicator for whether the household passed the
+    post-installation inspection.
+
+followup_survey_response
+    Post-treatment variable: indicator for whether the household completed the
+    spring 2025 follow-up survey.
+
+Details
+Treatment was not randomly assigned. Households could apply directly, but the city
+also prioritized high-burden households and homes identified through neighborhood
+outreach and energy audits. The data are intended for teaching causal adjustment,
+confounding, overlap, mediators, and colliders.
+```
+
+One reason to make the timing of measurement so explicit is that causal vocabulary depends on it. A variable can only be a standard confounder if it is measured before treatment and helps explain both treatment assignment and the outcome. Once a variable is measured after treatment begins, it may instead be part of the mechanism through which treatment works, or part of a selection process that creates bias when conditioned on. In other words, timing is not a cosmetic detail in a data dictionary. It is often the first clue to the causal role a variable may play.
+
+The observational nature of this study is important. Households do not simply split into treatment and control at random. A household with a drafty, older home and a high overdue utility balance may be much more likely to receive the retrofit than a household in a newer, well-insulated home with low energy costs. At the same time, those same pre-treatment differences are likely to matter for future gas use even if no retrofit had occurred. That is the core confounding problem. The raw difference in winter gas use between treated and untreated households would combine the effect of the program with the fact that the two groups started from very different places.
+
+The treatment itself also needs to be imagined carefully. In this dataset, `retrofit = 1` is supposed to mean that the household received a reasonably coherent weatherization package before the winter season began. This is where `insulation_added` is useful conceptually. If treated households receive very different amounts of insulation, very different furnace work, or very different bundles of services, then the treated condition may hide important versions of treatment. In that case the meaning of the treated potential outcome $Y(1)$ becomes less clear. That is why consistency is not just abstract notation. It depends on the treatment being defined well enough that `retrofit = 1` refers to a treatment condition with a reasonably stable meaning.
+
+The pre-treatment covariates in this example are intentionally varied. Some describe the physical features of the home: `sqft`, `home_age`, `building_type`, `insulation_baseline`, and `furnace_age`. Some describe household resources and vulnerability: `income`, `arrears_balance`, `credit_score`, and `energy_burden`. Some describe how the home is used: `occupants`, `children`, `elderly_resident`, and `work_from_home_days`. Others reflect how the city and the household move into the program: `energy_audit_score`, `neighborhood`, and `application_month`. None of these variables is included just because it is easy to measure. Each one is plausible because it may help explain both which households receive treatment and what their winter gas use would have looked like anyway.
+
+This setting is especially good for the informal backdoor idea. Consider `gas_use_2024`. Households that used a lot of gas last winter are likely to be flagged as inefficient, more likely to apply for help, and more likely to be prioritized by the city. Households with high gas use before the program are likely to have higher gas use in 2025 regardless of treatment status, which is why prior gas use is a plausible confounder. Thus `gas_use_2024` is a classic candidate confounder: it affects treatment assignment and is also predictive of future gas use. The same broad logic applies to variables such as `energy_audit_score`, `insulation_baseline`, `home_age`, and `energy_burden`. These are not merely predictive variables. They are variables that help explain why treated and untreated households differ before treatment begins.
+
+The example also gives us several bad controls, but it is helpful to separate them by type. The clearest **mediator** in this story is `thermostat_setting_2025`. If the retrofit makes the home easier or cheaper to heat, households may respond by changing how warm they keep the home, and those thermostat choices may then affect `gas_use_2025`. In that case, `thermostat_setting_2025` lies on the causal pathway from treatment to outcome. If the goal is the **total effect** of the retrofit, then controlling for `thermostat_setting_2025` would be a mistake because it would block part of the very treatment effect we want to estimate. Variables such as `contractor_visits` and `coaching_sessions` can be thought of in a similar way if they are part of the mechanism through which treatment changes later energy use.
+
+A different problem arises with variables such as `followup_survey_response`. This is a plausible **collider**, meaning a variable that is affected by both treatment and some other factor related to the outcome. A treated household may be more likely to respond to the follow-up survey because the program keeps it engaged. But response may also depend on some household characteristic such as organization, conscientiousness, or housing stability, and those same characteristics may affect future energy use. If we condition on `followup_survey_response`, we risk opening a **noncausal path** between treatment and those unmeasured household characteristics. In that case survey response becomes a **bad control**, not because it blocks part of the treatment effect, but because it can induce a spurious association and create bias. This is what makes a collider different from a mediator.
+
+Overlap is also easy to discuss in this example. Some parts of the covariate space may contain many treated households and almost no controls. For instance, very low-income households in very old homes with poor baseline insulation and high arrears balances may be heavily concentrated in treatment. At the other extreme, high-income households in newer homes with low energy burdens may be almost entirely untreated. In those regions there may be little common support. That means a causal estimate would rely less on direct comparisons among similar households and more on extrapolation. This is why overlap is a different type of problem from confounding. We try to reduce confounding by adjusting for observed pre-treatment variables, but poor overlap is a feature of the data that adjustment alone cannot repair.
+
+## Quick Reference: Fill This In
+
+Use the discussion above to classify the variables in `retrofit`. Do not worry about making every choice perfectly. The goal is to practice the causal vocabulary in a richer setting than Lalonde. Fill in each line with several variable names from the dataset.
+
+- **Treatment:**
+- **Outcome:**
+- **Strong pre-treatment confounders:**
+- **Other useful pre-treatment covariates:**
+- **Post-treatment mediators / bad controls:**
+- **Possible colliders / bad controls:**
+- **Variables that raise an overlap concern:**
+- **Variable that raises a consistency concern:**
+
+The point of this exercise is not simply to sort variables into boxes. It is to slow down and ask why each variable belongs where it does. If a variable is a strong pre-treatment confounder, what makes it related to both treatment and outcome? If a variable is a bad control, is it bad because it lies on the treatment pathway or because conditioning on it could induce a spurious association? If a variable creates an overlap concern, what kinds of households are represented mostly in treatment or mostly in control? These are the questions that make the vocabulary operational rather than decorative.
+
+One useful feature of this example is that there is room for disagreement at the margins. For example, `application_month` might be a meaningful pre-treatment covariate because contractor capacity and household urgency vary across seasons. But it might matter much less than `gas_use_2024` or `energy_audit_score`. Likewise, `electric_use_2024` may be informative about baseline energy demand, but it may not be as central to confounding as prior gas use. This is realistic. Building a causal adjustment strategy is not usually a matter of one perfectly obvious list. It is a matter of making a reasoned argument about the roles the variables play.
+
+The example also makes clear why causal inference is not the same as throwing every available variable into a model. A variable can be useful because it helps block a backdoor path, but another variable can be harmful because it blocks part of the treatment effect or induces selection bias. Thinking carefully about variable roles is therefore not a side issue. It is one of the main tasks in observational causal analysis.
+
+## Quick Reference: One Reasonable Solution
+
+There is rarely a single perfect answer, but one reasonable quick reference for `retrofit` is the following.
+
+- **Treatment:** `retrofit`
+- **Outcome:** `gas_use_2025`
+- **Strong pre-treatment confounders:** `gas_use_2024`, `sqft`, `home_age`, `insulation_baseline`, `furnace_age`, `energy_audit_score`, `income`, `arrears_balance`, `energy_burden`, `neighborhood`
+- **Other useful pre-treatment covariates:** `electric_use_2024`, `building_type`, `credit_score`, `owner_occupied`, `years_in_home`, `occupants`, `children`, `elderly_resident`, `work_from_home_days`, `application_month`
+- **Post-treatment mediators / bad controls:** `thermostat_setting_2025`, `contractor_visits`, `coaching_sessions`
+- **Possible colliders / bad controls:** `followup_survey_response`
+- **Variables that raise an overlap concern:** `income`, `home_age`, `insulation_baseline`, `energy_burden`, `arrears_balance`, `energy_audit_score`, and especially combinations of these variables at the extremes
+- **Variable that raises a consistency concern:** `insulation_added`
+
+The treatment and outcome are the easiest parts. The pre-treatment confounders are the variables that most directly help explain both who receives the retrofit and what gas use would look like without it. Prior gas use is especially important because it captures baseline energy demand, housing inefficiency, and household behavior all at once. The housing-quality variables, such as home age and baseline insulation, help distinguish homes that are structurally likely to use more energy and therefore more likely to be targeted. The financial variables help explain why the city prioritizes certain households and why those households may differ from others even in the absence of treatment.
+
+The remaining variables are useful but somewhat less central. Some add detail about household demand for energy, some refine the description of the home, and some proxy for administrative or neighborhood differences in access to treatment. The important point is that they are still pre-treatment variables. By contrast, the post-treatment variables are bad controls precisely because they occur after treatment begins and may carry part of the treatment effect. Here `thermostat_setting_2025` is the clearest mediator because the retrofit may change how households manage indoor temperature, and that behavior may in turn affect gas use. The collider example is different: `followup_survey_response` is bad not because it lies on the treatment pathway, but because conditioning on it can open a noncausal path through unmeasured household traits such as organization or housing stability. The variable `insulation_added` serves a different role again. It is useful mainly because large differences in insulation added across treated households may indicate that the treated condition hides important versions of treatment, which raises a consistency concern.
+
+Finally, the overlap line is intentionally less precise than the others. Overlap problems usually arise not from one variable in isolation, but from combinations of variables that make certain households nearly always treated or nearly always untreated. In this example, one would especially worry about households at the extremes: very low-income households in old, inefficient homes with high energy burdens and high arrears balances on one side, and high-income households in relatively new, efficient homes on the other. Those are exactly the kinds of covariate profiles where observational causal comparisons become difficult.

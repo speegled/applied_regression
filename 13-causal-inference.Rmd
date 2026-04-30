@@ -263,11 +263,8 @@ There is one more practical point to make before returning to the Lalonde data. 
 The `jobs` data in the `mediation` package give a nice example. The treatment variable is `treat`, the outcome is `depress2`, and `job_seek` is a plausible post-treatment mediator. In the code below, the third model adds `job_seek` after treatment has already occurred.
 
 ```{r}
-library(mediation)
 
-data("jobs")
-
-jobs2 <- jobs |>
+jobs2 <- mediation::jobs |>
   as_tibble()
 
 mod1 <- lm(depress2 ~ treat, data = jobs2)
@@ -826,27 +823,266 @@ Despite these warning signs, we now extract the matched data and estimate the tr
 ```{r}
 aa_match <- match.data(m_out)
 
-mod_match <- lm(re78 ~ treat, data = aa_match, weights = weights)
+mod_match <- lm(re78 ~ treat, data = aa_match, weights = weights) #not recommended
 
 tidy(mod_match, conf.int = TRUE)
 ```
 
-This matched regression is much simpler than the earlier adjusted regression because the covariate adjustment has largely been moved into the design stage. After matching, we estimate the effect of treatment by comparing outcomes in the matched sample, where treated and control individuals are intended to be more comparable on the observed baseline covariates.
-
-For comparison, it is helpful to look at the naive estimate from the unmatched data.
+This matched regression is much simpler than the earlier adjusted regression because the covariate adjustment has largely been moved into the design stage. After matching, we estimate the effect of treatment by comparing outcomes in the matched sample, where treated and control individuals are intended to be more comparable on the observed baseline covariates. Note that the matched data is now paired, which introduces some dependence structure on the data and puts the usage of `lm` on the paired observations into question. We would want to analyze the matched data set taking into account the paired nature of the data. You already know one way of doing that - paired $t$-tests. These are not central to modern causal inference, but for the sake of time, we use them here.
 
 ```{r}
-mod_naive <- lm(re78 ~ treat, data = aa)
-
-bind_rows(
-  tidy(mod_naive, conf.int = TRUE) |> mutate(model = "Naive"),
-  tidy(mod_match, conf.int = TRUE) |> mutate(model = "Matched")
-) |>
-  filter(term == "treatTreated") |>
-  select(model, estimate, conf.low, conf.high, p.value)
+aa_wide <- aa_match |> 
+  select(treat, re78, subclass) |> 
+  pivot_wider(names_from = treat, values_from = re78) 
+  
+aa_wide |> 
+  summarize(mu_treated = mean(Treated),
+            mu_control = mean(Control))
+t.test(aa_wide$Treated, aa_wide$Control, paired = TRUE)
 ```
 
-The comparison between the naive and matched estimates shows how much the answer changes once we restrict attention to more comparable treated and control individuals. If the two estimates differ substantially, that is evidence that baseline differences between the groups mattered.
+We see that we have an estimate of 894 dollars higher salary based on the paired data, with a confidence interval of $[-495, 2284]$. This is not statistically significant ($p = .2057$).
 
+Note that our matching was not very good - in particular the racial profile of the treated and untreated groups are different. We can try to fix that by forcing an exact match on race, rather than allowing a dubious close enough match to someone of a different race. However, doint so causes other variables to become poorly balanced.
+
+```{r}
+m_out2 <- matchit(treat ~ age + educ + race + married + nodegree + re74 + re75, data = aa, method = "nearest", distance = "glm", exact = ~race)
+
+summary(m_out2)
+```
+
+This matching is arguably better (based on the distance score), but still does not pass the rule of thumb that standardized differences should be between -0.2 and 0.2. Realistically, it doesn't make a lot of sense to keep trying to get a good match here, when we already know of unmeasured confounders (`sex` for example). As an exercise, compute the estimated effect of treatment among the treated based on this new matching, and see whether it is significant.
+
+```{r eval=FALSE, echo=FALSE}
+aa_match <- match.data(m_out2)
+
+aa_wide <- aa_match |> 
+  select(treat, re78, subclass) |> 
+  pivot_wider(names_from = treat, values_from = re78) 
+  
+aa_wide |> 
+  summarize(mu_treated = mean(Treated),
+            mu_control = mean(Control))
+t.test(aa_wide$Treated, aa_wide$Control, paired = TRUE)
+```
+
+
+## Bernoulli outcomes
+
+In this section, we consider Bernoulli outcomes. We will use the data set `rhc` in the `causaldef` package. Let's start by examining it.
+
+```{r}
+aa <- causaldef::rhc |> 
+  as_tibble()
+```
+
+The help page doesn't provide a whole lot of information about the variables. Note that for causal inference, understanding exactly what the variables are measuring (and when) is essential. We cannot proceed without a better understanding of the variables. I downloaded the original paper and asked ChatGPT to provide more information on the variables based on the descriptions in the paper. Here is what it gave:
+
+### `rhc`
+
+A dataset containing 5,735 critically ill adult patients from the SUPPORT study. The treatment variable is `swang1`, indicating whether the patient received right heart catheterization (RHC, Swan-Ganz catheterization) within the first 24 hours of ICU care. Common outcome variables include `dth30` (30-day mortality), `death` (longer-term mortality indicator), and `t3d30` (survival time up to 30 days).
+
+#### Format
+
+A tibble with 5,735 rows and 63 variables.
+
+#### Variables
+
+- `X`: row index carried over from the imported data set.
+- `cat1`: primary disease category used by the study.
+- `cat2`: secondary disease category, when applicable.
+- `ca`: cancer status, typically coded as no cancer, localized cancer, or metastatic cancer.
+- `sadmdte`: study admission date, stored as an integer date code.
+- `dschdte`: hospital discharge date, stored as an integer date code.
+- `dthdte`: date of death, stored as an integer date code.
+- `lstctdte`: date of last contact, stored as an integer date code.
+- `death`: indicator for death by the longer-term follow-up window.
+- `cardiohx`: indicator for prior cardiovascular disease history.
+- `chfhx`: indicator for prior congestive heart failure history.
+- `dementhx`: indicator for prior dementia or related neurologic functional impairment.
+- `psychhx`: indicator for prior psychiatric history.
+- `chrpulhx`: indicator for prior chronic pulmonary disease history.
+- `renalhx`: indicator for prior chronic renal disease history.
+- `liverhx`: indicator for prior liver disease history.
+- `gibledhx`: indicator for prior gastrointestinal bleeding history.
+- `malighx`: indicator for prior malignancy history.
+- `immunhx`: indicator for prior immunocompromised status.
+- `transhx`: indicator for prior transfer from another hospital or prior major transfer history.
+- `amihx`: indicator for prior acute myocardial infarction history.
+- `age`: age in years.
+- `sex`: sex.
+- `edu`: years of education.
+- `surv2md1`: model-based estimate of the probability of surviving 2 months, computed at day 1.
+- `das2d3pc`: Duke Activity Status Index or a closely related baseline functional-status measure.
+- `t3d30`: survival time up to 30 days.
+- `dth30`: indicator for death within 30 days.
+- `aps1`: APACHE III severity score on day 1.
+- `scoma1`: Glasgow Coma Score on day 1.
+- `meanbp1`: mean blood pressure on day 1.
+- `wblc1`: white blood cell count on day 1.
+- `hrt1`: heart rate on day 1.
+- `resp1`: respiratory rate on day 1.
+- `temp1`: body temperature on day 1.
+- `pafi1`: ratio of arterial oxygen pressure to fraction of inspired oxygen (PaO2/FiO2) on day 1.
+- `alb1`: albumin on day 1.
+- `hema1`: hematocrit on day 1.
+- `bili1`: bilirubin on day 1.
+- `crea1`: creatinine on day 1.
+- `sod1`: sodium on day 1.
+- `pot1`: potassium on day 1.
+- `paco21`: arterial PaCO2 on day 1.
+- `ph1`: arterial pH on day 1.
+- `swang1`: treatment indicator for receipt of right heart catheterization within the first 24 hours.
+- `wtkilo1`: weight in kilograms on day 1.
+- `dnr1`: do-not-resuscitate status on day 1.
+- `ninsclas`: insurance class.
+- `resp`: indicator for a respiratory admission diagnosis.
+- `card`: indicator for a cardiovascular admission diagnosis.
+- `neuro`: indicator for a neurologic admission diagnosis.
+- `gastr`: indicator for a gastrointestinal admission diagnosis.
+- `renal`: indicator for a renal admission diagnosis.
+- `meta`: indicator for a metabolic admission diagnosis.
+- `hema`: indicator for a hematologic admission diagnosis.
+- `seps`: indicator for sepsis.
+- `trauma`: indicator for trauma.
+- `ortho`: indicator for an orthopedic diagnosis.
+- `adld3p`: activities-of-daily-living measure recorded later in the study period, typically around day 3.
+- `urin1`: urine output on day 1.
+- `race`: race category.
+- `income`: income category.
+- `ptid`: patient identifier.
+
+#### Details
+
+For causal inference, it is useful to think of these variables in broad groups. The treatment is `swang1`. The most common binary outcome is `dth30`, though `death` and `t3d30` are also used. Variables such as `age`, `sex`, `race`, `income`, `cat1`, `cat2`, and the `*hx` variables are the clearest baseline covariates. The day-1 physiology variables, such as `aps1`, `meanbp1`, `hrt1`, `resp1`, and the laboratory measures, are clinically important but raise timing questions because treatment also occurs within the first 24 hours. Variables such as `dth30`, `death`, `t3d30`, and `adld3p` should be treated as outcomes or downstream variables rather than ordinary baseline controls.
+
+#### Source
+
+SUPPORT (Study to Understand Prognoses and Preferences for Outcomes and Risks of Treatments), as used in observational analyses of right heart catheterization in critically ill ICU patients.
+
+OK, let's modify the data a little bit to make sure things are working correctly, then we'll start with propensity scores.
+
+```{r}
+aa <- aa |>
+  as_tibble() |>
+  mutate(
+    across(
+      c(cardiohx, chfhx, dementhx, psychhx, chrpulhx, renalhx,
+        liverhx, gibledhx, malighx, immunhx, transhx, amihx),
+      ~ factor(.x, levels = c(0, 1), labels = c("No", "Yes"))
+    )
+  )
+```
+
+We now perform a logistic regression and estimate the overlap. We choose controls of the following type: 
+
+1. General demographics: `age`, `sex`, `race`, `edu`, `income`, and `ninsclas`
+2. General health history before treatment: `cat1`, `ca`, `cardiohx`, `chfhx`, `dementhx`, `psychhx`, `chrpulhx`, `renalhx`, `liverhx`, `gibledhx`, `malighx`, `immunhx`, `transhx`, `amihx`
+2. Day of treatment health indicator that cannot reasonably be influenced by choice of treatment: `dnr1`
+
+It would be helpful if we knew which of the day of treatment variables were **before** the treatment and which were **after** the treatment, but absent that information we leave out these potential bad controls. We do not include `cat2` because it contains many missing values. If we knew that these were missing becuase that meant there **isn't** a second disease category, then we could replace it with "None" and add it. 
+
+```{r}
+mod <- glm(swang1 ~ age + sex + race + edu + income + ninsclas + cat1 + ca +
+    cardiohx + chfhx + dementhx + psychhx + chrpulhx + renalhx +
+    liverhx + gibledhx + malighx + immunhx + transhx + amihx + dnr1, data = aa, family = binomial)
+summary(mod)
+
+broom::augment(mod) |> 
+  mutate(propensity = plogis(.fitted)) |> 
+  ggplot(aes(x = propensity, fill = swang1)) + 
+  geom_histogram(position = "identity", alpha = 0.5, bins = 20) 
+```
+
+Let's also count the number of treated and untreated.
+
+```{r}
+summary(aa$swang1)
+```
+
+Since we considering RHC as the treatment and we will do 1:1 matching of the treated, this looks pretty good. We don't need there to be many RHC treated people on the lower tail, but we do like to see no RHC people in the upper tail, and we do for the most part.
+
+```{r}
+match_mod <- matchit(swang1 ~ age + sex + race + edu + income + ninsclas + cat1 + ca +
+    cardiohx + chfhx + dementhx + psychhx + chrpulhx + renalhx +
+    liverhx + gibledhx + malighx + immunhx + transhx + amihx + dnr1, 
+    data = aa,
+    method = "nearest",
+    distance = "glm")
+
+aa_dat <- match.data(match_mod)
+
+summary(match_mod)
+```
+
+We can see that the balance between treated and untreated is better after matching. Now, we want to examine the outcome for the two groups. We consider the `dth30` as our outcome. We note that we have two balanced, paired groups; one corresponding to RHC and one corresponding to no RHC. To analyze this, we first compute the number of concordant and discordant pairs in the paired sample. Let's start by computing the percentage of patients that survived in each treatment.
+
+```{r}
+aa_dat |> 
+  group_by(swang1) |> 
+  summarize(surv = mean(dth30=="No"))
+```
+
+Since we have paired data, the natural test is McNemar's test, which is really just a special version of a chi-squared test. We start by counting the discordant and concordant pairs. Pairs are discordant if the outcomes are different and they are concordant if the outcomes are the same.
+
+```{r}
+aa_dat |> 
+  select(subclass, swang1, dth30) |> 
+  pivot_wider(names_from = swang1, values_from = dth30) |> 
+  janitor::clean_names() |> 
+  mutate(d30_success = case_when(
+    rhc == "No" & no_rhc == "No" ~ "both",
+    rhc == "Yes" & no_rhc == "No" ~ "no_rhc",
+    rhc == "No" & no_rhc == "Yes" ~ "rhc",
+    rhc == "Yes" & no_rhc == "Yes" ~ "neither",
+    TRUE ~ "uhoh"
+  )) |> 
+  pull(d30_success) |> 
+  table()
+```
+
+We see that 987 paired patients were both successes, in 591 of the pairs only the no RHC was successful, in 367 of the pairs only RHC was successful, and 239 of the pairs neither was successful. McNemar's test does a chi-squared test on the items that are **different**, so in other words:
+
+```{r}
+chisq.test(c(591, 367), correct = T)
+```
+
+There is also a built in R function for this test, which works for more general things:
+
+```{r}
+mcnemar.test(matrix(c(987, 591, 367, 239), nrow = 2))
+```
+
+It is a good idea to provide an effect size and confidence interval where possible, in order to make the difference between RHC and no RHC more clear. For this case, we recommend the *paired risk difference*, which is computed by
+
+```{r}
+(591 - 367)/sum(c(987, 591, 367, 239))
+```
+
+This says that there is about a 10 percentage point better chance of success overall using the no RHC technique than the RHC technique. In order to get a simple CI, we can use `t.test` on the raw data:
+
+```{r}
+aa_dat |> 
+  select(subclass, swang1, dth30) |> 
+  pivot_wider(names_from = swang1, values_from = dth30) |> 
+  janitor::clean_names() |> 
+  mutate(rhc = as.integer(rhc) - 1,
+         no_rhc = as.integer(no_rhc) - 1) |> 
+  with(t.test(rhc, no_rhc, paired = T))
+```
+
+We see that we have a 95 percent CI of 0.075 to 0.13. Let's compare our results to those of the paper. I asked ChatGPT to read the original paper and compare its results to ours, and this is what it said:
+
+Our basic matched analysis and the original paper point in the same direction, but our estimated effect is much larger. In our analysis, after 1:1 nearest-neighbor matching, the estimated 30-day survival rate was 72.3\% for the No RHC group and 62.0\% for the RHC group. Equivalently, this corresponds to about a 10.3 percentage point higher 30-day mortality rate in the RHC group, with a paired risk difference of 0.103 and a 95\% confidence interval from about 0.075 to 0.130. McNemar's test also gave a very small p-value, suggesting a strong difference between the matched groups.
+
+The paper's matched analysis was less dramatic. Connors et al. reported 1008 matched pairs, with 30-day survival of 67.2\% in the No RHC group and 62.5\% in the RHC group. That is still worse for RHC, but the absolute difference is only about 4.7 percentage points rather than the roughly 10 percentage points we found. They reported a matched-pair odds ratio of 1.24 with a 95\% confidence interval from 1.03 to 1.49 and a p-value of .03. So the qualitative conclusion is the same---RHC is associated with worse short-term outcomes---but the paper's estimated effect is smaller and much less statistically overwhelming than the effect from our simplified analysis.
+
+There are several reasons for this difference. First, our propensity score model is much simpler than the one in the paper. We used a conservative set of baseline demographic, diagnostic, comorbidity, and DNR variables, while the paper used a much richer adjustment set that included many additional measures of illness severity and prognosis. In particular, the paper incorporated variables such as APACHE-based severity information, physiologic measurements, laboratory values, functional status, and a model-based estimate of 2-month survival. The point of including those variables was to make the RHC and No RHC patients more comparable in how sick they were at baseline. Since sicker patients were more likely to receive RHC and also more likely to die, leaving out some of those severity variables can make RHC look more harmful than it really is.
+
+Second, the matching strategy in the paper was more selective than the one we used. Our analysis used the default greedy nearest-neighbor matching and kept all 2184 treated patients, pairing each with a control. The paper instead matched patients within disease category and required propensity scores to be very close. As a result, they ended up with only 1008 matched pairs rather than using all treated patients. In other words, the paper was willing to discard many patients in order to create a cleaner comparison. Our analysis uses more data, but it also allows weaker matches, and that can make the estimated treatment effect look larger if the remaining imbalance still favors the No RHC group.
+
+Third, the paper did not rely only on one matched-pair comparison. The authors also fit multivariable outcome models after propensity-score adjustment, looked at survival over multiple time horizons, examined subgroups, and carried out sensitivity analyses asking how large an omitted confounder would have to be to explain away the observed association. These extra analyses do not prove causality, but they do make the overall argument more careful. Our analysis is a good first pass because it shows the basic logic of propensity scores, matching, and paired outcome analysis. The paper's analysis is more sophisticated because it tries harder to address the possibility that the RHC patients were simply sicker in ways not fully captured by a simpler model.
+
+So the right takeaway is not that one analysis is "correct" and the other is "wrong." Rather, the simpler analysis is useful for illustrating the method, while the paper shows what a more serious observational analysis looks like. The fact that both analyses point in the same direction is reassuring. The fact that the paper's estimated effect is smaller is also informative: it suggests that some of the very large difference we saw in the simplified analysis was probably due to the fact that our matching model did not control as fully for severity of illness as the original study did.
 
 

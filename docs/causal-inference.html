@@ -23,7 +23,7 @@
 <meta name="author" content="Darrin Speegle" />
 
 
-<meta name="date" content="2026-04-22" />
+<meta name="date" content="2026-04-30" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -63,8 +63,9 @@
 
 
 <style type="text/css">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -74,7 +75,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -316,6 +317,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="12.5" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#why-finalist_pool-or-special_review-can-be-problematic-in-more-than-one-way"><i class="fa fa-check"></i><b>12.5</b> Why <code>finalist_pool</code> or <code>special_review</code> can be problematic in more than one way</a></li>
 <li class="chapter" data-level="12.6" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#a-compact-summary"><i class="fa fa-check"></i><b>12.6</b> A compact summary</a></li>
 <li class="chapter" data-level="12.7" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#directed-acyclic-graphs-dags"><i class="fa fa-check"></i><b>12.7</b> Directed Acyclic Graphs (DAGs)</a></li>
+<li class="chapter" data-level="12.8" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#matching"><i class="fa fa-check"></i><b>12.8</b> Matching</a></li>
+<li class="chapter" data-level="12.9" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#propensity-scores-and-matching-in-the-lalonde-data"><i class="fa fa-check"></i><b>12.9</b> Propensity scores and matching in the Lalonde data</a></li>
+<li class="chapter" data-level="12.10" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#bernoulli-outcomes"><i class="fa fa-check"></i><b>12.10</b> Bernoulli outcomes</a>
+<ul>
+<li class="chapter" data-level="12.10.1" data-path="the-retrofit-study.html"><a href="the-retrofit-study.html#rhc"><i class="fa fa-check"></i><b>12.10.1</b> <code>rhc</code></a></li>
+</ul></li>
 </ul></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
@@ -342,18 +349,18 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>In this chapter, we begin our discussion of causal inference. We will not try to cover the subject in full here. Instead, we focus on a basic but important question: when we fit a regression model with a treatment variable, under what circumstances can we interpret the coefficient of that treatment variable causally?</p>
 <p>A useful place to start is with observational data. In observational studies, the treated and untreated groups are often different before the treatment occurs. This means that a simple comparison of outcomes can mix together two things: the effect of the treatment itself, and baseline differences between the groups. Regression adjustment is one way to address this problem, but it does not solve it automatically.</p>
 <p>We will work with the <code>lalonde</code> data set from the <code>MatchIt</code> package. The outcome variable is earnings in 1978 (<code>re78</code>), and the treatment variable <code>treat</code> indicates participation in a job-training program. The data also includes several pre-treatment covariates such as age, education, marital status, degree status, and earnings in 1974 and 1975.</p>
-<div class="sourceCode" id="cb1258"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1258-1"><a href="causal-inference.html#cb1258-1" tabindex="-1"></a><span class="fu">library</span>(MatchIt)</span>
-<span id="cb1258-2"><a href="causal-inference.html#cb1258-2" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1258-3"><a href="causal-inference.html#cb1258-3" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
-<span id="cb1258-4"><a href="causal-inference.html#cb1258-4" tabindex="-1"></a></span>
-<span id="cb1258-5"><a href="causal-inference.html#cb1258-5" tabindex="-1"></a></span>
-<span id="cb1258-6"><a href="causal-inference.html#cb1258-6" tabindex="-1"></a></span>
-<span id="cb1258-7"><a href="causal-inference.html#cb1258-7" tabindex="-1"></a>aa <span class="ot">&lt;-</span> MatchIt<span class="sc">::</span>lalonde <span class="sc">|&gt;</span> </span>
-<span id="cb1258-8"><a href="causal-inference.html#cb1258-8" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb1243"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1243-1"><a href="causal-inference.html#cb1243-1" tabindex="-1"></a><span class="fu">library</span>(MatchIt)</span>
+<span id="cb1243-2"><a href="causal-inference.html#cb1243-2" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1243-3"><a href="causal-inference.html#cb1243-3" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
+<span id="cb1243-4"><a href="causal-inference.html#cb1243-4" tabindex="-1"></a></span>
+<span id="cb1243-5"><a href="causal-inference.html#cb1243-5" tabindex="-1"></a></span>
+<span id="cb1243-6"><a href="causal-inference.html#cb1243-6" tabindex="-1"></a></span>
+<span id="cb1243-7"><a href="causal-inference.html#cb1243-7" tabindex="-1"></a>aa <span class="ot">&lt;-</span> MatchIt<span class="sc">::</span>lalonde <span class="sc">|&gt;</span> </span>
+<span id="cb1243-8"><a href="causal-inference.html#cb1243-8" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span></code></pre></div>
 <p>We begin by looking at the structure of the data.</p>
-<div class="sourceCode" id="cb1259"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1259-1"><a href="causal-inference.html#cb1259-1" tabindex="-1"></a>aa <span class="sc">|&gt;</span> </span>
-<span id="cb1259-2"><a href="causal-inference.html#cb1259-2" tabindex="-1"></a>  <span class="fu">select</span>(treat, age, educ, married, nodegree, re74, re75, re78) <span class="sc">|&gt;</span> </span>
-<span id="cb1259-3"><a href="causal-inference.html#cb1259-3" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb1244"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1244-1"><a href="causal-inference.html#cb1244-1" tabindex="-1"></a>aa <span class="sc">|&gt;</span> </span>
+<span id="cb1244-2"><a href="causal-inference.html#cb1244-2" tabindex="-1"></a>  <span class="fu">select</span>(treat, age, educ, married, nodegree, re74, re75, re78) <span class="sc">|&gt;</span> </span>
+<span id="cb1244-3"><a href="causal-inference.html#cb1244-3" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code></pre></div>
 <pre><code>##      treat             age             educ          married      
 ##  Min.   :0.0000   Min.   :16.00   Min.   : 0.00   Min.   :0.0000  
 ##  1st Qu.:0.0000   1st Qu.:20.00   1st Qu.: 9.00   1st Qu.:0.0000  
@@ -373,19 +380,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 \texttt{re78} = \beta_0 + \beta_1 \texttt{treat} + \varepsilon.
 \]</span></p>
 <p>This model compares 1978 earnings between the treated and untreated groups without adjusting for any other variables.</p>
-<div class="sourceCode" id="cb1261"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1261-1"><a href="causal-inference.html#cb1261-1" tabindex="-1"></a>mod_naive <span class="ot">&lt;-</span> <span class="fu">lm</span>(re78 <span class="sc">~</span> treat, <span class="at">data =</span> aa)</span>
-<span id="cb1261-2"><a href="causal-inference.html#cb1261-2" tabindex="-1"></a></span>
-<span id="cb1261-3"><a href="causal-inference.html#cb1261-3" tabindex="-1"></a>mod_naive <span class="sc">|&gt;</span></span>
-<span id="cb1261-4"><a href="causal-inference.html#cb1261-4" tabindex="-1"></a>  <span class="fu">tidy</span>(<span class="at">conf.int =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1246"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1246-1"><a href="causal-inference.html#cb1246-1" tabindex="-1"></a>mod_naive <span class="ot">&lt;-</span> <span class="fu">lm</span>(re78 <span class="sc">~</span> treat, <span class="at">data =</span> aa)</span>
+<span id="cb1246-2"><a href="causal-inference.html#cb1246-2" tabindex="-1"></a></span>
+<span id="cb1246-3"><a href="causal-inference.html#cb1246-3" tabindex="-1"></a>mod_naive <span class="sc">|&gt;</span></span>
+<span id="cb1246-4"><a href="causal-inference.html#cb1246-4" tabindex="-1"></a>  <span class="fu">tidy</span>(<span class="at">conf.int =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## # A tibble: 2 × 7
 ##   term        estimate std.error statistic  p.value conf.low conf.high
 ##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
 ## 1 (Intercept)    6984.      361.    19.4   1.64e-65    6276.     7693.
 ## 2 treat          -635.      657.    -0.966 3.34e- 1   -1926.      655.</code></pre>
 <p>It is also useful to look at the group means directly.</p>
-<div class="sourceCode" id="cb1263"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1263-1"><a href="causal-inference.html#cb1263-1" tabindex="-1"></a>aa <span class="sc">|&gt;</span> </span>
-<span id="cb1263-2"><a href="causal-inference.html#cb1263-2" tabindex="-1"></a>  <span class="fu">group_by</span>(treat) <span class="sc">|&gt;</span> </span>
-<span id="cb1263-3"><a href="causal-inference.html#cb1263-3" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean_re78 =</span> <span class="fu">mean</span>(re78), <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1248"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1248-1"><a href="causal-inference.html#cb1248-1" tabindex="-1"></a>aa <span class="sc">|&gt;</span> </span>
+<span id="cb1248-2"><a href="causal-inference.html#cb1248-2" tabindex="-1"></a>  <span class="fu">group_by</span>(treat) <span class="sc">|&gt;</span> </span>
+<span id="cb1248-3"><a href="causal-inference.html#cb1248-3" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean_re78 =</span> <span class="fu">mean</span>(re78), <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span>)</span></code></pre></div>
 <pre><code>## # A tibble: 2 × 2
 ##   treat mean_re78
 ##   &lt;int&gt;     &lt;dbl&gt;
@@ -395,25 +402,25 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="baseline-differences-between-the-groups" class="section level3 hasAnchor" number="11.0.1">
 <h3><span class="header-section-number">11.0.1</span> Baseline Differences Between the Groups<a href="causal-inference.html#baseline-differences-between-the-groups" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>To investigate this, we compare some pre-treatment covariates across the two groups.</p>
-<div class="sourceCode" id="cb1265"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1265-1"><a href="causal-inference.html#cb1265-1" tabindex="-1"></a>aa <span class="sc">|&gt;</span> </span>
-<span id="cb1265-2"><a href="causal-inference.html#cb1265-2" tabindex="-1"></a>  <span class="fu">group_by</span>(treat) <span class="sc">|&gt;</span> </span>
-<span id="cb1265-3"><a href="causal-inference.html#cb1265-3" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
-<span id="cb1265-4"><a href="causal-inference.html#cb1265-4" tabindex="-1"></a>    <span class="fu">across</span>(<span class="fu">c</span>(age, educ, re74, re75), mean),</span>
-<span id="cb1265-5"><a href="causal-inference.html#cb1265-5" tabindex="-1"></a>    <span class="at">married =</span> <span class="fu">mean</span>(married),</span>
-<span id="cb1265-6"><a href="causal-inference.html#cb1265-6" tabindex="-1"></a>    <span class="at">nodegree =</span> <span class="fu">mean</span>(nodegree),</span>
-<span id="cb1265-7"><a href="causal-inference.html#cb1265-7" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
-<span id="cb1265-8"><a href="causal-inference.html#cb1265-8" tabindex="-1"></a>  )</span></code></pre></div>
+<div class="sourceCode" id="cb1250"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1250-1"><a href="causal-inference.html#cb1250-1" tabindex="-1"></a>aa <span class="sc">|&gt;</span> </span>
+<span id="cb1250-2"><a href="causal-inference.html#cb1250-2" tabindex="-1"></a>  <span class="fu">group_by</span>(treat) <span class="sc">|&gt;</span> </span>
+<span id="cb1250-3"><a href="causal-inference.html#cb1250-3" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb1250-4"><a href="causal-inference.html#cb1250-4" tabindex="-1"></a>    <span class="fu">across</span>(<span class="fu">c</span>(age, educ, re74, re75), mean),</span>
+<span id="cb1250-5"><a href="causal-inference.html#cb1250-5" tabindex="-1"></a>    <span class="at">married =</span> <span class="fu">mean</span>(married),</span>
+<span id="cb1250-6"><a href="causal-inference.html#cb1250-6" tabindex="-1"></a>    <span class="at">nodegree =</span> <span class="fu">mean</span>(nodegree),</span>
+<span id="cb1250-7"><a href="causal-inference.html#cb1250-7" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb1250-8"><a href="causal-inference.html#cb1250-8" tabindex="-1"></a>  )</span></code></pre></div>
 <pre><code>## # A tibble: 2 × 7
 ##   treat   age  educ  re74  re75 married nodegree
 ##   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;
 ## 1     0  28.0  10.2 5619. 2466.   0.513    0.597
 ## 2     1  25.8  10.3 2096. 1532.   0.189    0.708</code></pre>
 <p>We can also visualize one of the most important pre-treatment variables, namely earnings in 1975.</p>
-<div class="sourceCode" id="cb1267"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1267-1"><a href="causal-inference.html#cb1267-1" tabindex="-1"></a>aa <span class="sc">|&gt;</span> </span>
-<span id="cb1267-2"><a href="causal-inference.html#cb1267-2" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">treat =</span> <span class="fu">factor</span>(treat, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Control&quot;</span>, <span class="st">&quot;Treated&quot;</span>))) <span class="sc">|&gt;</span> </span>
-<span id="cb1267-3"><a href="causal-inference.html#cb1267-3" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> treat, <span class="at">y =</span> re75)) <span class="sc">+</span></span>
-<span id="cb1267-4"><a href="causal-inference.html#cb1267-4" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
-<span id="cb1267-5"><a href="causal-inference.html#cb1267-5" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">&quot;1975 earnings&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1252"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1252-1"><a href="causal-inference.html#cb1252-1" tabindex="-1"></a>aa <span class="sc">|&gt;</span> </span>
+<span id="cb1252-2"><a href="causal-inference.html#cb1252-2" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">treat =</span> <span class="fu">factor</span>(treat, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Control&quot;</span>, <span class="st">&quot;Treated&quot;</span>))) <span class="sc">|&gt;</span> </span>
+<span id="cb1252-3"><a href="causal-inference.html#cb1252-3" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> treat, <span class="at">y =</span> re75)) <span class="sc">+</span></span>
+<span id="cb1252-4"><a href="causal-inference.html#cb1252-4" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb1252-5"><a href="causal-inference.html#cb1252-5" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">&quot;1975 earnings&quot;</span>)</span></code></pre></div>
 <p><img src="13-causal-inference_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <p>We see that the treated and untreated groups are not the same at baseline. In particular, prior earnings differ substantially. This matters because prior earnings are measured before treatment, and they are strongly related to later earnings. If the treated group started out at a disadvantage, then a raw treated-versus-control comparison is not isolating the effect of treatment. It is combining the effect of treatment with the fact that the treated and untreated groups were different to begin with.</p>
 <p>This is the basic idea of <strong>confounding</strong>. A confounder is a variable that is related both to treatment assignment and to the outcome. Prior earnings are a natural example in this setting.</p>
@@ -422,13 +429,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 \texttt{re78} = \beta_0 + \beta_1 \texttt{treat} + \beta_2 X + \varepsilon,
 \]</span></p>
 <p>where <span class="math inline">\(X\)</span> denotes the baseline covariates.</p>
-<div class="sourceCode" id="cb1268"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1268-1"><a href="causal-inference.html#cb1268-1" tabindex="-1"></a>mod_adj <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
-<span id="cb1268-2"><a href="causal-inference.html#cb1268-2" tabindex="-1"></a>  re78 <span class="sc">~</span> treat <span class="sc">+</span> age <span class="sc">+</span> educ <span class="sc">+</span> race <span class="sc">+</span> married <span class="sc">+</span> nodegree <span class="sc">+</span> re74 <span class="sc">+</span> re75,</span>
-<span id="cb1268-3"><a href="causal-inference.html#cb1268-3" tabindex="-1"></a>  <span class="at">data =</span> aa</span>
-<span id="cb1268-4"><a href="causal-inference.html#cb1268-4" tabindex="-1"></a>)</span>
-<span id="cb1268-5"><a href="causal-inference.html#cb1268-5" tabindex="-1"></a></span>
-<span id="cb1268-6"><a href="causal-inference.html#cb1268-6" tabindex="-1"></a>mod_adj <span class="sc">|&gt;</span></span>
-<span id="cb1268-7"><a href="causal-inference.html#cb1268-7" tabindex="-1"></a>  <span class="fu">tidy</span>(<span class="at">conf.int =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1253"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1253-1"><a href="causal-inference.html#cb1253-1" tabindex="-1"></a>mod_adj <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb1253-2"><a href="causal-inference.html#cb1253-2" tabindex="-1"></a>  re78 <span class="sc">~</span> treat <span class="sc">+</span> age <span class="sc">+</span> educ <span class="sc">+</span> race <span class="sc">+</span> married <span class="sc">+</span> nodegree <span class="sc">+</span> re74 <span class="sc">+</span> re75,</span>
+<span id="cb1253-3"><a href="causal-inference.html#cb1253-3" tabindex="-1"></a>  <span class="at">data =</span> aa</span>
+<span id="cb1253-4"><a href="causal-inference.html#cb1253-4" tabindex="-1"></a>)</span>
+<span id="cb1253-5"><a href="causal-inference.html#cb1253-5" tabindex="-1"></a></span>
+<span id="cb1253-6"><a href="causal-inference.html#cb1253-6" tabindex="-1"></a>mod_adj <span class="sc">|&gt;</span></span>
+<span id="cb1253-7"><a href="causal-inference.html#cb1253-7" tabindex="-1"></a>  <span class="fu">tidy</span>(<span class="at">conf.int =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## # A tibble: 10 × 7
 ##    term         estimate std.error statistic     p.value   conf.low conf.high
 ##    &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
@@ -474,20 +481,20 @@ e(X) = P(D = 1 \mid X).
 \]</span></p>
 <p>Here, <span class="math inline">\(X\)</span> denotes the observed pre-treatment covariates. Units with similar propensity scores have similar observed baseline characteristics, at least in the sense relevant for treatment assignment. The idea is then to compare treated and untreated units that were similarly likely to receive treatment in the first place.</p>
 <p>We will not develop propensity scores fully in this section, but we can at least estimate them and inspect the results. A common first step is to fit a logistic regression for treatment.</p>
-<div class="sourceCode" id="cb1270"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1270-1"><a href="causal-inference.html#cb1270-1" tabindex="-1"></a>ps_mod <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
-<span id="cb1270-2"><a href="causal-inference.html#cb1270-2" tabindex="-1"></a>  treat <span class="sc">~</span> age <span class="sc">+</span> educ <span class="sc">+</span> race <span class="sc">+</span> married <span class="sc">+</span> nodegree <span class="sc">+</span> re74 <span class="sc">+</span> re75,</span>
-<span id="cb1270-3"><a href="causal-inference.html#cb1270-3" tabindex="-1"></a>  <span class="at">data =</span> aa,</span>
-<span id="cb1270-4"><a href="causal-inference.html#cb1270-4" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>()</span>
-<span id="cb1270-5"><a href="causal-inference.html#cb1270-5" tabindex="-1"></a>)</span>
-<span id="cb1270-6"><a href="causal-inference.html#cb1270-6" tabindex="-1"></a></span>
-<span id="cb1270-7"><a href="causal-inference.html#cb1270-7" tabindex="-1"></a>aa_ps <span class="ot">&lt;-</span> ps_mod <span class="sc">|&gt;</span></span>
-<span id="cb1270-8"><a href="causal-inference.html#cb1270-8" tabindex="-1"></a>  <span class="fu">augment</span>(<span class="at">data =</span> aa, <span class="at">type.predict =</span> <span class="st">&quot;response&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb1270-9"><a href="causal-inference.html#cb1270-9" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb1270-10"><a href="causal-inference.html#cb1270-10" tabindex="-1"></a>    <span class="at">treat =</span> <span class="fu">factor</span>(treat, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Control&quot;</span>, <span class="st">&quot;Treated&quot;</span>))</span>
-<span id="cb1270-11"><a href="causal-inference.html#cb1270-11" tabindex="-1"></a>  )</span>
-<span id="cb1270-12"><a href="causal-inference.html#cb1270-12" tabindex="-1"></a></span>
-<span id="cb1270-13"><a href="causal-inference.html#cb1270-13" tabindex="-1"></a>ps_mod <span class="sc">|&gt;</span></span>
-<span id="cb1270-14"><a href="causal-inference.html#cb1270-14" tabindex="-1"></a>  <span class="fu">tidy</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb1255"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1255-1"><a href="causal-inference.html#cb1255-1" tabindex="-1"></a>ps_mod <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb1255-2"><a href="causal-inference.html#cb1255-2" tabindex="-1"></a>  treat <span class="sc">~</span> age <span class="sc">+</span> educ <span class="sc">+</span> race <span class="sc">+</span> married <span class="sc">+</span> nodegree <span class="sc">+</span> re74 <span class="sc">+</span> re75,</span>
+<span id="cb1255-3"><a href="causal-inference.html#cb1255-3" tabindex="-1"></a>  <span class="at">data =</span> aa,</span>
+<span id="cb1255-4"><a href="causal-inference.html#cb1255-4" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>()</span>
+<span id="cb1255-5"><a href="causal-inference.html#cb1255-5" tabindex="-1"></a>)</span>
+<span id="cb1255-6"><a href="causal-inference.html#cb1255-6" tabindex="-1"></a></span>
+<span id="cb1255-7"><a href="causal-inference.html#cb1255-7" tabindex="-1"></a>aa_ps <span class="ot">&lt;-</span> ps_mod <span class="sc">|&gt;</span></span>
+<span id="cb1255-8"><a href="causal-inference.html#cb1255-8" tabindex="-1"></a>  <span class="fu">augment</span>(<span class="at">data =</span> aa, <span class="at">type.predict =</span> <span class="st">&quot;response&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1255-9"><a href="causal-inference.html#cb1255-9" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb1255-10"><a href="causal-inference.html#cb1255-10" tabindex="-1"></a>    <span class="at">treat =</span> <span class="fu">factor</span>(treat, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Control&quot;</span>, <span class="st">&quot;Treated&quot;</span>))</span>
+<span id="cb1255-11"><a href="causal-inference.html#cb1255-11" tabindex="-1"></a>  )</span>
+<span id="cb1255-12"><a href="causal-inference.html#cb1255-12" tabindex="-1"></a></span>
+<span id="cb1255-13"><a href="causal-inference.html#cb1255-13" tabindex="-1"></a>ps_mod <span class="sc">|&gt;</span></span>
+<span id="cb1255-14"><a href="causal-inference.html#cb1255-14" tabindex="-1"></a>  <span class="fu">tidy</span>()</span></code></pre></div>
 <pre><code>## # A tibble: 9 × 5
 ##   term          estimate std.error statistic  p.value
 ##   &lt;chr&gt;            &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
@@ -501,10 +508,10 @@ e(X) = P(D = 1 \mid X).
 ## 8 re74        -0.0000718 0.0000287     -2.50 1.25e- 2
 ## 9 re75         0.0000534 0.0000463      1.15 2.49e- 1</code></pre>
 <p>We can now look at the estimated propensity scores by treatment group.</p>
-<div class="sourceCode" id="cb1272"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1272-1"><a href="causal-inference.html#cb1272-1" tabindex="-1"></a>aa_ps <span class="sc">|&gt;</span> </span>
-<span id="cb1272-2"><a href="causal-inference.html#cb1272-2" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .fitted, <span class="at">fill =</span> treat)) <span class="sc">+</span></span>
-<span id="cb1272-3"><a href="causal-inference.html#cb1272-3" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">bins =</span> <span class="dv">30</span>, <span class="at">position =</span> <span class="st">&quot;identity&quot;</span>) <span class="sc">+</span></span>
-<span id="cb1272-4"><a href="causal-inference.html#cb1272-4" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Estimated propensity score&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Count&quot;</span>, <span class="at">fill =</span> <span class="cn">NULL</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1257"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1257-1"><a href="causal-inference.html#cb1257-1" tabindex="-1"></a>aa_ps <span class="sc">|&gt;</span> </span>
+<span id="cb1257-2"><a href="causal-inference.html#cb1257-2" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .fitted, <span class="at">fill =</span> treat)) <span class="sc">+</span></span>
+<span id="cb1257-3"><a href="causal-inference.html#cb1257-3" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">bins =</span> <span class="dv">30</span>, <span class="at">position =</span> <span class="st">&quot;identity&quot;</span>) <span class="sc">+</span></span>
+<span id="cb1257-4"><a href="causal-inference.html#cb1257-4" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Estimated propensity score&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Count&quot;</span>, <span class="at">fill =</span> <span class="cn">NULL</span>)</span></code></pre></div>
 <p><img src="13-causal-inference_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 <p>The plot is not itself a causal analysis, but it begins to show us something that the outcome regression did not show directly: how much overlap there is between the treated and untreated groups on the observed baseline covariates. Later, this idea of overlap will become central. In this particular plot, notice that there is not a lot of overlap between control and treated in the low propensity score group. This means that there is some combination of covariates which almost uniformly led participants not to get job training. That is somewhat bad news for causal analysis in general, and certainly should lead to hesitancy in interpreting the multiple regression output causally. We expect to see some predictive power of the covariates on whether the treatment was received, but we are hoping to still see significant overlap for our causal analysis. There are techniques for dealing with data like this which we will discuss in later sections.</p>
 </div>
@@ -521,21 +528,21 @@ e(X) = P(D = 1 \mid X).
 <p>In the previous section, we saw that a naive regression of later earnings on treatment in the Lalonde data gave a different answer than a regression that adjusted for observed baseline covariates. That already tells us something important: the treated and control groups were different before treatment. In observational work, that is the rule rather than the exception.</p>
 <p>The next question is the more important one. When does an adjusted comparison deserve a causal interpretation? Regression adjustment can be part of a causal analysis, but the causal interpretation does not come from the software output. It comes from the assumptions that justify using treated and untreated units as stand-ins for one another’s missing counterfactual outcomes.</p>
 <p>Throughout this section, we continue to use the Lalonde job-training data. The treatment is participation in the job-training program, and the outcome is earnings in 1978.</p>
-<div class="sourceCode" id="cb1273"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1273-1"><a href="causal-inference.html#cb1273-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1273-2"><a href="causal-inference.html#cb1273-2" tabindex="-1"></a><span class="fu">library</span>(MatchIt)</span>
-<span id="cb1273-3"><a href="causal-inference.html#cb1273-3" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
-<span id="cb1273-4"><a href="causal-inference.html#cb1273-4" tabindex="-1"></a></span>
-<span id="cb1273-5"><a href="causal-inference.html#cb1273-5" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;lalonde&quot;</span>)</span>
-<span id="cb1273-6"><a href="causal-inference.html#cb1273-6" tabindex="-1"></a></span>
-<span id="cb1273-7"><a href="causal-inference.html#cb1273-7" tabindex="-1"></a></span>
-<span id="cb1273-8"><a href="causal-inference.html#cb1273-8" tabindex="-1"></a>aa <span class="ot">&lt;-</span> lalonde <span class="sc">|&gt;</span></span>
-<span id="cb1273-9"><a href="causal-inference.html#cb1273-9" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
-<span id="cb1273-10"><a href="causal-inference.html#cb1273-10" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb1273-11"><a href="causal-inference.html#cb1273-11" tabindex="-1"></a>    <span class="at">treat =</span> <span class="fu">factor</span>(treat, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Control&quot;</span>, <span class="st">&quot;Treated&quot;</span>)),</span>
-<span id="cb1273-12"><a href="causal-inference.html#cb1273-12" tabindex="-1"></a>    <span class="at">race =</span> <span class="fu">factor</span>(race),</span>
-<span id="cb1273-13"><a href="causal-inference.html#cb1273-13" tabindex="-1"></a>    <span class="at">married =</span> <span class="fu">factor</span>(married, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;No&quot;</span>, <span class="st">&quot;Yes&quot;</span>)),</span>
-<span id="cb1273-14"><a href="causal-inference.html#cb1273-14" tabindex="-1"></a>    <span class="at">nodegree =</span> <span class="fu">factor</span>(nodegree, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;No&quot;</span>, <span class="st">&quot;Yes&quot;</span>))</span>
-<span id="cb1273-15"><a href="causal-inference.html#cb1273-15" tabindex="-1"></a>  )</span></code></pre></div>
+<div class="sourceCode" id="cb1258"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1258-1"><a href="causal-inference.html#cb1258-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1258-2"><a href="causal-inference.html#cb1258-2" tabindex="-1"></a><span class="fu">library</span>(MatchIt)</span>
+<span id="cb1258-3"><a href="causal-inference.html#cb1258-3" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
+<span id="cb1258-4"><a href="causal-inference.html#cb1258-4" tabindex="-1"></a></span>
+<span id="cb1258-5"><a href="causal-inference.html#cb1258-5" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;lalonde&quot;</span>)</span>
+<span id="cb1258-6"><a href="causal-inference.html#cb1258-6" tabindex="-1"></a></span>
+<span id="cb1258-7"><a href="causal-inference.html#cb1258-7" tabindex="-1"></a></span>
+<span id="cb1258-8"><a href="causal-inference.html#cb1258-8" tabindex="-1"></a>aa <span class="ot">&lt;-</span> lalonde <span class="sc">|&gt;</span></span>
+<span id="cb1258-9"><a href="causal-inference.html#cb1258-9" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
+<span id="cb1258-10"><a href="causal-inference.html#cb1258-10" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb1258-11"><a href="causal-inference.html#cb1258-11" tabindex="-1"></a>    <span class="at">treat =</span> <span class="fu">factor</span>(treat, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Control&quot;</span>, <span class="st">&quot;Treated&quot;</span>)),</span>
+<span id="cb1258-12"><a href="causal-inference.html#cb1258-12" tabindex="-1"></a>    <span class="at">race =</span> <span class="fu">factor</span>(race),</span>
+<span id="cb1258-13"><a href="causal-inference.html#cb1258-13" tabindex="-1"></a>    <span class="at">married =</span> <span class="fu">factor</span>(married, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;No&quot;</span>, <span class="st">&quot;Yes&quot;</span>)),</span>
+<span id="cb1258-14"><a href="causal-inference.html#cb1258-14" tabindex="-1"></a>    <span class="at">nodegree =</span> <span class="fu">factor</span>(nodegree, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;No&quot;</span>, <span class="st">&quot;Yes&quot;</span>))</span>
+<span id="cb1258-15"><a href="causal-inference.html#cb1258-15" tabindex="-1"></a>  )</span></code></pre></div>
 <p>We will use the following observed pre-treatment covariates throughout this section:</p>
 <ul>
 <li><code>age</code></li>
@@ -569,24 +576,20 @@ Y_i = D_iY_i(1) + (1-D_i)Y_i(0).
 <p>These assumptions help explain why regression is not the opposite of causal inference. Regression is one tool that causal inference can use. The causal interpretation depends on whether the regression is implementing a defensible comparison.</p>
 <p>There is one more practical point to make before returning to the Lalonde data. A good control is generally a variable measured before treatment that affects both treatment assignment and the outcome. A bad control is a variable that is downstream of treatment or a collider. For example, if a job-search intervention improves later mental health partly by increasing job-search confidence, then controlling for job-search confidence would remove part of the very treatment effect we are trying to estimate. If the goal is the total effect of treatment, post-treatment mediators are bad controls.</p>
 <p>The <code>jobs</code> data in the <code>mediation</code> package give a nice example. The treatment variable is <code>treat</code>, the outcome is <code>depress2</code>, and <code>job_seek</code> is a plausible post-treatment mediator. In the code below, the third model adds <code>job_seek</code> after treatment has already occurred.</p>
-<div class="sourceCode" id="cb1274"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1274-1"><a href="causal-inference.html#cb1274-1" tabindex="-1"></a><span class="fu">library</span>(mediation)</span>
-<span id="cb1274-2"><a href="causal-inference.html#cb1274-2" tabindex="-1"></a></span>
-<span id="cb1274-3"><a href="causal-inference.html#cb1274-3" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;jobs&quot;</span>)</span>
-<span id="cb1274-4"><a href="causal-inference.html#cb1274-4" tabindex="-1"></a></span>
-<span id="cb1274-5"><a href="causal-inference.html#cb1274-5" tabindex="-1"></a>jobs2 <span class="ot">&lt;-</span> jobs <span class="sc">|&gt;</span></span>
-<span id="cb1274-6"><a href="causal-inference.html#cb1274-6" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span>
-<span id="cb1274-7"><a href="causal-inference.html#cb1274-7" tabindex="-1"></a></span>
-<span id="cb1274-8"><a href="causal-inference.html#cb1274-8" tabindex="-1"></a>mod1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(depress2 <span class="sc">~</span> treat, <span class="at">data =</span> jobs2)</span>
-<span id="cb1274-9"><a href="causal-inference.html#cb1274-9" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(depress2 <span class="sc">~</span> treat <span class="sc">+</span> econ_hard <span class="sc">+</span> sex <span class="sc">+</span> age, <span class="at">data =</span> jobs2)</span>
-<span id="cb1274-10"><a href="causal-inference.html#cb1274-10" tabindex="-1"></a>mod3 <span class="ot">&lt;-</span> <span class="fu">lm</span>(depress2 <span class="sc">~</span> treat <span class="sc">+</span> econ_hard <span class="sc">+</span> sex <span class="sc">+</span> age <span class="sc">+</span> job_seek, <span class="at">data =</span> jobs2)</span>
-<span id="cb1274-11"><a href="causal-inference.html#cb1274-11" tabindex="-1"></a></span>
-<span id="cb1274-12"><a href="causal-inference.html#cb1274-12" tabindex="-1"></a><span class="fu">bind_rows</span>(</span>
-<span id="cb1274-13"><a href="causal-inference.html#cb1274-13" tabindex="-1"></a>  <span class="fu">tidy</span>(mod1) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">&quot;Treatment only&quot;</span>),</span>
-<span id="cb1274-14"><a href="causal-inference.html#cb1274-14" tabindex="-1"></a>  <span class="fu">tidy</span>(mod2) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">&quot;Baseline controls&quot;</span>),</span>
-<span id="cb1274-15"><a href="causal-inference.html#cb1274-15" tabindex="-1"></a>  <span class="fu">tidy</span>(mod3) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">&quot;Adds post-treatment variable&quot;</span>)</span>
-<span id="cb1274-16"><a href="causal-inference.html#cb1274-16" tabindex="-1"></a>) <span class="sc">|&gt;</span> </span>
-<span id="cb1274-17"><a href="causal-inference.html#cb1274-17" tabindex="-1"></a>  <span class="fu">filter</span>(term <span class="sc">==</span> <span class="st">&quot;treat&quot;</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb1274-18"><a href="causal-inference.html#cb1274-18" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(model, estimate, std.error, statistic, p.value)</span></code></pre></div>
+<div class="sourceCode" id="cb1259"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1259-1"><a href="causal-inference.html#cb1259-1" tabindex="-1"></a>jobs2 <span class="ot">&lt;-</span> mediation<span class="sc">::</span>jobs <span class="sc">|&gt;</span></span>
+<span id="cb1259-2"><a href="causal-inference.html#cb1259-2" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span>
+<span id="cb1259-3"><a href="causal-inference.html#cb1259-3" tabindex="-1"></a></span>
+<span id="cb1259-4"><a href="causal-inference.html#cb1259-4" tabindex="-1"></a>mod1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(depress2 <span class="sc">~</span> treat, <span class="at">data =</span> jobs2)</span>
+<span id="cb1259-5"><a href="causal-inference.html#cb1259-5" tabindex="-1"></a>mod2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(depress2 <span class="sc">~</span> treat <span class="sc">+</span> econ_hard <span class="sc">+</span> sex <span class="sc">+</span> age, <span class="at">data =</span> jobs2)</span>
+<span id="cb1259-6"><a href="causal-inference.html#cb1259-6" tabindex="-1"></a>mod3 <span class="ot">&lt;-</span> <span class="fu">lm</span>(depress2 <span class="sc">~</span> treat <span class="sc">+</span> econ_hard <span class="sc">+</span> sex <span class="sc">+</span> age <span class="sc">+</span> job_seek, <span class="at">data =</span> jobs2)</span>
+<span id="cb1259-7"><a href="causal-inference.html#cb1259-7" tabindex="-1"></a></span>
+<span id="cb1259-8"><a href="causal-inference.html#cb1259-8" tabindex="-1"></a><span class="fu">bind_rows</span>(</span>
+<span id="cb1259-9"><a href="causal-inference.html#cb1259-9" tabindex="-1"></a>  <span class="fu">tidy</span>(mod1) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">&quot;Treatment only&quot;</span>),</span>
+<span id="cb1259-10"><a href="causal-inference.html#cb1259-10" tabindex="-1"></a>  <span class="fu">tidy</span>(mod2) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">&quot;Baseline controls&quot;</span>),</span>
+<span id="cb1259-11"><a href="causal-inference.html#cb1259-11" tabindex="-1"></a>  <span class="fu">tidy</span>(mod3) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">&quot;Adds post-treatment variable&quot;</span>)</span>
+<span id="cb1259-12"><a href="causal-inference.html#cb1259-12" tabindex="-1"></a>) <span class="sc">|&gt;</span> </span>
+<span id="cb1259-13"><a href="causal-inference.html#cb1259-13" tabindex="-1"></a>  <span class="fu">filter</span>(term <span class="sc">==</span> <span class="st">&quot;treat&quot;</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb1259-14"><a href="causal-inference.html#cb1259-14" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(model, estimate, std.error, statistic, p.value)</span></code></pre></div>
 <pre><code>## # A tibble: 3 × 5
 ##   model                        estimate std.error statistic p.value
 ##   &lt;chr&gt;                           &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
@@ -598,31 +601,31 @@ Y_i = D_iY_i(1) + (1-D_i)Y_i(0).
 <div id="the-lalonde-data-revisited" class="section level3 hasAnchor" number="11.1.2">
 <h3><span class="header-section-number">11.1.2</span> The Lalonde Data Revisited<a href="causal-inference.html#the-lalonde-data-revisited" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>We return now to the Lalonde data. The first thing to notice is that the treated and control groups differ on several observed pre-treatment covariates.</p>
-<div class="sourceCode" id="cb1276"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1276-1"><a href="causal-inference.html#cb1276-1" tabindex="-1"></a>aa <span class="sc">|&gt;</span></span>
-<span id="cb1276-2"><a href="causal-inference.html#cb1276-2" tabindex="-1"></a>  <span class="fu">group_by</span>(treat) <span class="sc">|&gt;</span></span>
-<span id="cb1276-3"><a href="causal-inference.html#cb1276-3" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
-<span id="cb1276-4"><a href="causal-inference.html#cb1276-4" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
-<span id="cb1276-5"><a href="causal-inference.html#cb1276-5" tabindex="-1"></a>    <span class="at">age =</span> <span class="fu">mean</span>(age),</span>
-<span id="cb1276-6"><a href="causal-inference.html#cb1276-6" tabindex="-1"></a>    <span class="at">educ =</span> <span class="fu">mean</span>(educ),</span>
-<span id="cb1276-7"><a href="causal-inference.html#cb1276-7" tabindex="-1"></a>    <span class="at">re74 =</span> <span class="fu">mean</span>(re74),</span>
-<span id="cb1276-8"><a href="causal-inference.html#cb1276-8" tabindex="-1"></a>    <span class="at">re75 =</span> <span class="fu">mean</span>(re75),</span>
-<span id="cb1276-9"><a href="causal-inference.html#cb1276-9" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
-<span id="cb1276-10"><a href="causal-inference.html#cb1276-10" tabindex="-1"></a>  )</span></code></pre></div>
+<div class="sourceCode" id="cb1261"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1261-1"><a href="causal-inference.html#cb1261-1" tabindex="-1"></a>aa <span class="sc">|&gt;</span></span>
+<span id="cb1261-2"><a href="causal-inference.html#cb1261-2" tabindex="-1"></a>  <span class="fu">group_by</span>(treat) <span class="sc">|&gt;</span></span>
+<span id="cb1261-3"><a href="causal-inference.html#cb1261-3" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb1261-4"><a href="causal-inference.html#cb1261-4" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb1261-5"><a href="causal-inference.html#cb1261-5" tabindex="-1"></a>    <span class="at">age =</span> <span class="fu">mean</span>(age),</span>
+<span id="cb1261-6"><a href="causal-inference.html#cb1261-6" tabindex="-1"></a>    <span class="at">educ =</span> <span class="fu">mean</span>(educ),</span>
+<span id="cb1261-7"><a href="causal-inference.html#cb1261-7" tabindex="-1"></a>    <span class="at">re74 =</span> <span class="fu">mean</span>(re74),</span>
+<span id="cb1261-8"><a href="causal-inference.html#cb1261-8" tabindex="-1"></a>    <span class="at">re75 =</span> <span class="fu">mean</span>(re75),</span>
+<span id="cb1261-9"><a href="causal-inference.html#cb1261-9" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb1261-10"><a href="causal-inference.html#cb1261-10" tabindex="-1"></a>  )</span></code></pre></div>
 <pre><code>## # A tibble: 2 × 6
 ##   treat       n   age  educ  re74  re75
 ##   &lt;fct&gt;   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
 ## 1 Control   429  28.0  10.2 5619. 2466.
 ## 2 Treated   185  25.8  10.3 2096. 1532.</code></pre>
-<div class="sourceCode" id="cb1278"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1278-1"><a href="causal-inference.html#cb1278-1" tabindex="-1"></a>aa <span class="sc">|&gt;</span></span>
-<span id="cb1278-2"><a href="causal-inference.html#cb1278-2" tabindex="-1"></a>  <span class="fu">group_by</span>(treat) <span class="sc">|&gt;</span></span>
-<span id="cb1278-3"><a href="causal-inference.html#cb1278-3" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
-<span id="cb1278-4"><a href="causal-inference.html#cb1278-4" tabindex="-1"></a>    <span class="at">percent_black =</span> <span class="fu">mean</span>(race <span class="sc">==</span> <span class="st">&quot;black&quot;</span>),</span>
-<span id="cb1278-5"><a href="causal-inference.html#cb1278-5" tabindex="-1"></a>    <span class="at">percent_hispanic =</span> <span class="fu">mean</span>(race <span class="sc">==</span> <span class="st">&quot;hispan&quot;</span>),</span>
-<span id="cb1278-6"><a href="causal-inference.html#cb1278-6" tabindex="-1"></a>    <span class="at">percent_white =</span> <span class="fu">mean</span>(race <span class="sc">==</span> <span class="st">&quot;white&quot;</span>),</span>
-<span id="cb1278-7"><a href="causal-inference.html#cb1278-7" tabindex="-1"></a>    <span class="at">married =</span> <span class="fu">mean</span>(married <span class="sc">==</span> <span class="st">&quot;Yes&quot;</span>),</span>
-<span id="cb1278-8"><a href="causal-inference.html#cb1278-8" tabindex="-1"></a>    <span class="at">nodegree =</span> <span class="fu">mean</span>(nodegree <span class="sc">==</span> <span class="st">&quot;Yes&quot;</span>),</span>
-<span id="cb1278-9"><a href="causal-inference.html#cb1278-9" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
-<span id="cb1278-10"><a href="causal-inference.html#cb1278-10" tabindex="-1"></a>  )</span></code></pre></div>
+<div class="sourceCode" id="cb1263"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1263-1"><a href="causal-inference.html#cb1263-1" tabindex="-1"></a>aa <span class="sc">|&gt;</span></span>
+<span id="cb1263-2"><a href="causal-inference.html#cb1263-2" tabindex="-1"></a>  <span class="fu">group_by</span>(treat) <span class="sc">|&gt;</span></span>
+<span id="cb1263-3"><a href="causal-inference.html#cb1263-3" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb1263-4"><a href="causal-inference.html#cb1263-4" tabindex="-1"></a>    <span class="at">percent_black =</span> <span class="fu">mean</span>(race <span class="sc">==</span> <span class="st">&quot;black&quot;</span>),</span>
+<span id="cb1263-5"><a href="causal-inference.html#cb1263-5" tabindex="-1"></a>    <span class="at">percent_hispanic =</span> <span class="fu">mean</span>(race <span class="sc">==</span> <span class="st">&quot;hispan&quot;</span>),</span>
+<span id="cb1263-6"><a href="causal-inference.html#cb1263-6" tabindex="-1"></a>    <span class="at">percent_white =</span> <span class="fu">mean</span>(race <span class="sc">==</span> <span class="st">&quot;white&quot;</span>),</span>
+<span id="cb1263-7"><a href="causal-inference.html#cb1263-7" tabindex="-1"></a>    <span class="at">married =</span> <span class="fu">mean</span>(married <span class="sc">==</span> <span class="st">&quot;Yes&quot;</span>),</span>
+<span id="cb1263-8"><a href="causal-inference.html#cb1263-8" tabindex="-1"></a>    <span class="at">nodegree =</span> <span class="fu">mean</span>(nodegree <span class="sc">==</span> <span class="st">&quot;Yes&quot;</span>),</span>
+<span id="cb1263-9"><a href="causal-inference.html#cb1263-9" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb1263-10"><a href="causal-inference.html#cb1263-10" tabindex="-1"></a>  )</span></code></pre></div>
 <pre><code>## # A tibble: 2 × 6
 ##   treat   percent_black percent_hispanic percent_white married nodegree
 ##   &lt;fct&gt;           &lt;dbl&gt;            &lt;dbl&gt;         &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;
@@ -630,19 +633,19 @@ Y_i = D_iY_i(1) + (1-D_i)Y_i(0).
 ## 2 Treated         0.843           0.0595        0.0973   0.189    0.708</code></pre>
 <p>These are all pre-treatment variables, so differences here are a warning sign for confounding rather than an effect of treatment. In particular, prior earnings differ between the groups, and prior earnings are highly relevant for later earnings.</p>
 <p>We can see again that the naive and adjusted regressions tell different stories.</p>
-<div class="sourceCode" id="cb1280"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1280-1"><a href="causal-inference.html#cb1280-1" tabindex="-1"></a>mod_naive <span class="ot">&lt;-</span> <span class="fu">lm</span>(re78 <span class="sc">~</span> treat, <span class="at">data =</span> aa)</span>
-<span id="cb1280-2"><a href="causal-inference.html#cb1280-2" tabindex="-1"></a></span>
-<span id="cb1280-3"><a href="causal-inference.html#cb1280-3" tabindex="-1"></a>mod_adj <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
-<span id="cb1280-4"><a href="causal-inference.html#cb1280-4" tabindex="-1"></a>  re78 <span class="sc">~</span> treat <span class="sc">+</span> age <span class="sc">+</span> educ <span class="sc">+</span> race <span class="sc">+</span> married <span class="sc">+</span> nodegree <span class="sc">+</span> re74 <span class="sc">+</span> re75,</span>
-<span id="cb1280-5"><a href="causal-inference.html#cb1280-5" tabindex="-1"></a>  <span class="at">data =</span> aa</span>
-<span id="cb1280-6"><a href="causal-inference.html#cb1280-6" tabindex="-1"></a>)</span>
-<span id="cb1280-7"><a href="causal-inference.html#cb1280-7" tabindex="-1"></a></span>
-<span id="cb1280-8"><a href="causal-inference.html#cb1280-8" tabindex="-1"></a><span class="fu">bind_rows</span>(</span>
-<span id="cb1280-9"><a href="causal-inference.html#cb1280-9" tabindex="-1"></a>  <span class="fu">tidy</span>(mod_naive, <span class="at">conf.int =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">&quot;Naive&quot;</span>),</span>
-<span id="cb1280-10"><a href="causal-inference.html#cb1280-10" tabindex="-1"></a>  <span class="fu">tidy</span>(mod_adj, <span class="at">conf.int =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">&quot;Adjusted&quot;</span>)</span>
-<span id="cb1280-11"><a href="causal-inference.html#cb1280-11" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
-<span id="cb1280-12"><a href="causal-inference.html#cb1280-12" tabindex="-1"></a>  <span class="fu">filter</span>(term <span class="sc">==</span> <span class="st">&quot;treatTreated&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb1280-13"><a href="causal-inference.html#cb1280-13" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(model, estimate, conf.low, conf.high, p.value)</span></code></pre></div>
+<div class="sourceCode" id="cb1265"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1265-1"><a href="causal-inference.html#cb1265-1" tabindex="-1"></a>mod_naive <span class="ot">&lt;-</span> <span class="fu">lm</span>(re78 <span class="sc">~</span> treat, <span class="at">data =</span> aa)</span>
+<span id="cb1265-2"><a href="causal-inference.html#cb1265-2" tabindex="-1"></a></span>
+<span id="cb1265-3"><a href="causal-inference.html#cb1265-3" tabindex="-1"></a>mod_adj <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb1265-4"><a href="causal-inference.html#cb1265-4" tabindex="-1"></a>  re78 <span class="sc">~</span> treat <span class="sc">+</span> age <span class="sc">+</span> educ <span class="sc">+</span> race <span class="sc">+</span> married <span class="sc">+</span> nodegree <span class="sc">+</span> re74 <span class="sc">+</span> re75,</span>
+<span id="cb1265-5"><a href="causal-inference.html#cb1265-5" tabindex="-1"></a>  <span class="at">data =</span> aa</span>
+<span id="cb1265-6"><a href="causal-inference.html#cb1265-6" tabindex="-1"></a>)</span>
+<span id="cb1265-7"><a href="causal-inference.html#cb1265-7" tabindex="-1"></a></span>
+<span id="cb1265-8"><a href="causal-inference.html#cb1265-8" tabindex="-1"></a><span class="fu">bind_rows</span>(</span>
+<span id="cb1265-9"><a href="causal-inference.html#cb1265-9" tabindex="-1"></a>  <span class="fu">tidy</span>(mod_naive, <span class="at">conf.int =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">&quot;Naive&quot;</span>),</span>
+<span id="cb1265-10"><a href="causal-inference.html#cb1265-10" tabindex="-1"></a>  <span class="fu">tidy</span>(mod_adj, <span class="at">conf.int =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">model =</span> <span class="st">&quot;Adjusted&quot;</span>)</span>
+<span id="cb1265-11"><a href="causal-inference.html#cb1265-11" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb1265-12"><a href="causal-inference.html#cb1265-12" tabindex="-1"></a>  <span class="fu">filter</span>(term <span class="sc">==</span> <span class="st">&quot;treatTreated&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1265-13"><a href="causal-inference.html#cb1265-13" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(model, estimate, conf.low, conf.high, p.value)</span></code></pre></div>
 <pre><code>## # A tibble: 2 × 5
 ##   model    estimate conf.low conf.high p.value
 ##   &lt;chr&gt;       &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
@@ -650,29 +653,29 @@ Y_i = D_iY_i(1) + (1-D_i)Y_i(0).
 ## 2 Adjusted    1548.     13.9     3083.  0.0480</code></pre>
 <p>The sign change is a strong indication that the raw treatment comparison was confounded by observed baseline differences. This does not prove that the adjusted model is causal, but it does show that adjustment matters.</p>
 <p>It is useful to visualize overlap directly. We start with one important pre-treatment covariate, 1975 earnings.</p>
-<div class="sourceCode" id="cb1282"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1282-1"><a href="causal-inference.html#cb1282-1" tabindex="-1"></a><span class="fu">ggplot</span>(aa, <span class="fu">aes</span>(<span class="at">x =</span> re75, <span class="at">fill =</span> treat)) <span class="sc">+</span></span>
-<span id="cb1282-2"><a href="causal-inference.html#cb1282-2" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
-<span id="cb1282-3"><a href="causal-inference.html#cb1282-3" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;1975 earnings&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Density&quot;</span>, <span class="at">fill =</span> <span class="cn">NULL</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1267"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1267-1"><a href="causal-inference.html#cb1267-1" tabindex="-1"></a><span class="fu">ggplot</span>(aa, <span class="fu">aes</span>(<span class="at">x =</span> re75, <span class="at">fill =</span> treat)) <span class="sc">+</span></span>
+<span id="cb1267-2"><a href="causal-inference.html#cb1267-2" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb1267-3"><a href="causal-inference.html#cb1267-3" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;1975 earnings&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Density&quot;</span>, <span class="at">fill =</span> <span class="cn">NULL</span>)</span></code></pre></div>
 <p><img src="13-causal-inference_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
 <p>Where the two distributions overlap, comparison is more plausible. Where they are far apart, adjustment begins to rely on extrapolation. This same idea can be summarized more compactly by the <strong>propensity score</strong>, which we define as</p>
 <p><span class="math display">\[
 e(X) = P(D = 1 \mid X).
 \]</span></p>
 <p>For now, we use the propensity score only as a way to study overlap. We estimate it with logistic regression using the observed pre-treatment covariates.</p>
-<div class="sourceCode" id="cb1283"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1283-1"><a href="causal-inference.html#cb1283-1" tabindex="-1"></a>ps_mod <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
-<span id="cb1283-2"><a href="causal-inference.html#cb1283-2" tabindex="-1"></a>  treat <span class="sc">~</span> age <span class="sc">+</span> educ <span class="sc">+</span> race <span class="sc">+</span> married <span class="sc">+</span> nodegree <span class="sc">+</span> re74 <span class="sc">+</span> re75,</span>
-<span id="cb1283-3"><a href="causal-inference.html#cb1283-3" tabindex="-1"></a>  <span class="at">data =</span> aa,</span>
-<span id="cb1283-4"><a href="causal-inference.html#cb1283-4" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>()</span>
-<span id="cb1283-5"><a href="causal-inference.html#cb1283-5" tabindex="-1"></a>)</span>
-<span id="cb1283-6"><a href="causal-inference.html#cb1283-6" tabindex="-1"></a></span>
-<span id="cb1283-7"><a href="causal-inference.html#cb1283-7" tabindex="-1"></a>aa_ps <span class="ot">&lt;-</span> ps_mod <span class="sc">|&gt;</span></span>
-<span id="cb1283-8"><a href="causal-inference.html#cb1283-8" tabindex="-1"></a>  <span class="fu">augment</span>(<span class="at">data =</span> aa, <span class="at">type.predict =</span> <span class="st">&quot;response&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb1283-9"><a href="causal-inference.html#cb1283-9" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ps =</span> .fitted) <span class="sc">|&gt;</span></span>
-<span id="cb1283-10"><a href="causal-inference.html#cb1283-10" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>.fitted)</span></code></pre></div>
+<div class="sourceCode" id="cb1268"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1268-1"><a href="causal-inference.html#cb1268-1" tabindex="-1"></a>ps_mod <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb1268-2"><a href="causal-inference.html#cb1268-2" tabindex="-1"></a>  treat <span class="sc">~</span> age <span class="sc">+</span> educ <span class="sc">+</span> race <span class="sc">+</span> married <span class="sc">+</span> nodegree <span class="sc">+</span> re74 <span class="sc">+</span> re75,</span>
+<span id="cb1268-3"><a href="causal-inference.html#cb1268-3" tabindex="-1"></a>  <span class="at">data =</span> aa,</span>
+<span id="cb1268-4"><a href="causal-inference.html#cb1268-4" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>()</span>
+<span id="cb1268-5"><a href="causal-inference.html#cb1268-5" tabindex="-1"></a>)</span>
+<span id="cb1268-6"><a href="causal-inference.html#cb1268-6" tabindex="-1"></a></span>
+<span id="cb1268-7"><a href="causal-inference.html#cb1268-7" tabindex="-1"></a>aa_ps <span class="ot">&lt;-</span> ps_mod <span class="sc">|&gt;</span></span>
+<span id="cb1268-8"><a href="causal-inference.html#cb1268-8" tabindex="-1"></a>  <span class="fu">augment</span>(<span class="at">data =</span> aa, <span class="at">type.predict =</span> <span class="st">&quot;response&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1268-9"><a href="causal-inference.html#cb1268-9" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ps =</span> .fitted) <span class="sc">|&gt;</span></span>
+<span id="cb1268-10"><a href="causal-inference.html#cb1268-10" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>.fitted)</span></code></pre></div>
 <p>Now we look at the distributions of the estimated propensity scores in the treated and control groups.</p>
-<div class="sourceCode" id="cb1284"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1284-1"><a href="causal-inference.html#cb1284-1" tabindex="-1"></a><span class="fu">ggplot</span>(aa_ps, <span class="fu">aes</span>(<span class="at">x =</span> ps, <span class="at">fill =</span> treat)) <span class="sc">+</span></span>
-<span id="cb1284-2"><a href="causal-inference.html#cb1284-2" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">position =</span> <span class="st">&quot;identity&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">bins =</span> <span class="dv">20</span>) <span class="sc">+</span></span>
-<span id="cb1284-3"><a href="causal-inference.html#cb1284-3" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Estimated propensity score&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Count&quot;</span>, <span class="at">fill =</span> <span class="cn">NULL</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1269"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1269-1"><a href="causal-inference.html#cb1269-1" tabindex="-1"></a><span class="fu">ggplot</span>(aa_ps, <span class="fu">aes</span>(<span class="at">x =</span> ps, <span class="at">fill =</span> treat)) <span class="sc">+</span></span>
+<span id="cb1269-2"><a href="causal-inference.html#cb1269-2" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">position =</span> <span class="st">&quot;identity&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">bins =</span> <span class="dv">20</span>) <span class="sc">+</span></span>
+<span id="cb1269-3"><a href="causal-inference.html#cb1269-3" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Estimated propensity score&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Count&quot;</span>, <span class="at">fill =</span> <span class="cn">NULL</span>)</span></code></pre></div>
 <p><img src="13-causal-inference_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
 <p>The treated units tend to have higher estimated probabilities of treatment than the control units. This is the expected direction. The issue is not that the graph is backwards. The issue is that the groups may be too separated. Good causal adjustment needs overlap, not simply a treatment model that predicts treatment well. If treated and control units have little overlap in propensity score, then there are few comparable units to compare.</p>
 <p>This is the main reason to introduce propensity scores in the first place. Regression adjustment hides the comparability problem inside a single coefficient. Propensity scores make it easier to inspect whether treated and untreated units are similar on the observed pre-treatment covariates and whether common support is adequate.</p>
