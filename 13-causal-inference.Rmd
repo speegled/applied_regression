@@ -401,7 +401,7 @@ A **bad control** is a variable that should not be conditioned on in a causal an
 
 One last idea is that of **no interference**: one unit’s treatment should not directly affect another unit’s outcome. In the `retrofit` study, this would mean that one household’s retrofit does not directly change another household’s gas use.
 
-# The `retrofit` study
+## The `retrofit` study
 
 The `retrofit` study is a hypothetical observational study of a city-run home weatherization program. The city offers subsidies for attic and wall insulation, air sealing, duct repair, and minor furnace improvements to households with high energy burdens. Some households apply directly, while others are identified through neighborhood outreach or energy audits. Some households receive the retrofit before the winter heating season, and some do not. There is no random assignment. Participation depends on a mixture of household choice, city targeting, contractor availability, and administrative prioritization.
 
